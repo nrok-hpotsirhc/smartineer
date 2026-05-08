@@ -1229,42 +1229,216 @@
                 summary: 'Scanning-Methoden, Priorisierung, Compensating Controls, Remediation-Workflows.',
                 pages: [{
                     title: 'Vulnerability Lifecycle',
-                    html: `<h4>Scanning</h4>
-<ul><li>Authenticated/Credentialed vs. Unauthenticated.</li>
-<li>Network-based, Host-based, Container/Cloud-Image.</li>
-<li>Tools: Nessus/Tenable, Qualys, Rapid7 InsightVM, OpenVAS, Trivy (Container).</li></ul>
-<h4>Prioritization</h4>
-<p>CVSS + EPSS + Asset-Criticality + Exploit-Availability (KEV). Heat-Map-Visualisierung.</p>
-<h4>Compensating Controls</h4>
-<p>Wenn Patch nicht möglich (Legacy/SCADA): Mikrosegmentierung, IPS-Signaturen, Read-Only-Modi, Monitoring-Erhöhung.</p>`
+                    html: `<p>Vulnerability Management ist die Disziplin, mit der eine Organisation Schwachstellen <em>systematisch</em> findet, bewertet, behebt und verifiziert. Sie ist nicht „Patches einspielen", sondern ein durchgehender Prozess, der bei der Asset-Erkennung beginnt und mit messbarer Risikoreduktion endet. CompTIA prüft hier vor allem das Verständnis der einzelnen Phasen und die korrekte Auswahl des richtigen Werkzeugs für ein Szenario.</p>
+
+<h4>Scanning-Methoden</h4>
+<p>Schwachstellen-Scanner unterscheiden sich nach <em>Berechtigung</em>, <em>Sichtweise</em> und <em>Ziel-Plattform</em>. Du musst diese Achsen sauber trennen können:</p>
+<ul>
+<li><strong>Authenticated/Credentialed Scan</strong> — der Scanner meldet sich mit Anmeldedaten am Zielsystem an, liest installierte Pakete und Patchstände direkt aus dem OS aus. Resultate sind weit genauer; False-Positive-Rate niedrig. Voraussetzung: gehärtete, gemanagte Service-Accounts mit minimalen Rechten (Read-only-LSA-Rechte unter Windows, Sudo-Wrapper-Skripte unter Linux).</li>
+<li><strong>Unauthenticated Scan</strong> — nur das, was von außen sichtbar ist (Banner, offene Ports, exponierte Versionen). Schneller, breit einsetzbar, aber zwangsläufig oberflächlicher. Sinnvoll als Ergänzung, um die externe Angreifer-Sicht zu simulieren.</li>
+<li><strong>Network-based Scan</strong> — Scanner aus dem Netz, Ziele werden über IP angesprochen.</li>
+<li><strong>Host-based / Agent-based Scan</strong> — ein Agent läuft auf dem Endpoint, sendet Inventar und Scan-Daten an die Plattform. Vorteil: erreicht Mobile-Notebooks ohne VPN, gibt kontinuierlich aktuelle Daten. Nachteil: höherer Wartungsaufwand.</li>
+<li><strong>Container-/Cloud-Image-Scan</strong> — eigenes Werkzeug-Set für Layer-basierte Images (siehe letzte Seite des Kapitels).</li>
+<li><strong>Passives Scanning</strong> — analysiert Netzwerkverkehr und identifiziert Hosts/Versionen ohne aktiven Probe; geeignet für OT-Umgebungen, in denen aktives Scanning Anlagen stören kann.</li>
+</ul>
+<p>Marktreife Werkzeuge: <em>Tenable Nessus / Tenable.io / Tenable.sc</em>, <em>Qualys VMDR</em>, <em>Rapid7 InsightVM</em>, <em>Microsoft Defender Vulnerability Management</em>, im OSS-Bereich <em>Greenbone/OpenVAS</em>, für Container <em>Trivy</em>, <em>Grype</em>, <em>Snyk</em>, <em>Clair</em>.</p>
+
+<h4>Priorisierung — warum CVSS allein nicht reicht</h4>
+<p>Ein Scanner findet typisch tausende Schwachstellen. Niemand patcht alle gleichzeitig. Reife Priorisierung kombiniert mehrere Signale:</p>
+<ul>
+<li><strong>CVSS</strong> — technische Schwere, ohne Kontext. Eine RCE auf einem isolierten Test-VM hat denselben CVSS wie auf einem Domain-Controller.</li>
+<li><strong>EPSS</strong> (Exploit Prediction Scoring System, FIRST.org, monatlich aktualisiert) — Wahrscheinlichkeit, dass die CVE in den nächsten 30 Tagen tatsächlich ausgenutzt wird. Wird als Zahl 0–1 ausgegeben; ≥ 0,7 bedeutet hohes praktisches Risiko.</li>
+<li><strong>CISA KEV</strong> — die Lücke wird <em>nachweislich aktiv</em> ausgenutzt. Höchste Priorität.</li>
+<li><strong>Asset-Kritikalität</strong> — was passiert, wenn dieses Asset kompromittiert wird? Tier-0-System (DC, IdP) bekommt höchste Gewichtung.</li>
+<li><strong>Erreichbarkeit</strong> — extern erreichbar oder nur intern?</li>
+<li><strong>Vorhandene Compensating Controls</strong> — WAF-Signatur, IPS-Regel, Mikrosegmentierung verringern das Restrisiko.</li>
+</ul>
+<p>Reife Plattformen erzeugen aus diesen Signalen einen <em>Risiko-Score</em>, oft als Heatmap visualisiert. Vorgehen: zunächst alle KEV-CVEs auf erreichbaren Tier-0/Tier-1-Assets schließen, dann Critical+EPSS-hoch, dann breitflächig.</p>
+
+<h4>Compensating Controls — wenn Patchen nicht möglich ist</h4>
+<p>Es gibt Fälle, in denen ein Patch nicht zur Verfügung steht oder nicht eingespielt werden kann: ein Legacy-Anwendungsserver, der nur mit Java 7 läuft; eine SCADA-PLC, deren Hersteller seit Jahren keine Updates mehr liefert; ein medizinisches Gerät unter strenger Zertifizierung. Hier gilt nicht „Risiko ignorieren", sondern <em>formal akzeptiertes Restrisiko</em> kombiniert mit kompensierenden Kontrollen:</p>
+<ul>
+<li><strong>Mikrosegmentierung</strong> — das System darf nur mit explizit definierten Hosts kommunizieren.</li>
+<li><strong>IPS-Signaturen oder virtuelle Patches</strong> auf vorgelagerten Geräten oder WAFs.</li>
+<li><strong>Read-Only-Modi oder eingeschränkte Funktionalität</strong>, die den verwundbaren Pfad deaktivieren.</li>
+<li><strong>Erhöhte Überwachung</strong> — engerer Detection-Fokus auf Verhaltensindikatoren rund um diesen Host.</li>
+<li><strong>Risk-Acceptance-Dokument</strong> mit Owner, Begründung, Reviewdatum und Eskalationspfad.</li>
+</ul>
+<p>Wichtig: Risk Acceptance ist eine Management-Entscheidung, keine technische. Sicherheits-Verantwortliche dokumentieren das Risiko, das Business akzeptiert es schriftlich und nimmt damit die Verantwortung.</p>
+
+<h4>Verifikation und kontinuierliche Verbesserung</h4>
+<p>Nach jedem Patch-Zyklus folgt ein Re-Scan, der bestätigt, dass die Schwachstelle tatsächlich behoben ist — nicht nur „der Patch wurde verteilt". Häufige Stolpersteine: Patch ist installiert, aber Service nicht neu gestartet (Linux-Bibliotheken im RAM); Patch ist verteilt, aber Konfiguration aktiviert die Mitigation nicht (Spectre/Meltdown-Mikrocode-Beispiele).</p>`
                 }, {
                     title: 'CVSS-Vektoren im Detail',
-                    html: `<h4>CVSS v3.1 Base Metrics</h4>
-<ul><li><strong>AV</strong> Attack Vector: Network/Adjacent/Local/Physical</li><li><strong>AC</strong> Attack Complexity: Low/High</li><li><strong>PR</strong> Privileges Required: None/Low/High</li><li><strong>UI</strong> User Interaction: None/Required</li><li><strong>S</strong> Scope: Unchanged/Changed</li><li><strong>C/I/A</strong> Impact je: None/Low/High</li></ul>
-<h4>Severity-Ranges</h4>
-<table><tr><th>Score</th><th>Severity</th></tr><tr><td>0.0</td><td>None</td></tr><tr><td>0.1–3.9</td><td>Low</td></tr><tr><td>4.0–6.9</td><td>Medium</td></tr><tr><td>7.0–8.9</td><td>High</td></tr><tr><td>9.0–10.0</td><td>Critical</td></tr></table>
-<h4>CVSS v4.0 Neuerungen</h4>
-<p>Granularere Threat-Metrics (CVSS-BTE), Supplemental-Metrics (Safety, Automatable), bessere Differenzierung niedriger Komplexität.</p>
-<h4>Kontextualisierung</h4>
-<p>EPSS (Wahrscheinlichkeit der Ausnutzung), KEV (aktiv ausgenutzt), Asset-Kritikalität, Erreichbarkeit (extern vs. intern), Compensating Controls.</p>`
+                    html: `<p>CVSS (Common Vulnerability Scoring System) ist die meistgenutzte Methode, technische Schwere zu quantifizieren. Für CySA+ musst du die Base-Metriken im Detail beherrschen — Szenario-Fragen geben einen Vektor und verlangen, dass du daraus die Risikoeinschätzung ableitest.</p>
+
+<h4>CVSS v3.1 Base Metrics</h4>
+<p>Der Base-Score wird aus acht Metriken berechnet, die in einem maschinenlesbaren Vektor stehen (z. B. <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</code>). Du musst die Bedeutung jeder Metrik kennen:</p>
+<ul>
+<li><strong>AV — Attack Vector</strong>: Wie nah muss der Angreifer sein? <em>Network (N)</em> = übers Internet, <em>Adjacent (A)</em> = im selben Subnetz/Bluetooth, <em>Local (L)</em> = lokaler Zugang, <em>Physical (P)</em> = Hardware-Zugriff. N ist am gefährlichsten.</li>
+<li><strong>AC — Attack Complexity</strong>: <em>Low (L)</em> oder <em>High (H)</em>. Hoch bedeutet, dass besondere Bedingungen gegeben sein müssen (z. B. Race-Condition).</li>
+<li><strong>PR — Privileges Required</strong>: <em>None / Low / High</em>. None ist am schlimmsten — der Angreifer braucht kein Konto.</li>
+<li><strong>UI — User Interaction</strong>: <em>None</em> oder <em>Required</em>. Required senkt das Risiko, weil ein Klick benötigt wird.</li>
+<li><strong>S — Scope</strong>: <em>Unchanged (U)</em> oder <em>Changed (C)</em>. Changed bedeutet, dass die Schwachstelle Wirkung außerhalb der ursprünglichen Sicherheitsdomäne entfaltet (z. B. VM-Escape aus Hypervisor).</li>
+<li><strong>C — Confidentiality Impact</strong>: <em>None / Low / High</em>.</li>
+<li><strong>I — Integrity Impact</strong>: <em>None / Low / High</em>.</li>
+<li><strong>A — Availability Impact</strong>: <em>None / Low / High</em>.</li>
+</ul>
+<p>Klassisches Beispiel: Log4Shell (CVE-2021-44228) hat CVSS 10.0 — AV:N (Internet), AC:L (trivial), PR:N (kein Konto), UI:N (keine Interaktion), S:C (RCE bricht Container-Grenzen), CIA:H/H/H. Das ist der Worst Case.</p>
+
+<h4>Severity-Bereiche</h4>
+<table>
+<thead><tr><th>Score</th><th>Severity</th><th>Praktische Lesart</th></tr></thead>
+<tbody>
+<tr><td>0.0</td><td>None</td><td>Keine Sicherheitsauswirkung</td></tr>
+<tr><td>0.1–3.9</td><td>Low</td><td>Geringe Schwere, oft Information-Disclosure ohne sensible Daten</td></tr>
+<tr><td>4.0–6.9</td><td>Medium</td><td>Schwer, aber mit Voraussetzungen</td></tr>
+<tr><td>7.0–8.9</td><td>High</td><td>Schwerwiegend, oft Privilege-Escalation oder authentifizierte RCE</td></tr>
+<tr><td>9.0–10.0</td><td>Critical</td><td>Typisch unauthentifizierte RCE oder vollständige Kompromittierung</td></tr>
+</tbody></table>
+
+<h4>Temporal- und Environmental-Metriken</h4>
+<p>Über den Base-Score hinaus erlaubt CVSS Anpassungen:</p>
+<ul>
+<li><strong>Temporal Metrics</strong> — Reife des Exploits (E: Functional/Proof-of-Concept/Unproven), Verfügbarkeit eines Patches (RL: Official/Workaround/Temporary), Bestätigung des Reports (RC: Confirmed/Reasonable/Unknown).</li>
+<li><strong>Environmental Metrics</strong> — Kontext der eigenen Umgebung: CR/IR/AR (eigene Gewichtung von CIA), Modified-Base-Metrics (z. B. interne IDS-Filter ändern AV).</li>
+</ul>
+
+<h4>CVSS v4.0 (November 2023)</h4>
+<p>FIRST.org hat 2023 CVSS 4.0 veröffentlicht. Wichtige Neuerungen:</p>
+<ul>
+<li><strong>Granularere Threat-Metriken</strong> — die kombinierten Scores heißen jetzt CVSS-B (Base), CVSS-BT (mit Threat), CVSS-BE (mit Environmental), CVSS-BTE (alle).</li>
+<li><strong>Supplemental Metrics</strong> — Safety, Automatable, Recovery, Value Density, Vulnerability Response Effort, Provider Urgency. Diese geben Kontext für Branchen wie OT, Medizin oder Automotive, wo „Verfügbarkeitsverlust" auch Personenschäden bedeuten kann.</li>
+<li><strong>Bessere Differenzierung niedriger Komplexität</strong> — der Übergang zwischen 7.x und 9.x in v3.1 war oft sprunghaft.</li>
+</ul>
+<p>In der Praxis koexistieren CVSS v3.1 und v4.0 mehrere Jahre lang. Das NVD veröffentlicht beide Werte für neue CVEs.</p>
+
+<h4>Kontextualisierung — was CVSS nicht leistet</h4>
+<p>CVSS ist ein technisches Maß. Es sagt nichts über:</p>
+<ul>
+<li>tatsächliche Ausnutzbarkeit in einer konkreten Umgebung (das macht EPSS),</li>
+<li>aktive Exploitation in der Wildnis (das macht KEV),</li>
+<li>Geschäftsauswirkung (das macht eigene Asset-Kritikalitäts-Bewertung),</li>
+<li>Compliance-Anforderungen (PCI-DSS verlangt z. B. Patches für „Critical" innerhalb 30 Tagen).</li>
+</ul>
+<p>Reife Vulnerability-Programme kombinieren alle vier Achsen zu einem priorisierten Backlog.</p>`
                 }, {
-                    title: 'Patch-Management & SLAs',
-                    html: `<h4>Lifecycle</h4>
-<ol><li>Inventory (CMDB, SBOM, Asset-Discovery)</li><li>Detection (Scanner + Vendor-Advisories + KEV-Feed)</li><li>Risk Assessment (CVSS + EPSS + Kontext)</li><li>Test (Dev/Stage)</li><li>Deployment (gestaffelt: Pilot → Production)</li><li>Verification (Re-Scan)</li><li>Documentation</li></ol>
-<h4>Beispiel-SLAs</h4>
-<table><tr><th>Severity</th><th>Internet-facing</th><th>Internal</th></tr><tr><td>Critical (KEV)</td><td>≤ 7 Tage</td><td>≤ 14 Tage</td></tr><tr><td>Critical</td><td>≤ 14 Tage</td><td>≤ 30 Tage</td></tr><tr><td>High</td><td>≤ 30 Tage</td><td>≤ 60 Tage</td></tr><tr><td>Medium</td><td>≤ 90 Tage</td><td>≤ 180 Tage</td></tr></table>
-<h4>Maintenance Windows</h4>
-<p>Geplante Fenster mit Change-Approval. Out-of-Band-Patching für KEV/Zero-Days. Backout-Plan immer dokumentiert.</p>`
+                    title: 'Patch-Management und SLAs',
+                    html: `<p>Während die vorherige Seite das <em>Was</em> und <em>Warum</em> von Vulnerability Management abdeckt, beschreibt diese Seite das <em>Wie</em>: den Lifecycle vom Erkennen einer Schwachstelle bis zur dokumentierten Behebung. Saubere Patch-Prozesse sind der Unterschied zwischen einem Programm, das Compliance erfüllt, und einem, das tatsächlich Risiko reduziert.</p>
+
+<h4>Lifecycle eines Patches</h4>
+<ol>
+<li><strong>Inventory</strong> — was existiert überhaupt? Asset-Register (CMDB), <em>SBOM</em> (Software Bill of Materials, in CycloneDX oder SPDX), Asset-Discovery durch Scanner. Ohne vollständiges Inventar sind alle weiteren Schritte Stochastik.</li>
+<li><strong>Detection</strong> — Schwachstellen identifizieren: Vulnerability-Scanner, Vendor-Advisories (Microsoft Security Update Guide, Red Hat Errata, Cisco PSIRT), CISA-KEV-Feed, GitHub-Security-Advisories, NIST NVD.</li>
+<li><strong>Risk Assessment</strong> — Priorisierung wie in vorheriger Seite beschrieben (CVSS + EPSS + KEV + Kontext).</li>
+<li><strong>Test</strong> — Patches in Dev/Stage validieren. Microsoft-Patch-Tuesday-Releases haben in der Vergangenheit gelegentlich Funktionsregressionen verursacht (z. B. Mai 2022 Domain-Controller-Boot-Loop, August 2023 Outlook-Probleme). Direkter Roll-out ohne Test ist Hochrisiko.</li>
+<li><strong>Deployment</strong> — gestaffelt: Pilot-Gruppe (5–10 % der Hosts) → breite Welle → Nachzügler. Tooling: WSUS, Microsoft Configuration Manager, Intune Update Rings, Tenable Patch Management, Automox, Tanium, BigFix.</li>
+<li><strong>Verification</strong> — Re-Scan zur Bestätigung. Der Patch muss nachweislich aktiv sein, nicht nur installiert.</li>
+<li><strong>Documentation</strong> — Change-Record, Reporting an Management, KPI-Pflege.</li>
+</ol>
+
+<h4>SLA-Beispiele nach Severity und Exposition</h4>
+<p>Realistische SLAs werden anhand der vorhandenen Risiko-Achsen gesetzt. Ein vernünftiger Ausgangspunkt:</p>
+<table>
+<thead><tr><th>Klassifikation</th><th>Internet-facing</th><th>Internal</th><th>Begründung</th></tr></thead>
+<tbody>
+<tr><td>CISA KEV</td><td>≤ 7 Tage</td><td>≤ 14 Tage</td><td>Aktive Ausnutzung dokumentiert</td></tr>
+<tr><td>Critical (CVSS 9.0+)</td><td>≤ 14 Tage</td><td>≤ 30 Tage</td><td>Hohes inhärentes Risiko</td></tr>
+<tr><td>High (7.0–8.9)</td><td>≤ 30 Tage</td><td>≤ 60 Tage</td><td>Schwer, aber meist mit Voraussetzungen</td></tr>
+<tr><td>Medium (4.0–6.9)</td><td>≤ 90 Tage</td><td>≤ 180 Tage</td><td>Im normalen Patch-Zyklus</td></tr>
+<tr><td>Low (≤ 3.9)</td><td>nächster Zyklus</td><td>nächster Zyklus</td><td>Geringes Risiko</td></tr>
+</tbody></table>
+<p>Regulatorische Vorgaben können engere SLAs setzen: <em>PCI-DSS v4.0</em> verlangt für Kartendaten-Umgebungen Patches kritischer Schwachstellen innerhalb eines Monats; US-Bundesbehörden müssen <em>BOD 22-01</em> einhalten (KEV-CVEs in oft sehr kurzen Fristen). DORA fordert für Finanzinstitute risikobasierte Patchpflichten mit Eskalation an Management.</p>
+
+<h4>Maintenance-Windows und Out-of-Band-Patching</h4>
+<p>Reguläre Patches laufen in geplanten <em>Maintenance Windows</em> mit Change-Approval — typischerweise Sonntag- oder Mittwochnacht für klassische Server, fortlaufend für Cloud-Workloads via Blue-Green-Deployment.</p>
+<p>Bei kritischen Lücken oder aktiver Exploitation greift <strong>Out-of-Band-Patching</strong>: Notfall-Change durch Emergency Change Advisory Board (ECAB) mit verkürztem Prozess. Beispiele aus der Praxis: Log4Shell (Dezember 2021), MOVEit-Lücken (Mai 2023), Citrix Bleed (Oktober 2023), CrowdStrike-Falcon-Sensor-Outage (Juli 2024 — selbst verursacht durch fehlerhaften Sensor-Update). In allen Fällen waren reguläre SLAs zu langsam.</p>
+<p><strong>Backout-Plan</strong> ist Pflicht: Vor jedem Patch wird dokumentiert, wie der Patch im Fehlerfall rückgängig gemacht wird (Snapshot-Restore, Uninstall-Skript, Vorgängerversion-Image). Ohne Backout-Plan keine Production-Approval — egal wie eilig der Change.</p>
+
+<h4>Patch-Strategien für besondere Umgebungen</h4>
+<ul>
+<li><strong>Cloud-Workloads</strong> — Immutable Infrastructure: Patch wird nicht in laufende VM eingespielt, sondern ein neues Image gebaut, getestet und ausgerollt; alte Instanz wird ersetzt. Reduziert Drift dramatisch.</li>
+<li><strong>Container</strong> — Image neu bauen, durch Pipeline schicken, alte Pods rolling-updaten. Patch-Frequenz: täglich oder wöchentlich, weil Build-Kosten gering sind.</li>
+<li><strong>OT/ICS</strong> — Patches in Wartungsfenstern, oft jährlich; kompensierende Kontrollen schließen die Zeit zwischen CVE und Patch.</li>
+<li><strong>Embedded / IoT</strong> — Hersteller-Update-Mechanismen via OTA. Pflichtmerkmal von EU CRA ab 2027.</li>
+</ul>
+
+<h4>Metriken und KPIs</h4>
+<p>Was nicht gemessen wird, wird nicht verbessert. Standard-KPIs für VM-Programme:</p>
+<ul>
+<li><strong>MTTR</strong> (Mean Time to Remediate) pro Severity.</li>
+<li><strong>SLA-Einhaltungsquote</strong> pro Severity-Klasse.</li>
+<li><strong>Open-CVE-Aging</strong> — wie lange sind High-/Critical-CVEs offen?</li>
+<li><strong>Coverage</strong> — wie viel Prozent des Asset-Inventars wird tatsächlich gescannt?</li>
+<li><strong>Recurrence Rate</strong> — wie oft taucht dieselbe CVE nach Patch wieder auf (= Drift, fehlerhaftes Image)?</li>
+</ul>`
                 }, {
-                    title: 'Cloud- und Container-VM',
-                    html: `<h4>Cloud-Posture</h4>
-<p><strong>CSPM</strong> (Cloud Security Posture Management): Wiz, Prisma Cloud, Defender for Cloud, AWS Security Hub. Identifiziert Misconfigurations gegen CIS-Benchmarks.</p>
+                    title: 'Cloud- und Container-Vulnerability-Management',
+                    html: `<p>In Cloud- und Container-Umgebungen ändert sich die Angriffsfläche radikal. Klassische Netzwerk-Scanner allein sehen weder S3-Bucket-Misconfigs noch verwundbare Base-Images. Diese Seite beschreibt das spezifische Werkzeug-Set, das CySA+ als Kompetenz erwartet.</p>
+
+<h4>Cloud Security Posture Management (CSPM)</h4>
+<p>CSPM-Tools prüfen Cloud-Konfigurationen kontinuierlich gegen Best-Practices und Compliance-Frameworks. Sie verbinden sich über die Cloud-API (Read-Only) und scannen alle Ressourcen auf:</p>
+<ul>
+<li>öffentlich erreichbare Storage-Buckets,</li>
+<li>überprivilegierte IAM-Rollen,</li>
+<li>fehlende Verschlüsselung at rest,</li>
+<li>fehlende Logging-Aktivierung (CloudTrail, Activity Log),</li>
+<li>offene Security-Group-Regeln (0.0.0.0/0:22),</li>
+<li>nicht-rotierte Access-Keys,</li>
+<li>Compliance-Drift gegen CIS Cloud Benchmarks, NIST 800-53, PCI-DSS.</li>
+</ul>
+<p>Marktführer: <em>Wiz</em>, <em>Palo Alto Prisma Cloud</em>, <em>Microsoft Defender for Cloud</em>, <em>AWS Security Hub</em> mit Config, <em>Lacework</em>, <em>Orca Security</em>. OSS-Alternativen: <em>Prowler</em> (AWS, Azure, GCP, M365, K8s), <em>ScoutSuite</em>, <em>CloudSploit</em>, <em>Checkov</em>.</p>
+<p>Moderne CSPM-Plattformen erweitern sich zu <strong>CNAPP</strong> (Cloud-Native Application Protection Platform), die CSPM, Container-Security, Workload-Protection und IaC-Scanning bündelt.</p>
+
 <h4>Container-Image-Scanning</h4>
-<p>Trivy, Grype, Snyk, Clair. Pipeline-Integration: Build → Scan → Sign (Cosign) → Push → Admission Control (Kyverno, OPA Gatekeeper, Cosign-Verify).</p>
-<h4>Runtime-VM</h4>
-<p>Falco, Tetragon, Sysdig Secure — eBPF-basierte Detection von ungewöhnlichen Syscalls in Containern.</p>
-<h4>IaC-Scanning</h4>
-<p>Checkov, tfsec, KICS, Terrascan — finden Misconfigurations in Terraform/CloudFormation/K8s-Manifests vor dem Deployment (Shift-Left).</p>`
+<p>Container-Images sind Schichten aus Base-OS, Runtime und Anwendungs-Dependencies. Jede Schicht kann verwundbare Pakete enthalten. Image-Scanner inspizieren:</p>
+<ul>
+<li>OS-Pakete gegen Distro-CVE-Datenbanken,</li>
+<li>Sprach-Dependencies (npm, PyPI, Maven, Go-Modules) gegen Advisory-Datenbanken,</li>
+<li>fehlerhafte Dockerfile-Patterns (root-User, unnötige Privilegien, kein USER-Statement),</li>
+<li>eingebettete Secrets (API-Keys, Tokens),</li>
+<li>Lizenz-Compliance.</li>
+</ul>
+<p>Tools: <em>Trivy</em> (Aqua, OSS, Defacto-Standard), <em>Grype</em> (Anchore), <em>Snyk Container</em>, <em>Clair</em>, <em>Docker Scout</em>.</p>
+
+<h4>Sichere Container-Pipeline</h4>
+<p>Eine produktionsreife CI/CD-Pipeline für Container kombiniert mehrere Stages:</p>
+<ol>
+<li><strong>Build</strong> — Image bauen, möglichst <em>distroless</em> oder <em>minimal base</em> wählen (Google Distroless, Chainguard Wolfi, Alpine).</li>
+<li><strong>Scan</strong> — Trivy/Grype/Snyk im Pipeline-Schritt; Build bricht ab bei Critical-Vulnerabilities.</li>
+<li><strong>Sign</strong> — Image mit <em>Cosign</em> (Sigstore) signieren; Signaturen werden in Transparency-Logs (Rekor) eingetragen. SLSA-Level 3 verlangt Signaturen mit Provenance.</li>
+<li><strong>Push</strong> — in Registry, mit unveränderlichem Tag (Digest-basiert).</li>
+<li><strong>Admission Control</strong> — Kubernetes-Webhooks prüfen vor Deployment: <em>Kyverno</em>, <em>OPA Gatekeeper</em>, <em>Cosign-Verify</em> als Admission-Controller. Nur signierte, gescannte Images aus erlaubten Registries kommen in den Cluster.</li>
+<li><strong>Runtime Protection</strong> — siehe nächster Abschnitt.</li>
+</ol>
+
+<h4>Runtime-Detection in Containern</h4>
+<p>Static Scanning erkennt bekannte Lücken vor Deployment. <em>Runtime</em> erkennt Angriffe gegen laufende Container — ideal mit eBPF, weil Containerisolation den Sensor-Einsatz erschwert:</p>
+<ul>
+<li><strong>Falco</strong> (CNCF, OSS) — definiert Regeln gegen ungewöhnliche Syscalls, Datei-Events, Netzwerk-Verbindungen. Beispielregel: „Shell in Container gestartet" ist in Production fast nie legitim.</li>
+<li><strong>Tetragon</strong> (Cilium-Ökosystem) — eBPF-basiert, mit Action-Möglichkeit (Prozess sofort beenden).</li>
+<li><strong>Tracee</strong> (Aqua) — eBPF, integriert mit Trivy-Findings.</li>
+<li><strong>Sysdig Secure</strong> — kommerzielle Plattform mit Falco-Engine.</li>
+</ul>
+
+<h4>Infrastructure as Code (IaC) Scanning</h4>
+<p>Cloud-Misconfigs entstehen meist im Code, nicht in der Cloud-Konsole. Wer dort prüft, verhindert die Lücke schon bevor sie deployed wird — <em>Shift Left</em>. Tools:</p>
+<ul>
+<li><strong>Checkov</strong> (Bridgecrew/Palo Alto) — Terraform, CloudFormation, Kubernetes, Helm, ARM, Bicep, Serverless.</li>
+<li><strong>tfsec</strong> (Aqua) — Terraform-spezifisch, sehr schnell.</li>
+<li><strong>KICS</strong> (Checkmarx) — multi-format.</li>
+<li><strong>Terrascan</strong> — IaC-Compliance gegen NIST, CIS, HIPAA.</li>
+<li><strong>Snyk IaC</strong> — kommerzielles Pendant.</li>
+</ul>
+<p>Integration in CI: jeder Pull-Request löst IaC-Scan aus; Befunde werden als Comments im PR angezeigt; Critical-Findings blockieren Merge.</p>
+
+<h4>Anti-Pattern</h4>
+<ul>
+<li><em>„Wir scannen nur die Production-Cluster"</em> — Drift entsteht in Development und wandert nach Production.</li>
+<li><em>„Image-Scan einmal beim Build"</em> — neue CVEs für alte Base-Images werden täglich publiziert; kontinuierliches Re-Scanning der Registry ist Pflicht.</li>
+<li><em>„Containerprivilegien lassen wir auf Default"</em> — privileged-Mode, hostPath-Mounts, Root-User in Container sind die häufigsten Eskalationspfade.</li>
+<li><em>„CSPM zeigt 5000 Findings, niemand bearbeitet sie"</em> — ohne Priorisierung und Owner verkommt das Tool.</li>
+</ul>`
                 }],
                 quiz: [
                     q('Welcher Scan-Typ liefert die genauesten Resultate?', ['Unauthenticated', 'Credentialed (Authenticated)', 'External nur', 'Passiv allein'], 1, 'Credentialed Scans haben OS-Zugriff, sehen installierte Patches, Konfiguration, Software-Versionen — wesentlich akkurater.'),
@@ -1323,47 +1497,256 @@
                 title: 'Kapitel 3 — Incident Response & Management',
                 summary: 'IR-Lifecycle, Forensik, Playbooks, Tabletop Exercises.',
                 pages: [{
-                    title: 'IR Praxis',
-                    html: `<h4>Lifecycle (NIST 800-61 r2)</h4>
-<ol><li>Preparation</li><li>Detection & Analysis</li><li>Containment, Eradication, Recovery</li><li>Post-Incident Activity</li></ol>
+                    title: 'IR-Lifecycle in der Praxis',
+                    html: `<p>Incident Response ist kein Improvisationsakt, sondern ein vorbereiteter Prozess. Wenn ein Vorfall eintritt, entscheidet die Qualität der Vorbereitung darüber, ob Schaden in Stunden oder Wochen begrenzt wird. CySA+ prüft hier vor allem das Verständnis des NIST-Lebenszyklus, der Order of Volatility und der Rolle von Playbooks.</p>
+
+<h4>Lifecycle nach NIST SP 800-61 Rev. 2</h4>
+<p>Der Standard ist die Referenz für Incident-Response-Programme. Er beschreibt vier Phasen, oft als sechs Schritte ausformuliert:</p>
+<ol>
+<li><strong>Preparation</strong> — alles, was <em>vor</em> dem Vorfall passieren muss: IR-Plan, Run-Books pro Vorfallstyp, Toolkit (Forensik-USB, vorbereitete Forensik-VMs, Out-of-Band-Kommunikationskanäle wie Signal-Gruppen oder Tarn-Slack-Workspaces), Kontaktlisten (intern, extern, Strafverfolgung, Versicherer), Übungen, Schulungen.</li>
+<li><strong>Detection & Analysis</strong> — Vorfall erkennen, Scope verstehen, Schweregrad einstufen, Stakeholder informieren. Hier laufen alle SIEM-/EDR-/User-Reports zusammen.</li>
+<li><strong>Containment, Eradication, Recovery</strong> — drei eng verzahnte Schritte: Schaden eingrenzen, Angreifer entfernen, Geschäftsbetrieb wiederherstellen.</li>
+<li><strong>Post-Incident Activity</strong> — Lessons Learned, Pflege des Plans, Verbesserung der Detections.</li>
+</ol>
+<p>Wichtig: Die Phasen sind <em>iterativ</em>, nicht linear. Während des Containments treten oft neue Detections auf, die wieder Analyse erfordern. Reife IR-Teams arbeiten mit parallelen Workstreams — Forensik, Containment, Communication.</p>
+
 <h4>Order of Volatility (RFC 3227)</h4>
-<p>CPU/Cache → RAM → Network → Disk → Backups.</p>
-<h4>Indicators</h4>
-<p>IoCs (Hashes, IPs, Domains) vs. IoAs (Behavior, TTPs). Playbooks pro Kategorie (Phishing, Ransomware, Malware, Insider).</p>`
+<p>Bei der Beweissicherung gilt: das flüchtigste zuerst. RFC 3227 definiert die Reihenfolge, in der Beweise gesammelt werden, bevor sie verloren gehen:</p>
+<ol>
+<li>CPU-Register und Cache (Mikrosekunden)</li>
+<li>Routing-Tabellen, ARP-Cache, Prozess-Tabellen, Kernel-Statistiken (Sekunden)</li>
+<li>RAM-Inhalt (Minuten bis Stunden)</li>
+<li>temporäre Dateisysteme</li>
+<li>Festplatte/SSD</li>
+<li>Remote-Logs und Monitoring-Daten</li>
+<li>physische Konfiguration und Topologie</li>
+<li>Backups und Archive (Tage bis Jahre)</li>
+</ol>
+<p>Konsequenz für die Praxis: Eine RAM-Akquise muss <em>vor</em> einem Power-Off oder einer Disk-Acquisition passieren. Wenn ein Analyst aus Reflex „Stecker ziehen" sagt, sind die wertvollsten Beweise weg — Mimikatz-Spuren im LSASS-Speicher, Cobalt-Strike-Beacon-Konfigurationen, entschlüsselte Crypto-Keys.</p>
+
+<h4>IoC vs. IoA</h4>
+<p>Beide sind Detection-Signale, aber unterschiedlicher Natur:</p>
+<ul>
+<li><strong>IoC</strong> (Indicator of Compromise) — konkrete Artefakte: Datei-Hash, IP-Adresse, Domain, Mutex-Name, Registry-Schlüssel. Leicht zu pflegen, leicht zu suchen, aber <em>flüchtig</em>: Angreifer wechselt sie schnell. Pyramid of Pain ganz unten.</li>
+<li><strong>IoA</strong> (Indicator of Attack) — Verhaltensmuster oder TTPs: „Office-Prozess startet PowerShell mit -enc-Flag und kontaktiert externe IP". Robuster, weil Angreifer dieses Muster nicht trivial ändern kann. Pyramid of Pain ganz oben.</li>
+</ul>
+<p>Reifes Detection-Programm pflegt beide: IoCs aus Threat-Intel-Feeds (MISP, OTX, Mandiant) zur schnellen Mustersuche, IoAs als Sigma-/EDR-Regeln zur nachhaltigen Erkennung.</p>
+
+<h4>Playbooks pro Vorfallstyp</h4>
+<p>Generische IR-Pläne sind in der Krise unbrauchbar. Reife Programme haben spezialisierte Playbooks für die häufigsten Vorfallstypen — jedes mit klar definierten Schritten, Owner-Rollen und Eskalationspfaden:</p>
+<ul>
+<li><strong>Phishing</strong> — Mail in Quarantäne, betroffene Konten prüfen, MFA-Reset, Awareness-Communication.</li>
+<li><strong>Ransomware</strong> — siehe Spezialseite weiter im Kapitel.</li>
+<li><strong>Generischer Malware-Vorfall</strong> — Containment, Sandbox-Analyse, IoC-Extraktion, Threat-Hunt nach denselben IoCs in der Umgebung.</li>
+<li><strong>Insider-Threat</strong> — siehe Spezialseite.</li>
+<li><strong>Cloud-Account-Compromise</strong> — siehe Spezialseite.</li>
+<li><strong>DDoS</strong> — Provider-Mitigation aktivieren, Rate-Limiting hochfahren, Anycast/CDN.</li>
+<li><strong>Datenleak</strong> — Scope-Bestimmung, rechtliche Meldepflichten, betroffene Personen benachrichtigen.</li>
+</ul>
+
+<h4>Stakeholder-Kommunikation</h4>
+<p>Während eines Vorfalls reden viele gleichzeitig. Klare Rollen sind essenziell:</p>
+<ul>
+<li><strong>Incident Commander</strong> — koordiniert die Response, trifft taktische Entscheidungen.</li>
+<li><strong>Communications Lead</strong> — interne und externe Kommunikation; einziger Sprecher gegenüber Presse.</li>
+<li><strong>Technical Lead</strong> — leitet die Forensik- und Eradication-Arbeit.</li>
+<li><strong>Legal/DPO</strong> — bewerten Meldepflichten (DSGVO Art. 33, NIS2, DORA).</li>
+<li><strong>Executive Sponsor</strong> — entscheidet über business-kritische Trade-offs (Service-Abschaltung, Lösegeldfrage).</li>
+</ul>
+<p>Out-of-Band-Kommunikation ist Pflicht: Ist die Active-Directory-Domäne oder das Microsoft-365-Tenant kompromittiert, kann der Angreifer Mails und Teams-Chats mitlesen. Vorbereitet sind Signal-Gruppen, separate Cloud-Workspaces, Telefonnummern.</p>`
                 }, {
                     title: 'Forensik-Toolkit',
-                    html: `<h4>Disk-Forensik</h4>
-<ul><li>Acquisition: dd, dcfldd, dc3dd, FTK Imager, EnCase.</li><li>Analyse: Autopsy/SleuthKit, X-Ways, EnCase, Plaso/log2timeline.</li><li>Carving: scalpel, foremost, photorec.</li></ul>
+                    html: `<p>Forensik liefert die Beweise, auf denen Eradication und Recovery aufbauen. Ein Vorfall ohne saubere Forensik führt entweder zu unvollständiger Eradication (Angreifer kommt zurück) oder zu unbegründeter Eskalation (interner Verdacht ohne Beweis). Diese Seite gibt einen Überblick über das Werkzeug-Set, das ein CySA+-Analyst kennen muss.</p>
+
+<h4>Disk-Forensik</h4>
+<p>Bei der Disk-Forensik wird ein <em>bitgenaues</em> Abbild der Festplatte erzeugt und auf einem Forensik-System analysiert — niemals direkt auf dem Original. Akquise:</p>
+<ul>
+<li><strong>dd</strong> / <strong>dcfldd</strong> / <strong>dc3dd</strong> — Linux-Standard-Imaging-Werkzeuge. dcfldd und dc3dd ergänzen Hashing on-the-fly.</li>
+<li><strong>FTK Imager</strong> (AccessData/Exterro) — kostenlos, GUI-basiert, Standard in vielen Forensik-Workflows.</li>
+<li><strong>EnCase Forensic Imager</strong> — kommerzielles Werkzeug, im Strafverfolgungs-Bereich verbreitet.</li>
+<li><strong>Write-Blocker</strong> (Hardware oder Software) — Pflicht, damit das Original nicht versehentlich modifiziert wird.</li>
+</ul>
+<p>Verifikation erfolgt über Doppel-Hash: typisch <em>MD5 + SHA-256</em>. Beide Hashes werden vor und nach der Akquise berechnet; Übereinstimmung dokumentiert die Integrität. Die <em>Chain of Custody</em> dokumentiert lückenlos jede Übergabe des Beweismaterials.</p>
+<p>Analyse:</p>
+<ul>
+<li><strong>Autopsy / The Sleuth Kit</strong> — Open-Source-Workbench für Datei-System-Analyse, Carving, Timeline.</li>
+<li><strong>X-Ways Forensics</strong> — kommerziell, sehr performant.</li>
+<li><strong>EnCase</strong> — Standardwerkzeug in Behörden.</li>
+<li><strong>Plaso / log2timeline</strong> — Super-Timeline aus dutzenden Datei-System- und Anwendungsartefakten.</li>
+<li><strong>File Carving</strong> — <em>scalpel</em>, <em>foremost</em>, <em>photorec</em> rekonstruieren gelöschte Dateien aus Roh-Sektoren.</li>
+</ul>
+<p>Wichtige Windows-Artefakte: <em>$MFT</em> (Master File Table), <em>USN Journal</em>, <em>Prefetch</em>-Dateien, <em>Shimcache/AmCache</em> (zeigt ausgeführte Programme), <em>SRUM</em> (Application Resource Usage), <em>Event Logs</em>, <em>Browser-Historien</em>, Registry-Hives (NTUSER.DAT, SOFTWARE, SYSTEM, SAM).</p>
+
 <h4>Memory-Forensik</h4>
-<p>Acquisition: WinPMem, FTK Imager, LiME, AVML. Analyse: Volatility 3, Rekall. Findings: laufende Prozesse, injizierter Code, Network-Connections, Mimikatz-Spuren.</p>
+<p>RAM enthält Geheimnisse, die nirgendwo sonst stehen: laufende Prozesse, geladene DLLs, Netzwerk-Verbindungen, entschlüsselte Crypto-Schlüssel, Mimikatz-Spuren, injizierten Shellcode. Akquise:</p>
+<ul>
+<li><strong>WinPMem</strong> (Velocidex) — Windows.</li>
+<li><strong>FTK Imager</strong> kann RAM dumpen.</li>
+<li><strong>LiME</strong> (Linux Memory Extractor) — Linux.</li>
+<li><strong>AVML</strong> (Microsoft, OSS) — Linux.</li>
+<li><strong>OSXPMem</strong> — macOS.</li>
+</ul>
+<p>Analyse mit <strong>Volatility 3</strong> (Python, OSS) oder <strong>Rekall</strong>. Typische Plug-ins: <em>pslist/pstree</em> (Prozessbaum), <em>netscan</em> (Netzwerk-Verbindungen), <em>malfind</em> (injizierten Code finden), <em>cmdline</em>, <em>dlllist</em>, <em>hashdump</em>, <em>mimikatz</em>-Plug-In zur Extraktion von Klartext-Credentials, <em>filescan</em>.</p>
+
 <h4>Network-Forensik</h4>
-<p>PCAP-Analyse mit Wireshark, NetworkMiner, Brim/Zeek. Flow-Forensik mit Arkime/Moloch. NetFlow-Records aus Netzwerk-Devices.</p>
+<p>Netzwerk-Beweise sind oft das einzige Mittel, um Lateral Movement und Exfiltration zu rekonstruieren. Werkzeuge:</p>
+<ul>
+<li><strong>Wireshark</strong> — Packet-Analyzer, Standard für PCAP-Dateien.</li>
+<li><strong>NetworkMiner</strong> — extrahiert Dateien, Credentials, Artefakte aus PCAPs automatisch.</li>
+<li><strong>Brim/Zui</strong> — moderne UI über Zeek-Logs.</li>
+<li><strong>Arkime</strong> (ehemals Moloch) — voller PCAP-Speicher mit Indexierung; sucht in Petabytes.</li>
+<li><strong>NetFlow/IPFIX-Records</strong> — Metadaten von Routern; hilfreich, wenn Vollpakete nicht gespeichert sind.</li>
+<li><strong>Suricata-eve.json-Logs</strong> — Alarm-Events plus Protokoll-Metadaten.</li>
+</ul>
+<p>Praktisch wichtig: Vollpaket-Capture (PCAP) ist teuer. Reife SOCs entscheiden risikobasiert, welche Segmente vollständig aufgezeichnet werden (DMZ-Egress, kritische DB-Server) und welche nur per Flow.</p>
+
 <h4>Cloud-Forensik</h4>
-<p>AWS CloudTrail, Azure Activity, GCP Audit. Snapshots für EBS/Disk; isolated security account; immutable storage für Logs.</p>
-<h4>Container-Forensik</h4>
-<p>Sysdig Inspect, Falco-Logs, runtime-snapshots, eBPF-Tracing. Persistente Logging-Pipeline ist Pflicht (Container leben kurz).</p>`
+<p>In der Cloud verschiebt sich der Forensik-Stack:</p>
+<ul>
+<li><strong>API-Audit-Logs</strong> — AWS CloudTrail, Azure Activity Log, GCP Cloud Audit Logs sind die wichtigste Quelle. Sollten in einem <em>separaten</em> Sicherheits-Konto/Tenant gespeichert werden, damit ein kompromittierter Admin-Account sie nicht löschen kann.</li>
+<li><strong>EBS-/Disk-Snapshots</strong> — vor jeder Containment-Aktion eines verdächtigen Hosts: Snapshot des Volumes anlegen, in einem isolierten Forensik-Account analysieren.</li>
+<li><strong>Memory-Akquise</strong> aus laufenden VMs: AWS bietet keine native Live-Memory-Akquise; oft via SSM-Agent + AVML oder LiME.</li>
+<li><strong>Kubernetes-Forensik</strong> — Pod-Logs (<code>kubectl logs</code>), API-Audit, Falco-Events. Persistente Logging-Pipeline ist Pflicht, weil Container Sekunden leben.</li>
+</ul>
+
+<h4>Container- und Endpoint-Forensik</h4>
+<p>Klassische Disk-/Memory-Forensik passt schlecht zu kurzlebigen Containern. Stattdessen:</p>
+<ul>
+<li><strong>Sysdig Inspect</strong> — capture-basierte Container-Analyse.</li>
+<li><strong>Falco-Logs</strong> als Detection-Trail.</li>
+<li><strong>EDR-Forensik-Modus</strong> — moderne EDRs (CrowdStrike, Defender) können Live-Response-Sessions öffnen, in denen ein Analyst direkt auf einem isolierten Endpoint Befehle ausführt, ohne Beweismittel zu verändern.</li>
+<li><strong>Triage-Pakete</strong> — Skripte wie <em>KAPE</em> (Eric Zimmerman), <em>UAC</em> (Unix-like Artifacts Collector), <em>CyLR</em> sammeln in Minuten die wichtigsten Artefakte ohne Vollimage.</li>
+</ul>
+
+<h4>Chain of Custody und rechtliche Verwertbarkeit</h4>
+<p>Wenn Forensik vor Gericht verwertbar sein soll, muss die <em>Chain of Custody</em> lückenlos dokumentiert sein: Wer hat wann welches Beweismittel übernommen, wo wurde es gelagert, welche Hashes wurden berechnet? Standard-Dokumentation: signierte Übergabeprotokolle, Tamper-Evident-Bags, schreibgeschützte Speicher. In Deutschland orientiert sich die Praxis an BSI-Leitfäden zur IT-Forensik; international ist <em>ISO/IEC 27037</em> der Referenzstandard für die Identifikation, Sammlung, Akquise und Erhaltung digitaler Beweise.</p>`
                 }, {
-                    title: 'Containment-Strategien',
-                    html: `<h4>Logisch vs. Physisch</h4>
-<ul><li>Logisch: VLAN-Move, Firewall-Block, EDR-Network-Isolation, IAM-Disable.</li><li>Physisch: Kabel ziehen, Power-Off (zerstört RAM-Beweise!).</li></ul>
+                    title: 'Containment- und Recovery-Strategien',
+                    html: `<p>Containment ist die schwierigste Phase im IR-Lifecycle: zu früh oder zu hart, und der Angreifer wird gewarnt; zu spät, und der Schaden wächst weiter. CySA+ prüft hier vor allem die Trennung zwischen logischer und physischer Isolation, Short-/Long-term-Containment und die Logik einer kontrollierten Wiederinbetriebnahme.</p>
+
+<h4>Logische vs. physische Isolation</h4>
+<p>Containment-Aktionen lassen sich auf zwei Ebenen ausführen:</p>
+<ul>
+<li><strong>Logisch</strong> — der Host bleibt eingeschaltet, wird aber netzwerkseitig isoliert. Mittel: VLAN-Move in ein Forensik-Quarantäne-Netz, Firewall-/Switch-ACL-Regel, EDR-„Network-Containment" (CrowdStrike, Defender for Endpoint), IAM-Account-Disable, OAuth-Token-Revocation, Disable von Service-Accounts. <em>Vorteil</em>: RAM und laufende Prozesse bleiben analysierbar; Angreifer-Persistenzmechanismen werden nicht unbeabsichtigt verworfen.</li>
+<li><strong>Physisch</strong> — Kabel ziehen, Power-Off, USB-Ports physisch trennen. Schnell, aber: Power-Off zerstört flüchtige Beweise (RAM, laufende Prozesse). <em>Niemals</em> als erste Reaktion, außer bei akuter Gefährdung von Leib und Leben (z. B. OT-Anlage mit Sicherheitsfunktion).</li>
+</ul>
+<p>Praxisempfehlung: zuerst RAM-Akquise, dann logische Isolation, dann Disk-Imaging. Nur in OT-Umgebungen mit Safety-Implikation steht Power-Off vor Forensik.</p>
+
 <h4>Short-term vs. Long-term Containment</h4>
-<p>Short-term: schnelle Isolation des betroffenen Systems. Long-term: Hardening + Rebuild + saubere Wiedereinbindung.</p>
-<h4>Eradication</h4>
-<p>Malware entfernen, kompromittierte Konten löschen, Persistence-Mechanismen (Scheduled Tasks, Services, AutoRuns, WMI-Subscriptions) auditieren.</p>
-<h4>Recovery-Strategie</h4>
-<p>Restore aus letztem sauberen Backup. Bei Ransomware: niemals zahlen ohne Notfall-Notwendigkeit. Phased Bring-up mit Monitoring.</p>
+<p>Containment hat zwei Zeithorizonte:</p>
+<ul>
+<li><strong>Short-term</strong> — schnelle Begrenzung der Schadausbreitung. Ziel: weiteren Schaden in Minuten bis Stunden verhindern. Beispiel: kompromittierten Host vom Netz trennen, kompromittierte Konten sperren, kompromittierte API-Keys widerrufen.</li>
+<li><strong>Long-term</strong> — strukturelle Härtung, die ein Wiederaufflammen verhindert. Beispiel: kompromittiertes System komplett neu installieren statt zu „bereinigen", Active-Directory-Tier-Modell durchsetzen, MFA für alle privilegierten Konten.</li>
+</ul>
+
+<h4>Eradication — den Angreifer entfernen</h4>
+<p>Eradication entfernt alle Spuren des Angreifers, bevor Recovery beginnt. Ohne saubere Eradication ist die Wiederherstellung Augenwischerei — der Angreifer ist nach 24 Stunden zurück. Typische Persistenzmechanismen unter Windows, die ein CySA+-Analyst kennt:</p>
+<ul>
+<li><strong>Scheduled Tasks</strong> (<em>schtasks</em>, <em>at</em>),</li>
+<li><strong>Services</strong> mit verstecktem Pfad,</li>
+<li><strong>AutoRuns</strong> (Run, RunOnce, Userinit, Image File Execution Options, AppInit DLLs),</li>
+<li><strong>WMI Event Subscriptions</strong> (Persistenz ohne Datei),</li>
+<li><strong>Startup-Ordner</strong>,</li>
+<li><strong>BITS Jobs</strong>,</li>
+<li><strong>COM Hijacking</strong>,</li>
+<li><strong>Boot- oder Bootkit-Manipulation</strong> (UEFI-/MBR-Implants),</li>
+<li>kompromittierte <strong>Service-Accounts</strong>, <strong>Golden Tickets</strong>, <strong>Skeleton Keys</strong> in AD,</li>
+<li>angelegte <strong>OAuth-Apps</strong> mit Mail.Read- oder Files.ReadWrite-Berechtigung in Microsoft 365.</li>
+</ul>
+<p>Tools für Persistence-Hunting: <em>Sysinternals Autoruns</em>, <em>OSQuery</em>, EDR-Live-Response, <em>BloodHound</em> für AD-Pfadanalyse.</p>
+<p>Eine Faustregel: wenn der Initial-Access-Vektor nicht eindeutig identifiziert ist, ist Eradication unsicher. Recovery ohne Wurzelbehebung ist Roulette.</p>
+
+<h4>Recovery — kontrollierte Wiederinbetriebnahme</h4>
+<p>Recovery bringt Systeme zurück in Produktion. Pflichtprinzipien:</p>
+<ul>
+<li><strong>Restore aus sauberer Quelle</strong> — Backups, die nachweislich vor dem Initial-Access entstanden sind, oder komplette Neuinstallation aus Gold-Image.</li>
+<li><strong>Phased Bring-up</strong> — kritische Systeme zuerst, in kleinen Wellen, mit erhöhtem Monitoring zwischen Wellen.</li>
+<li><strong>Erweiterte Detection</strong> — temporär engere Schwellen, zusätzliche Sigma-Regeln, Honey-Token zur Frühwarnung.</li>
+<li><strong>Credential-Reset</strong> — alle Passwörter, Service-Accounts, API-Keys, Zertifikate, Kerberos-KRBTGT-Hash-Reset (zweimal, 12 Stunden Abstand) in AD.</li>
+<li><strong>Patches eingespielt</strong>, bevor das System wieder ans Netz geht.</li>
+</ul>
+
+<h4>Ransomware-spezifische Recovery</h4>
+<p>Bei Ransomware ist Recovery besonders heikel:</p>
+<ul>
+<li><strong>Niemals zahlen ohne Notfall-Notwendigkeit</strong> — keine Garantie auf Decryptor, fördert das Geschäftsmodell, in vielen Ländern rechtlich problematisch (OFAC-Sanktionen in den USA, mögliche Strafbarkeit in EU bei Sanktions-Listen-Akteuren).</li>
+<li><strong>Decryptor-Suche</strong> bei <em>NoMoreRansom.org</em> — bei einigen Familien existieren öffentliche Decryptor.</li>
+<li><strong>Backup-Restore</strong> aus immutable / offline Kopie. Vor Restore die Initial-Access-Lücke schließen.</li>
+<li><strong>Forensik parallel</strong> — Mandiant/Crowdstrike-Style: Restore und Forensik laufen parallel, sonst dauert die Recovery zu lang.</li>
+</ul>
+
 <h4>Lessons Learned</h4>
-<p>Hot Wash binnen 2 Wochen; Aktionen mit Owner + Frist; Tabletop-Update mit neuen Szenarien; Detection-Regeln nachschärfen.</p>`
+<p>Innerhalb von 1–2 Wochen nach Vorfallsende ein <em>Hot Wash</em> ansetzen, mit allen Beteiligten. Format: was lief gut, was lief schlecht, was sind konkrete Aktionspunkte mit Owner und Frist. Ergebnisse fließen zurück in:</p>
+<ul>
+<li>aktualisierten IR-Plan,</li>
+<li>neue oder geschärfte Detection-Regeln,</li>
+<li>aktualisierte Tabletop-Szenarien,</li>
+<li>Hardening-Backlog,</li>
+<li>Schulungs-Themen für Awareness und Tier-1-Onboarding.</li>
+</ul>
+<p>Lessons Learned ohne Aktionspunkte ist Theater. Die wichtigste Frage am Ende jedes Vorfalls: <em>„Was muss strukturell anders sein, damit derselbe Vorfall nicht erneut auftritt?"</em></p>`
                 }, {
                     title: 'Spezial-Playbooks',
-                    html: `<h4>Ransomware-Playbook</h4>
-<ol><li>Isolation infizierter Hosts.</li><li>Identifikation Ransomware-Familie (ID Ransomware, NoMoreRansom).</li><li>Backup-Integrität prüfen (immutable / offline).</li><li>Rechtliche Pflichten: DSGVO Art. 33 (72h), NIS2 24h Initial / 72h Update / 1 Monat Final.</li><li>CISA/BSI/Strafverfolgung benachrichtigen.</li><li>Restore + Forensik parallel.</li></ol>
-<h4>BEC-Playbook</h4>
-<p>Mailbox-Forensik (Inbox-Rules, Forwarding, Auditlog), Refund-/Recall-Versuch der Überweisung, FBI IC3 / LKA, Conditional Access nachschärfen, Awareness-Booster.</p>
+                    html: `<p>Generische IR-Pläne reichen nicht. Reife Programme pflegen spezialisierte Playbooks für die häufigsten Vorfallstypen. Diese Seite skizziert die wichtigsten — Ransomware, Business Email Compromise, Insider, Cloud-Account-Compromise — und zeigt jeweils das spezifische Vorgehen, das CySA+ in Szenarien abfragt.</p>
+
+<h4>Ransomware-Playbook</h4>
+<p>Ransomware ist heute meist <em>doppelt erpressend</em>: erst Daten exfiltrieren, dann verschlüsseln, dann doppelt drohen (Schlüssel + Veröffentlichung). Vorgehen:</p>
+<ol>
+<li><strong>Sofortige Isolation</strong> aller infizierten Hosts — logisch, nicht Power-Off (RAM für Schlüssel-Recovery wichtig).</li>
+<li><strong>Identifikation der Familie</strong> — <em>ID Ransomware</em> (id-ransomware.malwarehunterteam.com), <em>NoMoreRansom.org</em>. Familie bestimmt, ob ein öffentlicher Decryptor existiert (z. B. für ältere REvil-Versionen, BlackByte, einige BlackMatter-Builds).</li>
+<li><strong>Backup-Integrität prüfen</strong> — sind immutable / offline Kopien betroffen? Wann ist der letzte sauberer Stand?</li>
+<li><strong>Initial-Access-Vector identifizieren</strong> bevor Recovery beginnt — sonst sofortige Re-Infektion.</li>
+<li><strong>Rechtliche Meldepflichten</strong>:
+<ul>
+<li>DSGVO Art. 33: 72 Stunden Meldepflicht an Aufsichtsbehörde, falls personenbezogene Daten betroffen.</li>
+<li>NIS2 (ab 2024): 24 Stunden Frühwarnung, 72 Stunden Vorfallsmeldung, 1 Monat Abschlussbericht.</li>
+<li>DORA (ab 2025): eigene Finanzsektor-Meldekanäle.</li>
+<li>SEC Cybersecurity Disclosure Rule (USA, ab 2023): börsennotierte Unternehmen 4 Werktage.</li>
+</ul></li>
+<li><strong>Strafverfolgung benachrichtigen</strong> — in Deutschland LKA/BKA, ggf. ZAC; europaweit Europol; USA FBI IC3 / CISA.</li>
+<li><strong>Lösegeld-Frage</strong> — Management-Entscheidung mit Legal: Sanktionsrisiko (OFAC), Erpressbarkeit, mögliche Folgeangriffe. Nie leichtfertig zahlen.</li>
+<li><strong>Restore + Forensik parallel</strong> — Forensik darf Restore nicht aufhalten, aber Restore darf Forensik-Beweise nicht zerstören (Snapshots vor jedem Restore).</li>
+<li><strong>Communication</strong> — Mitarbeiter, Kunden, Aufsichtsbehörden, ggf. Versicherer (Cyberpolice). Prepared statements helfen, Reputationsschaden zu begrenzen.</li>
+</ol>
+
+<h4>BEC-Playbook (Business Email Compromise)</h4>
+<p>BEC ist seit Jahren laut FBI IC3 der größte Cybercrime-Schadensposten — typische Schäden je Vorfall im Millionenbereich. Angreifer übernimmt ein Mailkonto (oft via Phishing oder Adversary-in-the-Middle wie Evilginx), beobachtet Geschäftsprozesse und löst eine gefälschte Überweisungsanweisung aus.</p>
+<p>Vorgehen bei Verdacht:</p>
+<ol>
+<li><strong>Sofortige Account-Sperrung</strong> + MFA-Reset + Session-Revocation (Microsoft Entra: <em>Revoke-AzureADUserAllRefreshToken</em>).</li>
+<li><strong>Mailbox-Forensik</strong> — Inbox-Rules (oft heimliche Forwarding-Regeln auf externe Adressen), Auto-Forwarding aktiviert, manipulierte Suchen, gelöschte Mails wiederherstellen, Audit-Log auswerten.</li>
+<li><strong>Recall der Überweisung</strong> — Hausbank kontaktieren, SWIFT-Recall, Finanzaufsicht. Bei Geschwindigkeit < 24 h sind Erfolgschancen am höchsten.</li>
+<li><strong>Strafverfolgung</strong> — FBI IC3 (USA), LKA (Deutschland). FBI hat 2018 die Recovery Asset Team etabliert, die internationale Recall-Anfragen koordiniert.</li>
+<li><strong>Conditional Access nachschärfen</strong> — phishing-resistente MFA für Finanzfunktionen, IP-Restriktionen, Geofencing.</li>
+<li><strong>Awareness-Booster</strong> — gezielte Aufklärung der Buchhaltungs-/Geschäftsleitungs-Funktionen.</li>
+<li><strong>Lookalike-Domain-Monitoring</strong> — viele BEC-Angriffe nutzen typosquatted Domains, die früh erkannt werden können.</li>
+</ol>
+
 <h4>Insider-Threat-Playbook</h4>
-<p>HR + Legal einbeziehen, Beweissicherung mit Chain of Custody, Daten-Exfil-Pfade prüfen (USB, Personal-Cloud, Email-Forwarding), Leaver-Process-Audit.</p>
+<p>Insider-Vorfälle sind politisch und rechtlich heikel. Falsche Verdächtigung führt zu arbeitsrechtlichen Konsequenzen; verzögerte Reaktion erlaubt Datenabfluss.</p>
+<ol>
+<li><strong>HR und Legal sofort einbeziehen</strong> — keine technische IR-Aktion ohne Abstimmung. In Deutschland zusätzlich Betriebsrat (BetrVG), Datenschutzbeauftragter.</li>
+<li><strong>Diskrete Beweissicherung</strong> mit Chain of Custody — wenn der Verdächtige weiterhin im Unternehmen arbeitet, sollte er nicht alarmiert werden.</li>
+<li><strong>Daten-Exfil-Pfade prüfen</strong> — USB-Wechselmedien (Audit-Log + DLP), persönliche Cloud-Speicher (CASB-Logs), private Mail-Forwarding, Druck-Logs, Foto/Screenshot-Indikatoren.</li>
+<li><strong>Leaver-Process-Audit</strong> — bei tatsächlichen oder geplanten Austritten 60 Tage erhöhte Überwachung; bei Kündigung sofortige Account-Deaktivierung und Geräterückgabe.</li>
+<li><strong>Forensik-Konservierung</strong> — Image vom Notebook, Mailbox-Export, Dateizugriffs-Audit. Beweise müssen vor Gericht verwertbar sein.</li>
+</ol>
+
 <h4>Cloud-Account-Compromise-Playbook</h4>
-<p>Sofort: MFA reset, Sessions invalidieren, IAM-Keys rotieren, CloudTrail-Trail audit, IMDS-Abfragen prüfen, Tags/Resource-Drift, Costs-Anomalie.</p>`
+<p>Wenn ein Cloud-Admin-Account kompromittiert ist, kann der Angreifer in Minuten ganze Tenants übernehmen. Vorgehen:</p>
+<ol>
+<li><strong>Sofort:</strong> MFA-Reset, alle aktiven Sessions invalidieren (in AWS: <em>aws iam delete-access-key</em> + <em>aws sts get-session-token</em> revoke; in Azure: <em>Revoke-AzureADUserAllRefreshToken</em>; in GCP: Identity-Aware Proxy Sessions revoken).</li>
+<li><strong>IAM-Keys rotieren</strong> — alle Access-Keys, Service-Account-Keys, OAuth-Apps des betroffenen Accounts.</li>
+<li><strong>CloudTrail / Activity-Log audit</strong> — was hat der Angreifer in der Zwischenzeit getan? Neue IAM-Rollen, neue OAuth-Apps, neue Backup-Aufträge mit externer Destination?</li>
+<li><strong>IMDS-Abfragen prüfen</strong> — wurde aus einer EC2-Instanz Metadata-Service kontaktiert (möglicher SSRF + Credential-Diebstahl)?</li>
+<li><strong>Resource-Drift</strong> — neue VMs, neue Egress-Regeln, neue VPC-Peerings, neue S3-Buckets mit Public-Read.</li>
+<li><strong>Cost-Anomalien</strong> — Cryptominer-Aktivität zeigt sich oft zuerst in der Abrechnung. Cloud-Kosten-Alarme sind eine valide Detection-Quelle.</li>
+<li><strong>Persistente OAuth-Apps</strong> — moderne Angriffe legen <em>Consent-Phishing</em>-Apps an, die auch nach Passwort-Änderung weiterhin Zugriff haben. Apps mit Mail.Read, Files.ReadWrite.All, Directory.ReadWrite.All sind hochkritisch.</li>
+<li><strong>Secrets-Rotation</strong> — alle in Code, CI-Variablen, Config-Maps abgelegten Secrets, die der Account je hatte, müssen rotiert werden.</li>
+</ol>
+
+<h4>Tabletop-Übungen — Playbooks lebendig halten</h4>
+<p>Ein Playbook, das nie geübt wurde, scheitert in der Krise. Tabletop-Exercises (TTX) sind Diskussionsübungen ohne System-Eingriff: Moderator stellt ein Szenario vor, Teilnehmer arbeiten den Plan durch und identifizieren Lücken. Reife: TTX mindestens jährlich pro Playbook, mit unterschiedlichen Eskalationsstufen (Tier-1-Triage bis Executive-Krise). Ergebnis ist immer eine Liste konkreter Verbesserungen am Plan.</p>`
                 }],
                 quiz: [
                     q('Welche Phase folgt auf Detection & Analysis?', ['Containment, Eradication, Recovery', 'Preparation', 'Lessons Learned', 'Hardening'], 0, 'Reihenfolge nach NIST SP 800-61 r2.'),
@@ -1424,46 +1807,228 @@
                 summary: 'Berichtswesen für technische und Executive-Zielgruppen, KPIs, Compliance-Mapping.',
                 pages: [{
                     title: 'Berichts-Architektur',
-                    html: `<h4>Stakeholder-Mapping</h4>
-<ul><li>Executive (C-Level): Risiko, Geschäftsauswirkung, Budget.</li>
-<li>Operations: Konkrete IoCs, Hosts, Aktionen.</li>
-<li>Compliance: Mapping zu Rahmenwerken (PCI, HIPAA, NIS2).</li></ul>
-<h4>Metriken</h4>
-<p>MTTD, MTTR, Dwell Time, Number of Incidents, False-Positive-Rate, Patch-Compliance, Phishing-Click-Rate.</p>
-<h4>Compliance-Reports</h4>
-<p>SOC 2, ISO 27001, PCI-DSS — automatisierte Beweissammlung aus Cloud-Logs/Endpoint/SIEM.</p>`
+                    html: `<p>Reporting ist die Disziplin, die ein SOC zur Organisation hin sichtbar macht. Schlechtes Reporting ruiniert auch ein technisch gutes SOC: Management sieht keinen Wertbeitrag, Compliance-Audits scheitern, Operations bekommt keine relevanten Informationen. Diese Seite zeigt, wie Berichte strukturiert werden, damit jede Zielgruppe die für sie nutzbaren Informationen erhält.</p>
+
+<h4>Stakeholder-Mapping</h4>
+<p>Vor jedem Bericht steht die Frage: Wer liest das, und welche Entscheidung soll damit getroffen werden? Ein Bericht ohne Entscheidungs-Adressat ist Selbstzweck. Standard-Adressaten:</p>
+<ul>
+<li><strong>Executive (C-Level, Vorstand, Board)</strong> — entscheidet über Strategie, Budget, Risikoakzeptanz. Braucht: aggregiertes Risiko, finanzielle Auswirkung, Trend, Top-3-Risiken, strategische Empfehlung. Lesedauer: 2–5 Minuten.</li>
+<li><strong>Mittelmanagement / IT-Leitung</strong> — entscheidet über Ressourcenzuteilung, Projektpriorisierung. Braucht: KPIs, SLA-Einhaltung, Capacity-Planning, Roadmap-Status.</li>
+<li><strong>Security Operations</strong> — handelt taktisch. Braucht: konkrete IoCs, Hashes, IPs, betroffene Hosts, Sigma-Regeln, ATT&CK-IDs, Empfehlungen für Detection-Tuning.</li>
+<li><strong>Compliance / Audit</strong> — bewertet Kontroll-Wirksamkeit. Braucht: Mapping zu Frameworks (NIST 800-53, ISO 27001 Annex A, PCI-DSS Requirements, SOC 2 TSC), Beweise (Screenshots, Logs, Policies, Tickets, Test-Ergebnisse), Lückenanalyse.</li>
+<li><strong>Externe Stakeholder</strong> — Kunden, Partner, Aufsichtsbehörden, Versicherer, Medien. Inhalt mit Legal/PR abgestimmt, oft redacted.</li>
+</ul>
+
+<h4>Berichts-Kadenz</h4>
+<p>Reife Programme arbeiten mit gestaffelter Kadenz:</p>
+<ul>
+<li><strong>Daily</strong> — Operations-Dashboards (live), Schichtübergabe-Reports.</li>
+<li><strong>Weekly</strong> — Tier-1-Statusbericht, Open-Incident-Liste, Trend.</li>
+<li><strong>Monthly</strong> — KPI-Bericht ans Management, Threat-Landscape-Update, Vulnerability-Status.</li>
+<li><strong>Quarterly</strong> — Executive-Bericht, Risk-Register-Review, Compliance-Status.</li>
+<li><strong>Annual</strong> — strategischer Risikobericht, Reife-Assessment, Budget-Begründung.</li>
+<li><strong>Ad-hoc</strong> — Incident-Reports, Compliance-Findings, Notfall-Updates.</li>
+</ul>
+
+<h4>Bericht-Struktur (Standardvorlage)</h4>
+<p>Eine bewährte Struktur für jeden Bericht:</p>
+<ol>
+<li><strong>Executive Summary</strong> — 5–10 Sätze, geschäftsorientiert, mit Top-3-Risiken und Empfehlung.</li>
+<li><strong>Lagebericht</strong> — KPIs, Trends, Vergleich Vor-Periode.</li>
+<li><strong>Vorfälle der Periode</strong> — Anzahl, Schweregrad-Verteilung, herausragende Fälle.</li>
+<li><strong>Vulnerability- und Compliance-Status</strong>.</li>
+<li><strong>Threat-Intelligence-Highlights</strong> — relevante neue TTPs, Aktorgruppen.</li>
+<li><strong>Aktionspunkte</strong> — was wurde umgesetzt, was ist offen, mit Owner und Frist.</li>
+<li><strong>Anhänge</strong> — Detaildaten für technische Leser.</li>
+</ol>
+
+<h4>Compliance-Reporting — Mapping als Backbone</h4>
+<p>Compliance-Berichte unterscheiden sich von Operations-Berichten dadurch, dass sie Wirksamkeit gegen einen vorgegebenen Kontroll-Katalog nachweisen müssen. Reife Programme nutzen <em>Continuous Control Monitoring</em>: Beweise werden automatisiert aus SIEM, EDR, Cloud-APIs und Ticketing-Systemen gezogen, gegen den Kontroll-Katalog gemappt und versioniert abgelegt. Standardformat ist <em>OSCAL</em> (Open Security Controls Assessment Language, NIST), das Kontrollen, Implementierungen und Bewertungen maschinenlesbar abbildet — Grundlage für FedRAMP, automatisierte SOC-2-Audits und ISO-27001-Begleitsysteme wie Vanta, Drata oder Secureframe.</p>
+
+<h4>Anti-Pattern</h4>
+<ul>
+<li>Bericht ohne Empfehlung — der Leser weiß nicht, was er entscheiden soll.</li>
+<li>Bericht ohne Vergleich zur Vorperiode — kein Trend erkennbar.</li>
+<li>Technische Details im Executive Summary — verschwendet Leseaufmerksamkeit.</li>
+<li>Generischer „Threat-Landscape-Block" ohne Bezug zur eigenen Umgebung.</li>
+<li>KPIs, deren Messmethode nicht dokumentiert ist — Vergleichbarkeit zwischen Perioden ist nicht gegeben.</li>
+</ul>`
                 }, {
                     title: 'KPI-Katalog',
-                    html: `<h4>Detection-KPIs</h4>
-<table><tr><th>KPI</th><th>Ziel</th></tr><tr><td>MTTD</td><td>Min/Std (kontextabhängig)</td></tr><tr><td>MTTR</td><td>Std/Tage</td></tr><tr><td>Dwell Time</td><td>< 7 Tage anstreben</td></tr><tr><td>FP-Rate</td><td>< 10 %</td></tr><tr><td>True-Positive-Rate</td><td>maximal</td></tr><tr><td>Coverage (ATT&CK)</td><td>messbar via Heatmap</td></tr></table>
-<h4>Vulnerability-KPIs</h4>
-<p>Time-to-Patch nach Severity, KEV-Compliance-Rate, Asset-Coverage, Number of Critical Vulns Outstanding.</p>
-<h4>People/Process-KPIs</h4>
-<p>Phishing-Click-Rate, Phishing-Report-Rate, Awareness-Training-Compliance, On-call-Response-Time.</p>
-<h4>Compliance-KPIs</h4>
-<p>Audit-Findings (offen vs. geschlossen), Control-Test-Pass-Rate, Risk-Register-Volume, Risk-Heatmap-Trend.</p>`
+                    html: `<p>Was nicht gemessen wird, kann nicht verbessert werden — was falsch gemessen wird, wird falsch optimiert. Diese Seite stellt den Standard-KPI-Kanon eines Security-Programms vor und zeigt, wie KPIs sinnvoll definiert werden.</p>
+
+<h4>Detection- und Response-KPIs</h4>
+<table>
+<thead><tr><th>KPI</th><th>Definition</th><th>Reifes Zielband</th></tr></thead>
+<tbody>
+<tr><td><strong>MTTD</strong> (Mean Time to Detect)</td><td>Zeit von Initial-Compromise bis Erkennung</td><td>Minuten bis wenige Stunden</td></tr>
+<tr><td><strong>MTTR</strong> (Mean Time to Respond / Remediate)</td><td>Zeit von Erkennung bis Containment / Eradication</td><td>Stunden bis Tage, kontextabhängig</td></tr>
+<tr><td><strong>Dwell Time</strong></td><td>Zeit, in der Angreifer unbemerkt im Netz war</td><td>Mandiant M-Trends 2024 berichtet globalen Median ~10 Tage</td></tr>
+<tr><td><strong>False-Positive-Rate</strong></td><td>FP / (FP + TP) der Alarme</td><td>möglichst niedrig, ohne TPs zu unterdrücken</td></tr>
+<tr><td><strong>True-Positive-Rate</strong></td><td>TP / (TP + FN)</td><td>möglichst hoch</td></tr>
+<tr><td><strong>Coverage (ATT&CK)</strong></td><td>Anteil abgedeckter Techniken pro Plattform</td><td>messbar als Heatmap</td></tr>
+<tr><td><strong>Alert-Closure-Rate</strong></td><td>Anteil bearbeiteter Alarme im SLA</td><td>> 95 %</td></tr>
+<tr><td><strong>Backlog</strong></td><td>Offene Alarme älter als SLA</td><td>0 ist Ziel</td></tr>
+</tbody></table>
+
+<h4>Vulnerability-Management-KPIs</h4>
+<ul>
+<li><strong>Time-to-Patch</strong> pro Severity (Critical/High/Medium/Low) — siehe SLAs aus Vulnerability-Kapitel.</li>
+<li><strong>KEV-Compliance-Rate</strong> — wie viele KEV-CVEs sind aktuell unter SLA?</li>
+<li><strong>Asset-Coverage</strong> — wie viele bekannte Assets werden tatsächlich gescannt?</li>
+<li><strong>Critical Vulns Outstanding</strong> — absolute Zahl offener Critical-CVEs.</li>
+<li><strong>Recurrence Rate</strong> — Lücken, die nach Patch wieder auftauchen (Drift, fehlerhafte Gold-Images).</li>
+<li><strong>Mean Vulnerability Age</strong> — Alter der ältesten offenen Critical-Schwachstelle.</li>
+</ul>
+
+<h4>People-/Process-KPIs</h4>
+<ul>
+<li><strong>Phishing-Click-Rate</strong> — Anteil der Mitarbeiter, die in einer Übung geklickt haben.</li>
+<li><strong>Phishing-Report-Rate</strong> — wie viele haben die Übungs-Mail aktiv gemeldet? Reife: Report-Rate höher als Click-Rate.</li>
+<li><strong>Awareness-Training-Compliance</strong> — Anteil der Mitarbeiter mit aktuellem Pflichttraining.</li>
+<li><strong>On-Call-Response-Time</strong> — Zeit vom Page-Out bis Acknowledgment.</li>
+<li><strong>SOC-Schichtstärke / Backlog-Wachstum</strong> — Capacity-Indikator.</li>
+</ul>
+
+<h4>Compliance- und Risiko-KPIs</h4>
+<ul>
+<li><strong>Audit-Findings</strong> — offen vs. geschlossen, nach Schwere.</li>
+<li><strong>Control-Test-Pass-Rate</strong> — Anteil bestandener Kontroll-Tests.</li>
+<li><strong>Risk-Register-Volume</strong> — Anzahl offener Risiken nach Klasse.</li>
+<li><strong>Heatmap-Trend</strong> — wandern Risiken aus Rot Richtung Grün?</li>
+<li><strong>Policy-Acknowledgement</strong> — Anteil der Mitarbeiter, die aktuelle Policies bestätigt haben.</li>
+</ul>
+
+<h4>KPI-Hygiene</h4>
+<p>Damit KPIs nicht zur Theaterkulisse werden, gelten ein paar Grundregeln:</p>
+<ul>
+<li>Jeder KPI hat eine schriftlich dokumentierte <em>Definition</em> und <em>Messmethode</em>. Beispiel: „MTTR berechnet aus Tickets der Kategorie X, Zeitstempel <code>opened</code> bis <code>contained</code>, gemessen in Stunden, Median über 30 Tage."</li>
+<li>Jeder KPI hat einen <em>Owner</em>, der für Datenqualität und Trend-Kommentar verantwortlich ist.</li>
+<li>KPIs werden mit <em>Vergleichswerten</em> berichtet — Vorperiode, Vorjahr, Branchen-Benchmark (z. B. Mandiant M-Trends, Verizon DBIR).</li>
+<li>Vanity-Metriken vermeiden: „Anzahl analysierter Logs in TB" sagt nichts über Qualität.</li>
+<li>Goodhart's Law beachten: Sobald ein KPI Bonus-relevant wird, wird er optimiert — manchmal auf Kosten der eigentlichen Qualität.</li>
+</ul>`
                 }, {
                     title: 'Audience-Tailoring',
-                    html: `<h4>C-Level / Board</h4>
-<ul><li>1–2 Seiten Executive Summary.</li><li>Sprache: Risiko, Wahrscheinlichkeit, Auswirkung in Euro/USD.</li><li>Visualisierung: Heatmap, Trendlinie, Top-Risiken.</li><li>Empfehlungen: strategisch, budgetbezogen.</li></ul>
+                    html: `<p>Derselbe Vorfall wird in unterschiedlichen Berichten dramatisch anders dargestellt — nicht weil Fakten abweichen, sondern weil Adressaten unterschiedlich sind. Diese Seite zeigt für jede Hauptzielgruppe das passende Format und die typischen Inhalte.</p>
+
+<h4>C-Level / Vorstand</h4>
+<p>Vorstandsmitglieder haben Minuten, nicht Stunden. Format:</p>
+<ul>
+<li><strong>1–2 Seiten Executive Summary</strong>, frontloaded — die Empfehlung steht oben.</li>
+<li><strong>Sprache</strong>: Risiko, Wahrscheinlichkeit, Auswirkung in Euro/USD; keine technischen Akronyme ohne Erklärung.</li>
+<li><strong>Visualisierung</strong>: Heatmap (Wahrscheinlichkeit × Auswirkung), Trendlinie, Top-Risiken-Tabelle.</li>
+<li><strong>Empfehlungen</strong>: strategisch, mit Budget-Größenordnung; idealerweise drei Optionen (do nothing / minimum / recommended) mit Kosten-Risiko-Vergleich.</li>
+<li><strong>Compliance-Bezug</strong>: welche Regulierungspflicht ist betroffen (DSGVO, NIS2, DORA, SEC).</li>
+</ul>
+<p>Beispiel-Satz aus einem guten Executive-Bericht: „Der Verzicht auf Phishing-resistente MFA für die Finanzfunktion erhöht die Wahrscheinlichkeit eines BEC-Vorfalls auf etwa 30 % pro Jahr. Erwartete Schadenshöhe gemäß Sektor-Benchmark: 1,5 Mio. EUR. Investition zur Mitigation: 80 k EUR einmalig, 20 k EUR jährlich."</p>
+
+<h4>Mittelmanagement / IT-Leitung</h4>
+<p>IT-Leitung braucht Detail über das Programmleben, nicht jedes IoC, aber genug Kontext für Ressourcenentscheidungen:</p>
+<ul>
+<li>KPI-Trends mit Erklärung von Anomalien,</li>
+<li>Roadmap-Status — was wurde geliefert, was ist verzögert,</li>
+<li>Capacity-Indikatoren — Backlog-Wachstum, On-Call-Belastung,</li>
+<li>Budget-Verbrauch und Forecast.</li>
+</ul>
+
 <h4>Operations / SOC</h4>
-<p>Detaillierte IoCs (Hashes, IPs, Domains), Hosts, Sigma-Regeln, MITRE-IDs, Container-IDs.</p>
+<p>Hier ist Detailtiefe Pflicht:</p>
+<ul>
+<li>vollständige <strong>IoCs</strong> (SHA-256-Hashes, IPs, Domains, URLs, Mutexes, Registry-Keys),</li>
+<li><strong>betroffene Hosts</strong> mit Inventory-Daten,</li>
+<li><strong>MITRE-ATT&CK-IDs</strong>,</li>
+<li><strong>Sigma-Regeln</strong> oder EDR-Custom-Detections im Anhang,</li>
+<li><strong>Container-IDs / Pod-Namen / Cloud-Resource-ARNs</strong>,</li>
+<li>konkrete Empfehlungen für Detection-Tuning.</li>
+</ul>
+<p>Format: technisches Markdown- oder Confluence-Dokument; bei externen Threat-Reports oft im STIX/TAXII-Format zur maschinellen Weiterverarbeitung.</p>
+
 <h4>Auditor / Compliance</h4>
-<p>Mapping zu Controls (NIST 800-53, ISO 27001, PCI-DSS Req., SOC 2 TSC). Beweise: Logs, Screenshots, Policies, Test-Results, OSCAL-Files.</p>
+<p>Auditoren brauchen Mapping plus Beweise:</p>
+<ul>
+<li><strong>Mapping</strong> zu konkreten Controls — z. B. ISO 27001:2022 Annex A 8.16 (Monitoring activities), NIST 800-53 SI-4 (System Monitoring), PCI-DSS 10.7.</li>
+<li><strong>Beweise</strong>: Logs (mit Zeitstempel-Bereichen), Screenshots, Policy-Dokumente in der gültigen Version, Test-Ergebnisse, Risikoakzeptanz-Dokumente, Tickets aus dem Change-Management.</li>
+<li><strong>Strukturierte Compliance-Daten</strong>: OSCAL-Files erlauben automatisierte Audits in FedRAMP, FedRAMP-Rev5, einigen ISO-27001-Tools.</li>
+<li><strong>Prozessbeschreibung</strong> — wie wird die Kontrolle in der Praxis ausgeführt, Stichproben.</li>
+</ul>
+
 <h4>Externe Stakeholder</h4>
-<p>Kunden, Partner, Behörden, Medien. Inhalt redacted; Sprachregelung mit PR/Legal abgestimmt.</p>`
+<p>Hier ist Sprachregelung Pflicht. Falsche Formulierungen können rechtliche oder reputationsbezogene Folgeschäden verursachen:</p>
+<ul>
+<li><strong>Kunden</strong> — gesicherte Fakten, klare Auswirkung auf den Kunden, geplante Maßnahmen, Kontaktstelle. Mit Legal abgestimmte Vorlagen.</li>
+<li><strong>Partner / Lieferkette</strong> — strukturierte Vorfallsmeldung, oft via standardisiertem Formular (z. B. nach Common Vulnerability Reporting Framework).</li>
+<li><strong>Aufsichtsbehörden</strong> — Pflichtfelder gemäß Regulierung (Art. 33 DSGVO, NIS2-Frühwarnung 24 h / Vorfallsmeldung 72 h / Abschluss 1 Monat, DORA-Kategorien, SEC 8-K binnen 4 Werktagen).</li>
+<li><strong>Medien</strong> — ausschließlich freigegebener Communications-Lead spricht; Holding-Statement vorbereitet, FAQs intern.</li>
+<li><strong>Versicherung</strong> — Cyber-Police verlangt oft Frühmeldung innerhalb 24–72 h; Verzug kann Versicherungsschutz gefährden.</li>
+</ul>
+
+<h4>Threat-Intelligence-Sharing</h4>
+<p>Wenn Threat-Intel mit Peers oder Sektor-ISACs (Information Sharing and Analysis Centers) geteilt wird, gelten weitere Konventionen:</p>
+<ul>
+<li><strong>TLP</strong> (Traffic Light Protocol, FIRST.org v2.0): RED / AMBER / AMBER+STRICT / GREEN / CLEAR. Beim Zitieren immer TLP-Farbe nennen.</li>
+<li><strong>STIX/TAXII</strong> — strukturiertes Format, ISACs (FS-ISAC für Finanzen, H-ISAC für Healthcare, AutoISAC, MS-ISAC) tauschen über TAXII-Server.</li>
+<li><strong>MISP</strong> — OSS-Plattform für IoC-Sharing zwischen Communities.</li>
+</ul>`
                 }, {
-                    title: 'Compliance-Frameworks',
-                    html: `<h4>NIST CSF 2.0</h4>
-<p>Sechs Funktionen (Govern, Identify, Protect, Detect, Respond, Recover) × 23 Categories. Tier-Modell für Reife (Partial → Adaptive).</p>
-<h4>ISO 27001:2022</h4>
-<p>ISMS mit 93 Annex-A-Controls in vier Themen (Organizational 37, People 8, Physical 14, Technological 34). Risk-Treatment-Plan + SoA (Statement of Applicability).</p>
-<h4>PCI-DSS v4.0</h4>
-<p>12 Requirements + Customized Approach. Pflicht ab 31.03.2025 voll wirksam. Targeted Risk Analysis für customized controls.</p>
-<h4>SOC 2 (AICPA)</h4>
-<p>Trust Service Criteria: Security (mandatory), Availability, Processing Integrity, Confidentiality, Privacy. Type I (Punkt-in-Zeit) vs. Type II (6–12 Monate Beobachtung).</p>
-<h4>EU-Regulierung</h4>
-<ul><li>DSGVO/GDPR — Datenschutz-Verordnung.</li><li>NIS2 — Cybersecurity für essentielle/wichtige Sektoren.</li><li>DORA — Finanzsektor-Resilienz.</li><li>EU AI Act — KI-Risikoklassen.</li><li>EU CRA (Cyber Resilience Act) — Produkthaftung mit digitalen Elementen.</li></ul>`
+                    title: 'Compliance-Frameworks im Überblick',
+                    html: `<p>Reife Compliance-Programme arbeiten mit mehreren Frameworks parallel: NIST CSF als Reife-Sprache, ISO 27001 als zertifizierbares ISMS, PCI-DSS für Kartendaten, SOC 2 für SaaS-Anbieter, dazu EU-Regulierungen. CySA+ erwartet, dass du die wichtigsten Frameworks unterscheiden und ihre Hauptaussagen einordnen kannst.</p>
+
+<h4>NIST Cybersecurity Framework 2.0 (Februar 2024)</h4>
+<p>Das CSF 2.0 ist eine reine Reife- und Mapping-Sprache, kein zertifizierbarer Standard. Es wurde im Februar 2024 veröffentlicht und erweitert das CSF 1.1 um die Funktion <em>Govern</em>:</p>
+<ol>
+<li><strong>Govern</strong> (neu in 2.0) — Strategie, Rollen, Lieferketten-Risiko, Aufsicht.</li>
+<li><strong>Identify</strong> — Asset-Inventar, Risiken.</li>
+<li><strong>Protect</strong> — Identitäten, Daten, Awareness, Plattform-Sicherheit.</li>
+<li><strong>Detect</strong> — kontinuierliches Monitoring, Anomalie-Erkennung.</li>
+<li><strong>Respond</strong> — Vorfallsmanagement, Kommunikation.</li>
+<li><strong>Recover</strong> — Wiederherstellung, Lessons Learned.</li>
+</ol>
+<p>Sechs Funktionen × 22 Categories × 106 Subcategories. Ergänzt durch <em>Implementation Tiers</em> (Partial → Risk Informed → Repeatable → Adaptive) für Reife-Selbstbewertung und durch <em>Profile</em>-Konzept für Soll-Ist-Vergleich.</p>
+
+<h4>ISO/IEC 27001:2022 und 27002:2022</h4>
+<p>Internationaler Standard für ein <em>Information Security Management System</em>. Zertifizierbar durch akkreditierte Stellen.</p>
+<ul>
+<li><strong>27001:2022</strong> — definiert das ISMS: Management-Verantwortung, Risk Treatment, Statement of Applicability (SoA), kontinuierliche Verbesserung.</li>
+<li><strong>27002:2022</strong> — Implementierungs-Leitfaden für die 93 Annex-A-Controls, neu strukturiert in vier Themen: <em>Organizational</em> (37), <em>People</em> (8), <em>Physical</em> (14), <em>Technological</em> (34).</li>
+<li>Pflichtdokumente: ISMS-Geltungsbereich, Informationssicherheits-Politik, Risikobeurteilungs- und Behandlungsmethodik, SoA, Risikoplan, Schulungsnachweise, interne Audit-Ergebnisse, Management-Reviews, Korrekturmaßnahmen.</li>
+<li>Audit-Zyklus: dreijähriger Zertifizierungszyklus mit jährlichen Überwachungs-Audits.</li>
+</ul>
+
+<h4>PCI-DSS v4.0 (März 2022, voll wirksam ab 31.03.2025)</h4>
+<p>Branchen-Standard für Karteninhaberdaten (Cardholder Data Environment, CDE). Wichtige Änderungen in v4.0:</p>
+<ul>
+<li><strong>Customized Approach</strong> als Alternative zu klassischen Defined Controls — eigene Mitigations zulässig, wenn das Sicherheitsziel demonstrierbar erreicht wird; verlangt <em>Targeted Risk Analysis</em> pro Control.</li>
+<li><strong>MFA verpflichtend</strong> für alle Zugriffe auf das CDE, nicht nur Admin-Zugriffe.</li>
+<li><strong>Stärkere Anforderungen an Authentifizierung</strong> — Passwortlängen, Phishing-Resistenz, automatisches Lockout.</li>
+<li><strong>Continuous Compliance</strong> — Monitoring statt jährlicher Punkt-in-Zeit-Bewertung.</li>
+<li><strong>Erweiterte Anforderungen an Web-Anwendungen</strong> — Inventarisierung von Skripten auf Zahlungsseiten gegen Magecart-artige Angriffe.</li>
+</ul>
+<p>12 Hauptanforderungen bleiben strukturell erhalten, sind aber detaillierter ausformuliert.</p>
+
+<h4>SOC 2 (AICPA Trust Services Criteria, 2017 mit Updates)</h4>
+<p>US-Reportingstandard für Service-Organisationen, in der SaaS-Branche international relevant. Trust Services Criteria:</p>
+<ul>
+<li><strong>Security</strong> (mandatory) — der „Common Criteria"-Block.</li>
+<li><strong>Availability</strong>, <strong>Processing Integrity</strong>, <strong>Confidentiality</strong>, <strong>Privacy</strong> — optional, je nach Service.</li>
+</ul>
+<p>Zwei Berichtsarten:</p>
+<ul>
+<li><strong>SOC 2 Type I</strong> — Punkt-in-Zeit-Bewertung der Kontroll-Konzeption.</li>
+<li><strong>SOC 2 Type II</strong> — Wirksamkeit der Kontrollen über einen Beobachtungszeitraum von typisch 6–12 Monaten. Marktstandard für Enterprise-Kunden.</li>
+</ul>
+
+<h4>EU-Regulierungslandschaft</h4>
+<table>
+<thead><tr><th>Regelung</th><th>Wirksam</th><th>Kerninhalt</th></tr></thead>
+<tbody>
+<tr><td><strong>DSGVO</strong></td><td>seit 25.05.2018</td><td>Datenschutz, 72-h-Meldepflicht (Art. 33), Bußgelder bis 4 % Jahresumsatz</td></tr>
+<tr><td><strong>NIS2</strong></td><td>nationale Umsetzung 2024–2025</td><td>Cybersecurity-Pflichten für „essential" und „important" Sektoren, Management-Haftung</td></tr>
+<tr><td><strong>DORA</strong></td><td>17.01.2025</td><td>Resilienz im Finanzsektor, ICT-Drittparteienrisiko, Pflicht-TLPT bei kritischen Instituten</td></tr>
+<tr><td><strong>EU AI Act</strong></td><td>schrittweise ab 2024–2027</td><td>Risikoklassen für KI-Systeme; verbotene Praktiken, Hochrisiko-Anforderungen</td></tr>
+<tr><td><strong>EU Cyber Resilience Act</strong></td><td>2027 (Übergangsfristen)</td><td>Sicherheitsanforderungen für Produkte mit digitalen Elementen, Schwachstellen-Management-Pflicht</td></tr>
+</tbody></table>
+<p>Reife Compliance-Programme arbeiten nicht jeder Regelung einzeln nach, sondern pflegen einen <em>einheitlichen Kontroll-Katalog</em>, der mehrere Frameworks gleichzeitig abdeckt — typische Mapping-Lösung: NIST CSF als Backbone, mit Verknüpfungen zu ISO 27001, PCI-DSS, SOC 2, NIS2 und DORA.</p>`
                 }],
                 quiz: [
                     q('Welche Metrik misst die Zeit von Detection bis Containment?', ['MTTR (in IR-Kontext)', 'MTBF', 'MTTF', 'TTL'], 0, 'Mean Time to Respond/Remediate.'),
@@ -1537,45 +2102,219 @@
                 title: 'Kapitel 1 — Planning & Scoping',
                 summary: 'Rules of Engagement, juristische Rahmenbedingungen, Cloud-Provider-Policies.',
                 pages: [{
-                    title: 'Vorbereitung',
-                    html: `<h4>Rules of Engagement (RoE)</h4>
-<ul><li>Scope (IPs, Domains, Apps, ausgenommene Ziele)</li><li>Zeitfenster, Methoden</li><li>Eskalations-Pfad bei kritischen Findings</li><li>Daten-Handling, NDA</li></ul>
-<h4>Cloud-Pentest</h4>
-<p>AWS/Azure/GCP haben spezifische Policies. DoS oft verboten oder genehmigungspflichtig. Shared-Tenancy darf nicht beeinträchtigt werden.</p>
-<h4>Methodologien</h4>
-<p>OSSTMM, PTES, NIST SP 800-115, OWASP WSTG, MITRE ATT&CK Adversary Emulation.</p>`
+                    title: 'Vorbereitung und RoE',
+                    html: `<p>Vor dem ersten Paket steht der Vertrag. Penetration-Testing ohne sauberen Scoping- und Vertragsrahmen ist im Wortsinn strafbar — § 202c StGB stellt schon das Vorbereiten unbefugter Zugriffe unter Strafe. Diese Seite zeigt das Fundament jedes Engagements: Rules of Engagement, Cloud-Provider-Policies und die Auswahl einer angemessenen Methodologie.</p>
+
+<h4>Rules of Engagement (RoE) — was hineingehört</h4>
+<p>Die RoE sind das verbindliche Regelwerk zwischen Tester und Auftraggeber. Schlecht definierte RoE führen entweder zu nutzlosen Tests („alles ist verboten") oder zu rechtlichen Problemen („wir wussten nicht, dass dieser Server zur Produktion gehört"). Pflichtinhalte:</p>
+<ul>
+<li><strong>Scope</strong> — explizite Liste erlaubter Ziele (IPs, Domains, Subnetze, Anwendungen, Cloud-Accounts, Container-Repositories, Mobile-Apps). Was nicht aufgeführt ist, ist nicht erlaubt.</li>
+<li><strong>Out-of-Scope</strong> — explizite Ausschlüsse, gerade dort, wo Verwechslung möglich wäre (gemeinsam genutzte Subnetze, Drittanbieter-SaaS).</li>
+<li><strong>Test-Methoden</strong> — was ist erlaubt: Vulnerability-Scan, manuelle Exploitation, Phishing, Social Engineering, Physical Pentest, Wireless. Was ist verboten: DoS/DDoS, destruktive Tests, Tests gegen Produktionsdaten ohne Zustimmung.</li>
+<li><strong>Zeitfenster</strong> — Engagement-Start und -Ende, Tageszeiten (z. B. nur außerhalb Geschäftszeiten), erlaubte Pausen, Re-Test-Fenster.</li>
+<li><strong>Eskalationspfad</strong> — wer wird wann informiert, wenn Tester eine kritische Lücke finden, eine aktive Drittangreifer-Aktivität entdecken oder versehentlich einen Service stören.</li>
+<li><strong>Daten-Handling</strong> — wie werden gefundene sensitive Daten gespeichert, übertragen, gelöscht? Verschlüsselung verpflichtend, Lösch-Frist nach Engagement-Ende dokumentieren.</li>
+<li><strong>NDA-Bezug</strong> — RoE verweist auf separates NDA.</li>
+<li><strong>Ansprechpartner</strong> — primär und sekundär, mit 24/7-Erreichbarkeit für Notfälle.</li>
+</ul>
+
+<h4>Cloud-Provider-Policies</h4>
+<p>Pentests gegen Cloud-Workloads betreffen oft Multi-Tenant-Infrastruktur. Provider haben deshalb eigene Acceptable Use Policies (AUP):</p>
+<ul>
+<li><strong>AWS</strong> — seit 2019 keine Voranmeldung mehr nötig für die meisten Tests gegen eigene Ressourcen, aber DoS/DDoS, Port-Flooding, Protocol-Flooding und Tests gegen die Provider-Steuerebene sind verboten. Service-spezifische Einschränkungen für Route 53, AWS Shield, RDS-Replikate.</li>
+<li><strong>Azure</strong> — Microsoft Cloud Penetration Testing Rules of Engagement: Tests gegen die eigene Subscription erlaubt, Phishing gegen Microsoft-Mitarbeiter verboten, Lasttests > 5 Gbps müssen vorher abgestimmt werden.</li>
+<li><strong>GCP</strong> — eigene Pentests müssen gegen Google AUP nicht angemeldet werden, dürfen aber andere Kunden nicht beeinträchtigen.</li>
+<li><strong>Microsoft 365 / Office 365</strong> — eigene Voranmeldung über Service Trust Portal nötig.</li>
+</ul>
+<p>Konsequenz: Vor jedem Cloud-Pentest die aktuelle AUP des Providers lesen. Verletzung kann zu Account-Sperre und rechtlichen Folgen führen.</p>
+
+<h4>Methodologien — welche wann</h4>
+<p>Eine reife Pentest-Engagement folgt einer dokumentierten Methodologie. Die wichtigsten:</p>
+<ul>
+<li><strong>NIST SP 800-115</strong> (2008, US-Standard) — „Technical Guide to Information Security Testing and Assessment". Behandelt Planung, Discovery, Vulnerability Analysis, Verification, Reporting. Solider, generischer Rahmen.</li>
+<li><strong>PTES</strong> (Penetration Testing Execution Standard) — sieben Phasen (Pre-Engagement, Intelligence Gathering, Threat Modeling, Vulnerability Analysis, Exploitation, Post-Exploitation, Reporting). Sehr praxisnah, aber seit Jahren ohne Versionierung.</li>
+<li><strong>OSSTMM 3.0</strong> (Open Source Security Testing Methodology Manual, ISECOM) — sehr formal, mit eigenen Metriken. Weniger verbreitet, aber detailliert.</li>
+<li><strong>OWASP WSTG</strong> (Web Security Testing Guide, aktuell 4.2) — De-facto-Standard für Web-Anwendungen.</li>
+<li><strong>OWASP MASTG</strong> (Mobile Application Security Testing Guide) — Standard für mobile Apps, kombiniert mit OWASP MASVS.</li>
+<li><strong>OWASP ASVS 4.0.3</strong> (Application Security Verification Standard) — verifizierbarer Anforderungskatalog für Web-Apps.</li>
+<li><strong>MITRE ATT&CK Adversary Emulation</strong> — TTP-orientiertes Testen, das eine bestimmte Bedrohungsgruppe nachstellt; Basis für Red-Team-Engagements und TIBER-EU.</li>
+<li><strong>TIBER-EU</strong> (Threat Intelligence-based Ethical Red Teaming) — EZB-Rahmenwerk für intelligence-led Red-Teaming im Finanzsektor; in DORA als Grundlage für TLPT (Threat-Led Penetration Testing) verankert.</li>
+</ul>
+<p>Wahl der Methodologie folgt dem Engagement-Ziel: Web-App → OWASP WSTG; Compliance-Pen → NIST SP 800-115; Adversary Emulation → MITRE ATT&CK; Bank/Versicherung mit TLPT-Pflicht → TIBER-EU.</p>`
                 }, {
                     title: 'Vertragsgrundlagen',
-                    html: `<h4>Dokumenten-Stack</h4>
-<ol><li><strong>MSA</strong> (Master Services Agreement) — langfristiger Rahmen.</li><li><strong>SOW</strong> (Statement of Work) — konkretes Engagement.</li><li><strong>RoE</strong> — Operative Regeln.</li><li><strong>NDA</strong> — Vertraulichkeit.</li><li><strong>Authorization Letter</strong> („Get-Out-of-Jail-Card“) — schriftliche Erlaubnis vom Asset-Owner.</li></ol>
-<h4>Engagement-Typen</h4>
-<table><tr><th>Typ</th><th>Wissen</th><th>Realität</th></tr><tr><td>Black Box</td><td>kein Vorwissen</td><td>externer Angreifer</td></tr><tr><td>Grey Box</td><td>teilweise (z. B. Standard-User)</td><td>Insider-Risiko</td></tr><tr><td>White Box</td><td>vollständig (Code, Architektur)</td><td>Code-Review</td></tr></table>
-<h4>Goal-Based vs. Compliance</h4>
-<p>Goal-Based = definierte Ziele (Domain Admin, exfiltrate Crown-Jewels). Compliance-Pen = PCI-DSS Req. 11.4 (jährlich + nach signifikanten Änderungen).</p>`
+                    html: `<p>Die Vertragsgrundlage entscheidet, ob das Engagement rechtssicher, sauber abrechenbar und für beide Seiten plan- und steuerbar ist. CompTIA prüft hier vor allem die Trennung der Dokumente und die Engagement-Typen.</p>
+
+<h4>Dokumenten-Stack</h4>
+<ol>
+<li><strong>MSA</strong> (Master Services Agreement) — langfristiger Rahmenvertrag zwischen Anbieter und Kunde. Regelt Haftung, IP-Rechte, Vertraulichkeit, Streitbeilegung. Wird einmal verhandelt und gilt für viele Engagements.</li>
+<li><strong>SOW</strong> (Statement of Work) — beschreibt das konkrete Engagement: Ziele, Zeitplan, Deliverables, Akzeptanzkriterien, Preis. Pro Engagement neu.</li>
+<li><strong>RoE</strong> (Rules of Engagement) — operatives Regelwerk wie auf vorheriger Seite beschrieben.</li>
+<li><strong>NDA</strong> (Non-Disclosure Agreement) — Vertraulichkeit. Schützt Findings, Architekturinformationen, Credentials, Geschäftsgeheimnisse.</li>
+<li><strong>Authorization Letter / Permission to Attack</strong> — schriftliche Erlaubnis vom Asset-Owner, oft als „Get-Out-of-Jail-Card" bezeichnet. Pflicht bei Engagements, die §-202-StGB-Tatbestände erfüllen würden. Muss vom legitimen Eigentümer der Systeme stammen — bei SaaS-Workloads oft Kunde plus Cloud-Provider.</li>
+</ol>
+<p>Eine eigene Akte für jedes Engagement bewahrt diese Dokumente revisionssicher. Im Zweifel kann der Tester sich nur darauf berufen, was schriftlich vorliegt.</p>
+
+<h4>Engagement-Typen nach Vorwissen</h4>
+<table>
+<thead><tr><th>Typ</th><th>Vorwissen</th><th>Realitätsbezug</th><th>Aufwand</th></tr></thead>
+<tbody>
+<tr><td><strong>Black Box</strong></td><td>nur Scope</td><td>externer Angreifer ohne Insider-Wissen</td><td>hoch (viel Zeit für Recon)</td></tr>
+<tr><td><strong>Grey Box</strong></td><td>teilweise (z. B. Standard-User-Konto, Architektur-Dokumente)</td><td>Insider-Risiko, kompromittierter Mitarbeiter</td><td>mittel</td></tr>
+<tr><td><strong>White Box</strong></td><td>vollständig (Source-Code, Architektur, Admin-Account)</td><td>Code-Review, Architektur-Audit</td><td>niedrig pro Lücke, hoch in Tiefe</td></tr>
+</tbody></table>
+<p>Auswahl folgt dem Erkenntnisinteresse: Compliance-Pflichten verlangen oft Black Box; in der Praxis liefert Grey Box bei begrenztem Budget mehr verwertbare Findings, weil weniger Zeit auf Recon verbraucht wird.</p>
+
+<h4>Engagement-Typen nach Sichtweise</h4>
+<ul>
+<li><strong>External Pentest</strong> — Angriff aus dem Internet auf öffentliche Assets.</li>
+<li><strong>Internal Pentest</strong> — Tester startet aus dem internen Netz, simuliert kompromittierten Endpoint.</li>
+<li><strong>Application Pentest</strong> — fokussiert auf eine Anwendung (Web, Mobile, Thick Client, API).</li>
+<li><strong>Wireless Pentest</strong> — WLAN, Bluetooth, ggf. RFID.</li>
+<li><strong>Physical Pentest</strong> — Zutritt, Schließsysteme, Tailgating, Drop-Devices.</li>
+<li><strong>Social Engineering</strong> — Phishing, Vishing, Pretexting.</li>
+<li><strong>Red Team</strong> — vollumfängliche, mehrwöchige Adversary-Emulation; misst Erkennungs- und Reaktionsfähigkeit der Verteidiger.</li>
+<li><strong>Purple Team</strong> — kollaborativ: Red und Blue arbeiten in derselben Übung zusammen, optimieren Detection-Coverage.</li>
+</ul>
+
+<h4>Goal-Based vs. Compliance-driven</h4>
+<p>Reife Engagements unterscheiden zwischen <em>Goal-Based</em> und <em>Compliance-Driven</em>:</p>
+<ul>
+<li><strong>Goal-Based</strong> definiert konkrete Erfolgsziele („Domain-Admin in 5 Tagen", „Crown-Jewel-Datenbank exfiltrieren", „Active-Directory-Persistenz aufrechterhalten"). Misst die Wirksamkeit der Verteidigung gegen ein realistisches Angriffsszenario. Üblich für Adversary Emulation und Red Teams.</li>
+<li><strong>Compliance-Driven</strong> erfüllt regulatorische Pflichten. Beispiele: <em>PCI-DSS v4.0 Req. 11.4</em> (jährlicher Pentest plus nach signifikanten Änderungen), <em>HIPAA Security Rule</em> (regelmäßige Risk Assessments), <em>DORA Art. 26</em> (TLPT mindestens alle 3 Jahre für kritische Finanzinstitute), <em>NIS2</em>-spezifische Sektorvorgaben.</li>
+</ul>
+
+<h4>Wirtschaftliche Rahmenbedingungen</h4>
+<p>Unabhängig vom technischen Inhalt enthält ein SOW immer auch:</p>
+<ul>
+<li><strong>Akzeptanzkriterien</strong> — wann gilt das Engagement als abgenommen? Üblich: Final Report + Read-out-Meeting + Q&A.</li>
+<li><strong>Re-Test-Klausel</strong> — sind Re-Tests zur Patch-Verifikation eingeschlossen, in welcher Frist?</li>
+<li><strong>Haftungsbegrenzung</strong> — typischerweise auf Auftragswert, Ausschluss für grobe Fahrlässigkeit/Vorsatz.</li>
+<li><strong>IP-Rechte am Bericht</strong> — wem gehören Findings und Bericht?</li>
+<li><strong>Subunternehmer-Klausel</strong> — werden externe Spezialisten hinzugezogen, müssen sie dem NDA unterliegen.</li>
+</ul>`
                 }, {
-                    title: 'Recht & Ethik',
-                    html: `<h4>Rechtsrahmen DACH</h4>
-<ul><li>§ 202a/b/c StGB („Hackerparagraph“) — Ausspähen, Abfangen, Vorbereitung.</li><li>§ 303a/b StGB — Datenveränderung, Computersabotage.</li><li>BDSG / DSGVO — personenbezogene Daten.</li><li>NIS2-Umsetzungsgesetz, KRITIS-Verordnungen.</li></ul>
+                    title: 'Recht und Ethik',
+                    html: `<p>Pentest ist eine Tätigkeit, die ohne ausdrückliche Erlaubnis Straftatbestände erfüllt. Diese Seite gibt einen Überblick über die wichtigsten Rechtsrahmen und ethischen Pflichten, die ein Tester kennen muss.</p>
+
+<h4>Rechtsrahmen DACH</h4>
+<ul>
+<li><strong>§ 202a StGB</strong> — Ausspähen von Daten. Wer Daten unbefugt unter Überwindung einer Zugangssicherung verschafft, macht sich strafbar.</li>
+<li><strong>§ 202b StGB</strong> — Abfangen von Daten. Unbefugtes Abfangen nicht für ihn bestimmter Daten aus einer nicht-öffentlichen Datenübertragung.</li>
+<li><strong>§ 202c StGB</strong> — „Hackerparagraph" im engeren Sinne: Vorbereiten von Ausspähen und Abfangen, einschließlich Herstellen und Verbreiten von Tools, die hauptsächlich diesem Zweck dienen.</li>
+<li><strong>§ 202d StGB</strong> — Datenhehlerei.</li>
+<li><strong>§ 303a StGB</strong> — Datenveränderung.</li>
+<li><strong>§ 303b StGB</strong> — Computersabotage. Bei Beeinträchtigung wesentlicher Datenverarbeitungen.</li>
+<li><strong>BDSG</strong> und <strong>DSGVO</strong> — personenbezogene Daten dürfen im Rahmen des Auftrags nur verarbeitet werden, wenn eine Rechtsgrundlage besteht. Auftragsverarbeitungsvertrag (Art. 28 DSGVO) zwischen Auftraggeber und Pentester ist Pflicht, sobald personenbezogene Daten betroffen sein können.</li>
+<li><strong>NIS2-Umsetzungsgesetz</strong>, <strong>KRITIS-Verordnungen</strong>, <strong>BSIG</strong> — sektorspezifische Pflichten.</li>
+<li><strong>Schweiz</strong> — Art. 143 StGB, Art. 143bis StGB, DSG (revidiertes Datenschutzgesetz seit 2023).</li>
+<li><strong>Österreich</strong> — § 118a, § 119, § 119a, § 126a StGB, Datenschutzgesetz.</li>
+</ul>
+<p>Die schriftliche Authorization vom legitimen Asset-Owner ist die einzige robuste Verteidigung gegen den Vorwurf der Strafbarkeit. Ohne sie kein Test.</p>
+
 <h4>USA</h4>
-<p>CFAA (Computer Fraud and Abuse Act, 18 U.S.C. § 1030). Diverse Bundesstaaten haben strengere Cybercrime-Statutes.</p>
-<h4>EU</h4>
-<p>RL 2013/40/EU (Cybercrime), DSGVO, NIS2, EU CRA.</p>
+<ul>
+<li><strong>Computer Fraud and Abuse Act</strong> (CFAA, 18 U.S.C. § 1030). Verbietet unauthorized access. Der Supreme-Court-Fall <em>Van Buren v. United States</em> (2021) hat den Anwendungsbereich gegenüber „authorized exceeded" begrenzt: legitimer Zugang mit Missbrauch ist nicht automatisch CFAA-Verstoß.</li>
+<li><strong>DMCA</strong> (Digital Millennium Copyright Act) — Section 1201 verbietet Umgehung technischer Schutzmaßnahmen; Pentest-Ausnahmen sind eng definiert.</li>
+<li><strong>SOX, HIPAA, GLBA, FERPA</strong> — sektorale Anforderungen.</li>
+<li>Bundesstaaten haben oft eigene, teilweise strengere Cybercrime-Statutes.</li>
+</ul>
+
+<h4>EU und international</h4>
+<ul>
+<li><strong>Richtlinie 2013/40/EU</strong> über Angriffe auf Informationssysteme.</li>
+<li><strong>DSGVO</strong> — schon erwähnt.</li>
+<li><strong>NIS2-Richtlinie</strong> — Cybersecurity-Pflichten für „essential" und „important" Sektoren, nationale Umsetzung in den Mitgliedsstaaten.</li>
+<li><strong>DORA</strong> (Digital Operational Resilience Act, Verordnung 2022/2554, wirksam ab 17.01.2025) — verlangt für kritische Finanzinstitute Threat-Led Penetration Testing.</li>
+<li><strong>EU Cyber Resilience Act</strong> — Pflicht zum Schwachstellen-Management und zur Schwachstellen-Meldung an ENISA für Hersteller von Produkten mit digitalen Elementen.</li>
+<li><strong>Council of Europe Convention on Cybercrime</strong> (Budapest Convention, 2001) — internationaler Rahmen.</li>
+</ul>
+
 <h4>Ethik-Codex</h4>
-<p>EC-Council, (ISC)², OffSec, CompTIA verlangen Code-of-Ethics-Anerkennung. Kernpunkte: Authorization, Vertraulichkeit, do-no-harm, Berichtspflicht.</p>
-<h4>Bug-Bounty-Programme</h4>
-<p>Safe-Harbor-Klausel (z. B. ISO/IEC 29147 — Vulnerability Disclosure, ISO/IEC 30111 — Vulnerability Handling). HackerOne, Bugcrowd, Intigriti definieren konkrete Spielregeln.</p>`
+<p>Verbände und Zertifizierungsstellen verpflichten ihre Mitglieder/Inhaber auf Ethik-Codes:</p>
+<ul>
+<li><strong>(ISC)²</strong> Code of Ethics — Vier Kanonen: Schutz der Gesellschaft, ehrenwertes Handeln, Pflicht gegenüber Auftraggebern, professionelle Weiterentwicklung.</li>
+<li><strong>EC-Council</strong> Code of Ethics — 19 Punkte mit Schwerpunkt auf Verschwiegenheit und Authorization.</li>
+<li><strong>OffSec</strong> (OSCP/OSEP/OSEE) — Code of Conduct.</li>
+<li><strong>CompTIA</strong> — Continuing Education Code of Ethics.</li>
+<li>Kerngrundsätze quer durch alle Codes: <em>Authorization</em>, <em>Vertraulichkeit</em>, <em>Do No Harm</em>, <em>vollständige Berichtspflicht</em>, keine Nutzung von Erkenntnissen außerhalb des Auftrags.</li>
+</ul>
+
+<h4>Coordinated Vulnerability Disclosure</h4>
+<p>Nicht jedes Finding entsteht im bezahlten Pentest. Researcher, die in Bug-Bounty-Programmen oder bei Coordinated-Disclosure-Funden arbeiten, brauchen ebenfalls Schutz:</p>
+<ul>
+<li><strong>ISO/IEC 29147:2018</strong> — Vulnerability Disclosure (Anbieter-Sicht: wie man Reports entgegennimmt).</li>
+<li><strong>ISO/IEC 30111:2019</strong> — Vulnerability Handling Processes (interne Bearbeitung).</li>
+<li><strong>RFC 9116</strong> — security.txt: standardisierte Datei <code>/.well-known/security.txt</code> mit Kontaktinformationen für Sicherheits-Reports.</li>
+<li><strong>Safe-Harbor-Klauseln</strong> in Bug-Bounty-Plattformen (HackerOne, Bugcrowd, Intigriti, YesWeHack) — Anbieter erklärt verbindlich, dass Researcher nicht zivil- oder strafrechtlich verfolgt werden, solange Spielregeln eingehalten werden.</li>
+<li><strong>EU CRA</strong> verlangt ab 2027 von Herstellern eine Single Point of Contact für Disclosure-Reports.</li>
+</ul>`
                 }, {
                     title: 'Scoping-Praxis',
-                    html: `<h4>Asset-Inventarisierung</h4>
-<p>IPs/Domains/URLs/Apps/Container-Image-Repos/Cloud-Accounts. Externe vs. interne Ziele explizit kennzeichnen.</p>
-<h4>Time-Boxing</h4>
-<ul><li>Zeitfenster (Start/Ende)</li><li>Tageszeiten (z. B. nur außerhalb Geschäftszeiten)</li><li>Behandlungs-Window für Re-Tests</li></ul>
+                    html: `<p>Scoping ist die Übersetzung von Auftrag und Risikoappetit in eine umsetzbare, nachvollziehbare Engagement-Definition. Schlechtes Scoping zerstört wertvolle Engagements: zu eng ist nutzlos, zu weit ist juristisch und operativ unkontrollierbar. Diese Seite zeigt, was ein robustes Scoping leistet.</p>
+
+<h4>Asset-Inventarisierung</h4>
+<p>Vor jedem Engagement steht eine vollständige Liste der zu testenden Ressourcen, mit eindeutiger Identifikation:</p>
+<ul>
+<li><strong>IP-Adressen und Subnetze</strong> mit CIDR-Notation, IPv4 und IPv6.</li>
+<li><strong>Domains und Subdomains</strong>, einschließlich Wildcard-Definitionen wo gewollt.</li>
+<li><strong>URLs und Endpoints</strong> für API- und Web-Tests.</li>
+<li><strong>Anwendungen</strong> mit Versionsnummer, Anmeldedaten für Grey-Box-Engagements.</li>
+<li><strong>Container-Image-Repositories</strong> mit konkreten Tags.</li>
+<li><strong>Cloud-Accounts</strong> mit Account-IDs/Subscription-IDs/Project-IDs.</li>
+<li><strong>Mobile-Apps</strong> mit Bundle-ID und Version.</li>
+<li><strong>OT-/IoT-Geräte</strong> mit Modellbezeichnung und Firmware-Version.</li>
+</ul>
+<p>Externe und interne Ziele werden explizit gekennzeichnet. Bei externen Tests gehört zur Scope-Klärung auch die Frage, wem die IP gehört (CDN-Anbieter, Cloud-Provider) — Tests gegen CDN-Anbieter ohne deren Zustimmung sind problematisch.</p>
+
 <h4>Out-of-Scope-Liste</h4>
-<p>Konkrete IP-/Hostnamen-Ausschlüsse, ggf. ganze Subnetze (Production-Datenbanken, Legacy-SCADA, Drittanbieter-SaaS, externe APIs ohne Genehmigung).</p>
-<h4>Stop-Conditions</h4>
-<ul><li>Kritisches Finding mit aktiver Drittparteibedrohung.</li><li>Service-Ausfall durch Test verursacht.</li><li>Personenbezogene Daten Dritter unerwartet eingesehen.</li><li>Beweis Dritter aktiv laufender Kompromittierung.</li></ul>
+<p>Genauso wichtig wie In-Scope ist eine explizite Out-of-Scope-Liste:</p>
+<ul>
+<li>spezifische IPs oder Subnetze (z. B. Production-Datenbanken, kritische OT-Anlagen),</li>
+<li>Drittanbieter-SaaS, deren AUP eigene Tests verbietet,</li>
+<li>Geschäftspartner-APIs ohne deren Zustimmung,</li>
+<li>Subdomains, die zu Drittanbietern verweisen (typisch: <code>blog.kunde.de</code> auf Medium, <code>status.kunde.de</code> auf Statuspage.io),</li>
+<li>Personen-Ziele bei Social-Engineering-Tests (z. B. C-Level explizit ausgenommen, oder im Gegenteil explizit erlaubt mit besonderer Genehmigung),</li>
+<li>OT-Anlagen mit Safety-Funktion, soweit nicht in einem Wartungsfenster mit Sicherheitsvorkehrungen freigegeben.</li>
+</ul>
+
+<h4>Time-Boxing</h4>
+<p>Engagement-Zeitfenster regelt nicht nur Anfang und Ende, sondern auch Tageszeiten:</p>
+<ul>
+<li><strong>Engagement-Window</strong> — z. B. 2 Wochen vom 15.05. bis 28.05.</li>
+<li><strong>Tagesfenster</strong> — z. B. 8:00–22:00 Uhr lokaler Zeit, oder ausschließlich außerhalb Geschäftszeiten zur Schonung der Produktion, oder 24/7 für Goal-Based.</li>
+<li><strong>Re-Test-Window</strong> — separates Fenster nach Patch-Zyklus, typisch 2–4 Wochen nach Final-Report.</li>
+<li><strong>Blackout-Zeiten</strong> — Wochenenden, Quartals-End-Verarbeitungen, Marketing-Kampagnen, Migrationen.</li>
+</ul>
+
+<h4>Stop-Conditions — wann muss der Tester sofort innehalten</h4>
+<p>RoE definiert Bedingungen, unter denen der Tester den Test sofort unterbricht und den Auftraggeber kontaktiert:</p>
+<ul>
+<li><strong>Aktive Drittangreifer-Aktivität</strong> — der Tester findet Hinweise auf eine echte, laufende Kompromittierung. Beispiel: aktive C2-Verbindungen, Mimikatz-Spuren, neu installierte unautorisierte Tools. Sofortmeldung an Incident-Response.</li>
+<li><strong>Service-Ausfall durch Test</strong> — auch wenn nicht beabsichtigt: sofort innehalten, Auftraggeber benachrichtigen, gemeinsam Recovery koordinieren.</li>
+<li><strong>Personenbezogene Daten Dritter</strong> — wenn der Tester unerwartet auf umfangreiche personenbezogene Daten stößt, die nicht für den Test benötigt werden, muss er Sammlung minimieren und Auftraggeber konsultieren.</li>
+<li><strong>Critical Finding mit unmittelbarer Schadensgefahr</strong> — z. B. medizinisches Gerät unverschlüsselt im Internet, OT-Anlage ohne Authentifizierung. Sofortmeldung über die im RoE definierte Hotline.</li>
+<li><strong>Beweis aktiver Datenexfiltration</strong> während des Tests.</li>
+</ul>
+
 <h4>Communication-Plan</h4>
-<p>Tagesreporting, Critical-Findings-Hotline, Status-Calls, Final-Read-out-Meeting.</p>`
+<p>Während eines Engagements brauchen beide Seiten klare Kommunikationsrhythmen:</p>
+<ul>
+<li><strong>Tagesreporting</strong> — kurzes Status-Update, was wurde getestet, was wurde gefunden, was steht morgen an.</li>
+<li><strong>Critical-Findings-Hotline</strong> — Telefon/Signal-Channel mit 24/7-Erreichbarkeit für unmittelbar zu meldende Findings.</li>
+<li><strong>Wöchentliche Status-Calls</strong> bei längeren Engagements.</li>
+<li><strong>Final Read-out</strong> — gemeinsame Sitzung mit technischen Ansprechpartnern und Management nach Bericht-Übergabe.</li>
+<li><strong>Re-Test-Briefing</strong> — Übergabe an Tester für Re-Test, Erläuterung der Patches.</li>
+</ul>
+
+<h4>Anti-Pattern</h4>
+<ul>
+<li>„Test alles" — kein definierter Scope, keine Verteidigung gegen Out-of-Bounds-Vorwürfe.</li>
+<li>Mündliche Erweiterungen des Scopes während des Tests — gehören schriftlich in einen Change Request zum SOW.</li>
+<li>Keine Authorization-Dokumentation für Cloud-Workloads, deren Eigentum unklar ist.</li>
+<li>Stop-Conditions nur als Floskel — Tester braucht konkretes Eskalations-Telefon, nicht „bitte mailen".</li>
+<li>Final-Report ohne Read-out-Meeting — Auftraggeber missversteht Findings.</li>
+</ul>`
                 }],
                 quiz: [
                     q('Welches Dokument fixiert den erlaubten Scope einer Pen-Engagement?', ['Rules of Engagement (RoE)', 'NDA allein', 'Service-Level Agreement', 'CISO-Calendar'], 0, 'RoE ist verbindlich für Scope, Timing, Eskalation.'),
@@ -1634,51 +2373,249 @@
                 title: 'Kapitel 2 — Information Gathering & Vulnerability Scanning',
                 summary: 'OSINT, aktive/passive Reconnaissance, Scanner-Strategien, Validation.',
                 pages: [{
-                    title: 'Reconnaissance',
-                    html: `<h4>Passiv vs. Aktiv</h4>
-<ul><li>Passiv: Shodan, Censys, crt.sh, DNS-History, GitHub-Leaks, Wayback-Machine.</li>
-<li>Aktiv: Nmap, masscan, RustScan, Fingerprint-Tools (whatweb, Wappalyzer).</li></ul>
-<h4>Nmap-Cheat</h4>
-<table><tr><th>Switch</th><th>Bedeutung</th></tr>
-<tr><td>-sS</td><td>SYN/Stealth</td></tr><tr><td>-sT</td><td>TCP-Connect</td></tr><tr><td>-sU</td><td>UDP</td></tr><tr><td>-sV</td><td>Service-Version</td></tr><tr><td>-O</td><td>OS-Detection</td></tr><tr><td>-A</td><td>Aggressive (sV+O+Script+Trace)</td></tr><tr><td>-T0…T5</td><td>Timing</td></tr></table>
-<h4>Validation</h4>
-<p>Scanner-Findings müssen durch manuelle Reproduktion verifiziert werden — gegen False Positives.</p>`
+                    title: 'Reconnaissance — Grundlagen',
+                    html: `<p>Reconnaissance ist die Phase, in der der Tester ein Bild der Angriffsfläche aufbaut, bevor er den ersten aktiven Probe abschickt. Gute Recon entscheidet über die Effizienz des restlichen Engagements: wer die Angriffsfläche kennt, exploitiert gezielt; wer im Dunkeln tappt, verbringt Tage mit unwirksamen Versuchen.</p>
+
+<h4>Passive vs. aktive Reconnaissance</h4>
+<p>Die wichtigste Unterscheidung in Recon ist <em>passiv</em> vs. <em>aktiv</em>:</p>
+<ul>
+<li><strong>Passiv</strong> — der Tester sendet keine Pakete an das Ziel. Quellen sind öffentlich (Certificate Transparency, DNS-History, Suchmaschinen) oder Drittanbieter (Shodan, Censys, GreyNoise). Der Vorteil ist Unsichtbarkeit: das Ziel weiß nicht, dass es untersucht wird. Hauptquellen: Shodan, Censys, FOFA, ZoomEye, crt.sh, dnsdumpster.com, SecurityTrails, Wayback Machine, GitHub-Suche, Google Dorking.</li>
+<li><strong>Aktiv</strong> — der Tester sendet Pakete: Port-Scans, Service-Probes, Web-Requests. Erzeugt Spuren in IDS/IPS/WAF. Hauptwerkzeuge: Nmap, masscan, RustScan, Naabu, ZGrab, WhatWeb, Wappalyzer, Nuclei.</li>
+</ul>
+<p>Reife Engagements beginnen passiv und gehen erst nach erschöpfender OSINT-Phase in aktive Recon über. Das schützt vor unnötiger Erkennung und liefert ein vollständigeres Bild.</p>
+
+<h4>Nmap — die wichtigsten Schalter</h4>
+<p>Nmap ist seit über 25 Jahren der Standard für aktive Recon. Die wichtigsten Schalter, die ein Tester im Schlaf können muss:</p>
+<table>
+<thead><tr><th>Switch</th><th>Bedeutung</th><th>Anmerkung</th></tr></thead>
+<tbody>
+<tr><td><code>-sS</code></td><td>SYN/Stealth-Scan</td><td>Standard mit Root, sendet SYN ohne Handshake-Abschluss</td></tr>
+<tr><td><code>-sT</code></td><td>TCP-Connect-Scan</td><td>ohne Root, vollständiger Handshake, lauter</td></tr>
+<tr><td><code>-sU</code></td><td>UDP-Scan</td><td>langsam, oft unklare Antworten (open|filtered)</td></tr>
+<tr><td><code>-sN/-sF/-sX</code></td><td>NULL/FIN/XMAS</td><td>Bypass alter Stateful-Firewalls</td></tr>
+<tr><td><code>-sV</code></td><td>Service-/Versions-Detection</td><td>Voraussetzung für CVE-Mapping</td></tr>
+<tr><td><code>-O</code></td><td>OS-Fingerprinting</td><td>basiert auf TCP/IP-Stack-Quirks</td></tr>
+<tr><td><code>-A</code></td><td>aggressiv (sV+O+Skripte+Traceroute)</td><td>laut, im Engagement zurückhaltend einsetzen</td></tr>
+<tr><td><code>-p-</code></td><td>alle 65535 TCP-Ports</td><td>Pflicht für Vollscan</td></tr>
+<tr><td><code>-Pn</code></td><td>kein Host-Discovery, alles als „up"</td><td>für Hosts hinter ICMP-Block</td></tr>
+<tr><td><code>-T0…-T5</code></td><td>Timing 0=paranoid, 5=insane</td><td>T3 default, T1/T2 für IDS-Evasion</td></tr>
+<tr><td><code>--script</code></td><td>NSE-Skripte ausführen</td><td>siehe nächste Seite</td></tr>
+<tr><td><code>-oA out</code></td><td>alle Formate (Normal, XML, Grepable)</td><td>Pflicht für Reproduzierbarkeit</td></tr>
+</tbody></table>
+
+<h4>Validierung — gegen False Positives</h4>
+<p>Vulnerability-Scanner produzieren False Positives. Ein Tester, der ungeprüfte Scanner-Findings in den Bericht schreibt, ruiniert seine Reputation. Validierung erfolgt manuell:</p>
+<ul>
+<li>Service-Banner mit <code>nc</code>, <code>curl</code>, <code>openssl s_client</code> bestätigen.</li>
+<li>Vermutete Schwachstellen mit gezielten PoC-Scripten oder Burp-Repeater testen.</li>
+<li>CVE-Versionsangaben gegen Vendor-Advisory verifizieren — Linux-Distributionen patchen oft <em>backported</em>, sodass Versionsnummer veraltet aussieht, aber sicher ist.</li>
+<li>Web-Vulnerabilities (XSS, SQLi, SSRF) mit angepassten Payloads reproduzieren.</li>
+</ul>
+<p>Eine validierte Schwachstelle bekommt im Bericht eine konkrete Beweisführung mit Request/Response, Screenshot oder Befehlszeile. Eine unvalidierte gehört nur als Vermutung erwähnt — oder gar nicht.</p>
+
+<h4>Output-Hygiene</h4>
+<p>Recon-Daten sind die Grundlage für alle weiteren Phasen und für den Bericht. Reife Tester pflegen ein konsistentes Output-Verzeichnis pro Engagement:</p>
+<ul>
+<li><code>recon/passive/</code>, <code>recon/active/</code>, <code>recon/scans/</code>, <code>recon/screenshots/</code>,</li>
+<li>standardisierte Dateinamen (<code>nmap-tcp-fullport-{date}.{xml,nmap,gnmap}</code>),</li>
+<li>Hash der Tool-Versionen für Reproduzierbarkeit,</li>
+<li>Notiz-Datei mit Hypothesen und Sackgassen,</li>
+<li>Loot-Verzeichnis für gefundene Credentials, mit Verschlüsselung at rest.</li>
+</ul>`
                 }, {
                     title: 'OSINT-Techniken',
-                    html: `<h4>Mitarbeiter & Org</h4>
-<p>LinkedIn (Org-Charts, Tech-Stack), GitHub (Code-Leaks, Secrets), StackOverflow, Konferenz-Talks, Pitch-Decks. theHarvester, Maltego, SpiderFoot automatisieren OSINT-Sammlung.</p>
-<h4>Domain & Subdomain</h4>
-<p>crt.sh (CT-Logs), Subfinder, Amass, dnsx, Assetfinder, Chaos-DB (Project Discovery), Shodan, Censys.</p>
+                    html: `<p>OSINT (Open Source Intelligence) ist passive Recon mit Schwerpunkt auf öffentlich zugänglichen Quellen. Eine reife OSINT-Phase erspart oft die Hälfte der späteren Exploitation-Arbeit, weil Credentials, Subdomains, Misconfigs oder Architektur-Hinweise ohne aktiven Probe gefunden werden.</p>
+
+<h4>Mitarbeiter und Organisation</h4>
+<p>Mitarbeiter sind oft der Initial-Access-Vektor. OSINT-Quellen über Personen:</p>
+<ul>
+<li><strong>LinkedIn</strong> — Org-Charts, Tech-Stack („wir suchen Senior Kubernetes Engineer mit Helm-Erfahrung"), Konferenz-Teilnahmen, Lebenslauf-Details für Pretexting.</li>
+<li><strong>GitHub-Profile</strong> — wo committed der Mitarbeiter, oft mit echtem Namen?</li>
+<li><strong>StackOverflow / Stack Exchange</strong> — Fragen verraten konkrete interne Probleme („wie verbinde ich Spring Boot mit unserer SAP-S4-Instanz?").</li>
+<li><strong>Konferenz-Talks und Slides</strong> — viele Architektur-Dokumente sind in Speaker-Decks öffentlich.</li>
+<li><strong>Pitch-Decks und Investor-Material</strong> bei Start-ups.</li>
+<li><strong>Personnel-Datenbanken</strong> — HaveIBeenPwned-API, DeHashed (kommerziell), IntelligenceX. Liefern Hinweise auf wiederverwendete Passwörter, allerdings <strong>strikt</strong> im Rahmen der Engagement-Authorization einsetzen.</li>
+</ul>
+<p>Werkzeuge zur Automatisierung: <em>theHarvester</em>, <em>Maltego</em>, <em>SpiderFoot</em>, <em>recon-ng</em>.</p>
+
+<h4>Domain- und Subdomain-Discovery</h4>
+<p>Subdomains sind oft der Einstiegspunkt — vergessene Test-/Stage-Systeme, alte Marketing-Microsites, ungeschützte Admin-Interfaces. Quellen:</p>
+<ul>
+<li><strong>Certificate Transparency Logs</strong> (RFC 6962, RFC 9162) — jedes öffentliche Zertifikat wird in CT-Logs eingetragen. <em>crt.sh</em>, <em>Censys-CT</em> machen die Logs durchsuchbar.</li>
+<li><strong>Subfinder</strong>, <strong>Amass</strong>, <strong>Assetfinder</strong>, <strong>Chaos-DB</strong> (Project Discovery) — kombinieren passive Quellen.</li>
+<li><strong>dnsx</strong> — schnelle DNS-Auflösung großer Listen.</li>
+<li><strong>Wordlist-Brute</strong> mit <em>gobuster</em>, <em>ffuf</em>, <em>shuffledns</em>.</li>
+<li><strong>VirusTotal-Passive-DNS</strong>, <strong>SecurityTrails</strong>, <strong>RiskIQ</strong>, <strong>DNSDB</strong>.</li>
+</ul>
+
 <h4>Cloud-Infrastruktur</h4>
-<p>S3-Bucket-Discovery (Bucket Stream, S3Scanner), GCS-Buckets, Azure-Blob, GCP-Storage. CloudEnum für Multi-Cloud-Discovery. Tipp: Bucket-Naming-Konvention raten (Brand-Names, dev/stage/prod).</p>
-<h4>Code & Secrets</h4>
-<p>GitHub-Search-Operators, Gitleaks/TruffleHog, Trufflehog Enterprise, GitHound. Pastebin/PasteHunter, Public Postman/Insomnia Workspaces, leaked .env-Files in archive.org.</p>
-<h4>Personnel</h4>
-<p>HaveIBeenPwned-API, DeHashed, IntelX, breach-DBs (mit Vorsicht und Legalität!). Zur Bewertung der Re-Use-Risiken.</p>`
+<p>Cloud-Storage-Buckets sind ein dauerhaftes Leak-Reservoir, weil Naming-Konventionen oft erratbar sind:</p>
+<ul>
+<li><strong>S3-Buckets</strong> — <em>Bucket Stream</em>, <em>S3Scanner</em>, <em>S3recon</em>, <em>aws s3 ls --no-sign-request s3://&lt;name&gt;</em>.</li>
+<li><strong>Azure Blob Storage</strong> — <em>MicroBurst</em>, <em>Stormspotter</em>.</li>
+<li><strong>Google Cloud Storage</strong> — <em>GCPBucketBrute</em>.</li>
+<li><strong>Multi-Cloud-Discovery</strong> — <em>cloud_enum</em> testet AWS, Azure, GCP gleichzeitig.</li>
+</ul>
+<p>Naming-Patterns: <code>brand-dev</code>, <code>brand-stage</code>, <code>brand-prod</code>, <code>brand-backup</code>, <code>brand-logs</code>. Permutationen liefern oft offene Buckets mit sensitiven Daten — historisch z. B. Capital One 2019, Booz Allen Hamilton 2017.</p>
+
+<h4>Code-Repositories und Secrets</h4>
+<p>Geleakte Secrets in öffentlichem Code sind eine der häufigsten Initial-Access-Quellen 2023–2024 (siehe Verizon DBIR und Mandiant M-Trends):</p>
+<ul>
+<li><strong>GitHub Dorking</strong> — gezielte Suchen nach <code>filename:.env</code>, <code>extension:pem private</code>, <code>aws_access_key_id</code>, organisationsspezifische Schlüsselworte.</li>
+<li><strong>gitleaks</strong>, <strong>trufflehog</strong>, <strong>noseyparker</strong> — Secret-Scanner für ganze Org-Histories, einschließlich Git-History.</li>
+<li><strong>GitHound</strong>, <strong>Gitrob</strong> — fokussiert auf Mitarbeiter-Konten der Zielfirma.</li>
+<li><strong>Pastebin / PasteHunter</strong> — überwacht Pastebin-Streams nach Org-spezifischen Mustern.</li>
+<li><strong>Public Postman / Insomnia Workspaces</strong>, <strong>SwaggerHub</strong>, <strong>archive.org</strong> mit alten <code>.env</code>-Dateien.</li>
+</ul>
+<p>Wichtig: Findings im Pentest-Scope nutzen, aber außerhalb des Scopes nur melden, nicht ausnutzen. Geleakte Secrets eines Drittanbieters anzuwenden ist juristisch riskant.</p>
+
+<h4>Suchmaschinen-Operatoren (Google Dorking)</h4>
+<table>
+<thead><tr><th>Operator</th><th>Wirkung</th><th>Beispiel</th></tr></thead>
+<tbody>
+<tr><td><code>site:</code></td><td>nur eine Domain</td><td><code>site:beispiel.de</code></td></tr>
+<tr><td><code>filetype:</code></td><td>Dateityp</td><td><code>filetype:pdf confidential</code></td></tr>
+<tr><td><code>intitle:</code></td><td>Titel enthält</td><td><code>intitle:"index of"</code></td></tr>
+<tr><td><code>inurl:</code></td><td>URL enthält</td><td><code>inurl:admin</code></td></tr>
+<tr><td><code>cache:</code></td><td>gecachte Version</td><td><code>cache:beispiel.de</code></td></tr>
+<tr><td><code>-</code></td><td>Ausschluss</td><td><code>passwords -github</code></td></tr>
+</tbody></table>
+<p>Die Google Hacking Database (GHDB, exploit-db.com/google-hacking-database) sammelt produktive Dorks für typische Misconfigs.</p>`
                 }, {
                     title: 'Aktive Reconnaissance',
-                    html: `<h4>Port-Scanning-Strategien</h4>
-<ul><li>Discovery: -sn (Ping), -PR (ARP, lokal), -PS/-PA (TCP-SYN/ACK), -PE (ICMP-Echo).</li><li>SYN-Scan: -sS (default als root), Stealth-modus.</li><li>UDP: -sU (langsam, viele Antworten implizit).</li><li>TCP-Connect: -sT (kein root nötig, lauter).</li></ul>
-<h4>Nmap-Skripting</h4>
-<p>NSE (Nmap Scripting Engine) mit Kategorien: auth, brute, default, discovery, dos, exploit, external, fuzzer, intrusive, malware, safe, version, vuln. Aufruf: --script=vuln,safe.</p>
+                    html: `<p>Sobald der Tester Pakete an das Ziel sendet, beginnt die aktive Recon. Diese Seite zeigt, wie Port-Scanning, Service-Enumeration und Web-Fingerprinting strukturiert ablaufen — und welche Werkzeuge welchen Zweck erfüllen.</p>
+
+<h4>Host-Discovery vor Port-Scan</h4>
+<p>Vor dem Port-Scan steht die Host-Discovery. Welche IPs sind überhaupt aktiv?</p>
+<ul>
+<li><code>nmap -sn 10.0.0.0/24</code> — Ping-Sweep, ICMP-Echo + TCP-SYN-80/443 + ICMP-Timestamp.</li>
+<li><code>nmap -PR 10.0.0.0/24</code> — ARP-Sweep, nur lokales Netz, sehr zuverlässig.</li>
+<li><code>nmap -PS22,80,443,3389</code> — TCP-SYN-Probes auf typische Ports, falls ICMP geblockt ist.</li>
+<li><code>nmap -PE -PP -PM</code> — ICMP-Echo, Timestamp, Address-Mask.</li>
+<li><code>masscan -p0-65535 --rate 10000</code> — schneller als Nmap für riesige Bereiche, weniger genau.</li>
+<li><code>fping</code>, <code>arping</code>, <code>nbtscan</code> als Spezialwerkzeuge.</li>
+</ul>
+
+<h4>Port-Scanning-Strategien</h4>
+<p>Klassischer Ablauf:</p>
+<ol>
+<li><strong>Top-Ports-Scan</strong>: <code>nmap -T4 --top-ports 1000 -oA top1k</code> für schnelle Übersicht.</li>
+<li><strong>Vollscan TCP</strong>: <code>nmap -p- -T4 -oA full-tcp</code>.</li>
+<li><strong>UDP-Top-Ports</strong>: <code>nmap -sU --top-ports 100 -T4 -oA udp-top100</code>.</li>
+<li><strong>Service-Versions-Scan</strong> auf gefundenen offenen Ports: <code>nmap -sV -sC -p22,80,443</code>.</li>
+<li><strong>Stealth-Strategien</strong> bei IDS-/IPS-bewährten Umgebungen: niedrige Timing-Stufe (<code>-T1</code>), <code>--scan-delay</code>, <code>--max-rate</code>, Decoys (<code>-D</code>), Source-Port-Spoofing (<code>--source-port 53</code>).</li>
+</ol>
+<p>masscan ist ergänzend nützlich für Internet-weite Bereiche, sollte aber innerhalb interner Netze nur mit hartem Rate-Limit eingesetzt werden — ein voller masscan kann Switches überlasten.</p>
+
+<h4>Nmap Scripting Engine (NSE)</h4>
+<p>NSE ist die Engine, die Nmap zum Vulnerability-Scanner und Exploit-Helper macht. Skripte sind in 14 Kategorien organisiert: <em>auth, broadcast, brute, default, discovery, dos, exploit, external, fuzzer, intrusive, malware, safe, version, vuln</em>.</p>
+<p>Wichtige Aufrufmuster:</p>
+<ul>
+<li><code>nmap -sV --script=default,safe,version</code> — solider Standard ohne Risiko.</li>
+<li><code>nmap --script vuln</code> — alle Vuln-Skripte (laut, kann Service stören).</li>
+<li><code>nmap --script smb-vuln-* -p445</code> — SMB-Vulnerability-Sweep.</li>
+<li><code>nmap --script ssl-* -p443</code> — TLS-Konfigurations-Audit (Cipher-Suiten, Zertifikat, Heartbleed).</li>
+<li><code>nmap --script http-* -p80,443</code> — Web-Enumeration.</li>
+<li><code>nmap --script-args=&lt;args&gt;</code> — Skript-Parameter setzen.</li>
+</ul>
+
 <h4>Web-Fingerprinting</h4>
-<p>WhatWeb, Wappalyzer, Webanalyze (CLI), HTTPx (Project Discovery). Erkennen CMS/Frameworks/Versionen für CVE-Mapping.</p>
-<h4>SMB/RPC-Enum</h4>
-<p>enum4linux-ng, smbclient, rpcclient, ldapsearch. Findet Shares, User, Domain-Info bei schwacher Konfiguration.</p>
+<p>Web-Anwendungen bilden den Hauptteil der Angriffsfläche. Fingerprinting identifiziert verwendete Technologien für gezielte CVE-Suche:</p>
+<ul>
+<li><strong>WhatWeb</strong>, <strong>Wappalyzer</strong>, <strong>webanalyze</strong> — CMS, Frameworks, Versions-Banner.</li>
+<li><strong>HTTPx</strong> (Project Discovery) — schnelle parallele Probes mit Status, Title, Tech-Stack.</li>
+<li><strong>EyeWitness</strong>, <strong>Aquatone</strong>, <strong>gowitness</strong> — Screenshots großer URL-Mengen für visuelle Triage.</li>
+<li><strong>nuclei</strong> — template-driven Vulnerability-Detection mit > 8000 Community-Templates.</li>
+<li><strong>Burp Suite</strong> Passive Scanner — markiert Server-Header, alte JS-Bibliotheken.</li>
+</ul>
+
+<h4>Enumeration spezifischer Dienste</h4>
+<table>
+<thead><tr><th>Dienst</th><th>Werkzeuge</th><th>Erkenntnisse</th></tr></thead>
+<tbody>
+<tr><td>SMB (445)</td><td>enum4linux-ng, smbclient, rpcclient, CrackMapExec, NetExec</td><td>Shares, User-Listen, Domain-Info, NULL-Sessions</td></tr>
+<tr><td>LDAP (389/636)</td><td>ldapsearch, windapsearch, ldapdomaindump, BloodHound</td><td>AD-Struktur, User, Gruppen, ACLs</td></tr>
+<tr><td>Kerberos (88)</td><td>kerbrute, GetUserSPNs, GetNPUsers (Impacket)</td><td>User-Enumeration, AS-REP-Roastable, Kerberoastable</td></tr>
+<tr><td>SNMP (161 UDP)</td><td>snmpwalk, snmp-check, onesixtyone</td><td>Community-Strings (default <code>public</code>!), Inventar</td></tr>
+<tr><td>SMTP (25)</td><td>smtp-user-enum, VRFY/EXPN, swaks</td><td>User-Existenz, Open Relay</td></tr>
+<tr><td>NFS (2049)</td><td>showmount -e, mount</td><td>Exports, no_root_squash</td></tr>
+<tr><td>RDP (3389)</td><td>rdp-sec-check, NLA-Test, scrying</td><td>NLA-Status, Versionsbanner</td></tr>
+</tbody></table>
+
 <h4>Cloud-Metadata-Probing</h4>
-<p>Bei SSRF: 169.254.169.254 (AWS, GCP, Azure-IMDS). IMDSv2 erfordert PUT-Token.</p>`
+<p>Wenn der Tester eine SSRF-Schwachstelle in einer Cloud-Anwendung findet, ist der Cloud-Metadata-Service ein Hauptziel:</p>
+<ul>
+<li><strong>AWS</strong>: <code>http://169.254.169.254/latest/meta-data/</code>. IMDSv1 erlaubt direkten GET, IMDSv2 verlangt einen PUT-Token (<code>X-aws-ec2-metadata-token</code>) — Standard seit 2020. IMDSv2-Pflicht ist heute Best Practice.</li>
+<li><strong>GCP</strong>: <code>http://metadata.google.internal/computeMetadata/v1/</code> mit Header <code>Metadata-Flavor: Google</code>.</li>
+<li><strong>Azure</strong>: <code>http://169.254.169.254/metadata/instance?api-version=2021-02-01</code> mit Header <code>Metadata: true</code>.</li>
+<li>Wenn erreichbar: temporäre Cloud-Credentials abgreifen (AWS Instance Profile, GCP Service Account Token, Azure Managed Identity Token), die Privilegien des Instance Profils analysieren (<em>aws-iam-actions</em>, <em>policy-sentry</em>).</li>
+</ul>`
                 }, {
                     title: 'Vulnerability Identification',
-                    html: `<h4>Vuln-Scanner</h4>
-<p>Nessus (Tenable), Qualys, Rapid7 InsightVM, OpenVAS/Greenbone, Nuclei (template-driven), Nexpose. Cloud: ScoutSuite, Prowler, CloudSploit, Cartography.</p>
-<h4>Web-Vuln-Scanner</h4>
-<p>OWASP ZAP, Burp Suite (Pro), Acunetix, Invicti, Nikto, w3af. Wichtig: Authentifizierte Scans für Behind-Auth-Endpunkte.</p>
+                    html: `<p>Vulnerability Identification ist die Brücke zwischen Recon und Exploitation. Diese Seite zeigt das Werkzeug-Set für Vulnerability-Scanning, Web-, API- und Container-Tests sowie die anschließende Validierung.</p>
+
+<h4>Generische Vulnerability-Scanner</h4>
+<ul>
+<li><strong>Nessus</strong> (Tenable) — Marktführer, kommerziell, sehr umfassende Plugin-Bibliothek.</li>
+<li><strong>Qualys</strong> — Cloud-only, stark in Vulnerability-Management-Programmen.</li>
+<li><strong>Rapid7 InsightVM / Nexpose</strong> — gute Workflow-Integration mit Metasploit.</li>
+<li><strong>OpenVAS / Greenbone</strong> — OSS-Alternative, gute Abdeckung gängiger CVEs.</li>
+<li><strong>Nuclei</strong> (Project Discovery) — template-driven, ideal für gezielte CVE-Detection.</li>
+</ul>
+<p>Cloud-spezifisch: <em>Prowler</em> (AWS, Azure, GCP, M365, K8s), <em>ScoutSuite</em>, <em>CloudSploit</em>, <em>Cartography</em> (Lyft) — bauen einen Graph der Cloud-Beziehungen auf.</p>
+
+<h4>Web-Vulnerability-Scanner</h4>
+<ul>
+<li><strong>OWASP ZAP</strong> — OSS, gute Active/Passive-Scanner-Engine, mit Add-on-Marktplatz.</li>
+<li><strong>Burp Suite Professional</strong> — Marktstandard, exzellenter manueller Testing-Workflow, kostenpflichtig.</li>
+<li><strong>Acunetix</strong>, <strong>Invicti</strong> (ehem. Netsparker) — kommerzielle DAST-Plattformen.</li>
+<li><strong>Nikto</strong> — schnelles Webserver-Misconfig-Audit.</li>
+<li><strong>w3af</strong> — OSS, eingeschränkter Pflegestand.</li>
+</ul>
+<p>Wichtig: für Endpunkte hinter Authentifizierung sind <em>authentifizierte Scans</em> Pflicht. Burp Suite und ZAP unterstützen Session-Recording oder Macros, die den Login-Flow vor jeder Crawl/Scan-Iteration nachspielen.</p>
+
 <h4>API-Testing</h4>
-<p>Postman + Newman, OpenAPI-/Swagger-Spec-Parsing, Akto, APIsec. Zielt auf BOLA/BFLA/IDOR/Mass Assignment.</p>
-<h4>Container & K8s</h4>
-<p>Trivy (Image+IaC+SBOM), Grype, Kube-Hunter, Kubescape, kube-bench (CIS K8s). Helm-Charts auf Defaults prüfen.</p>
-<h4>Validation & Triage</h4>
-<p>Findings nach Reproduktion gewichten. Bei Black-Box: Service-Stabilität, keine Datenexfil ohne Genehmigung. Bei Cloud: Read-only-Validation bevor schreibender Zugriff.</p>`
+<p>APIs (REST, GraphQL, SOAP, gRPC) sind 2024 die größte angreifbare Oberfläche moderner Anwendungen. OWASP API Security Top 10 (2023) listet die häufigsten Risiken — BOLA (Broken Object Level Authorization), Broken Authentication, Broken Object Property Level Authorization, Unrestricted Resource Consumption, BFLA (Broken Function Level Authorization), Unrestricted Access to Sensitive Business Flows, SSRF, Security Misconfiguration, Improper Inventory Management, Unsafe Consumption of APIs.</p>
+<p>Werkzeuge:</p>
+<ul>
+<li><strong>Postman</strong> + <strong>Newman</strong> — Test-Collections.</li>
+<li><strong>Burp Suite</strong> mit OpenAPI-Parser — automatisches Importieren von Swagger/OpenAPI-Specs.</li>
+<li><strong>Akto</strong>, <strong>APIsec</strong> — automatisierte API-Security-Tests.</li>
+<li><strong>graphql-cop</strong>, <strong>InQL</strong>, <strong>graphw00f</strong> — GraphQL-spezifisch.</li>
+<li><strong>Wuppiefuzz</strong>, <strong>RESTler</strong> — fuzzing-orientiert.</li>
+</ul>
+
+<h4>Container und Kubernetes</h4>
+<ul>
+<li><strong>Trivy</strong> — Image, IaC, SBOM, K8s-Cluster — Defacto-Standard.</li>
+<li><strong>Grype</strong> (Anchore) — schneller Image-Scanner.</li>
+<li><strong>kube-hunter</strong> — Cluster-Pentest aus Pod-Sicht oder remote.</li>
+<li><strong>Kubescape</strong> — Cluster-Hardening gegen NSA-Hardening-Guide und MITRE ATT&CK for Containers.</li>
+<li><strong>kube-bench</strong> — CIS Kubernetes Benchmark Audit.</li>
+<li><strong>Peirates</strong> — Post-Exploit-Toolkit innerhalb eines kompromittierten Pods.</li>
+</ul>
+<p>Helm-Charts auf Default-Werte prüfen: viele Standard-Charts deployen mit Cluster-Admin-RBAC, hostNetwork, Privileged-Container — alle drei sind in Production unzulässig.</p>
+
+<h4>Validation und Triage</h4>
+<p>Scanner-Findings sind Hypothesen. Vor Bericht kommt Reproduktion:</p>
+<ol>
+<li><strong>Scanner-Output sammeln</strong> aus allen Quellen.</li>
+<li><strong>Deduplizieren</strong> — gleiche Lücke in Multi-Scanner-Output zusammenführen.</li>
+<li><strong>Reproduzieren</strong> — manueller PoC pro Finding.</li>
+<li><strong>False Positive aussortieren</strong> — z. B. Backport-Patches, die Versionsnummer-basierte Detection irreführen.</li>
+<li><strong>Risiko bewerten</strong> — CVSS-Base + EPSS + Kontext (siehe CySA+-Kapitel).</li>
+<li><strong>Dokumentieren</strong> — Request, Response, Screenshot, Befehl, gefundene Daten (PII redacted).</li>
+</ol>
+
+<h4>Anti-Pattern</h4>
+<ul>
+<li>Scanner-Roh-Output direkt in den Bericht kopieren.</li>
+<li>CVE als „Critical" reporten, ohne Versionsbanner zu verifizieren.</li>
+<li>SSRF-Findings ungetestet als RCE eskalieren.</li>
+<li>Authentifizierte Scans gegen Production ohne abgestimmtes Wartungsfenster.</li>
+<li>Container-Findings ohne Berücksichtigung der Pod-Security-Standards.</li>
+<li>API-Findings ohne Sequenz-Tests — viele BOLA-Findings entstehen erst bei Interaktion mit anderen Endpunkten.</li>
+</ul>`
                 }],
                 quiz: [
                     q('Welcher Nmap-Switch macht einen Stealth-SYN-Scan?', ['-sS', '-sT', '-sU', '-sX'], 0, '-sS sendet SYN, sieht Antwort, sendet RST — Handshake nicht abgeschlossen.'),
@@ -1738,53 +2675,254 @@
                 title: 'Kapitel 3 — Attacks & Exploits',
                 summary: 'Web-, Netzwerk-, Wireless-, Cloud-, Social-Engineering-Angriffe.',
                 pages: [{
-                    title: 'Exploitation',
-                    html: `<h4>Web-Top</h4>
-<ul><li>SQLi (CWE-89) — sqlmap, parameterisierte Statements als Fix.</li>
-<li>XSS (CWE-79) — Output-Encoding, CSP.</li>
-<li>SSRF (CWE-918) — gefährlich in Cloud (IMDS-Abuse: 169.254.169.254). IMDSv2 erzwingen!</li>
-<li>IDOR — Object-Level-Authorization fehlt.</li>
-<li>RCE — Deserialization, Template-Injection.</li></ul>
-<h4>Netzwerk</h4>
-<p>SMB-Relay, Pass-the-Hash/Ticket, Kerberoasting, AS-REP-Roasting, NTLM-Downgrade.</p>
-<h4>Wireless</h4>
-<p>WPA2-Handshake-Capture + Crack (hashcat), Rogue-AP, Evil-Twin, KRACK (CVE-2017-13077).</p>
-<h4>Cloud</h4>
-<p>IMDS-Stehlen, S3-Misconfig, IAM-Privilege-Escalation, OAuth-Phishing.</p>`
+                    title: 'Web- und Netzwerk-Exploitation',
+                    html: `<p>Exploitation ist die Phase, in der aus identifizierten Schwachstellen tatsächlicher Zugriff oder Privilege Escalation wird. Diese Seite zeigt die wichtigsten Web- und Netzwerk-Angriffsklassen mit Mechanik, Werkzeugen und Mitigationen, wie sie CompTIA PenTest+ erwartet.</p>
+
+<h4>OWASP-Top-10-Klassen, die im Pentest dominieren</h4>
+<p><strong>SQL-Injection (CWE-89)</strong> — Angreifer injiziert SQL-Fragmente in Eingaben, die ungefiltert in eine Datenbankabfrage konkateniert werden. Folgen reichen von Authentication-Bypass bis Remote-Code-Execution (z. B. <code>xp_cmdshell</code> in MSSQL, <code>COPY ... PROGRAM</code> in PostgreSQL). Standardwerkzeug: <em>sqlmap</em>. Reife Detection: parameterisierte Statements / Prepared Statements / ORM-Framework, kein String-Konkateniert-Code. WAF ist Defense-in-Depth, nicht Primärschutz.</p>
+<p><strong>Cross-Site Scripting (CWE-79)</strong> — Angreifer injiziert clientseitiges Script. Drei Varianten: <em>Reflected</em> (Payload in URL), <em>Stored</em> (Payload in Datenbank, jedem Besucher ausgeliefert — schwerwiegendste Variante), <em>DOM-based</em> (Browser-seitige Sink). Mitigation: kontextspezifisches Output-Encoding (HTML, JS, CSS, URL), Content Security Policy mit Nonce/Hash, HttpOnly-Cookies, X-XSS-Protection ist obsolet.</p>
+<p><strong>Server-Side Request Forgery (CWE-918)</strong> — Server wird dazu gebracht, eine HTTP-Request an einen Angreifer-bestimmten Endpoint zu senden. In Cloud-Umgebungen besonders gefährlich: Zugriff auf Instance Metadata Service (siehe vorheriges Kapitel) liefert temporäre Credentials. Mitigation: Allowlist statt Denylist, IMDSv2 erzwingen, Egress-Filter, separate Egress-Rolle für externe HTTP-Calls.</p>
+<p><strong>Insecure Direct Object References / BOLA (Broken Object Level Authorization)</strong> — Angreifer ändert IDs in Requests und greift auf fremde Datensätze zu. Hauptproblem moderner APIs. Mitigation: serverseitige Autorisierung pro Objekt, signierte oder UUID-Identifier statt sequenzieller Integer.</p>
+<p><strong>Remote Code Execution durch Deserialization</strong> (CWE-502) — unsichere Deserialisierung in Java (ysoserial), .NET (BinaryFormatter), Python (pickle), Node.js. Mitigation: keine binären Serializer für ungetrustete Daten; signierte Tokens.</p>
+<p><strong>Server-Side Template Injection</strong> — Template-Engines (Jinja2, Twig, Velocity, Freemarker, Handlebars) interpretieren angreiferkontrollierte Eingabe. Folge: RCE.</p>
+<p><strong>XML External Entities (XXE, CWE-611)</strong> — XML-Parser löst externe Entities auf, liest Dateien oder triggert SSRF. Mitigation: <em>FEATURE_SECURE_PROCESSING</em> aktivieren, externe Entities deaktivieren.</p>
+<p><strong>Cross-Site Request Forgery (CWE-352)</strong> — Browser sendet authentifizierte Request, ohne dass der Nutzer es will. Mitigation: <em>SameSite=Lax</em> (Default in modernen Browsern) oder <em>Strict</em>, Anti-CSRF-Token, Origin/Referer-Check.</p>
+
+<h4>Netzwerk-Angriffe</h4>
+<ul>
+<li><strong>SMB-Relay / NTLM-Relay</strong> — Angreifer fängt NTLM-Authentifizierung ab und leitet sie an einen anderen Dienst weiter. Werkzeuge: <em>impacket-ntlmrelayx</em>, <em>Responder</em>. Mitigation: SMB-Signing erzwingen, LDAP Channel Binding, Extended Protection for Authentication (EPA), Disable NTLM auf privilegierten Hosts.</li>
+<li><strong>LLMNR/NBT-NS Poisoning</strong> — Angreifer antwortet auf fehlerhafte Namensauflösungsanfragen, sammelt NetNTLMv2-Hashes für Offline-Crack. Mitigation: LLMNR per GPO deaktivieren, NBT-NS abschalten.</li>
+<li><strong>IPv6-Mitm via mitm6</strong> — Angreifer-DHCPv6-Server konfiguriert sich als IPv6-Default-DNS und leitet Anfragen um.</li>
+<li><strong>ARP-Poisoning</strong> — klassischer Mitm im selben L2-Segment, mit <em>arpspoof</em>, <em>bettercap</em>. Mitigation: Dynamic ARP Inspection (DAI), Port Security, Mikrosegmentierung.</li>
+<li><strong>DHCP-Starvation und Rogue-DHCP</strong> — DHCP-Snooping als Mitigation auf Switches.</li>
+<li><strong>VLAN-Hopping</strong> — Double-Tagging mit 802.1Q oder DTP-Auto-Trunking. Mitigation: keine Auto-Trunks, Native-VLAN ungenutzt lassen.</li>
+</ul>
+
+<h4>Wireless-Angriffe</h4>
+<ul>
+<li><strong>WPA2-PSK Handshake-Capture + Crack</strong> — 4-Way-Handshake aufzeichnen, Wordlist-Crack mit <em>hashcat -m 22000</em> (vormals -m 2500/2501). Mitigation: WPA3-SAE oder lange, zufällige PSK.</li>
+<li><strong>PMKID-Attack</strong> (CVE-2018-13099) — clientloser Angriff, der den PMKID aus dem ersten EAPOL-Frame extrahiert.</li>
+<li><strong>WPS-Pixie-Dust</strong> — schwacher Random-Generator in WPS, mit <em>reaver</em>/<em>bully</em> in Minuten. Mitigation: WPS abschalten.</li>
+<li><strong>KRACK</strong> (CVE-2017-13077, Vanhoef 2017) — Re-Installation des Pairwise Transient Keys, Mehrfachverwendung des Nonce. Mitigation: Patches in <em>wpa_supplicant</em> und <em>hostapd</em>.</li>
+<li><strong>Rogue-AP / Evil-Twin</strong> — Angreifer betreibt Access-Point mit gleichem SSID, Client verbindet sich automatisch. Werkzeuge: <em>airbase-ng</em>, <em>hostapd-wpe</em>, <em>Wifiphisher</em>.</li>
+<li><strong>WPA2-Enterprise-Angriffe</strong> — EAP-Identity-Sniffing, EAP-MD5-Crack, EAP-Downgrade.</li>
+</ul>
+
+<h4>Cloud- und SaaS-Angriffe (Kurzüberblick)</h4>
+<ul>
+<li><strong>IMDS-Theft</strong> via SSRF (siehe oben).</li>
+<li><strong>S3-Bucket-Misconfig</strong> — Public ACL, fehlerhafte Bucket-Policy, ListAllMyBuckets-Wildcard, fehlende Block-Public-Access-Konfiguration.</li>
+<li><strong>IAM Privilege Escalation</strong> — <em>Pacu</em> (Rhino Security) testet automatisch 30+ AWS-PrivEsc-Pfade: PassRole, AssumeRole, iam:CreatePolicyVersion, lambda:InvokeFunction mit privilegierter Rolle.</li>
+<li><strong>OAuth-Phishing</strong> (Consent-Phishing) — siehe Social-Engineering-Seite.</li>
+<li><strong>Workload-Identity-Misconfig</strong> in Kubernetes/GKE — Service-Account-Token aus einem Pod liefert Cloud-Credentials.</li>
+</ul>
+
+<h4>Werkzeug-Stack</h4>
+<ul>
+<li><strong>Burp Suite</strong>, <strong>OWASP ZAP</strong> — Web-Proxy.</li>
+<li><strong>sqlmap</strong> — SQLi-Automatisierung.</li>
+<li><strong>Metasploit</strong> — modulares Exploit-Framework.</li>
+<li><strong>Cobalt Strike</strong> (kommerziell, oft missbraucht), <strong>Sliver</strong> (OSS, Bishop Fox), <strong>Mythic</strong>, <strong>Havoc</strong> — C2-Frameworks.</li>
+<li><strong>Impacket</strong> — Python-Suite für SMB/Kerberos/NTLM.</li>
+<li><strong>BloodHound + SharpHound</strong> — AD-Graph-Analyse.</li>
+<li><strong>responder</strong> — LLMNR/NBT-NS-Poisoning.</li>
+<li><strong>aircrack-ng</strong>, <strong>hcxdumptool</strong>, <strong>hashcat</strong> — Wireless.</li>
+<li><strong>Pacu</strong> — AWS-Exploitation-Framework.</li>
+</ul>`
                 }, {
                     title: 'Active Directory Angriffe',
-                    html: `<h4>Recon im AD</h4>
-<p>BloodHound + SharpHound, ADRecon, PingCastle. Identifiziert Pfade zu Domain Admin via Graph-Analyse.</p>
+                    html: `<p>Active Directory ist in den meisten Enterprise-Engagements das primäre Ziel. Wer Domain-Admin oder gleichwertige Privilegien erreicht, kontrolliert die gesamte Infrastruktur. Diese Seite fasst die wichtigsten AD-Angriffstechniken zusammen, die in PenTest+ regelmäßig geprüft werden.</p>
+
+<h4>Recon im AD</h4>
+<p>Vor jedem AD-Angriff steht eine vollständige Karte:</p>
+<ul>
+<li><strong>BloodHound</strong> + <strong>SharpHound</strong>/<strong>BloodHound.py</strong>/<strong>RustHound</strong> — sammeln Sessions, Group-Memberships, ACLs, Trusts und visualisieren Pfade zu Domain Admin als Graph. <em>BloodHound CE</em> (seit 2023) ist die aktuelle OSS-Version mit Cypher-Abfragen.</li>
+<li><strong>ADRecon</strong> (Sense of Security) — Excel-basierte Inventarisierung.</li>
+<li><strong>PingCastle</strong> — kostenlose AD-Reife-Bewertung mit klar priorisierten Findings.</li>
+<li><strong>Purple Knight</strong> (Semperis) — fokussiert auf Indikatoren laufender Kompromittierung.</li>
+<li><strong>ldapsearch</strong>, <strong>windapsearch</strong>, <strong>ldapdomaindump</strong> — direkte LDAP-Queries.</li>
+</ul>
+<p>BloodHound-Pfade wie <em>„kompromittierter User → Group → ACL → Domain Admin"</em> sind in jeder gewachsenen Domain vorhanden — die Frage ist nicht ob, sondern wie viele.</p>
+
 <h4>Credential-Angriffe</h4>
-<ul><li><strong>Kerberoasting</strong> (T1558.003) — Service-Ticket-Hashes mit hashcat -m 13100 cracken. Mitigation: gMSA + 25+ Zeichen-Passwörter.</li><li><strong>AS-REP-Roasting</strong> (T1558.004) — User mit „Does not require Kerberos preauth“. hashcat -m 18200.</li><li><strong>DCSync</strong> (T1003.006) — GetNCChanges-Replikation — Domain-Hashes.</li><li><strong>DCShadow</strong> (T1207) — Fake-DC injiziert AD-Änderungen.</li><li><strong>Pass-the-Hash</strong> (T1550.002) — NTLM-Hash als Credential.</li><li><strong>Pass-the-Ticket</strong> (T1550.003) — Kerberos-Ticket re-use.</li><li><strong>Golden Ticket</strong> — KRBTGT-Hash fälscht TGT.</li><li><strong>Silver Ticket</strong> — Service-Account-Hash fälscht Service-Ticket.</li></ul>
-<h4>Trust-Abuse</h4>
-<p>SID-History-Injection, Bidirectional Trusts, Cross-Forest-Privilege-Escalation. PrintNightmare (CVE-2021-34527), ZeroLogon (CVE-2020-1472), PetitPotam (CVE-2021-36942).</p>
-<h4>LAPS / Tier-Modell</h4>
-<p>LAPS rotiert lokale Admin-Passwörter (jetzt Windows-LAPS). Tier-Modell trennt Tier 0 (DC, ADCS) / Tier 1 (Server) / Tier 2 (Workstations) administrativ.</p>`
+<ul>
+<li><strong>Kerberoasting</strong> (MITRE T1558.003) — Service-Accounts mit gesetztem ServicePrincipalName erlauben jedem authentifizierten User, ein Service-Ticket (TGS) anzufordern. Das TGS ist mit dem NTLM-Hash des Service-Accounts verschlüsselt; offline mit <em>hashcat -m 13100</em> (Kerberos 5 TGS-REP etype 23, RC4) crackbar. Werkzeuge: <em>GetUserSPNs.py</em> (Impacket), <em>Rubeus</em>. Mitigation: Group Managed Service Accounts (gMSA) mit 256-Zeichen-Random-Passwords; AES-only-Tickets über <em>msDS-SupportedEncryptionTypes</em> erzwingen.</li>
+<li><strong>AS-REP-Roasting</strong> (T1558.004) — User mit „Does not require Kerberos preauthentication" liefern bei AS-REQ ein verschlüsseltes Pre-Auth-Token, das offline mit <em>hashcat -m 18200</em> gecrackt wird. Werkzeug: <em>GetNPUsers.py</em>. Mitigation: Pre-Auth für alle Konten erzwingen.</li>
+<li><strong>Pass-the-Hash</strong> (T1550.002) — NTLM-Hash dient als Credential-Equivalent. Mit <em>impacket-psexec</em>, <em>impacket-wmiexec</em>, <em>CrackMapExec</em>/<em>NetExec</em>. Mitigation: Credential Guard (VBS), LAPS, Tier-Modell, Disable NTLM.</li>
+<li><strong>Pass-the-Ticket</strong> (T1550.003) — Kerberos-Ticket aus einem kompromittierten System wiederverwenden. Mit <em>Mimikatz</em>, <em>Rubeus</em>.</li>
+<li><strong>Overpass-the-Hash</strong> (T1550.002) — NTLM-Hash an Kerberos-Authentication weitergeben, um TGT zu bekommen.</li>
+<li><strong>Golden Ticket</strong> (T1558.001) — KRBTGT-Account-Hash erlaubt das Fälschen beliebiger TGTs für beliebige Konten mit beliebigen Gruppenzugehörigkeiten. Persistenz für Jahre, bis KRBTGT zweimal rotiert wird (mit 12 h Abstand).</li>
+<li><strong>Silver Ticket</strong> (T1558.002) — gefälschtes Service-Ticket mit Service-Account-Hash. Erlaubt Zugriff auf einen einzelnen Service ohne KDC-Kontakt.</li>
+<li><strong>DCSync</strong> (T1003.006) — Account mit „Replicating Directory Changes"-Recht kann via MS-DRSR-Protokoll alle Domain-Hashes inkl. KRBTGT abrufen. Werkzeug: <em>Mimikatz lsadump::dcsync</em>, <em>secretsdump.py</em>.</li>
+<li><strong>DCShadow</strong> (T1207) — Angreifer registriert sich als Fake-DC und schreibt manipulierte Replikationsdaten ein. Schwer zu detektieren.</li>
+</ul>
+
+<h4>Trust- und ADCS-Angriffe</h4>
+<ul>
+<li><strong>SID-History-Injection</strong> — Cross-Forest-Privilege-Escalation über SID-History.</li>
+<li><strong>ADCS-Escalation</strong> — Active Directory Certificate Services. Forschung von SpecterOps (Will Schroeder, Lee Christensen) hat 2021 mehrere Angriffsklassen veröffentlicht: <em>ESC1</em>–<em>ESC11</em>. Beispiele: ESC1 = Template mit ENROLLEE_SUPPLIES_SUBJECT + Client-Auth-EKU + Enrollment-Permission für Low-Priv-User → Smart-Card-Login als Domain Admin. Werkzeug: <em>Certify</em>/<em>Certipy</em>. Mitigation: Template-Audit, Manager-Approval, NTLM-Relay-Schutz auf Web-Enrollment-Endpoints.</li>
+<li><strong>PrintNightmare</strong> (CVE-2021-1675/CVE-2021-34527) — Print Spooler erlaubt RCE als SYSTEM. Mitigation: Print Spooler auf DCs deaktivieren, Patch.</li>
+<li><strong>ZeroLogon</strong> (CVE-2020-1472) — Netlogon-Schwäche erlaubt DC-Account-Reset auf leeres Passwort. Mitigation: Patch + Enforcement-Modus.</li>
+<li><strong>PetitPotam</strong> (CVE-2021-36942) — EFS-RPC-Coercion zwingt Hosts, sich beim Angreifer zu authentifizieren. Kombiniert mit ADCS-NTLM-Relay → Domain-Admin.</li>
+<li><strong>noPac/sAMAccountName-Spoofing</strong> (CVE-2021-42278/42287) — Eskalation von Computer- zu Domain-Account.</li>
+</ul>
+
+<h4>Mitigations und Detection</h4>
+<ul>
+<li><strong>Tier-Modell</strong> (Microsoft Privileged Access Strategy) — Tier 0 (DCs, ADFS, ADCS, AAD-Connect) | Tier 1 (Server) | Tier 2 (Workstations). Admin-Konten dürfen nur in ihrer Tier verwendet werden.</li>
+<li><strong>LAPS / Windows LAPS</strong> — rotiert lokales Admin-Passwort auf jedem Host, im AD verschlüsselt gespeichert.</li>
+<li><strong>Protected Users Group</strong> — verhindert Klartext-Caching, NTLM-Auth, RC4-Tickets.</li>
+<li><strong>Authentication Policies / Silos</strong> — beschränken, von wo privilegierte Konten anmelden dürfen.</li>
+<li><strong>Credential Guard</strong> — VBS-isolierte LSASS, blockiert Mimikatz-Klartext-Extraktion.</li>
+<li><strong>Phishing-resistente MFA</strong> für privilegierte Konten — FIDO2-Hardware-Keys, Windows Hello for Business.</li>
+<li><strong>Detection-Fokus</strong>: Event 4769 (Service-Ticket-Anforderungen mit RC4), Event 4624 logon-type 9 (Pass-the-Hash-Indikator), abnormale 4662 (Replication-Permissions auf KRBTGT), neue ADCS-Templates, neu hinzugefügte Domain-Admins.</li>
+</ul>`
                 }, {
-                    title: 'Cloud- & Container-Angriffe',
-                    html: `<h4>AWS</h4>
-<ul><li>SSRF auf 169.254.169.254 — IMDSv1 liefert Credentials, IMDSv2 erzwingt Token.</li><li>S3-Bucket-Misconfig (Public ACL, Bucket-Policy, ListBucket).</li><li>IAM-PrivEsc (Pacu) — PassRole, AssumeRole, iam:*-Wildcards.</li><li>CloudShell-Token-Abuse, SSO-Misuse.</li></ul>
-<h4>Azure</h4>
-<p>Managed-Identity-Token aus IMDS, OAuth-Token-Theft (Adv. AAD-Phishing via TokenSmith/AADInternals), Conditional-Access-Bypass, Storage-Account-SAS-Leak, App-Reg-Misconfig.</p>
+                    title: 'Cloud- und Container-Angriffe',
+                    html: `<p>Cloud- und Container-Workloads sind in modernen Engagements oft das Hauptziel. Diese Seite zeigt die wichtigsten Angriffsklassen pro Provider und für Kubernetes — mit Mitigationen, die ein Tester im Bericht empfehlen muss.</p>
+
+<h4>AWS</h4>
+<ul>
+<li><strong>SSRF gegen IMDS</strong> — siehe vorherige Seite. <em>IMDSv1</em> (legacy) erlaubt einfachen GET, <em>IMDSv2</em> verlangt PUT-Token mit TTL. Empfehlung: <em>EnforceIMDSv2: true</em> auf Account-Ebene.</li>
+<li><strong>S3-Bucket-Misconfig</strong> — Public-Read-ACL, Public-Read-Bucket-Policy, fehlende Block-Public-Access-Settings. Tools zum Audit: <em>Prowler</em>, <em>ScoutSuite</em>, <em>aws-inventor</em>.</li>
+<li><strong>IAM Privilege Escalation</strong> — <em>Pacu</em> testet 30+ Pfade: <code>iam:PassRole</code> + <code>lambda:CreateFunction</code>, <code>iam:CreatePolicyVersion</code>, <code>iam:AttachUserPolicy</code>, <code>sts:AssumeRole</code> mit zu weitem Trust, <code>ec2:RunInstances</code> + Instance Profile.</li>
+<li><strong>CloudShell-/SSO-Token-Abuse</strong> — kompromittierte Browser-Session liefert temporäre Credentials.</li>
+<li><strong>Snapshot-/AMI-Sharing</strong> öffentlich gemacht, enthält oft Credentials und Source-Code.</li>
+<li><strong>SES-Missbrauch</strong> für Phishing aus legitimer AWS-Domäne.</li>
+<li><strong>GuardDuty/CloudTrail-Tampering</strong> — Angreifer mit Admin-Rechten deaktiviert Logging und Detection. Mitigation: Logs in separates, schreibgeschütztes Security-Account replizieren.</li>
+</ul>
+
+<h4>Azure / Entra ID</h4>
+<ul>
+<li><strong>Managed-Identity-Token-Theft</strong> via SSRF gegen IMDS.</li>
+<li><strong>OAuth-Token-Theft</strong> via Adversary-in-the-Middle (Evilginx2, EvilProxy, NakedPages, AADInternals/TokenTactics).</li>
+<li><strong>Conditional-Access-Bypass</strong> — Token-Replay aus nicht-konformem Gerät, wenn CA falsch konfiguriert ist.</li>
+<li><strong>Storage-Account-SAS-Leak</strong> — Shared Access Signatures mit zu langer Gültigkeit, in Code-Repos geleakt.</li>
+<li><strong>App-Registration-Misconfig</strong> — Client-Secret im Code, Multi-Tenant-Apps mit zu weiten API-Permissions.</li>
+<li><strong>Privilege Escalation in Entra</strong> — Application Administrator → eigenes Service-Principal mit Directory.Read.All → Global Admin durch Hinzufügen.</li>
+<li><strong>Workload Identity Federation Misconfig</strong> in DevOps-Pipelines.</li>
+<li>Werkzeuge: <em>ROADtools</em> (ROADrecon, ROADtx), <em>AzureHound</em> (BloodHound-Erweiterung), <em>MicroBurst</em>, <em>Stormspotter</em>, <em>AADInternals</em>.</li>
+</ul>
+
 <h4>GCP</h4>
-<p>Default-Service-Accounts, Workload-Identity-Misconfig, gcloud-credentials-Theft, OAuth-Scopes.</p>
-<h4>Container Escape</h4>
-<p>Privileged Container, hostPath-Mount, capabilities (CAP_SYS_ADMIN), Docker-Socket-Mount, Kernel-Exploits (Dirty COW, Dirty Pipe). runC-CVE-2019-5736, CVE-2024-21626.</p>
-<h4>K8s-Angriffe</h4>
-<p>Etcd-Direct-Access, Kubelet-AnonAuth, RBAC-Misconfig (cluster-admin, get-pods-all-namespaces), Service-Account-Token-Abuse, Workload-Identity-Cross-Pod-Reading.</p>`
+<ul>
+<li><strong>Default-Service-Accounts</strong> — Compute Engine Default-SA hat oft Editor-Rolle auf Projekt-Ebene.</li>
+<li><strong>Workload-Identity-Misconfig</strong> in GKE.</li>
+<li><strong>gcloud-Credentials-Theft</strong> aus <code>~/.config/gcloud/</code>.</li>
+<li><strong>OAuth-Scopes</strong> der Service-Accounts oft zu weit.</li>
+<li>Werkzeuge: <em>GCPBucketBrute</em>, <em>gcp_enum</em>, <em>cloudtoken</em>.</li>
+</ul>
+
+<h4>Container-Escape-Techniken</h4>
+<p>Container sind Prozesse mit Linux-Namespaces und cgroups — Isolation ist schwächer als VMs. Häufige Eskalations-Pfade aus einem kompromittierten Container heraus:</p>
+<ul>
+<li><strong>Privileged Container</strong> (<code>--privileged</code>) — alle Capabilities, /dev-Zugang. Praktisch root auf Host.</li>
+<li><strong>hostPath-Mount</strong> — <code>/</code> oder <code>/etc</code> als Volume gemountet. Direkter Schreibzugriff auf Host-Dateien.</li>
+<li><strong>Linux-Capabilities</strong> wie <em>CAP_SYS_ADMIN</em>, <em>CAP_SYS_PTRACE</em>, <em>CAP_DAC_READ_SEARCH</em>.</li>
+<li><strong>Docker-Socket gemountet</strong> (<code>/var/run/docker.sock</code>) — Container kann Docker-API ansprechen, neue Privileged-Container starten.</li>
+<li><strong>Kernel-Exploits</strong> — Dirty COW (CVE-2016-5195), Dirty Pipe (CVE-2022-0847), OverlayFS-Lücken.</li>
+<li><strong>runC-CVEs</strong> — CVE-2019-5736 (runC-Binary überschreiben aus Container), CVE-2024-21626 („Leaky Vessels", File-Descriptor-Leak).</li>
+<li><strong>cgroup release_agent-Trick</strong> — wenn cgroup v1 mit user_xattr aktiviert.</li>
+<li>Tool zur Selbst-Diagnose: <em>amicontained</em> (Jess Frazelle), <em>peirates</em>.</li>
+</ul>
+
+<h4>Kubernetes-Angriffe</h4>
+<ul>
+<li><strong>Etcd Direct Access</strong> — wer Etcd lesen kann, hat alle Secrets im Cluster.</li>
+<li><strong>Kubelet AnonymousAuth</strong> — Kubelet auf Port 10250 ohne Auth erlaubt Pod-Listing und Befehlsausführung.</li>
+<li><strong>RBAC-Misconfigs</strong> — <code>cluster-admin</code> an ServiceAccounts gebunden, <code>get pods --all-namespaces</code> für Default-SAs, <code>create pods</code> + <code>get/list secrets</code> = Cluster-Takeover.</li>
+<li><strong>Service-Account-Token-Abuse</strong> — Default-SA-Token in Pod gemountet, mit zu weiten Rechten.</li>
+<li><strong>Workload-Identity-Cross-Pod-Reading</strong> — wenn IRSA/Workload Identity falsch konfiguriert.</li>
+<li><strong>Admission Controller fehlt</strong> — keine PodSecurity-Policy, beliebige Pods mit hostNetwork, hostPID, privileged können starten.</li>
+<li><strong>Helm-Charts mit Defaults</strong> — viele bekannte Charts deployen mit Cluster-Admin-RBAC. Pflicht: Chart-Audit vor Install.</li>
+</ul>
+
+<h4>Empfehlungen für den Bericht</h4>
+<ul>
+<li>Immutable, signierte Images mit Cosign + Admission-Controller (Kyverno, OPA Gatekeeper).</li>
+<li>Pod Security Standards: <em>Restricted</em> für alle nicht-System-Namespaces.</li>
+<li>NetworkPolicies als Default-Deny.</li>
+<li>RBAC nach Least Privilege; keine wildcard-Verben, keine wildcard-Ressourcen.</li>
+<li>EKS/AKS/GKE Audit-Log in zentralisiertes SIEM.</li>
+<li>Runtime-Security mit Falco/Tetragon/Tracee.</li>
+</ul>`
                 }, {
-                    title: 'Social Engineering & Physical',
-                    html: `<h4>Phishing-Frameworks</h4>
-<p>GoPhish, King Phisher, Evilginx2 (Reverse-Proxy mit MFA-Bypass via Session-Cookie-Theft), Modlishka. Pretexts: Quartals-Update, IT-Support, HR-Dokument.</p>
-<h4>OAuth-Phishing</h4>
-<p>Consent-Phishing: Angreifer registriert App, sendet Consent-Link. Nach Zustimmung: Mailbox-Lesen, Files-Lesen ohne Passwort. Mitigation: Verified-Publisher, Admin-Consent, App-Risk-Score.</p>
+                    title: 'Social Engineering und Physical',
+                    html: `<p>Technische Angriffe scheitern an gehärteten Systemen — Menschen sind oft das schwächste Glied. Diese Seite zeigt das Spektrum von Phishing über OAuth-Phishing bis Physical-Pentesting, wie es CompTIA PenTest+ und reale Engagements abdecken.</p>
+
+<h4>Phishing-Frameworks und Pretexts</h4>
+<p>Reife Phishing-Engagements sind keine generischen „Klick-hier-Mails", sondern auf das Unternehmen zugeschnittene Pretexts:</p>
+<ul>
+<li><strong>GoPhish</strong> — OSS-Plattform mit Templates, Tracking, Reports.</li>
+<li><strong>King Phisher</strong> — älteres OSS-Framework.</li>
+<li><strong>Evilginx2</strong> — Reverse-Proxy, der die echte Login-Seite des Ziels darstellt und Session-Cookies inkl. MFA-Bypass abfängt. Aktuelle Version unterstützt Microsoft 365, Google Workspace, Okta.</li>
+<li><strong>Modlishka</strong>, <strong>Muraena</strong> — alternative Reverse-Proxy-Tools.</li>
+<li><strong>EvilProxy</strong>, <strong>NakedPages</strong> — kommerzielle Phishing-as-a-Service-Plattformen, von Mandiant und Microsoft seit 2022 dokumentiert.</li>
+</ul>
+<p>Typische Pretexts mit hoher Erfolgsquote: Quartals-Update-Reminder, IT-Support-Helpdesk-Ticket, HR-Dokument („Ihre neue Vergütungstabelle"), Konferenz-Einladung, Paket-Tracking, Microsoft 365 „Storage Quota Exceeded", DocuSign-Phishing.</p>
+
+<h4>Vishing und Smishing</h4>
+<ul>
+<li><strong>Vishing</strong> — Voice-Phishing. Mit Spoofed Caller-ID („Ihre Bank ruft an"). Wachsend mit AI-Voice-Cloning seit 2023.</li>
+<li><strong>Smishing</strong> — SMS-Phishing. Verlinkung auf gefälschte Login-Seite.</li>
+<li><strong>Quishing</strong> — QR-Code-Phishing, weil QR-Codes von Mail-Filtern oft nicht analysiert werden.</li>
+<li><strong>Callback-Phishing</strong> — Mail mit „Sie haben Premium-Service abonniert, rufen Sie an" leitet auf Call-Center-Operator, der Remote-Tool installieren lässt.</li>
+</ul>
+
+<h4>OAuth-Phishing (Consent-Phishing)</h4>
+<p>Eine der gefährlichsten Phishing-Klassen seit 2020:</p>
+<ol>
+<li>Angreifer registriert eine OAuth-App im eigenen oder kompromittierten Tenant.</li>
+<li>App fordert Permissions wie <em>Mail.Read</em>, <em>Files.Read.All</em>, <em>offline_access</em>.</li>
+<li>Angreifer sendet Consent-Link mit App-Name, der wie Microsoft aussieht („Microsoft Activations Service").</li>
+<li>User klickt auf „Accept", App erhält Refresh-Token mit langer Gültigkeit.</li>
+<li>Angreifer hat dauerhaften Mailbox-Zugriff — überlebt Passwort-Reset, da kein Passwort verwendet wird.</li>
+</ol>
+<p>Mitigation:</p>
+<ul>
+<li><em>Verified Publisher</em>-Pflicht für Consent durch User.</li>
+<li><em>Admin-Consent-Workflow</em>: User muss bei sensitiven Permissions Admin-Approval beantragen.</li>
+<li><em>App-Risk-Score</em> in Entra ID prüfen.</li>
+<li>Quartals-Audit aller registrierten OAuth-Apps mit Mail-Permissions, Cleanup unbenutzter Apps.</li>
+</ul>
+
 <h4>MFA-Bypass-Techniken</h4>
-<ul><li>Reverse-Proxy-Phishing (Evilginx2)</li><li>MFA-Fatigue (Push-Bombing)</li><li>SIM-Swapping</li><li>SS7-Angriffe gegen SMS-OTP</li><li>Stolen Session Cookies (Pass-the-Cookie)</li></ul>
-<h4>Physical</h4>
-<p>Tailgating, Lock-Picking, RFID-Cloning (Proxmark3), USB-Drops (Rubber Ducky, Bash Bunny), DropBox in Meetingräumen, Wi-Fi-Pineapple in Empfangsbereich.</p>
-<h4>Mitigations</h4>
-<p>Mantraps, Visitor-Logs, Awareness-Training, FIDO2-Hardware-Keys (phishing-resistent), Number-Match-Push, Conditional Access mit Compliance-Check.</p>`
+<table>
+<thead><tr><th>Technik</th><th>Mechanik</th><th>Mitigation</th></tr></thead>
+<tbody>
+<tr><td><strong>Reverse-Proxy-Phishing</strong></td><td>Evilginx2 fängt Session-Cookie inkl. MFA</td><td>FIDO2-Phishing-Resistente MFA</td></tr>
+<tr><td><strong>MFA-Fatigue / Push-Bombing</strong></td><td>Spam an Authenticator-App, User klickt aus Frustration</td><td>Number-Matching, Geo-Anzeige in Push</td></tr>
+<tr><td><strong>SIM-Swapping</strong></td><td>Angreifer übernimmt Rufnummer beim Carrier</td><td>SMS-OTP nicht für privilegierte Konten</td></tr>
+<tr><td><strong>SS7-Angriffe</strong></td><td>Mobilfunk-Signalisierungs-Schwächen</td><td>SMS-OTP nicht für privilegierte Konten</td></tr>
+<tr><td><strong>Pass-the-Cookie</strong></td><td>Stolen Session Cookie wiederverwenden</td><td>Token-Binding, Conditional Access mit Device-Compliance</td></tr>
+<tr><td><strong>Adversary-in-the-Middle (AitM)</strong></td><td>Reverse-Proxy bricht TLS, klaut Tokens</td><td>FIDO2, Certificate-Bound Tokens (RFC 8705)</td></tr>
+</tbody></table>
+<p>Phishing-resistente MFA ist heute der einzige robuste Schutz. NIST SP 800-63B Rev. 4 (2024 Public Draft) und CISA-Advisories empfehlen FIDO2/WebAuthn als bevorzugte Methode für privilegierte Konten und alle High-Value-Accounts.</p>
+
+<h4>Physical-Pentesting</h4>
+<ul>
+<li><strong>Tailgating</strong> — Mitlaufen durch Schleuse. Pretext: „Karte vergessen, Hände voll".</li>
+<li><strong>Lock-Picking</strong> — Tubular-Locks, Pin-Tumbler, Bypass via Bumping. Werkzeuge: Pick-Set, Bump-Keys, Decoders.</li>
+<li><strong>RFID-Cloning</strong> — Proxmark3, Flipper Zero. Klont LF-Cards (HID Prox, EM4100) trivial; HF-Cards (MIFARE Classic ungeschützt) ebenfalls.</li>
+<li><strong>USB-Drops</strong> — Rubber Ducky, Bash Bunny, OMG Cable. Tippt vorprogrammierte Befehle als Tastatur.</li>
+<li><strong>Drop-Boxes</strong> — kleine Linux-Geräte (Raspberry Pi, LAN Turtle) in Meeting-Räumen mit 4G-Modem.</li>
+<li><strong>Wi-Fi-Pineapple</strong> — Rogue-AP-Hardware, sammelt Credentials in Empfangsbereichen.</li>
+<li><strong>Network-Tap-Drops</strong> — Inline-Tap zwischen Drucker und Wand.</li>
+<li><strong>OSINT zu physischen Zielen</strong> — Google Maps Streetview, Konferenz-Photos, LinkedIn-Posts mit Bürohintergrund.</li>
+</ul>
+
+<h4>Mitigations gegen Social Engineering und Physical</h4>
+<ul>
+<li><strong>Mantraps</strong> oder Drehkreuze gegen Tailgating.</li>
+<li><strong>Visitor-Logs und Begleitpflicht</strong>.</li>
+<li><strong>Awareness-Training</strong> — wiederholte, realistische Übungen, kein Compliance-Theater. Reife: gemeldete Phishing-Mails (Report-Rate) wichtiger als geklickte.</li>
+<li><strong>FIDO2-Hardware-Keys</strong> für privilegierte Konten und alle Mitarbeiter mit Zugriff auf sensitive Systeme.</li>
+<li><strong>Number-Matching Push</strong> in Microsoft Authenticator, Duo, Okta Verify.</li>
+<li><strong>Conditional Access</strong> mit Device-Compliance (Intune-Compliance, MDM-Status).</li>
+<li><strong>USB-Port-Lockdown</strong> per Endpoint-Management, Disable Auto-Run, Application-Allowlist.</li>
+<li><strong>RFID-Card-Audit</strong> — alte Mitarbeiter-Karten regelmäßig deaktivieren.</li>
+<li><strong>Security-Awareness-Campagnen</strong> mit messbaren KPIs (Phishing-Click-Rate, Report-Rate, Verbesserungstrend).</li>
+</ul>`
                 }],
                 quiz: [
                     q('Welche SQLi-Mitigation ist die effektivste im Code?', ['Parameterisierte Statements', 'Mehr WAF-Regeln allein', 'Längere Strings', 'TLS 1.3'], 0, 'Trennung Code/Daten in der DB-Schicht.'),
@@ -1844,44 +2982,254 @@
                 summary: 'Risiko-orientiertes Reporting, Re-Test, Knowledge Transfer.',
                 pages: [{
                     title: 'Berichts-Lifecycle',
-                    html: `<h4>Struktur</h4>
-<ol><li>Executive Summary (1–2 Seiten, Geschäftsrisiko)</li>
-<li>Methodology (Scope, RoE, Methodologien)</li>
-<li>Findings (Severity-sortiert, mit PoC und Mitigation)</li>
-<li>Strategic Recommendations</li>
-<li>Anhang (Tools, Logs, Hashes)</li></ol>
+                    html: `<p>Der Pentest-Bericht ist das einzige tatsächliche Liefergut eines Engagements. Findings, die im Bericht missverständlich, schwach oder nicht reproduzierbar dargestellt sind, verlieren ihren Wert — egal wie elegant der Angriff war. Diese Seite zeigt die Standardstruktur, die in CompTIA PenTest+ und realen Audits erwartet wird.</p>
+
+<h4>Standard-Struktur</h4>
+<ol>
+<li><strong>Executive Summary</strong> (1–2 Seiten) — Geschäftsorientierte Zusammenfassung. Adressat: C-Level, Aufsicht, Vorstand. Inhalt: Engagement-Ziel, Scope-Übersicht, Top-3-Risiken, kritische Empfehlung, Vergleich zu Vorjahr/Branche.</li>
+<li><strong>Methodology</strong> — Scope, RoE-Auszug, gewählte Methodologie (NIST 800-115, OWASP WSTG, MITRE ATT&CK), Werkzeuge, Engagement-Typ (Black/Grey/White-Box, External/Internal).</li>
+<li><strong>Findings</strong> — nach Severity sortiert. Jedes Finding mit dem Standard-Template der nächsten Seite.</li>
+<li><strong>Strategic Recommendations</strong> — strukturelle, programmweite Empfehlungen, die mehrere Findings adressieren (z. B. Awareness-Programm, Tier-Modell, Secret-Management).</li>
+<li><strong>Anhang</strong> — Tool-Versionen, Roh-Output (sanitisiert), Hashes, Logs, IP-Listen, Test-Konten.</li>
+</ol>
+
 <h4>Severity-Mapping</h4>
-<p>CVSS allein reicht nicht — Geschäftsauswirkung gewichten.</p>
-<h4>Re-Test</h4>
-<p>Nach Remediation: erneuter gezielter Test, dokumentierter Status (Fixed / Risk Accepted / Open).</p>`
+<p>Bericht-Severity entsteht aus zwei Faktoren:</p>
+<ul>
+<li><strong>Technische Schwere</strong> — CVSS v3.1/v4.0 als objektive Basis.</li>
+<li><strong>Geschäftliche Auswirkung</strong> — Erreichbarkeit (intern vs. extern), Schutzbedarf der betroffenen Daten, Kompensierende Kontrollen.</li>
+</ul>
+<p>Beispiele für Differenzierung:</p>
+<table>
+<thead><tr><th>CVSS</th><th>Kontext</th><th>Effektive Severity</th></tr></thead>
+<tbody>
+<tr><td>9.8 RCE</td><td>nur intern auf Test-VM mit isoliertem Netz</td><td>High statt Critical</td></tr>
+<tr><td>4.0 Info-Disclosure</td><td>betrifft Klartext-API-Keys mit Production-Zugang</td><td>High statt Medium</td></tr>
+<tr><td>7.5 SSRF</td><td>Cloud-Workload ohne IMDSv2-Enforcement</td><td>Critical (effektiver Pfad zu IAM-Credentials)</td></tr>
+<tr><td>5.5 XSS</td><td>Stored, betrifft Admin-Panel</td><td>High</td></tr>
+</tbody></table>
+<p>Reife Berichte erläutern die effektive Severity in jedem Finding — keine Black-Box-Bewertung.</p>
+
+<h4>Re-Test-Phase</h4>
+<p>Nach Remediation folgt eine gezielte erneute Verifikation. Ergebnis pro Finding:</p>
+<ul>
+<li><strong>Fixed</strong> — Patch verifiziert, kein Restrisiko.</li>
+<li><strong>Partial Fix</strong> — Mitigation reduziert Risiko, aber Lücke nicht vollständig geschlossen (z. B. WAF-Regel statt Code-Fix).</li>
+<li><strong>Risk Accepted</strong> — formales Sign-off vom Asset-Owner mit Begründung und Reviewdatum.</li>
+<li><strong>Open</strong> — nicht behoben, eskaliert ans Management.</li>
+</ul>
+<p>Re-Test-Bericht ergänzt den Hauptbericht; viele Engagement-SOWs schließen einen Re-Test innerhalb eines definierten Zeitfensters (typisch 30–60 Tage) ein.</p>
+
+<h4>Berichts-Versionen und Distribution</h4>
+<ul>
+<li><strong>Executive Report</strong> — kürzere Variante, oft als separate PDF.</li>
+<li><strong>Technical Report</strong> — vollständig, mit allen Findings und Anhängen.</li>
+<li><strong>Letter of Attestation</strong> — kurze Bescheinigung über Engagement-Durchführung, oft für Compliance-Audits oder Kunden-RFI ausreichend, ohne Details preiszugeben.</li>
+<li>Distribution: PGP-/S/MIME-verschlüsselt, oder über sichere Plattform (One-Time-Link, Pflicht-MFA).</li>
+<li>Versionierung mit Datum, Versions-Tag, Hash. Frühere Drafts kennzeichnen.</li>
+</ul>
+
+<h4>Anti-Pattern</h4>
+<ul>
+<li>Roh-Scanner-Output als „Bericht" abgeben.</li>
+<li>Findings ohne Reproduktionsschritte.</li>
+<li>Keine Trennung zwischen Beobachtung und Interpretation.</li>
+<li>Sensationelle Adjektive („verheerend", „katastrophal") statt sachlicher Beschreibung.</li>
+<li>Klartext-Credentials oder unredigierte PII in Anhängen.</li>
+<li>Final Report ohne Read-out-Meeting.</li>
+</ul>`
                 }, {
                     title: 'Finding-Schreibweise',
-                    html: `<h4>Finding-Template</h4>
-<ul><li><strong>Title</strong> — prägnant, action-oriented.</li><li><strong>Severity</strong> — CVSS-Score + Business-Risk.</li><li><strong>Description</strong> — Was, Wo, Wie.</li><li><strong>Impact</strong> — konkrete Konsequenzen (Daten-Exfil, Privilege-Escalation, Service-Disruption).</li><li><strong>Reproduction Steps</strong> — nummerierte Schritte mit konkreten URLs/Befehlen.</li><li><strong>Evidence</strong> — Screenshots, HTTP-Requests, Log-Excerpts (redacted).</li><li><strong>Remediation</strong> — konkrete Code-/Konfigurations-Empfehlung mit Standards-Referenz (CWE, OWASP).</li><li><strong>References</strong> — CVE, vendor-Advisory, NIST/MITRE-IDs.</li></ul>
-<h4>Sprache</h4>
-<p>Aktiv, klar, ohne Fachjargon (oder mit Glossar). Keine sensationellen Adjektive („katastrophal“, „verheerend“). Faktenbasiert mit klarer Trennung Beobachtung vs. Interpretation.</p>
-<h4>Severity-Differenzierung</h4>
-<table><tr><th>CVSS</th><th>Aber: Kontext</th></tr><tr><td>9.8 RCE</td><td>nur intern erreichbar → effektiv High statt Critical</td></tr><tr><td>4.0 Info-Disclosure</td><td>betrifft kritische API-Keys → effektiv High</td></tr></table>`
+                    html: `<p>Ein Finding ist ein eigenständiges Mini-Dokument, das jemand ohne Kontext lesen und umsetzen können muss. Die Struktur unterscheidet einen professionellen Bericht von einer Hobby-Liste. Diese Seite zeigt das Standard-Template und die typischen Sprachregeln.</p>
+
+<h4>Standard-Template</h4>
+<p>Jedes Finding folgt derselben Struktur:</p>
+<ul>
+<li><strong>Title</strong> — prägnant, action-oriented. Beispiel: „Stored XSS in Kommentar-Feature ermöglicht Session-Hijacking" statt „XSS-Finding".</li>
+<li><strong>Severity</strong> — CVSS v3.1-Vector + Effektive Severity (siehe vorheriger Abschnitt) + kurzer Begründungssatz.</li>
+<li><strong>Affected Asset</strong> — konkrete Identifikation: URL, IP, Hostname, Cloud-Resource-ARN, Container-Image-Digest. Mehrfachvorkommen aufzählen.</li>
+<li><strong>Description</strong> — was, wo, wie. Sachlich, technisch präzise. Trennt klar zwischen Beobachtung und Interpretation.</li>
+<li><strong>Impact</strong> — konkrete Konsequenzen: Datenexfiltration, Privilege Escalation, Service Disruption. In Geschäftssprache übersetzbar.</li>
+<li><strong>Reproduction Steps</strong> — nummerierte Schritte mit konkreten URLs, Befehlen, Payloads. Ein Entwickler ohne Pentest-Erfahrung muss die Schritte nachvollziehen können.</li>
+<li><strong>Evidence</strong> — Screenshots (mit Annotationen), HTTP-Request/Response (sanitisiert), Befehlszeilen-Output, Log-Excerpts. PII und Klartext-Credentials redacted.</li>
+<li><strong>Remediation</strong> — konkrete Code-/Konfigurations-Empfehlung, idealerweise mit Beispiel-Snippet. Verweis auf Standard (CWE-Nummer, OWASP-Cheat-Sheet, NIST-Control).</li>
+<li><strong>References</strong> — CVE-IDs, Vendor-Advisory-Links, NIST-/MITRE-IDs, OWASP-Cheat-Sheet-Links.</li>
+</ul>
+
+<h4>Beispiel eines guten Findings (gekürzt)</h4>
+<blockquote>
+<p><strong>Title:</strong> Reflected XSS in Suchparameter ermöglicht Session-Hijacking</p>
+<p><strong>Severity:</strong> CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N → 7.6 High. Effektive Severity High, da Authentifizierungs-Cookie ohne <code>HttpOnly</code> gesetzt wird und ein erfolgreicher Angriff vollständige Account-Übernahme ermöglicht.</p>
+<p><strong>Affected Asset:</strong> https://app.beispiel.de/search?q=...</p>
+<p><strong>Description:</strong> Der Parameter <code>q</code> wird im Server-Response in einem <code>&lt;h2&gt;</code>-Tag ohne HTML-Encoding ausgegeben. Eingaben wie <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> werden als Skript ausgeführt.</p>
+<p><strong>Impact:</strong> Angreifer kann beliebigen JavaScript-Code im Browser eines Opfers ausführen, das einen präparierten Link öffnet. Da das Session-Cookie nicht <code>HttpOnly</code> gesetzt ist, ist Session-Hijacking trivial möglich.</p>
+<p><strong>Reproduction:</strong></p>
+<ol>
+<li>Folgenden Link in Browser öffnen: <code>https://app.beispiel.de/search?q=&lt;script&gt;alert(document.cookie)&lt;/script&gt;</code>.</li>
+<li>Beobachten: Alert-Dialog mit Cookie-Inhalt erscheint.</li>
+</ol>
+<p><strong>Evidence:</strong> Screenshot Anhang A.3, HTTP-Request-Trace Anhang A.4.</p>
+<p><strong>Remediation:</strong> Output in HTML-Kontext mit <code>htmlspecialchars()</code> bzw. äquivalentem Framework-Mittel (Spring's <code>th:text</code>, React-JSX-Default-Escape, Django-Template-Auto-Escape) kontextspezifisch encodieren. Zusätzlich Content Security Policy mit Nonce für inline Scripts und <code>HttpOnly</code>+<code>Secure</code>-Flag für Session-Cookies setzen. Referenz: OWASP XSS Prevention Cheat Sheet, CWE-79.</p>
+<p><strong>References:</strong> CWE-79, OWASP Top 10 A03:2021, OWASP XSS Prevention Cheat Sheet.</p>
+</blockquote>
+
+<h4>Sprachregeln</h4>
+<ul>
+<li><strong>Aktiv, klar, technisch präzise.</strong> Passive Konstruktionen verstecken Verantwortlichkeiten.</li>
+<li><strong>Keine sensationellen Adjektive</strong> — „katastrophal", „verheerend" wirken unprofessionell.</li>
+<li><strong>Klare Trennung zwischen Beobachtung und Interpretation.</strong> Beispiel: „Der Server liefert das Cookie ohne <em>HttpOnly</em>-Flag (Beobachtung). Dies ermöglicht clientseitiges JavaScript, den Cookie-Wert zu lesen (Interpretation)."</li>
+<li><strong>Keine Spekulation.</strong> „Es ist möglich, dass …" ohne Beweis gehört nicht in den Bericht.</li>
+<li><strong>Konsistente Terminologie.</strong> Glossar mit definierten Begriffen.</li>
+<li><strong>Keine englisch-deutsch-Mischsprache</strong> innerhalb eines Satzes, außer bei etablierten Fachbegriffen (SSRF, XSS, IAM).</li>
+</ul>
+
+<h4>Visualisierungen</h4>
+<ul>
+<li><strong>Severity-Heatmap</strong> — alle Findings als Punkte in 2D (Wahrscheinlichkeit × Auswirkung).</li>
+<li><strong>Pareto-Chart</strong> — Findings nach Häufigkeit der Klasse, Top-Treiber sichtbar.</li>
+<li><strong>ATT&CK-Heatmap</strong> — gefundene Techniken farbig auf der ATT&CK-Matrix markiert.</li>
+<li><strong>Angriffspfad-Diagramm</strong> — bei Goal-Based-Engagements: Schritte vom Initial-Access bis Domain Admin.</li>
+<li><strong>Trend-Vergleich</strong> bei Re-Tests oder Folge-Engagements.</li>
+</ul>`
                 }, {
-                    title: 'Mitigation Patterns',
-                    html: `<h4>Standard-Mitigations</h4>
-<ul><li><strong>SQLi</strong> — Parameterisierte Queries, ORM, Input-Allowlist, WAF als Defense-in-Depth.</li><li><strong>XSS</strong> — Output-Encoding kontextsensitiv, CSP, HttpOnly + Secure Cookies, SameSite=strict.</li><li><strong>CSRF</strong> — Anti-CSRF-Tokens, SameSite, Origin/Referer-Check.</li><li><strong>SSRF</strong> — Egress-Filter, IMDSv2, Allowlist von Ziel-IPs, Disable internal-Networks.</li><li><strong>IDOR / BOLA</strong> — Server-side Authorization-Check pro Object-Access, niemals client-side.</li><li><strong>Auth Failures</strong> — Rate-Limit, MFA, Account-Lockout, secure Password-Reset, Phishing-Resistente Faktoren.</li></ul>
+                    title: 'Mitigation-Patterns',
+                    html: `<p>Empfehlungen sind nur dann nutzbar, wenn sie konkret, technisch korrekt und an Standards verankert sind. Diese Seite fasst Mitigation-Patterns für die häufigsten Vulnerability-Klassen zusammen — als Referenz, die in Findings direkt zitiert werden kann.</p>
+
+<h4>SQL-Injection</h4>
+<ul>
+<li><strong>Parameterisierte Statements / Prepared Statements</strong> — Trennung Code/Daten in der DB-Schicht. Pflicht-Maßnahme.</li>
+<li><strong>ORM-Framework</strong> mit korrekter Verwendung — keine raw-SQL-Kombinationen mit User-Input.</li>
+<li><strong>Stored Procedures</strong> nur, wenn nicht intern dynamisches SQL.</li>
+<li><strong>Eingabe-Validierung</strong> nach Allowlist (numerische IDs, Längenbeschränkung).</li>
+<li><strong>Least Privilege Database Account</strong> — App-User hat keine DDL-Rechte, kein <code>FILE</code>-Privileg, kein <code>xp_cmdshell</code>.</li>
+<li><strong>WAF</strong> als Defense-in-Depth — niemals Primärschutz.</li>
+</ul>
+
+<h4>Cross-Site Scripting</h4>
+<ul>
+<li><strong>Output-Encoding kontextsensitiv</strong> — HTML-Body, HTML-Attribut, JavaScript, CSS, URL haben unterschiedliche Escape-Regeln. OWASP XSS Prevention Cheat Sheet als Referenz.</li>
+<li><strong>Framework-Auto-Escape nutzen</strong> — React-JSX, Vue-Templates, Django, Razor, Thymeleaf escapen Default-Output.</li>
+<li><strong>Content Security Policy</strong> mit Nonce oder Hash für inline Scripts, <code>script-src 'self'</code> als Mindestmaß.</li>
+<li><strong>HttpOnly + Secure + SameSite</strong> auf Session-Cookies.</li>
+<li><strong>DOMPurify</strong> oder vergleichbare Sanitizer für User-HTML, der gerendert werden muss.</li>
+</ul>
+
+<h4>Cross-Site Request Forgery</h4>
+<ul>
+<li><strong>SameSite=Lax</strong> oder <strong>Strict</strong> auf Session-Cookies (Default in modernen Browsern).</li>
+<li><strong>Anti-CSRF-Token</strong> — Synchronizer-Token-Pattern oder Double-Submit-Cookie.</li>
+<li><strong>Origin-/Referer-Header-Check</strong> für state-changing Requests.</li>
+<li><strong>Re-Authentication</strong> für besonders sensitive Aktionen.</li>
+</ul>
+
+<h4>Server-Side Request Forgery</h4>
+<ul>
+<li><strong>Egress-Allowlist</strong> für ausgehende HTTP-Calls — keine direkten Calls zu beliebigen Zielen.</li>
+<li><strong>IMDSv2 in AWS erzwingen</strong> (Account-Default ab 2024 möglich).</li>
+<li><strong>Block-Listen unzuverlässig</strong> — DNS-Rebinding, IPv6-Mapping, Decimal-IP-Encoding umgehen Listen.</li>
+<li><strong>Separate Egress-Identity</strong> mit minimalen Permissions für externe HTTP-Operationen.</li>
+<li><strong>Web-Application-Firewall-Regel</strong> auf Cloud-Metadata-IPs (169.254.169.254, fd00:ec2::254 für AWS IPv6).</li>
+</ul>
+
+<h4>Broken Object Level Authorization (IDOR/BOLA)</h4>
+<ul>
+<li><strong>Server-seitige Authorization pro Object-Access</strong> — niemals nur clientseitige UI-Kontrolle.</li>
+<li><strong>Object-Identifier-Strategie</strong> — UUIDs statt sequenzieller Integer reduzieren Bruteforce-Risiko, sind aber kein Authorization-Ersatz.</li>
+<li><strong>Policy-Engine</strong> wie Open Policy Agent oder Cedar für komplexe Berechtigungslogik.</li>
+<li><strong>Tests</strong> in CI: jeder Endpoint mit User-A-Token gegen User-B-Object — muss 403 liefern.</li>
+</ul>
+
+<h4>Authentication Failures</h4>
+<ul>
+<li><strong>Phishing-resistente MFA</strong> für privilegierte Konten — FIDO2/WebAuthn.</li>
+<li><strong>Rate-Limiting</strong> mit Account-Lockout nach n Fehlversuchen, ggf. CAPTCHA.</li>
+<li><strong>NIST SP 800-63B Rev. 4 (2024 Public Draft)</strong> — moderne Passwort-Policy: Mindestlänge 8, Memorized-Secret bis 64 Zeichen, keine arbiträren Komplexitätsregeln, Vergleich gegen Breach-Korpus, kein erzwungener Wechsel ohne Anlass.</li>
+<li><strong>Sicherer Password-Reset</strong> — Token mit kurzer Gültigkeit, Single-Use, an verifizierte Adresse.</li>
+<li><strong>Session-Management</strong> — Server-side Invalidation, kurzer Idle-Timeout, Re-Auth für privilegierte Aktionen.</li>
+</ul>
+
 <h4>Defense in Depth</h4>
-<p>Eine Mitigation reicht nicht. Beispiel SSRF: IMDSv2 + Egress-Filter + Web-Application-Firewall + WAF-DLP-Rule auf 169.254.169.254.</p>
-<h4>Kompensierende Kontrollen</h4>
-<p>Wenn Patch nicht umsetzbar (Legacy-System, Vendor-Lock-in): Mikrosegmentierung, IPS-Signature, Application-Allowlisting, Read-Only-Mode, Erhöhung des Monitorings.</p>`
+<p>Eine Mitigation reicht nicht. Beispiel SSRF:</p>
+<ol>
+<li>IMDSv2 Pflicht (Provider-Ebene).</li>
+<li>Egress-Filter (Netzwerk-Ebene).</li>
+<li>WAF-Regel auf Metadata-IPs (Application-Layer).</li>
+<li>Service-Account-Permissions reduziert (IAM-Ebene).</li>
+<li>Detection-Regel im SIEM auf Metadata-Zugriffe (Detection-Ebene).</li>
+</ol>
+<p>Jede Schicht alleine ist umgehbar; die Kombination ist robust.</p>
+
+<h4>Kompensierende Kontrollen bei nicht-patchbaren Systemen</h4>
+<p>Wenn ein Patch nicht möglich ist (Legacy-Anwendung, Vendor-Lock-in, OT-Anlage):</p>
+<ul>
+<li>Mikrosegmentierung — System darf nur mit explizit erlaubten Hosts kommunizieren.</li>
+<li>IPS-Signatur oder virtueller Patch auf vorgelagerten Geräten.</li>
+<li>Application-Allowlisting — nur signierte/genehmigte Binaries dürfen ausgeführt werden.</li>
+<li>Read-Only-Modus, soweit möglich.</li>
+<li>Erhöhte Überwachung — engerer Detection-Fokus, Honey-Token in der Nähe.</li>
+<li>Formale Risk-Acceptance vom Business-Owner mit Reviewdatum.</li>
+</ul>`
                 }, {
-                    title: 'Knowledge-Transfer & Re-Test',
-                    html: `<h4>Read-out-Meeting</h4>
-<ul><li>1–2 Stunden, Stakeholder gemischt (Tech + Mgmt).</li><li>Top-Findings live gezeigt (Demo statt Screenshot).</li><li>Kontext zu Threat-Landscape und Trend.</li><li>Q&A.</li></ul>
-<h4>Workshops</h4>
-<p>Bei größeren Engagements separate Tech-Workshops mit Dev/Ops, in denen Code-Snippets gemeinsam geprüft werden. Erhöht Remediation-Quality drastisch.</p>
-<h4>Re-Test-Pflicht</h4>
-<p>Re-Test nach Remediation. Findings als <strong>Fixed</strong> (verifiziert), <strong>Partial Fix</strong> (Mitigation aber nicht voll), <strong>Risk Accepted</strong> (mit formalem Sign-off), <strong>Open</strong> (nicht behoben).</p>
-<h4>Lessons Learned fürs Programm</h4>
-<p>Wiederkehrende Patterns (z. B. fehlende Output-Encoding) als systemisches Problem behandeln — Awareness, Threat-Modeling-Reife, Secure-Coding-Trainings.</p>
+                    title: 'Knowledge-Transfer und Re-Test',
+                    html: `<p>Ein Bericht ohne anschließenden Knowledge-Transfer wird selten vollständig umgesetzt. Reife Engagements enden nicht mit der PDF-Übergabe, sondern mit einem Read-out, optional Workshops und einem Re-Test. Diese Seite zeigt, wie diese Phasen aussehen.</p>
+
+<h4>Read-out-Meeting</h4>
+<p>Das Read-out ist die formale Übergabe der Findings an den Auftraggeber. Format:</p>
+<ul>
+<li><strong>Dauer</strong> 1–2 Stunden, abhängig von Engagement-Größe.</li>
+<li><strong>Stakeholder gemischt</strong> — Tech-Leads, Security-Verantwortliche, ggf. Management. Bei sehr sensitiven Findings separate Sessions für Tech und Management.</li>
+<li><strong>Top-Findings live demonstriert</strong>, nicht nur Screenshots gezeigt. Eine Live-Demo eines BloodHound-Pfades zu Domain-Admin ist überzeugender als jede Folie.</li>
+<li><strong>Kontext zur Threat-Landscape</strong> — wie passt dieses Finding ins Bild aktueller Aktorgruppen, was sagt Mandiant M-Trends, MITRE ATT&CK?</li>
+<li><strong>Q&A</strong> — Mindestens 30 Minuten reserviert.</li>
+<li><strong>Kein Verkaufsgespräch.</strong> Read-out ist Wissenstransfer, kein Pitch für Folgeaufträge.</li>
+</ul>
+
+<h4>Workshops bei größeren Engagements</h4>
+<p>Bei umfangreichen Engagements helfen separate technische Workshops mit Dev-/Ops-Teams enorm:</p>
+<ul>
+<li><strong>Code-Review-Session</strong> — gemeinsam mit Entwicklern den verwundbaren Code-Pfad ansehen, Fix-Vorschläge prüfen.</li>
+<li><strong>Architecture-Review</strong> — strukturelle Schwächen (fehlende Mikrosegmentierung, falsches Tier-Modell) im Whiteboard durchgehen.</li>
+<li><strong>Threat-Modeling</strong> für ein neues Feature — Attacker-Perspektive im Designprozess verankern.</li>
+<li><strong>Purple-Team-Session</strong> — Findings mit Blue-Team durchspielen, Detection-Coverage prüfen.</li>
+</ul>
+<p>Erfahrung zeigt: Workshops verdoppeln die Remediation-Quote im Vergleich zu reinen Bericht-Übergaben.</p>
+
+<h4>Re-Test</h4>
+<p>Re-Test verifiziert, dass Findings tatsächlich behoben sind:</p>
+<ul>
+<li><strong>Scope</strong> auf gemeldete Findings begrenzt; keine erneute Voll-Engagement.</li>
+<li><strong>Status pro Finding</strong>: Fixed (verifiziert), Partial Fix (Mitigation reduziert Risiko, Lücke nicht voll geschlossen), Risk Accepted (formales Sign-off mit Begründung und Reviewdatum), Open (nicht behoben — Eskalation).</li>
+<li><strong>Re-Test-Bericht</strong> — Delta-Bericht zum Hauptbericht, klare Statusliste.</li>
+<li><strong>Zeitfenster</strong> — typisch 30–60 Tage nach Hauptbericht, im SOW geregelt.</li>
+</ul>
+<p>Reife Programme tracken Re-Test-Fortschritt im Risk-Register und melden Ergebnisse als KPI an Management.</p>
+
+<h4>Lessons Learned und programmweite Verbesserungen</h4>
+<p>Wiederkehrende Patterns sind systemische Probleme, keine Einzel-Bugs. Beispiele:</p>
+<ul>
+<li>Findings-Cluster „fehlendes Output-Encoding" → Awareness-Defizit oder fehlerhafter Framework-Default → Schulung + Code-Review-Checkliste.</li>
+<li>Findings-Cluster „IAM-Wildcards in Cloud" → fehlendes IaC-Linting → Checkov/tfsec/KICS in CI integrieren.</li>
+<li>Findings-Cluster „Default-Credentials" → fehlendes Secret-Management → Vault/AWS-Secrets-Manager etablieren.</li>
+<li>Findings-Cluster „NTLM überall" → fehlendes Tier-Modell → Enterprise-AD-Reife-Programm.</li>
+</ul>
+<p>Strategic Recommendations im Bericht adressieren diese Cluster auf Programmebene.</p>
+
 <h4>Documentation Hygiene</h4>
-<p>Reports verschlüsselt übermitteln (PGP, S/MIME, dedizierte sichere Plattform). Versionierung mit Datum + Hash. Aufbewahrung gemäß NDA-Frist; Sicherer Lebensende mit Crypto-Erase.</p>`
+<ul>
+<li><strong>Verschlüsselte Übermittlung</strong> — PGP, S/MIME oder dedizierte sichere Plattform mit One-Time-Link und Pflicht-MFA.</li>
+<li><strong>Versionierung</strong> — Datum, Versions-Tag (Draft v0.9, Final v1.0, Re-Test Addendum v1.1), Hash der finalen Version.</li>
+<li><strong>NDA-konforme Aufbewahrung</strong> — typisch 12–36 Monate beim Tester, danach sichere Vernichtung.</li>
+<li><strong>Crypto-Erase</strong> bei Engagement-Ende — die im Engagement gesammelten Daten (Tool-Output, Loot, Forensik-Snippets) müssen nachweislich gelöscht werden.</li>
+<li><strong>Chain of Custody</strong> für besonders sensitive Findings, z. B. wenn personenbezogene Daten gefunden wurden.</li>
+</ul>
+
+<h4>Ethische Pflichten am Engagement-Ende</h4>
+<ul>
+<li>Alle Test-Konten/Backdoors/persistente Implants entfernt — verifiziert.</li>
+<li>Keine Findings im Marketing-Material veröffentlichen, auch nicht anonymisiert, ohne Kunden-Freigabe.</li>
+<li>Keine zur eigenen Tool-Entwicklung verwendeten Daten behalten.</li>
+<li>Falls ein Finding im Engagement aktive Drittangriffe aufgedeckt hat: vertraulicher Hinweis an den Kunden, ggf. an CERT/CISA/BSI nach Rücksprache.</li>
+</ul>`
                 }],
                 quiz: [
                     q('Welche Sektion gehört zu Beginn eines C-Level-Reports?', ['Executive Summary', 'Hex-Dumps', 'CLI-Befehle', 'Tool-Logs'], 0, 'C-Level-Audience erwartet 1–2-seitige Zusammenfassung.'),
