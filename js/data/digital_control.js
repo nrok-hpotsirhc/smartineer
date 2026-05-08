@@ -33,7 +33,7 @@
             <strong>Jury-Kriterium</strong> (notwendige Bedingungen)<br>
             $P(1)>0$, $(-1)^n P(-1)>0$, $|a_0|<a_n$<br><br>
             <strong>ZOH-Äquivalent</strong><br>
-            $G(z)=(1-z^{-1})\\,\\mathcal{Z}\\!\\left\{\\dfrac{G(s)}{s}\\right\}$<br><br>
+            $G(z)=(1-z^{-1})\\,\\mathcal{Z}\\!\\left\\{\\dfrac{G(s)}{s}\\right\\}$<br><br>
             <strong>Bilineare Frequenz-Verzerrung (Pre-Warping)</strong><br>
             $\\omega_d=\\dfrac{2}{T_s}\\tan\\!\\dfrac{\\omega T_s}{2}$<br><br>
             <strong>FIR vs. IIR</strong><br>

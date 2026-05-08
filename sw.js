@@ -5,7 +5,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v5-redesign';
+const CACHE_VERSION = 'smartineer-v6-schueler-cyber';
 const APP_SHELL = [
     './',
     './index.html',
@@ -22,6 +22,8 @@ const APP_SHELL = [
     './js/data/blockchain.js',
     './js/data/neural_nets.js',
     './js/data/plc.js',
+    './js/data/cyber_security.js',
+    './js/data/schueler.js',
     './icons/icon.svg',
     './icons/icon-192.svg',
     './icons/icon-512.svg'

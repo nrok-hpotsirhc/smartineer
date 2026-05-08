@@ -9,7 +9,7 @@ Dieses Dokument richtet sich an **menschliche Entwickler** und **AI-Coding-Agent
 
 ## 1. Projekt-Mission
 
-Smartineer ist eine **statische Single-Page-Anwendung** zum Reaktivieren von Ingenieurs-Studienwissen über 9 Kategorien × 3 Schwierigkeitsstufen.
+Smartineer ist eine **statische Single-Page-Anwendung** zum Reaktivieren von Ingenieurs-Studienwissen über 11 Kategorien × 3 Schwierigkeitsstufen, ergänzt um einen Schüler-Bereich (Klassen 1–10, Mathematik aktiv für 1–4).
 
 **Nicht-Ziele** (bewusst weggelassen):
 - Kein Backend, keine Datenbank, kein Auth.
@@ -271,9 +271,9 @@ Folgende DOM-IDs/Klassen sind Vertrag zwischen `index.html`, `css/styles.css` un
 Minimum-Set:
 
 1. `get_errors` (oder Linter) auf alle geänderten `js/**/*.js` Dateien.
-2. `index.html` lokal öffnen, alle 9 Kategorien durchklicken, mind. eine L1/L2/L3-Aufgabe je Kategorie betrachten — KaTeX rendert?
+2. `index.html` lokal öffnen, alle 11 Kategorien durchklicken, mind. eine L1/L2/L3-Aufgabe je Kategorie betrachten — KaTeX rendert?
 3. Cheatsheet-Reiter "Formeln" und "Musterlösungen" prüfen — keine Render-Fehler?
-4. Dashboard: Radar zeigt alle 9 Kategorien?
+4. Dashboard: Radar zeigt alle 11 Kategorien?
 5. "Fortschritt zurücksetzen" funktioniert?
 
 ---
@@ -344,3 +344,74 @@ Eine PR/Änderung gilt als fertig, wenn:
 - [ ] README-Aufgabenzähler/Tabelle aktualisiert (falls Gesamtzahl geändert).
 - [ ] Keine Änderung an Storage-Key ohne `_vN`-Bump.
 - [ ] Diese Datei (`AGENTS.md`) aktualisiert, falls neue Konvention eingeführt wurde.
+
+---
+
+## 17. Schüler-Bereich (Mathematik Klasse 1–10, später Englisch ab Klasse 5)
+
+Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Track:
+
+- Eigener Top-Level-Nav-Tab "Schüler" (links neben dem Theme-Toggle).
+- Eigene Datendatei `js/data/schueler.js` mit globalem `window.SCHUELER`.
+- Eigener Komponenten-Block `Schueler` in `app.jsx` (Stages: `classes` → `subjects` → `drill` → `result`).
+- **Eigener** Storage-Namespace (Prefix `smartineer_schueler_*`); der Ingenieurs-Storage-Key (`wissen_reloaded_progress_v1`) wird **nicht** angefasst.
+- KaTeX wird im Drill mitgerendert (nur falls eine Aufgabe `$...$` enthält); die generierten Klasse-1/2-Aufgaben sind reiner Text.
+
+### 17.1 Datenstruktur (`window.SCHUELER`)
+
+```js
+{
+    classes:  [{ id: 'k1', label: 'Klasse 1', subjects: ['mathe'] }, ... ],
+    subjects: { mathe: { label: 'Mathematik' }, englisch: { label: 'Englisch' } },
+    content: {
+        'k1.mathe': { mode: 'generated', gen: () => ({ q, a }), note: '...' },
+        'k3.mathe': { mode: 'pool',      pool: [{ q, a }, ...],  note: '...' },
+        'k5.mathe': { mode: 'stub' },
+        ...
+    },
+    normalize: (s) => s.trim().replace(/\s+/g, '').replace(/,/g, '.').toLowerCase()
+}
+```
+
+`mode`-Werte:
+
+- `generated` — Aufgaben werden über `gen()` prozedural erzeugt (Klasse 1–2, gut für unbegrenzte Wiederholungen).
+- `pool` — Aufgaben werden zufällig aus einem festen, kuratierten Array gezogen (Klasse 3–4, garantiert Lehrplan-Coverage).
+- `stub` — UI zeigt "in Vorbereitung" und deaktiviert die Karte.
+
+### 17.2 UX-Vertrag
+
+- **Sets von genau 10 Aufgaben.** Keine Konfiguration der Set-Größe durch User.
+- **Kein Multiple-Choice.** Eingabe ausschließlich als Text/Zahl. Antwort-Vergleich erfolgt nach Normalisierung (Whitespace weg, Komma → Punkt, Lowercase).
+- **Kein Hint, keine Musterlösung während des Drills** — Schüler sollen handschriftlich rechnen.
+- Endbildschirm: Anzahl korrekt/falsch, Quote in %, Liste aller 10 Aufgaben mit eigener Antwort und (bei Fehler) der Musterlösung.
+- Buttons am Ende: "Neuer Durchgang", "Anderes Fach", "Andere Klasse".
+- Eingabefeld nutzt eigene Klasse `.schueler-input` (groß, zentriert) — Default heller Hintergrund, dunkler im Dark-Mode.
+- Bei Klassen 3+4 zusätzlich Hinweis: *"Rechne wenn nötig im Heft, gib hier nur das Endergebnis ein."*
+
+### 17.3 Aufgabenverteilung (verbindlich)
+
+| Klasse | Modus    | Inhalte                                                                                |
+|--------|----------|----------------------------------------------------------------------------------------|
+| 1      | generated| Plus/Minus im Zahlenraum bis 20 (überwiegend ohne Zehnerübergang).                     |
+| 2      | generated| Plus/Minus bis 100, Vorübung Einmaleins (×2, ×5, ×10).                                 |
+| 3      | pool     | Vollständiges kleines 1×1, Geteilt aus 1×1, schriftliche Addition/Subtraktion bis 1000.|
+| 4      | pool     | Halbschriftliches/schriftliches Mal/Geteilt, Division mit Rest, einfache Sachaufgaben.  |
+| 5–10   | stub     | Mathematik in Vorbereitung; Englisch ab Klasse 5 ebenfalls in Vorbereitung.            |
+
+### 17.4 Erweiterungsregeln
+
+- **Neue Aufgabe für Klasse 3 oder 4 hinzufügen**: an das passende `pool_*`-Array anhängen (Reihenfolge irrelevant — die UI sampelt zufällig).
+- **Neuen Generator (Klasse 1 oder 2)**: rein deterministisches `gen()` schreiben; immer `{ q: string, a: string }` zurückgeben. Antwort als String, damit `normalize()` greift. Schwerere Generatoren (z.B. Zehnerübergang) in eigene Funktion auslagern und in `gen_klasse2_mathe` per Wahrscheinlichkeit einsteuern.
+- **Klasse 5–10 freischalten**: `mode: 'stub'` durch `pool` oder `generated` ersetzen, `pool`/`gen` und `note` ergänzen. UI braucht keine Änderung — die Karten werden automatisch aktiv.
+- **Englisch ab Klasse 5**: gleiches Schema (`{ q, a }`). Da Antworten Texte sein können, muss `normalize()` ggf. erweitert werden (z.B. Bindestriche, Apostrophe). Vor Erweiterung in einem Issue diskutieren.
+- **Antwortformat-Konventionen** dokumentieren: Sachaufgaben — Antworten ohne Einheit; Division-mit-Rest — Format `qRr` (z.B. `7R3`), Vergleich case-insensitiv über `normalize()`.
+
+### 17.5 Anti-Pattern
+
+- Schüler-Aufgaben in eine Ingenieurs-Kategorie mischen.
+- Antworten in `q` oder `a` mit HTML-Tags, die User-Input rendern (XSS-Risiko) — beide Felder sind Plain-Text.
+- Multiple-Choice-Komponente einführen (nicht im Konzept).
+- Fortschritt der Schüler in `wissen_reloaded_progress_v1` schreiben.
+- Set-Größe ändern oder konfigurierbar machen (10 ist hart kodiert).
+

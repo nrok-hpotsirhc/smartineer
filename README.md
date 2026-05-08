@@ -1,6 +1,6 @@
 # Smartineer — Engineering Knowledge Reloaded
 
-Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 10 Kategorien, 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie (~300 gesamt) und mit isolierten Musterlösungen samt Rechenweg.
+Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 11 Kategorien, 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie (~330 gesamt) und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–4 (Klassen 5–10 und Englisch in Vorbereitung).
 
 > **Stack**: React 18 (CDN, JSX via Babel-standalone) · Tailwind CSS (CDN) · Chart.js · KaTeX  
 > **Auslieferung**: Klassische Website **und** installierbare PWA (Desktop, Android, iOS)  
@@ -26,7 +26,7 @@ Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein e
 
 ## Features
 
-- **10 Kategorien**: Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3)
+- **11 Kategorien**: Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3), Cyber Security
 - **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **10 Aufgaben** = ~**270 Aufgaben** insgesamt
 - **KaTeX-gerenderte Formeln** in Aufgaben, Hinweisen und Lösungen
 - **React-UI** (Hooks, Functional Components) mit weichen Übergangs-Animationen, Gradient-Hero, animierten Fortschrittsbalken und Hover-Effekten

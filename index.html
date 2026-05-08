@@ -23,6 +23,18 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 
     <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Pre-Paint Theme: setzt theme-Klasse vor Render, vermeidet Flicker. Default = dark. -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('smartineer_theme_v1') || 'dark';
+                document.documentElement.classList.add('theme-' + t);
+            } catch (e) {
+                document.documentElement.classList.add('theme-dark');
+            }
+        })();
+    </script>
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -49,6 +61,8 @@
     <script src="js/data/blockchain.js"></script>
     <script src="js/data/neural_nets.js"></script>
     <script src="js/data/plc.js"></script>
+    <script src="js/data/cyber_security.js"></script>
+    <script src="js/data/schueler.js"></script>
 
     <!-- React + ReactDOM (UMD via CDN) und Babel-standalone (JSX-Transform im Browser) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>

@@ -6,6 +6,7 @@ const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 const STORAGE_KEY = 'wissen_reloaded_progress_v1';
 const INSTALL_DISMISS_KEY = 'smartineer_install_dismissed_v1';
+const THEME_KEY = 'smartineer_theme_v1'; // 'dark' | 'light' (Default: 'dark')
 
 // ---------------------------------------------------------------- Hooks
 function useProgress() {
@@ -59,14 +60,15 @@ function categoryStats(cat, isSolved) {
 }
 
 // ---------------------------------------------------------------- Nav
-function Nav({ view, setView }) {
+function Nav({ view, setView, theme, onToggleTheme }) {
     const items = [
         { id: 'dashboard', label: 'Dashboard' },
         { id: 'training', label: 'Training' },
-        { id: 'cheatsheet', label: 'Cheatsheets' }
+        { id: 'cheatsheet', label: 'Cheatsheets' },
+        { id: 'schueler', label: 'Schüler' }
     ];
     return (
-        <nav className="sticky top-0 z-40 backdrop-blur-md bg-slate-900/90 text-white shadow-lg border-b border-slate-700/50 w-full">
+        <nav className="nav-glass sticky top-0 z-40 backdrop-blur-md bg-slate-900/90 text-white shadow-lg border-b border-slate-700/50 w-full">
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                 <div className="flex justify-between gap-2 h-16 items-center min-w-0">
                     <a href="./" className="flex items-center gap-2 min-w-0 flex-shrink" aria-label="Smartineer Home">
@@ -80,13 +82,19 @@ function Nav({ view, setView }) {
                             return (
                                 <button key={it.id}
                                     onClick={() => setView(it.id)}
-                                    className={`nav-btn whitespace-nowrap px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${active
+                                    className={`nav-btn whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${active
                                         ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30'
                                         : 'text-slate-300 hover:text-white hover:bg-slate-700/60'}`}>
                                     {it.label}
                                 </button>
                             );
                         })}
+                        <button onClick={onToggleTheme}
+                            title={theme === 'dark' ? 'Auf hell umschalten' : 'Auf dunkel umschalten'}
+                            aria-label="Farbschema umschalten"
+                            className="ml-1 sm:ml-2 whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium border border-slate-600 text-slate-200 hover:bg-slate-700/60 transition">
+                            {theme === 'dark' ? 'Hell' : 'Dunkel'}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -193,8 +201,8 @@ function Dashboard({ data, order, isSolved, onOpenCategory, onReset, onInstall }
     return (
         <section className="view-fade">
             <div className="text-center max-w-3xl mx-auto mb-10">
-                <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-slate-900 via-blue-800 to-cyan-700 bg-clip-text text-transparent">Willkommen zurück, Ingenieur.</h1>
-                <p className="text-base md:text-lg text-slate-600">Reaktiviere systematisch dein Wissen in {order.length} Kategorien. Jede gelöste Aufgabe füllt das Wissensradar — Fortschritt wird lokal gespeichert.</p>
+                <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-slate-900 via-blue-800 to-cyan-700 bg-clip-text text-transparent">Smartineer — dein Lern-Cockpit.</h1>
+                <p className="text-base md:text-lg text-slate-600">Reaktiviere Ingenieurs-Wissen über drei Schwierigkeitsstufen oder wechsle in den Schüler-Bereich für Mathematik der Klassen 1–10. Fortschritt wird lokal gespeichert.</p>
             </div>
 
             <div className="bg-gradient-to-br from-white via-white to-blue-50/40 rounded-2xl shadow-sm border border-slate-200 p-6 md:p-10 flex flex-col md:flex-row items-center gap-8 mb-10">
@@ -495,6 +503,217 @@ function Cheatsheet({ data, order }) {
     );
 }
 
+// ---------------------------------------------------------------- Schüler-Bereich
+function Schueler() {
+    const SCH = window.SCHUELER;
+    const [stage, setStage] = useState('classes'); // classes | subjects | drill | result
+    const [klass, setKlass] = useState(null);
+    const [subject, setSubject] = useState(null);
+    const [items, setItems] = useState([]);
+    const [idx, setIdx] = useState(0);
+    const [answers, setAnswers] = useState([]);
+    const [val, setVal] = useState('');
+
+    const drillRef = useKaTeX([stage, idx]);
+    const resultRef = useKaTeX([stage, answers.length]);
+
+    if (!SCH) {
+        return <section className="view-fade p-8 text-red-700">Schüler-Daten nicht geladen. Prüfe <code>js/data/schueler.js</code> in <code>index.html</code>.</section>;
+    }
+
+    const startDrill = (klassId, subjId) => {
+        const key = `${klassId}.${subjId}`;
+        const cfg = SCH.content[key];
+        if (!cfg || cfg.mode === 'stub') return;
+        let arr = [];
+        if (cfg.mode === 'generated') {
+            for (let i = 0; i < 10; i++) arr.push(cfg.gen());
+        } else if (cfg.mode === 'pool') {
+            const pool = cfg.pool.slice();
+            for (let i = 0; i < 10 && pool.length; i++) {
+                const k = Math.floor(Math.random() * pool.length);
+                arr.push(pool.splice(k, 1)[0]);
+            }
+        }
+        setKlass(klassId); setSubject(subjId);
+        setItems(arr); setIdx(0); setAnswers([]); setVal('');
+        setStage('drill');
+    };
+
+    const submit = () => {
+        if (!val.trim()) return;
+        const item = items[idx];
+        const correct = SCH.normalize(val) === SCH.normalize(item.a);
+        const next = answers.concat([{ q: item.q, expected: item.a, given: val, correct }]);
+        setAnswers(next); setVal('');
+        if (idx + 1 >= items.length) setStage('result');
+        else setIdx(idx + 1);
+    };
+
+    const onKey = (e) => { if (e.key === 'Enter') submit(); };
+
+    // ---------- Stage: Klassen-Auswahl ----------
+    if (stage === 'classes') {
+        return (
+            <section className="view-fade">
+                <div className="text-center max-w-3xl mx-auto mb-8">
+                    <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schüler-Bereich</h1>
+                    <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–4. Klassen 5–10 sind in Vorbereitung; Englisch folgt ab Klasse 5.</p>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {SCH.classes.map((c, i) => {
+                        const ready = c.subjects.some(s => {
+                            const cfg = SCH.content[`${c.id}.${s}`];
+                            return cfg && cfg.mode !== 'stub';
+                        });
+                        return (
+                            <button key={c.id}
+                                onClick={() => { setKlass(c.id); setStage('subjects'); }}
+                                style={{ animationDelay: `${i * 50}ms` }}
+                                className="card-fade group bg-white rounded-2xl border border-slate-200 p-5 text-left hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 transition-all">
+                                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Klassenstufe</div>
+                                <div className="text-2xl font-extrabold text-slate-800 mb-2">{c.label}</div>
+                                <div className={`text-xs font-bold px-2 py-1 rounded-full inline-block ${ready ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                    {ready ? 'verfügbar' : 'in Vorbereitung'}
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            </section>
+        );
+    }
+
+    // ---------- Stage: Fächer-Auswahl ----------
+    if (stage === 'subjects') {
+        const klassObj = SCH.classes.find(c => c.id === klass);
+        if (!klassObj) { setStage('classes'); return null; }
+        return (
+            <section className="view-fade">
+                <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{klassObj.label} — Fach wählen</h1>
+                    <button onClick={() => setStage('classes')}
+                        className="px-4 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition">← Klassenübersicht</button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {klassObj.subjects.map(s => {
+                        const cfg = SCH.content[`${klass}.${s}`];
+                        const ready = cfg && cfg.mode !== 'stub';
+                        return (
+                            <button key={s}
+                                onClick={() => { if (ready) startDrill(klass, s); }}
+                                disabled={!ready}
+                                className={`text-left bg-white rounded-2xl border border-slate-200 p-6 transition ${ready
+                                    ? 'hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer'
+                                    : 'opacity-60 cursor-not-allowed'}`}>
+                                <h3 className="text-xl font-bold text-slate-800 mb-2">{SCH.subjects[s].label}</h3>
+                                <p className="text-sm text-slate-600 mb-3">{ready && cfg.note ? cfg.note : 'In Vorbereitung. Bald verfügbar.'}</p>
+                                <span className={`text-xs font-bold px-2 py-1 rounded-full ${ready ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                    {ready ? '10 Aufgaben starten' : 'in Vorbereitung'}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </section>
+        );
+    }
+
+    // ---------- Stage: Drill (10 Aufgaben) ----------
+    if (stage === 'drill') {
+        const item = items[idx];
+        if (!item) { setStage('classes'); return null; }
+        return (
+            <section className="view-fade max-w-2xl mx-auto" ref={drillRef}>
+                <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                    <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+                        Aufgabe {idx + 1} von {items.length}
+                    </div>
+                    <button onClick={() => { if (window.confirm('Drill abbrechen? Antworten gehen verloren.')) setStage('classes'); }}
+                        className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2 mb-6 overflow-hidden">
+                    <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 transition-all duration-500"
+                         style={{ width: `${(idx / items.length) * 100}%` }}></div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 task-fade" key={idx}>
+                    <div className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-8 math-block">
+                        {item.q}
+                    </div>
+                    <input type="text" inputMode="text" autoComplete="off" autoCapitalize="off" autoFocus
+                        value={val} onChange={(e) => setVal(e.target.value)} onKeyDown={onKey}
+                        placeholder="Deine Antwort"
+                        className="schueler-input mb-4" />
+                    <button onClick={submit} disabled={!val.trim()}
+                        className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
+                        Antwort prüfen
+                    </button>
+                    <p className="text-xs text-slate-500 text-center mt-3">Hinweis: Rechne wenn nötig im Heft, gib hier nur das Endergebnis ein.</p>
+                </div>
+            </section>
+        );
+    }
+
+    // ---------- Stage: Ergebnis ----------
+    if (stage === 'result') {
+        const correct = answers.filter(a => a.correct).length;
+        const wrong = answers.length - correct;
+        const klassObj = SCH.classes.find(c => c.id === klass);
+        return (
+            <section className="view-fade max-w-3xl mx-auto" ref={resultRef}>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
+                    <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Auswertung</h2>
+                    <p className="text-slate-600 mb-6">{klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}</p>
+                    <div className="flex justify-center gap-8 mb-4">
+                        <div>
+                            <div className="text-5xl font-extrabold text-emerald-600">{correct}</div>
+                            <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">richtig</div>
+                        </div>
+                        <div>
+                            <div className="text-5xl font-extrabold text-rose-600">{wrong}</div>
+                            <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">falsch</div>
+                        </div>
+                        <div>
+                            <div className="text-5xl font-extrabold text-slate-700">{Math.round((correct / answers.length) * 100)}%</div>
+                            <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">Quote</div>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+                    <h3 className="font-bold text-slate-800 mb-4">Aufgaben im Überblick</h3>
+                    <ol className="flex flex-col gap-3">
+                        {answers.map((a, i) => (
+                            <li key={i} className={`p-3 rounded-lg border-l-4 ${a.correct ? 'border-emerald-400 bg-emerald-50' : 'border-rose-400 bg-rose-50'}`}>
+                                <div className="font-bold text-slate-800">{i + 1}. {a.q}</div>
+                                <div className="text-sm mt-1">
+                                    Deine Antwort: <strong className={a.correct ? 'text-emerald-700' : 'text-rose-700'}>{a.given || '—'}</strong>
+                                    {!a.correct && <span className="text-slate-700"> · richtig: <strong>{a.expected}</strong></span>}
+                                </div>
+                            </li>
+                        ))}
+                    </ol>
+                </div>
+                <div className="flex flex-wrap gap-3 justify-center">
+                    <button onClick={() => startDrill(klass, subject)}
+                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
+                        Neuer Durchgang (10 Aufgaben)
+                    </button>
+                    <button onClick={() => setStage('subjects')}
+                        className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">
+                        Anderes Fach
+                    </button>
+                    <button onClick={() => setStage('classes')}
+                        className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">
+                        Andere Klasse
+                    </button>
+                </div>
+            </section>
+        );
+    }
+
+    return null;
+}
+
 // ---------------------------------------------------------------- Install Prompt
 function detectPlatform() {
     const ua = navigator.userAgent || '';
@@ -580,6 +799,22 @@ function App() {
     const [currentCat, setCurrentCat] = useState(order[0] || null);
     const { isSolved, setSolved, reset } = useProgress();
 
+    // Theme: Default dunkel. Pre-paint-Skript in index.html setzt die Klasse bereits am <html>,
+    // hier wird der State synchron daraus initialisiert und bei Änderung sowohl <html> als auch <body> markiert.
+    const [theme, setTheme] = useState(() => {
+        try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch (e) { return 'dark'; }
+    });
+    useEffect(() => {
+        const el = document.documentElement;
+        const body = document.body;
+        el.classList.remove('theme-dark', 'theme-light');
+        body.classList.remove('theme-dark', 'theme-light');
+        el.classList.add('theme-' + theme);
+        body.classList.add('theme-' + theme);
+        try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* quota */ }
+    }, [theme]);
+    const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+
     // PWA Install
     const [deferredEvent, setDeferredEvent] = useState(null);
     const [installOpen, setInstallOpen] = useState(false);
@@ -632,7 +867,7 @@ function App() {
 
     return (
         <>
-            <Nav view={view} setView={setView} />
+            <Nav view={view} setView={setView} theme={theme} onToggleTheme={toggleTheme} />
             <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {view === 'dashboard' && (
                     <Dashboard data={data} order={order} isSolved={isSolved}
@@ -646,6 +881,9 @@ function App() {
                 )}
                 {view === 'cheatsheet' && (
                     <Cheatsheet data={data} order={order} />
+                )}
+                {view === 'schueler' && (
+                    <Schueler />
                 )}
             </main>
             <footer className="bg-slate-900 text-slate-400 py-6 text-center text-sm mt-auto">
