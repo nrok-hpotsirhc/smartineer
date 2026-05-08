@@ -14,6 +14,17 @@ html, body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Verankerung: Seite darf horizontal nicht über den Viewport hinaus gezogen werden. */
+html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+}
+body {
+    position: relative;
+}
+
 /* iOS PWA: Notch / Safe-Area */
 body {
     padding-top: env(safe-area-inset-top, 0);
@@ -25,7 +36,39 @@ body {
 /* ---------- Hilfsklassen ---------- */
 .hide { display: none !important; }
 .math-block { overflow-x: auto; padding: 0.5rem 0; line-height: 1.7; }
-.math-block .katex-display { margin: 0.6em 0; }
+.math-block .katex-display { margin: 0.6em 0; max-width: 100%; }
+
+/* KaTeX-Block-Formeln dürfen den Container nicht sprengen */
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+}
+.katex-display > .katex { white-space: nowrap; }
+
+/* Lange Code-/Pre-Blöcke (z.B. PLC) niemals über den Container hinaus */
+pre, code {
+    max-width: 100%;
+    overflow-x: auto;
+    word-break: normal;
+}
+pre {
+    white-space: pre;
+}
+
+/* Tabellen in Aufgabentexten dürfen scrollen, nicht überlaufen */
+.task-question table,
+.task-hint table,
+.task-solution table,
+.cheatsheet-formulas table,
+.cheatsheet-solutions table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Bilder/SVGs respektieren Container */
+img, svg { max-width: 100%; height: auto; }
 
 /* ---------- Chart-Container ---------- */
 .chart-container {

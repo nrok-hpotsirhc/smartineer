@@ -121,7 +121,7 @@
                 {
                     q: 'Verifiziere, dass $R(\\theta)R(\\phi) = R(\\theta+\\phi)$ für 2D-Rotationsmatrizen gilt.',
                     h: 'Standard 2D-Rotationsmatrix multiplizieren und Additionstheoreme nutzen.',
-                    s: '$R(\\theta)R(\\phi)=\\begin{pmatrix}c\\theta & -s\\theta\\\\ s\\theta & c\\theta\\end{pmatrix}\\!\\begin{pmatrix}c\\phi & -s\\phi\\\\ s\\phi & c\\phi\\end{pmatrix}$<br>$=\\begin{pmatrix}c\\theta c\\phi - s\\theta s\\phi & -c\\theta s\\phi - s\\theta c\\phi\\\\ s\\theta c\\phi + c\\theta s\\phi & -s\\theta s\\phi + c\\theta c\\phi\\end{pmatrix}=\\begin{pmatrix}c(\\theta+\\phi) & -s(\\theta+\\phi)\\\\ s(\\theta+\\phi) & c(\\theta+\\phi)\\end{pmatrix}=R(\\theta+\\phi)$. ✓'                },
+                    s: '$R(\\theta)R(\\phi)=\\begin{pmatrix}c\\theta & -s\\theta\\\\ s\\theta & c\\theta\\end{pmatrix}\\!\\begin{pmatrix}c\\phi & -s\\phi\\\\ s\\phi & c\\phi\\end{pmatrix}$<br>$=\\begin{pmatrix}c\\theta c\\phi - s\\theta s\\phi & -c\\theta s\\phi - s\\theta c\\phi\\\\ s\\theta c\\phi + c\\theta s\\phi & -s\\theta s\\phi + c\\theta c\\phi\\end{pmatrix}=\\begin{pmatrix}c(\\theta+\\phi) & -s(\\theta+\\phi)\\\\ s(\\theta+\\phi) & c(\\theta+\\phi)\\end{pmatrix}=R(\\theta+\\phi)$.'                },
                 {
                     q: 'Statisches Gleichgewicht: planarer 2-Arm-Roboter ($l_1=l_2=1$) hält am Endeffektor eine Last $F=(0,-10)^T\\,\\text{N}$. Konfiguration $\\theta_1=0°,\\theta_2=90°$. Welche Gelenkdrehmomente $\\tau$ sind nötig?',
                     h: '$\\tau=J^T F$ mit $J$ aus L2.2.',
@@ -130,7 +130,7 @@
                 {
                     q: 'Schiefsymmetrische Matrix: bestimme $[\\omega]_\\times$ für $\\omega=(1,2,3)^T$ und verifiziere $[\\omega]_\\times v = \\omega\\times v$ für $v=(0,0,1)^T$.',
                     h: '$[\\omega]_\\times=\\begin{pmatrix}0&-\\omega_z&\\omega_y\\ \\omega_z&0&-\\omega_x\\ -\\omega_y&\\omega_x&0\\end{pmatrix}$.',
-                    s: '$[\\omega]_\\times=\\begin{pmatrix}0&-3&2\\ 3&0&-1\\ -2&1&0\\end{pmatrix}$.<br>$[\\omega]_\\times v = (2,-1,0)^T$. Direkt: $\\omega\\times v=(1,2,3)\\times(0,0,1)=(2\\cdot 1-3\\cdot 0,\ 3\\cdot 0-1\\cdot 1,\ 1\\cdot 0-2\\cdot 0)=(2,-1,0)^T$. ✓'
+                    s: '$[\\omega]_\\times=\\begin{pmatrix}0&-3&2\\ 3&0&-1\\ -2&1&0\\end{pmatrix}$.<br>$[\\omega]_\\times v = (2,-1,0)^T$. Direkt: $\\omega\\times v=(1,2,3)\\times(0,0,1)=(2\\cdot 1-3\\cdot 0,\ 3\\cdot 0-1\\cdot 1,\ 1\\cdot 0-2\\cdot 0)=(2,-1,0)^T$.'
                 },
                 {
                     q: 'Inverse Kinematik mit Redundanz: ein 3-DOF planarer Roboter ($l_1=l_2=l_3=1$) erreicht $(x,y)=(2,0)$. Wieso existieren unendlich viele Lösungen, und wie wird typischerweise eine ausgewählt?',
@@ -140,7 +140,7 @@
                 {
                     q: 'Konvertiere die Quaternion $q = (\\cos 30°, \\sin 30°, 0, 0)$ (Drehung 60° um $x$-Achse) in eine Rotationsmatrix.',
                     h: '$R(q)$-Formel mit $w=\\cos 30°,\ x=\\sin 30°$.',
-                    s: '$w=\\sqrt 3/2,\ x=0{,}5,\ y=z=0$.<br>$x^2=0{,}25,\ y^2=z^2=0$.<br>$R=\\begin{pmatrix}1-2(0+0)&2(0-0)&2(0+0)\\ 2(0+0)&1-2(0{,}25+0)&2(0-2\\cdot \\sqrt 3/2\\cdot 0{,}5)\\ 2(0-0)&2(0+\\sqrt 3/2 \\cdot 0{,}5\\cdot 2)&1-2(0{,}25+0)\\end{pmatrix}$.<br>$=\\begin{pmatrix}1 & 0 & 0\\ 0 & 0{,}5 & -\\sqrt 3/2\\ 0 & \\sqrt 3/2 & 0{,}5\\end{pmatrix}=R_x(60°)$. ✓'                }
+                    s: '$w=\\sqrt 3/2,\ x=0{,}5,\ y=z=0$.<br>$x^2=0{,}25,\ y^2=z^2=0$.<br>$R=\\begin{pmatrix}1-2(0+0)&2(0-0)&2(0+0)\\ 2(0+0)&1-2(0{,}25+0)&2(0-2\\cdot \\sqrt 3/2\\cdot 0{,}5)\\ 2(0-0)&2(0+\\sqrt 3/2 \\cdot 0{,}5\\cdot 2)&1-2(0{,}25+0)\\end{pmatrix}$.<br>$=\\begin{pmatrix}1 & 0 & 0\\ 0 & 0{,}5 & -\\sqrt 3/2\\ 0 & \\sqrt 3/2 & 0{,}5\\end{pmatrix}=R_x(60°)$.'                }
             ],
             // L3
             [

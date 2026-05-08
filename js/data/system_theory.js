@@ -47,7 +47,7 @@
                 {
                     q: 'Untersuche, ob das System $y(t)=x(t-2)$ kausal und zeitinvariant ist.',
                     h: 'Kausal: $y(t_0)$ braucht nur $x(t\\le t_0)$. Zeitinvarianz: Verschiebung von $x$ um $T_0$ ergibt Verschiebung von $y$ um $T_0$.',
-                    s: 'Kausal: $y(t)$ hängt von $x(t-2)$, also vergangenem Wert. ✓<br>Zeitinvarianz: $x(t-T_0)$ als Eingang ergibt $y_{neu}(t)=x(t-T_0-2)=y(t-T_0)$. ✓<br>$$\\boxed{\\text{Kausal und zeitinvariant}}$$'
+                    s: 'Kausal: $y(t)$ hängt von $x(t-2)$, also vergangenem Wert.<br>Zeitinvarianz: $x(t-T_0)$ als Eingang ergibt $y_{neu}(t)=x(t-T_0-2)=y(t-T_0)$.<br>$$\\boxed{\\text{Kausal und zeitinvariant}}$$'
                 },
                 {
                     q: 'Bestimme die Faltung $(f*\\delta)(t)$ mit $\\delta(t-T_0)$.',
@@ -67,7 +67,7 @@
                 {
                     q: 'Ein System hat Impulsantwort $h(t)=e^{-t}\\sigma(t)$. Ist es BIBO-stabil?',
                     h: 'BIBO: $\\int|h(t)|dt < \\infty$.',
-                    s: '$\\int_0^\\infty e^{-t}dt=[-e^{-t}]_0^\\infty=1<\\infty$. ✓<br>$$\\boxed{\\text{BIBO-stabil}}$$'
+                    s: '$\\int_0^\\infty e^{-t}dt=[-e^{-t}]_0^\\infty=1<\\infty$.<br>$$\\boxed{\\text{BIBO-stabil}}$$'
                 },
                 {
                     q: 'Welche Frequenz hat der Ausgang eines LTI-Systems mit Eingangs $u(t) = \\sin(5t)$? Begründe.',
@@ -140,7 +140,7 @@
                 {
                     q: 'Endwertsatz: berechne $\\lim_{t\\to\\infty} y(t)$ für $Y(s) = \\dfrac{2}{s(s+3)}$.',
                     h: '$\\lim_{t\\to\\infty} y(t) = \\lim_{s\\to 0} sY(s)$ (falls Pole von $sY(s)$ in LHE).',
-                    s: '$sY(s) = 2/(s+3)$. Pol bei $s=-3$ (LHE). ✓<br>$\\lim_{s\\to 0} 2/(s+3) = 2/3$.<br>$$\\boxed{y_\\infty = 2/3}$$'
+                    s: '$sY(s) = 2/(s+3)$. Pol bei $s=-3$ (LHE).<br>$\\lim_{s\\to 0} 2/(s+3) = 2/3$.<br>$$\\boxed{y_\\infty = 2/3}$$'
                 }
             ],
             // L3
@@ -183,7 +183,7 @@
                 {
                     q: 'Small-Gain-Theorem: stabilisiere die Rückkopplung von $G_1(s)=\\dfrac{0{,}5}{s+1}$ und $G_2(s)=\\dfrac{0{,}8}{s+2}$.',
                     h: '$\\lVert G\\rVert_\\infty = \\sup_\\omega |G(j\\omega)|$. Für PT1 beim Maximum bei $\\omega=0$.',
-                    s: '$\\lVert G_1\\rVert_\\infty = |G_1(0)| = 0{,}5$.<br>$\\lVert G_2\\rVert_\\infty = |G_2(0)| = 0{,}4$.<br>Produkt $= 0{,}2 < 1$. ✓<br>$$\\boxed{\\text{Rückkopplung stabil nach Small-Gain-Theorem}}$$ Hinreichende, aber nicht notwendige Bedingung.'
+                    s: '$\\lVert G_1\\rVert_\\infty = |G_1(0)| = 0{,}5$.<br>$\\lVert G_2\\rVert_\\infty = |G_2(0)| = 0{,}4$.<br>Produkt $= 0{,}2 < 1$.<br>$$\\boxed{\\text{Rückkopplung stabil nach Small-Gain-Theorem}}$$ Hinreichende, aber nicht notwendige Bedingung.'
                 },
                 {
                     q: 'Modale Zerlegung: bestimme die Zustandstrafo $z=Tx$, die $A=\\begin{pmatrix}0&1\\\\-2&-3\\end{pmatrix}$ in Diagonalform überführt, und gib das transformierte Modell an.',
@@ -193,7 +193,7 @@
                 {
                     q: 'Minimale Realisierung: ist $A=\\begin{pmatrix}-1&0\\\\0&-2\\end{pmatrix}$, $B=\\begin{pmatrix}1\\\\1\\end{pmatrix}$, $C=\\begin{pmatrix}1&0\\end{pmatrix}$ minimal? Begründe.',
                     h: 'Steuerbarkeit + Beobachtbarkeit prüfen.',
-                    s: 'Steuerbarkeit: $AB=(-1,-2)^T$. $\\mathcal{C}=\\begin{pmatrix}1&-1\\\\1&-2\\end{pmatrix}$, $\\det=-1\\neq 0$. ✓<br>Beobachtbarkeit: $CA=(-1,0)$. $\\mathcal{O}=\\begin{pmatrix}1&0\\\\-1&0\\end{pmatrix}$, Rang $1<2$. ✗<br>Mode $x_2$ ist nicht beobachtbar $\\Rightarrow$ <strong>nicht minimal</strong>. Minimale Realisierung hat Ordnung 1: $G(s)=C(sI-A)^{-1}B = 1/(s+1)$.'
+                    s: 'Steuerbarkeit: $AB=(-1,-2)^T$. $\\mathcal{C}=\\begin{pmatrix}1&-1\\\\1&-2\\end{pmatrix}$, $\\det=-1\\neq 0$.<br>Beobachtbarkeit: $CA=(-1,0)$. $\\mathcal{O}=\\begin{pmatrix}1&0\\\\-1&0\\end{pmatrix}$, Rang $1<2$.<br>Mode $x_2$ ist nicht beobachtbar $\\Rightarrow$ <strong>nicht minimal</strong>. Minimale Realisierung hat Ordnung 1: $G(s)=C(sI-A)^{-1}B = 1/(s+1)$.'
                 },
                 {
                     q: 'Kalman-Zerlegung: erläutere die 4 Subsysteme einer allgemeinen LTI-Realisation.',

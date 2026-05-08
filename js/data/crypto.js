@@ -43,7 +43,7 @@
                 {
                     q: 'XOR-Stromchiffre: Klartext $M=11001010_2$, Schlüssel $K=10101111_2$. Berechne $C=M\\oplus K$ und verifiziere $C\\oplus K=M$.',
                     h: 'XOR bitweise: gleiche Bits $\\to 0$, ungleiche $\\to 1$. XOR ist selbstinvers.',
-                    s: 'M:  1 1 0 0 1 0 1 0<br>K:  1 0 1 0 1 1 1 1<br>C:  0 1 1 0 0 1 0 1<br>Verifikation: C ⊕ K = 11001010 = M. ✓<br>$$\\boxed{C=01100101_2}$$'
+                    s: 'M:  1 1 0 0 1 0 1 0<br>K:  1 0 1 0 1 1 1 1<br>C:  0 1 1 0 0 1 0 1<br>Verifikation: C ⊕ K = 11001010 = M.<br>$$\\boxed{C=01100101_2}$$'
                 },
                 {
                     q: 'Caesar-Chiffre mit Verschiebung 3: verschlüssele "HALLO" (A=0, B=1, ...).',
@@ -101,12 +101,12 @@
                 {
                     q: 'Bestimme das modulare Inverse von $7\\bmod 26$ mit dem erweiterten Euklidischen Algorithmus.',
                     h: '$\\gcd(7,26)=1$. Suche $s,t$ mit $7s+26t=1$.',
-                    s: 'Euklid: $26=3\\cdot 7+5$; $7=1\\cdot 5+2$; $5=2\\cdot 2+1$; $2=2\\cdot 1+0$.<br>Rückwärts: $1=5-2\\cdot 2 = 5 - 2(7-5)=3\\cdot 5 - 2\\cdot 7 = 3(26-3\\cdot 7)-2\\cdot 7 = 3\\cdot 26 - 11\\cdot 7$.<br>Also $-11\\cdot 7\\equiv 1\\pmod{26}\\Rightarrow 7^{-1}\\equiv -11\\equiv 15\\pmod{26}$.<br>Probe: $7\\cdot 15=105 = 4\\cdot 26 + 1$. ✓<br>$$\\boxed{7^{-1}\\equiv 15\\pmod{26}}$$'
+                    s: 'Euklid: $26=3\\cdot 7+5$; $7=1\\cdot 5+2$; $5=2\\cdot 2+1$; $2=2\\cdot 1+0$.<br>Rückwärts: $1=5-2\\cdot 2 = 5 - 2(7-5)=3\\cdot 5 - 2\\cdot 7 = 3(26-3\\cdot 7)-2\\cdot 7 = 3\\cdot 26 - 11\\cdot 7$.<br>Also $-11\\cdot 7\\equiv 1\\pmod{26}\\Rightarrow 7^{-1}\\equiv -11\\equiv 15\\pmod{26}$.<br>Probe: $7\\cdot 15=105 = 4\\cdot 26 + 1$.<br>$$\\boxed{7^{-1}\\equiv 15\\pmod{26}}$$'
                 },
                 {
                     q: 'Vollständiges RSA-Beispiel: $p=3$, $q=11$, $e=3$. Berechne $d$ und chiffriere $m=4$.',
                     h: '$\\varphi=20$. $d\\equiv e^{-1}\\pmod{20}$. $c=m^e\\bmod N$.',
-                    s: '$3d\\equiv 1\\pmod{20}$. Probieren: $3\\cdot 7=21\\equiv 1$. $\\Rightarrow d=7$.<br>$c=4^3 \\bmod 33 = 64 \\bmod 33 = 64-33=31$.<br>Probe: $c^d\\bmod N = 31^7 \\bmod 33$. Schrittweise: $31\\equiv -2\\pmod{33}$. $(-2)^7=-128 \\equiv -128 + 4\\cdot 33 = -128+132 = 4 = m$. ✓<br>$$\\boxed{d=7,\\ c=31}$$'
+                    s: '$3d\\equiv 1\\pmod{20}$. Probieren: $3\\cdot 7=21\\equiv 1$. $\\Rightarrow d=7$.<br>$c=4^3 \\bmod 33 = 64 \\bmod 33 = 64-33=31$.<br>Probe: $c^d\\bmod N = 31^7 \\bmod 33$. Schrittweise: $31\\equiv -2\\pmod{33}$. $(-2)^7=-128 \\equiv -128 + 4\\cdot 33 = -128+132 = 4 = m$.<br>$$\\boxed{d=7,\\ c=31}$$'
                 },
                 {
                     q: 'Wie groß muss eine SHA-Ausgabe mindestens sein, damit eine Kollisions-Brute-Force im Mittel mind. $2^{64}$ Hashes braucht?',
@@ -146,7 +146,7 @@
                 {
                     q: 'Berechne den modularen Logarithmus $\\log_2 x \\equiv ?\\pmod{11}$ für $x=8$ via Baby-Step-Giant-Step (oder einfach durch Probieren).',
                     h: '$2^a\\equiv 8\\pmod{11}$. Probieren: $a=1,2,3,...$',
-                    s: '$2^1=2$, $2^2=4$, $2^3=8$. ✓<br>$$\\boxed{\\log_2 8\\equiv 3\\pmod{11}}$$ Hinweis: Ordnung von 2 mod 11: $2^{10}=1024\\equiv 1$, also Ordnung teilt 10. Tatsächlich Ordnung 10 (2 ist Primitivwurzel mod 11).'
+                    s: '$2^1=2$, $2^2=4$, $2^3=8$.<br>$$\\boxed{\\log_2 8\\equiv 3\\pmod{11}}$$ Hinweis: Ordnung von 2 mod 11: $2^{10}=1024\\equiv 1$, also Ordnung teilt 10. Tatsächlich Ordnung 10 (2 ist Primitivwurzel mod 11).'
                 }
             ],
             // L3
@@ -154,7 +154,7 @@
                 {
                     q: 'RSA-Sicherheit: Faktoreziere $N=143$ und beschreibe, wie damit der private Schlüssel rekonstruiert werden kann (gegeben $e=7$).',
                     h: 'Probedivisionen mit kleinen Primzahlen. Anschließend $d\\equiv e^{-1}\\pmod{\\varphi(N)}$.',
-                    s: '$143=11\\cdot 13\\Rightarrow p=11,\\ q=13$.<br>$\\varphi(N)=10\\cdot 12=120$.<br>$d\\equiv 7^{-1}\\pmod{120}$: erw. Euklid: $\\gcd(7,120)=1$, $1=7\\cdot 103 - 120\\cdot 6$. Probe: $7\\cdot 103=721=6\\cdot 120+1$. ✓<br>$$\\boxed{d=103}$$ Folgerung: kennt man die Faktoren von $N$, ist RSA gebrochen $\\Rightarrow$ Sicherheit beruht auf Schwierigkeit der Faktorisierung.'
+                    s: '$143=11\\cdot 13\\Rightarrow p=11,\\ q=13$.<br>$\\varphi(N)=10\\cdot 12=120$.<br>$d\\equiv 7^{-1}\\pmod{120}$: erw. Euklid: $\\gcd(7,120)=1$, $1=7\\cdot 103 - 120\\cdot 6$. Probe: $7\\cdot 103=721=6\\cdot 120+1$.<br>$$\\boxed{d=103}$$ Folgerung: kennt man die Faktoren von $N$, ist RSA gebrochen $\\Rightarrow$ Sicherheit beruht auf Schwierigkeit der Faktorisierung.'
                 },
                 {
                     q: 'Wende den Chinesischen Restsatz (CRT) an: löse $x\\equiv 2\\pmod 3$, $x\\equiv 3\\pmod 5$, $x\\equiv 2\\pmod 7$.',
@@ -194,7 +194,7 @@
                 {
                     q: 'Zero-Knowledge: erkläre Schnorr-Identifikation als Σ-Protokoll und beweise die drei Eigenschaften (Vollständigkeit, Soundness, Zero-Knowledge).',
                     h: 'Commitment-Challenge-Response: $R=kG$, $c$ Challenge, $s=k+cd$.',
-                    s: '<strong>Protokoll:</strong> Prover kennt $d$ mit $P=dG$. 1) Sendet $R=kG$. 2) Verifier sendet zufällige Challenge $c$. 3) Prover antwortet $s=k+cd\\bmod n$. 4) Verifier prüft $sG=R+cP$.<br><strong>Vollständigkeit:</strong> ehrlicher Prover besteht: $sG=(k+cd)G=R+cP$. ✓<br><strong>Soundness:</strong> kann Prover für 2 verschiedene Challenges $c_1\\neq c_2$ gültig antworten, lässt sich $d=(s_1-s_2)/(c_1-c_2)$ extrahieren $\\Rightarrow$ er kennt $d$.<br><strong>Zero-Knowledge (HVZK):</strong> Simulator wählt $s,c$ zufällig und setzt $R=sG-cP$ — Verteilung identisch, ohne $d$.<br>Fiat-Shamir: $c=H(R\\|P\\|m)$ macht es nicht-interaktiv $\\Rightarrow$ Schnorr-Signatur.'
+                    s: '<strong>Protokoll:</strong> Prover kennt $d$ mit $P=dG$. 1) Sendet $R=kG$. 2) Verifier sendet zufällige Challenge $c$. 3) Prover antwortet $s=k+cd\\bmod n$. 4) Verifier prüft $sG=R+cP$.<br><strong>Vollständigkeit:</strong> ehrlicher Prover besteht: $sG=(k+cd)G=R+cP$.<br><strong>Soundness:</strong> kann Prover für 2 verschiedene Challenges $c_1\\neq c_2$ gültig antworten, lässt sich $d=(s_1-s_2)/(c_1-c_2)$ extrahieren $\\Rightarrow$ er kennt $d$.<br><strong>Zero-Knowledge (HVZK):</strong> Simulator wählt $s,c$ zufällig und setzt $R=sG-cP$ — Verteilung identisch, ohne $d$.<br>Fiat-Shamir: $c=H(R\\|P\\|m)$ macht es nicht-interaktiv $\\Rightarrow$ Schnorr-Signatur.'
                 }
             ]
         ]

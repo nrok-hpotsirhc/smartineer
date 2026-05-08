@@ -115,7 +115,7 @@
                 {
                     q: 'Ein elastischer Stoß: $m_1=2\\,\\text{kg}$ mit $v_1=4\\,\\text{m/s}$ trifft ruhendes $m_2=1\\,\\text{kg}$. Berechne $v_1\',\\,v_2\'$ nach dem Stoß.',
                     h: 'Impuls- und Energieerhaltung. Standardformeln: $v_1\'=\\dfrac{m_1-m_2}{m_1+m_2}v_1$, $v_2\'=\\dfrac{2m_1}{m_1+m_2}v_1$.',
-                    s: '$v_1\'=(2-1)/(2+1)\\cdot 4 = 4/3\\approx 1{,}33\\,\\text{m/s}$.<br>$v_2\'=2\\cdot 2/3\\cdot 4 = 16/3\\approx 5{,}33\\,\\text{m/s}$.<br>Kontrolle Impuls: $2\\cdot 4 = 8 = 2\\cdot 4/3 + 1\\cdot 16/3 = 24/3=8$. ✓<br>$$\\boxed{v_1\'\\approx 1{,}33,\\ v_2\'\\approx 5{,}33\\,\\text{m/s}}$$'
+                    s: '$v_1\'=(2-1)/(2+1)\\cdot 4 = 4/3\\approx 1{,}33\\,\\text{m/s}$.<br>$v_2\'=2\\cdot 2/3\\cdot 4 = 16/3\\approx 5{,}33\\,\\text{m/s}$.<br>Kontrolle Impuls: $2\\cdot 4 = 8 = 2\\cdot 4/3 + 1\\cdot 16/3 = 24/3=8$.<br>$$\\boxed{v_1\'\\approx 1{,}33,\\ v_2\'\\approx 5{,}33\\,\\text{m/s}}$$'
                 },
                 {
                     q: 'Eine Spule mit $N=200$ Windungen umschließt einen magn. Fluss, der sich linear von $0$ auf $0{,}1\\,\\text{Vs}$ in $50\\,\\text{ms}$ ändert. Welche Induktionsspannung tritt auf?',
@@ -188,7 +188,7 @@
                 {
                     q: 'Fermi-Energie eines freien Elektronengases in Kupfer ($n=8{,}5\\cdot 10^{28}\\,\\text{m}^{-3}$). Berechne $E_F$ in eV. ($\\hbar=1{,}055\\cdot 10^{-34}\\,\\text{Js}$, $m_e=9{,}11\\cdot 10^{-31}\\,\\text{kg}$).',
                     h: '$E_F=\\dfrac{\\hbar^2}{2m_e}(3\\pi^2 n)^{2/3}$.',
-                    s: '$3\\pi^2 n\\approx 29{,}6\\cdot 8{,}5\\cdot 10^{28}\\approx 2{,}52\\cdot 10^{30}$.<br>$(...)^{2/3}\\approx (2{,}52\\cdot 10^{30})^{2/3}\\approx 1{,}85\\cdot 10^{20}\\,\\text{m}^{-2}$.<br>$\\hbar^2/(2m_e)=(1{,}055\\cdot 10^{-34})^2/(2\\cdot 9{,}11\\cdot 10^{-31})\\approx 6{,}10\\cdot 10^{-39}\\,\\text{J m}^2$.<br>$E_F\\approx 6{,}10\\cdot 10^{-39}\\cdot 1{,}85\\cdot 10^{20}\\approx 1{,}13\\cdot 10^{-18}\\,\\text{J}\\approx 7{,}05\\,\\text{eV}$.<br>$$\\boxed{E_F\\approx 7\\,\\text{eV}}$$ (Literaturwert: 7,0 eV ✓).'
+                    s: '$3\\pi^2 n\\approx 29{,}6\\cdot 8{,}5\\cdot 10^{28}\\approx 2{,}52\\cdot 10^{30}$.<br>$(...)^{2/3}\\approx (2{,}52\\cdot 10^{30})^{2/3}\\approx 1{,}85\\cdot 10^{20}\\,\\text{m}^{-2}$.<br>$\\hbar^2/(2m_e)=(1{,}055\\cdot 10^{-34})^2/(2\\cdot 9{,}11\\cdot 10^{-31})\\approx 6{,}10\\cdot 10^{-39}\\,\\text{J m}^2$.<br>$E_F\\approx 6{,}10\\cdot 10^{-39}\\cdot 1{,}85\\cdot 10^{20}\\approx 1{,}13\\cdot 10^{-18}\\,\\text{J}\\approx 7{,}05\\,\\text{eV}$.<br>$$\\boxed{E_F\\approx 7\\,\\text{eV}}$$ (Literaturwert: 7,0 eV).'
                 },
                 {
                     q: 'Erzwungene gedämpfte Schwingung: System aus L3.1 ($m=1, d=2, k=5$) mit Anregung $F_0\\cos\\omega t$, $F_0=1$. Berechne Resonanzamplitude $A(\\omega)$ und Resonanzfrequenz $\\omega_R$.',

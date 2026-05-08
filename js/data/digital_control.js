@@ -158,7 +158,7 @@
                 {
                     q: 'Untersuche die Stabilität von $P(z)=z^3-1{,}5 z^2+0{,}7 z-0{,}1$ mit dem Jury-Kriterium.',
                     h: 'Jury Grad 3 reduziert auf zwei einfache Bedingungen sowie $|a_0|<a_n$. Notwendig: $P(1)>0$, $(-1)^n P(-1)>0$.',
-                    s: '$P(1)=1-1{,}5+0{,}7-0{,}1=0{,}1>0$ ✓<br>$P(-1)=-1-1{,}5-0{,}7-0{,}1=-3{,}3$, $(-1)^3 P(-1)=3{,}3>0$ ✓<br>$|a_0|=0{,}1<1=a_n$ ✓<br>Erweiterte Jury-Bedingung: $|a_0^2-a_n^2|>|a_0 a_2 - a_n a_1|\\Rightarrow |0{,}01-1|>|{-0{,}1\\cdot 0{,}7}-1\\cdot(-1{,}5)|=|{-0{,}07+1{,}5}|=1{,}43$.<br>$0{,}99>1{,}43$? Nein.<br>$$\\boxed{\\text{Nicht stabil}}$$ Mindestens ein Pol auf oder außerhalb des Einheitskreises.'
+                    s: '$P(1)=1-1{,}5+0{,}7-0{,}1=0{,}1>0$<br>$P(-1)=-1-1{,}5-0{,}7-0{,}1=-3{,}3$, $(-1)^3 P(-1)=3{,}3>0$<br>$|a_0|=0{,}1<1=a_n$<br>Erweiterte Jury-Bedingung: $|a_0^2-a_n^2|>|a_0 a_2 - a_n a_1|\\Rightarrow |0{,}01-1|>|{-0{,}1\\cdot 0{,}7}-1\\cdot(-1{,}5)|=|{-0{,}07+1{,}5}|=1{,}43$.<br>$0{,}99>1{,}43$? Nein.<br>$$\\boxed{\\text{Nicht stabil}}$$ Mindestens ein Pol auf oder außerhalb des Einheitskreises.'
                 },
                 {
                     q: 'Bestimme die ZOH-äquivalente Diskretisierung von $G(s)=\\dfrac{1}{s+a}$ bei Abtastzeit $T_s$. ($G(z)=(1-z^{-1})\\,\\mathcal{Z}\\!\\left\\{\\dfrac{G(s)}{s}\\right\\}$.)',

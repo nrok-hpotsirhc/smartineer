@@ -97,7 +97,7 @@
                 {
                     q: 'Prüfe die Stabilität des charakteristischen Polynoms $P(s)=s^3+2s^2+s+2=0$ mit Hurwitz.',
                     h: 'Notwendig: $a_i>0$. Hinreichend bei Grad 3: $a_2 a_1 - a_3 a_0 > 0$.',
-                    s: '$a_3=1,\\ a_2=2,\\ a_1=1,\\ a_0=2$. Alle positiv ✓.<br>$\\Delta = a_2 a_1 - a_3 a_0 = 2-2 = 0$.<br>$\\Delta=0\\Rightarrow$ <strong>nicht asymptotisch stabil</strong> (Grenzstabil; konjugiert imaginäre Pole bei $\\pm j$).<br>Tatsächlich: $P(s)=(s+2)(s^2+1)\\Rightarrow$ Pole $-2,\\ \\pm j$. ✓'
+                    s: '$a_3=1,\\ a_2=2,\\ a_1=1,\\ a_0=2$. Alle positiv.<br>$\\Delta = a_2 a_1 - a_3 a_0 = 2-2 = 0$.<br>$\\Delta=0\\Rightarrow$ <strong>nicht asymptotisch stabil</strong> (Grenzstabil; konjugiert imaginäre Pole bei $\\pm j$).<br>Tatsächlich: $P(s)=(s+2)(s^2+1)\\Rightarrow$ Pole $-2,\\ \\pm j$.'
                 },
                 {
                     q: 'Ein PT2-System $G(s)=\\dfrac{\\omega_n^2}{s^2+2D\\omega_n s+\\omega_n^2}$ hat $\\omega_n=10\\,\\text{rad/s}$ und $D=0{,}5$. Bestimme die Eigenfrequenz $\\omega_d$ der gedämpften Schwingung und die Pole.',

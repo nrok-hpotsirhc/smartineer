@@ -26,18 +26,18 @@ Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein e
 
 ## Features
 
-- 🎯 **10 Kategorien**: Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3)
-- 📊 **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **10 Aufgaben** = ~**270 Aufgaben** insgesamt
-- 🧮 **KaTeX-gerenderte Formeln** in Aufgaben, Hinweisen und Lösungen
-- ⚛️ **React-UI** (Hooks, Functional Components) mit weichen Übergangs-Animationen, Gradient-Hero, animierten Fortschrittsbalken und Hover-Effekten
-- 📲 **PWA**: voll installierbar auf Desktop / Android / iOS, **offline-fähig** durch Service-Worker-Caching
-- 🧭 **Cheatsheets** je Kategorie mit zwei Reitern:
+- **10 Kategorien**: Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3)
+- **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **10 Aufgaben** = ~**270 Aufgaben** insgesamt
+- **KaTeX-gerenderte Formeln** in Aufgaben, Hinweisen und Lösungen
+- **React-UI** (Hooks, Functional Components) mit weichen Übergangs-Animationen, Gradient-Hero, animierten Fortschrittsbalken und Hover-Effekten
+- **PWA**: voll installierbar auf Desktop / Android / iOS, **offline-fähig** durch Service-Worker-Caching
+- **Cheatsheets** je Kategorie mit zwei Reitern:
   1. **Formeln** (kompakte Übersicht)
   2. **Musterlösungen** (vollständig isoliert mit Rechenweg und Kommentaren)
-- 💾 **Lokaler Lernfortschritt** via `localStorage` (kein Backend, kein Tracking)
-- 📈 **Dashboard** mit Radarchart deiner Kompetenzverteilung
-- 🌐 **Modular & erweiterbar**: jede Kategorie ist eine eigene Datei in `js/data/`. Neue Aufgaben hinzufügen = eine Datei editieren, Browser neu laden, fertig.
-- 🚀 **Zero-Build**: kein npm, kein Webpack — React/JSX werden via **Babel-standalone zur Laufzeit** im Browser transpiliert
+- **Lokaler Lernfortschritt** via `localStorage` (kein Backend, kein Tracking)
+- **Dashboard** mit Radarchart deiner Kompetenzverteilung
+- **Modular & erweiterbar**: jede Kategorie ist eine eigene Datei in `js/data/`. Neue Aufgaben hinzufügen = eine Datei editieren, Browser neu laden, fertig.
+- **Zero-Build**: kein npm, kein Webpack — React/JSX werden via **Babel-standalone zur Laufzeit** im Browser transpiliert
 
 ---
 
@@ -72,21 +72,21 @@ Dann `http://localhost:8000` öffnen.
 
 Smartineer kann zusätzlich zur klassischen Website-Nutzung als **eigenständige App** auf Desktop und Mobilgerät installiert werden. Nach der Installation startet die App ohne Browser-Leiste, ist offline verfügbar und lädt deutlich schneller.
 
-### 🖥️ Desktop (Chrome / Edge / Brave)
+### Desktop (Chrome / Edge / Brave)
 
 1. Smartineer im Browser öffnen.
 2. In der Adressleiste rechts erscheint ein **Install-Symbol** (kleines Monitor-/Plus-Icon).
 3. Klicken → **„Installieren"**. Die App taucht im Startmenü / Dock auf.
 
-Alternativ: Auf dem Dashboard den Button **„📲 Als App installieren"** klicken.
+Alternativ: Auf dem Dashboard den Button **„Als App installieren"** klicken.
 
-### 🤖 Android (Chrome / Edge)
+### Android (Chrome / Edge)
 
 1. Smartineer in Chrome öffnen.
 2. Bei erstem Besuch erscheint nach kurzer Zeit ein Hinweis-Popup — auf **„Jetzt installieren"** tippen.
-3. Falls geschlossen: **Menü** (⋮ oben rechts) → **„App installieren"** bzw. **„Zum Startbildschirm hinzufügen"**.
+3. Falls geschlossen: **Menü** (Drei-Punkte oben rechts) → **„App installieren"** bzw. **„Zum Startbildschirm hinzufügen"**.
 
-### 🍏 iOS / iPadOS (Safari)
+### iOS / iPadOS (Safari)
 
 Auf iOS unterstützt nur **Safari** die Installation als PWA (Chrome auf iOS funktioniert **nicht** — Apple-Restriktion).
 
@@ -225,7 +225,7 @@ window.APP_DATA[id] = {
 
 ## Wissenschaftliche Korrektheit
 
-> ⚠️ **VERBINDLICH: Alle Aufgaben, Hinweise und Musterlösungen MÜSSEN wissenschaftlich korrekt sein.**  
+> **VERBINDLICH: Alle Aufgaben, Hinweise und Musterlösungen MÜSSEN wissenschaftlich korrekt sein.**  
 > Eine inhaltlich falsche Aufgabe ist ein **Bug** — nicht eine „Kleinigkeit". Bevor eine Aufgabe ins Repo geht, ist die Korrektheit gegen mindestens eine etablierte Quelle (Lehrbuch, peer-reviewter Artikel, akzeptierter Standard) zu prüfen. Im Zweifel: weglassen, nicht raten.
 
 Konkrete Mindestanforderungen:

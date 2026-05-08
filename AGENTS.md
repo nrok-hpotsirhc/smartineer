@@ -122,11 +122,11 @@ Eine Aufgabe ist ein Objekt:
 
 | Feld | Typ | Pflicht | Hinweise |
 |---|---|---|---|
-| `id` | `string` | ✅ | snake_case, eindeutig, nie ändern (sonst Reset des Lernfortschritts!) |
-| `name` | `string` | ✅ | Anzeige in Sidebar/Dashboard |
-| `desc` | `string` | ✅ | Plain text |
-| `formulas` | `string` (HTML) | ✅ | Mind. die für die Aufgaben benötigten Formeln |
-| `levels` | `Array[3]` | ✅ | **Genau drei** Sub-Arrays |
+| `id` | `string` | ja | snake_case, eindeutig, nie ändern (sonst Reset des Lernfortschritts!) |
+| `name` | `string` | ja | Anzeige in Sidebar/Dashboard |
+| `desc` | `string` | ja | Plain text |
+| `formulas` | `string` (HTML) | ja | Mind. die für die Aufgaben benötigten Formeln |
+| `levels` | `Array[3]` | ja | **Genau drei** Sub-Arrays |
 
 ### Konventionen für `q`, `h`, `s`
 
@@ -162,11 +162,11 @@ Wenn du **eine** Aufgabe hinzufügst, müssen **alle** folgenden Punkte erledigt
 
 ### Anti-Pattern (vermeiden)
 
-- ❌ Aufgabentexte aus urheberrechtlich geschützten Lehrbüchern wörtlich kopieren.
-- ❌ "Trivialaufgaben" wie "Was ist 2+2" auf L1 setzen — auch L1 muss noch Reaktivierung von Studienwissen sein.
-- ❌ Auf L3 schwammige Essay-Fragen ohne klar überprüfbare Lösung.
-- ❌ Backslashes im JS-String einfach (`\frac` → wird zu `frac`).
-- ❌ HTML-Tags in `formulas`, die KaTeX-Output zerschießen (z.B. `<style>` inline).
+- Aufgabentexte aus urheberrechtlich geschützten Lehrbüchern wörtlich kopieren.
+- "Trivialaufgaben" wie "Was ist 2+2" auf L1 setzen — auch L1 muss noch Reaktivierung von Studienwissen sein.
+- Auf L3 schwammige Essay-Fragen ohne klar überprüfbare Lösung.
+- Backslashes im JS-String einfach (`\frac` → wird zu `frac`).
+- HTML-Tags in `formulas`, die KaTeX-Output zerschießen (z.B. `<style>` inline).
 
 ---
 
@@ -182,7 +182,7 @@ Wenn du **eine** Aufgabe hinzufügst, müssen **alle** folgenden Punkte erledigt
 
 ## 8. Wissenschaftliche Korrektheit — **VERBINDLICH**
 
-> ⚠️ **HARTE ANFORDERUNG: Alle Aufgaben, Hinweise und Lösungen MÜSSEN wissenschaftlich korrekt sein.**  
+> **HARTE ANFORDERUNG: Alle Aufgaben, Hinweise und Lösungen MÜSSEN wissenschaftlich korrekt sein.**  
 > Eine inhaltlich falsche Aufgabe ist **kein** akzeptabler Zustand — sie ist ein Bug und muss vor dem Einchecken behoben werden. Im Zweifel: Aufgabe weglassen oder im Issue diskutieren, **nicht** raten.
 
 Konkret bedeutet das:
@@ -257,6 +257,12 @@ Folgende DOM-IDs/Klassen sind Vertrag zwischen `index.html`, `css/styles.css` un
 - **HTML**: 4 Spaces, semantisch korrekt, ARIA-Attribute wo angebracht.
 - **CSS**: kebab-case-Klassen, keine `!important` außer für `.hide`.
 - **Markdown**: ATX-Headings (`#`), Tabellen mit Leerzeichen-Padding für Lesbarkeit.
+- **Keine Emojis** in Code, UI, Commit-Messages, Aufgabentexten oder Dokumentation. Verwendet werden ausschließlich:
+  - reine Text-Labels (z.B. `Musterlösung`, `Als gelöst markieren`),
+  - Inline-SVG / SVG-Icons in `icons/` für Marken/Logo,
+  - mathematische Symbole über **KaTeX** (z.B. `\\checkmark`, `\\square`, `\\rightarrow`),
+  - typografische Sonderzeichen aus dem Latin/Math-Block (z.B. `×`, `→`, `±`, `≈`).
+  Unicode-Dingbats / Pictographs (`✓ ✗ ⚠ ✅ ❌ 📲 ⬆️ ⋮ 🎯 📊 🧮 ⚛️` etc.) sind **verboten**, da sie schriftartabhängig rendern, in Tabellen verrutschen und nicht zum sachlichen Ton des Projekts passen.
 
 ---
 

@@ -106,7 +106,7 @@
                 {
                     q: 'Berechne mittels partieller Integration: $\\int x\\,e^{-x}\\,dx$.',
                     h: '$\\int u\\,v\'dx = uv - \\int u\'v\\,dx$. Wähle $u=x$, $v\'=e^{-x}$.',
-                    s: '$u=x\\Rightarrow u\'=1$. $v\'=e^{-x}\\Rightarrow v=-e^{-x}$.<br>$\\int x e^{-x}dx = -xe^{-x} - \\int(-e^{-x})dx = -xe^{-x} - e^{-x} + C$.<br>$$\\boxed{=-(x+1)e^{-x}+C}$$<br>Kontrolle durch Ableiten: $\\tfrac{d}{dx}[-(x+1)e^{-x}]=-e^{-x}+(x+1)e^{-x}=xe^{-x}$. ✓'
+                    s: '$u=x\\Rightarrow u\'=1$. $v\'=e^{-x}\\Rightarrow v=-e^{-x}$.<br>$\\int x e^{-x}dx = -xe^{-x} - \\int(-e^{-x})dx = -xe^{-x} - e^{-x} + C$.<br>$$\\boxed{=-(x+1)e^{-x}+C}$$<br>Kontrolle durch Ableiten: $\\tfrac{d}{dx}[-(x+1)e^{-x}]=-e^{-x}+(x+1)e^{-x}=xe^{-x}$.'
                 },
                 {
                     q: 'Bestimme die Laplace-Transformierte von $f(t)=e^{-3t}\\sin(2t)\\,\\sigma(t)$.',
@@ -140,7 +140,7 @@
                 {
                     q: 'Bestimme die Hesse-Matrix von $f(x,y)=x^3+xy^2-3x$ und klassifiziere den kritischen Punkt $(1,0)$.',
                     h: '$\\nabla f=0$ liefert kritische Punkte. Hesse $H$, Definitheit über Eigenwerte/Determinante.',
-                    s: '$\\nabla f=(3x^2+y^2-3,\ 2xy)$. Bei $(1,0)$: $(0,0)$ ✓.<br>$H=\\begin{pmatrix}6x & 2y\\ 2y & 2x\\end{pmatrix}$. Bei $(1,0)$: $\\begin{pmatrix}6&0\\0&2\\end{pmatrix}$.<br>EW: $6,2 > 0$ $\\Rightarrow$ positiv definit $\\Rightarrow$ <strong>lokales Minimum</strong>.<br>$$\\boxed{(1,0)\ \\text{lokales Minimum}}$$'
+                    s: '$\\nabla f=(3x^2+y^2-3,\ 2xy)$. Bei $(1,0)$: $(0,0)$.<br>$H=\\begin{pmatrix}6x & 2y\\ 2y & 2x\\end{pmatrix}$. Bei $(1,0)$: $\\begin{pmatrix}6&0\\0&2\\end{pmatrix}$.<br>EW: $6,2 > 0$ $\\Rightarrow$ positiv definit $\\Rightarrow$ <strong>lokales Minimum</strong>.<br>$$\\boxed{(1,0)\ \\text{lokales Minimum}}$$'
                 },
                 {
                     q: 'Berechne $\\int_0^\\infty x\\,e^{-x^2}\\,dx$.',

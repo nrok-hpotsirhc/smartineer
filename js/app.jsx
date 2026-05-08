@@ -61,28 +61,29 @@ function categoryStats(cat, isSolved) {
 // ---------------------------------------------------------------- Nav
 function Nav({ view, setView }) {
     const items = [
-        { id: 'dashboard', label: 'Dashboard', icon: '◉' },
-        { id: 'training', label: 'Training', icon: '⚡' },
-        { id: 'cheatsheet', label: 'Cheatsheets', icon: '☰' }
+        { id: 'dashboard', label: 'Dashboard' },
+        { id: 'training', label: 'Training' },
+        { id: 'cheatsheet', label: 'Cheatsheets' }
     ];
     return (
-        <nav className="sticky top-0 z-40 backdrop-blur-md bg-slate-900/90 text-white shadow-lg border-b border-slate-700/50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16 items-center">
-                    <div className="flex items-center gap-2">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-black shadow-lg">S</div>
-                        <span className="text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">Smartineer</span>
-                    </div>
-                    <div className="flex items-center gap-1 sm:gap-2">
+        <nav className="sticky top-0 z-40 backdrop-blur-md bg-slate-900/90 text-white shadow-lg border-b border-slate-700/50 w-full">
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+                <div className="flex justify-between gap-2 h-16 items-center min-w-0">
+                    <a href="./" className="flex items-center gap-2 min-w-0 flex-shrink" aria-label="Smartineer Home">
+                        <img src="icons/icon.svg" alt="" width="36" height="36"
+                             className="w-9 h-9 rounded-xl shadow-lg flex-shrink-0" />
+                        <span className="text-base sm:text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent truncate">Smartineer</span>
+                    </a>
+                    <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                         {items.map(it => {
                             const active = view === it.id;
                             return (
                                 <button key={it.id}
                                     onClick={() => setView(it.id)}
-                                    className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${active
-                                        ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30 scale-105'
+                                    className={`nav-btn whitespace-nowrap px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${active
+                                        ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30'
                                         : 'text-slate-300 hover:text-white hover:bg-slate-700/60'}`}>
-                                    <span className="mr-1 hidden sm:inline">{it.icon}</span>{it.label}
+                                    {it.label}
                                 </button>
                             );
                         })}
@@ -212,7 +213,7 @@ function Dashboard({ data, order, isSolved, onOpenCategory, onReset, onInstall }
                         {onInstall && (
                             <button onClick={onInstall}
                                 className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition-all">
-                                📲 Als App installieren
+                                Als App installieren
                             </button>
                         )}
                     </div>
@@ -343,17 +344,17 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
             <div className="flex flex-wrap gap-3 mb-6">
                 <button onClick={() => setShowHint(true)}
                     className="bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 font-medium py-2 px-4 rounded-lg transition">
-                    ⚠ Formel / Ansatz
+                    Formel / Ansatz
                 </button>
                 <button onClick={() => setShowSolution(true)}
                     className="bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 px-4 rounded-lg transition">
-                    ✓ Musterlösung
+                    Musterlösung
                 </button>
                 <button onClick={() => onMark(!solved)}
                     className={`font-medium py-2 px-4 rounded-lg transition text-white ${solved
                         ? 'bg-slate-500 hover:bg-slate-600'
                         : 'bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/30'}`}>
-                    {solved ? '✓ Gelöst (rückgängig)' : '☐ Als gelöst markieren'}
+                    {solved ? 'Gelöst (rückgängig)' : 'Als gelöst markieren'}
                 </button>
             </div>
 
@@ -518,9 +519,9 @@ function InstallPrompt({ open, onClose, deferredEvent, platform }) {
             onClick={() => onClose(false)}>
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative slide-up" onClick={(e) => e.stopPropagation()}>
                 <button onClick={() => onClose(false)}
-                    className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 transition" aria-label="Schließen">✕</button>
+                    className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 transition text-xl leading-none" aria-label="Schließen">×</button>
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-black text-2xl shadow-lg">S</div>
+                    <img src="icons/icon.svg" alt="" width="48" height="48" className="w-12 h-12 rounded-xl shadow-lg" />
                     <div>
                         <h3 className="text-xl font-bold text-slate-900">Smartineer als App</h3>
                         <p className="text-xs text-slate-500">Offline lernen, schneller Start vom Homescreen</p>
@@ -531,7 +532,7 @@ function InstallPrompt({ open, onClose, deferredEvent, platform }) {
                     <div className="space-y-3 text-sm text-slate-700">
                         <p>Auf <strong>iPhone / iPad</strong> in Safari:</p>
                         <ol className="list-decimal list-inside space-y-2 bg-slate-50 p-4 rounded-lg">
-                            <li>Tippe unten auf das <strong>Teilen-Symbol</strong> <span className="inline-block w-5 h-5 align-middle">⬆️</span></li>
+                            <li>Tippe unten auf das <strong>Teilen-Symbol</strong> (Quadrat mit Pfeil nach oben).</li>
                             <li>Wähle <strong>„Zum Home-Bildschirm"</strong>.</li>
                             <li>Bestätige mit <strong>Hinzufügen</strong> oben rechts.</li>
                         </ol>
@@ -553,7 +554,7 @@ function InstallPrompt({ open, onClose, deferredEvent, platform }) {
                     <div className="space-y-3 text-sm text-slate-700">
                         <p>Auf <strong>Android (Chrome / Edge)</strong>:</p>
                         <ol className="list-decimal list-inside space-y-2 bg-slate-50 p-4 rounded-lg">
-                            <li>Öffne das <strong>Menü</strong> (⋮ oben rechts).</li>
+                            <li>Öffne das <strong>Menü</strong> (Drei-Punkte oben rechts).</li>
                             <li>Wähle <strong>„App installieren"</strong> oder <strong>„Zum Startbildschirm hinzufügen"</strong>.</li>
                             <li>Bestätigen.</li>
                         </ol>
