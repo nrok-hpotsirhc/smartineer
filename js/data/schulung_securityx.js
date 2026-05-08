@@ -450,7 +450,10 @@
                 'EPSS (Exploit Prediction Scoring System) von FIRST liefert eine 30-Tages-Wahrscheinlichkeit aktiver Exploitation, ergänzt CVSS-Severity.'),
             q('Welcher Aspekt unterscheidet eine Compliance-Anforderung von einer Sicherheits-Best-Practice?',
                 ['Compliance ist immer höher priorisiert', 'Compliance ist rechtlich/vertraglich verbindlich, Best-Practice ist empfehlenden Charakters', 'Best-Practice ist meist gesetzlich verankert', 'Beide sind synonym'], 1,
-                'Compliance = Erfüllung verbindlicher Vorgaben (Gesetz, Vertrag, Standard); Best-Practice = empfohlene, branchenübliche Vorgehensweise — beides ergänzt sich.')
+                'Compliance = Erfüllung verbindlicher Vorgaben (Gesetz, Vertrag, Standard); Best-Practice = empfohlene, branchenübliche Vorgehensweise — beides ergänzt sich.'),
+            q('Welche ISO-/IEC-Norm definiert das Information Security Management System (ISMS) verbindlich?',
+                ['ISO 9001:2015', 'ISO/IEC 27001:2022', 'ISO 14001:2015', 'ISO/IEC 20000-1:2018'], 1,
+                'ISO/IEC 27001:2022 ist die Anforderungsnorm für ein ISMS; ISO/IEC 27002:2022 liefert die Control-Referenzen, ISO/IEC 27005 das Risikomanagement.')
         ],
 
         // ============== KAPITEL 2 — Architecture (50 Fragen) ==============
@@ -601,7 +604,10 @@
                 'Eine DMZ ist gerade dazu da, direkten Internetzugriff auf interne Systeme zu verhindern. Datenbanken liegen niemals in der DMZ.'),
             q('Welche Aussage zu Mikrosegmentierung mit Identity-aware Policies ist korrekt?',
                 ['Sie nutzt nur IP-Listen', 'Sie kombiniert Workload-Identity, Tags/Labels und Layer-7-Attribute zu Policies', 'Sie ersetzt MFA', 'Sie funktioniert nur on-prem'], 1,
-                'Moderne Mikrosegmentierung (Illumio, Cisco ACI, NSX, Calico, Cilium) entscheidet anhand Workload-Identity (SPIFFE), Labels und L7-Kontext — nicht nur IP/Port.')
+                'Moderne Mikrosegmentierung (Illumio, Cisco ACI, NSX, Calico, Cilium) entscheidet anhand Workload-Identity (SPIFFE), Labels und L7-Kontext — nicht nur IP/Port.'),
+            q('Welche Eigenschaft hat eine SASE-Architektur (Secure Access Service Edge)?',
+                ['Reine On-Prem-Lösung', 'Cloud-native Konvergenz von SD-WAN mit SSE-Funktionen (SWG, CASB, ZTNA, FWaaS)', 'Reine Hardware-Firewall', 'Reine VPN-Konzentrator-Lösung'], 1,
+                'Gartner-Konzept (2019): SASE = SD-WAN + SSE (Secure Service Edge), Identity- und Kontext-getrieben, am Edge geliefert.')
         ],
 
         // ============== KAPITEL 3 — Engineering (50 Fragen) ==============
@@ -752,7 +758,10 @@
                 'SCA (Software Composition Analysis) mit Pipeline-Gating — z. B. Snyk, Dependabot, Renovate, Trivy + OPA Conftest.'),
             q('Welche Eigenschaft beschreibt SLSA-Level-3 (Supply-chain Levels for Software Artifacts)?',
                 ['Lokaler Build ohne Provenienz', 'Gehärteter Build-Service mit nicht-fälschbarer Build-Provenienz und isolierten Builds', 'Crypto-Random-Build', 'Reine Cloud-Build ohne Authentifizierung'], 1,
-                'SLSA L3: gehärteter Build, nicht-fälschbare Provenance (z. B. via Sigstore + in-toto), isoliert, aber noch keine zwei-Personen-Reviews wie L4.')
+                'SLSA L3: gehärteter Build, nicht-fälschbare Provenance (z. B. via Sigstore + in-toto), isoliert, aber noch keine zwei-Personen-Reviews wie L4.'),
+            q('Welcher Standard definiert ein Software Bill of Materials (SBOM) maschinenlesbar?',
+                ['ISO 9001', 'SPDX (ISO/IEC 5962:2021) und CycloneDX', 'PCI-DSS', 'NIST CSF'], 1,
+                'SBOM-Formate: SPDX (ISO/IEC 5962:2021) und CycloneDX (OWASP). NTIA Minimum Elements (2021) und EU CRA fordern SBOMs entlang der Lieferkette.')
         ],
 
         // ============== KAPITEL 4 — Operations (50 Fragen) ==============
@@ -903,7 +912,10 @@
                 'Containment fokussiert auf Schadensbegrenzung: Host isolieren, Privileg-Konten sperren, forensische Snapshots vor Wiederherstellung sichern.'),
             q('Welcher Log-Aufbewahrungs-Standard ist Mindestempfehlung in PCI-DSS v4.0 für Audit-Trails?',
                 ['30 Tage', '6 Monate', '1 Jahr (mind. 3 Monate sofort verfügbar)', '5 Jahre online'], 2,
-                'PCI-DSS v4.0 Req. 10.5.1: mindestens 1 Jahr Audit-Trails, davon mindestens 3 Monate sofort verfügbar ("immediately available").')
+                'PCI-DSS v4.0 Req. 10.5.1: mindestens 1 Jahr Audit-Trails, davon mindestens 3 Monate sofort verfügbar ("immediately available").'),
+            q('Welche Komponente liefert in einem modernen SOC kontextangereicherte Detections über Tool-Grenzen hinweg?',
+                ['Reines Antivirus', 'XDR / SIEM mit Korrelation (Endpoint, Identity, Network, Cloud, Email)', 'Reine Firewall-Logs', 'Reine DLP-Sensoren'], 1,
+                'XDR (Extended Detection & Response) bzw. ein modernes SIEM/SOAR korreliert Telemetrie aus EDR, IdP, NDR, CSPM, CASB, Email-Gateway zu Incidents.')
         ]
     };
 
