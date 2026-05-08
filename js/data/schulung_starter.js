@@ -32,59 +32,167 @@
                 summary: 'CIA-Triade, Kontrollkategorien (technisch/administrativ/physisch — präventiv/detektiv/korrigierend), Zero Trust Grundlagen, Change Management.',
                 pages: [{
                     title: 'Sicherheits-Grundbegriffe',
-                    html: `<h4>CIA + erweiterte Schutzziele</h4>
-<ul><li><strong>Confidentiality</strong> — Verschlüsselung, Access Control.</li>
-<li><strong>Integrity</strong> — Hashing, digitale Signaturen.</li>
-<li><strong>Availability</strong> — Redundanz, BCDR.</li>
-<li>+ <strong>Authenticity</strong>, <strong>Non-Repudiation</strong>.</li></ul>
-<h4>Kontroll-Kategorien</h4>
-<p>Technisch (Firewall, EDR), administrativ (Policies, Schulung), physisch (Schloss, Wache, Kamera).
-Wirkung: präventiv, detektiv, korrigierend, abschreckend, kompensierend, leitend.</p>
-<h4>Change Management</h4>
-<p>RFC → CAB → Test → Approval → Deployment → Post-implementation Review. Standard, Normal und Emergency Changes (ITIL 4).</p>`
+                    html: `<p>Bevor man über Tools, Angriffe oder Frameworks spricht, muss man wissen, <em>was</em> Informationssicherheit eigentlich schützen will. Genau das beantwortet die <strong>CIA-Triade</strong> — sie ist das Fundament, auf dem alle weiteren Konzepte aufbauen. CompTIA prüft diese Begriffe nicht abstrakt, sondern in Form von Szenario-Fragen: Du bekommst eine Situation und musst entscheiden, welches Schutzziel verletzt wird und welche Kontrolle hilft.</p>
+
+<h4>Die CIA-Triade</h4>
+<p><strong>Confidentiality (Vertraulichkeit)</strong> bedeutet: Daten sind nur für autorisierte Personen lesbar. Verletzt wird sie, wenn jemand Daten <em>sieht</em>, der das nicht dürfte — etwa weil ein Backup-Tape ohne Verschlüsselung verloren geht. Typische Schutzmaßnahmen: Verschlüsselung (in transit/at rest), Zugriffssteuerung, DLP, Klassifizierung.</p>
+<p><strong>Integrity (Integrität)</strong> bedeutet: Daten sind unverändert oder Änderungen sind nachweisbar. Verletzt wird sie, wenn jemand eine Überweisungssumme manipuliert oder ein Log-Eintrag still verschwindet. Schutzmaßnahmen: Hashes (SHA-256), HMAC, digitale Signaturen, Versionierung, Write-Once-Storage.</p>
+<p><strong>Availability (Verfügbarkeit)</strong> bedeutet: Berechtigte können auf Daten/Dienste zugreifen, wenn sie sie brauchen. Verletzt wird sie durch DDoS, Ransomware, Hardwareausfall oder fehlerhafte Patches. Schutzmaßnahmen: Redundanz, Lastverteilung, Backups, BCDR-Pläne.</p>
+<p>SY0-701 erweitert die Triade um zwei wichtige Konzepte: <strong>Authenticity</strong> (eine Identität ist nachweislich echt — durchgesetzt durch Faktoren und Signaturen) und <strong>Non-Repudiation</strong> (eine Aktion kann nicht plausibel abgestritten werden, weil sie kryptografisch oder durch lückenloses Audit-Logging dem Akteur zugeordnet ist).</p>
+
+<h4>Kontroll-Kategorien — Art × Wirkung</h4>
+<p>Kontrollen werden auf zwei Achsen klassifiziert. Die <strong>Art</strong> beschreibt, womit gearbeitet wird: <em>technisch</em> (Firewall, EDR, MFA-Token), <em>administrativ/managerial</em> (Policies, Schulungen, Background-Checks) und <em>physisch</em> (Schloss, Zaun, Wache, Kamera). Die <strong>Wirkung</strong> beschreibt, was die Kontrolle bewirkt:</p>
+<ul>
+<li><strong>Preventive</strong> verhindert den Vorfall (verschlüsselte Festplatte, Zaun, Awareness-Training).</li>
+<li><strong>Detective</strong> erkennt den Vorfall (IDS, SIEM, Bewegungsmelder, Log-Analyse).</li>
+<li><strong>Corrective</strong> behebt den Schaden nach Eintritt (Restore aus Backup, Patch nach Exploit).</li>
+<li><strong>Deterrent</strong> schreckt ab (Hinweisschild „Videoüberwachung", Compliance-Banner).</li>
+<li><strong>Compensating</strong> ersetzt eine nicht umsetzbare primäre Kontrolle (Mikrosegmentierung statt Patch eines nicht patchbaren SCADA-Systems).</li>
+<li><strong>Directive</strong> gibt vor, was zu tun ist (Policy, Standard, Verfahrensanweisung).</li>
+</ul>
+<p>Im Examen entscheidet oft der Kontext: Eine sichtbar angebrachte Kamera mit Hinweisschild ist primär <em>deterrent</em>, eine versteckte Kamera primär <em>detective</em>. Eine Firewall-Regel, die einen Port blockiert, ist <em>preventive</em>; das SIEM, das den Block-Treffer auswertet, ist <em>detective</em>.</p>
+
+<h4>Defense in Depth und Defense in Diversity</h4>
+<p>Eine einzige Kontrolle reicht nie. <strong>Defense in Depth</strong> staffelt mehrere Schichten hintereinander — Perimeter, Netzwerk, Host, Anwendung, Daten —, sodass das Versagen einer Schicht nicht das Gesamtsystem kompromittiert. <strong>Defense in Diversity</strong> ergänzt diesen Gedanken: nicht nur viele, sondern auch <em>verschiedenartige</em> Kontrollen einsetzen (z. B. zwei Firewalls von zwei Herstellern), damit eine einzige Schwachstelle nicht alle Schichten gleichzeitig aushebelt.</p>
+
+<h4>Change Management — die unterschätzte Sicherheitsdisziplin</h4>
+<p>Die meisten Outages und nicht wenige Sicherheitsvorfälle entstehen nicht durch Angreifer, sondern durch unkoordinierte Änderungen. Ein professioneller Change-Prozess folgt dem Lebenszyklus <em>Request → Bewertung → Genehmigung → Test → Deployment → Post-Implementation Review</em>. Bewertet wird durch das <strong>CAB</strong> (Change Advisory Board), ein gemischtes Gremium aus Tech, Security, Business und Service-Owner.</p>
+<p>ITIL 4 unterscheidet drei Change-Typen, die du im Examen sicher trennen musst:</p>
+<ul>
+<li><strong>Standard Change</strong> — pre-approved, low-risk, repetitiv (z. B. Drucker installieren, neuen User anlegen). Kein CAB nötig.</li>
+<li><strong>Normal Change</strong> — alles sonstige; geht durch CAB.</li>
+<li><strong>Emergency Change</strong> — Notfall (kritischer Patch, akuter Vorfall). Geht durch ein verkürztes ECAB, wird aber im Nachgang vollständig dokumentiert.</li>
+</ul>
+<p>Pflicht in jedem Change-Record sind <strong>Backout-Plan</strong> (wie macht man die Änderung rückgängig?), <strong>Maintenance-Window</strong> (wann?) und <strong>Stakeholder-Communication</strong> (wer wird informiert?). Ohne diese drei Punkte gibt es keine Production-Approval — egal wie eilig der Change ist.</p>`
                 }, {
                     title: 'Authentication, Authorization, Accounting (AAA)',
-                    html: `<h4>Faktor-Klassen</h4>
-<ul><li>Something you <strong>know</strong> — Passwort, PIN.</li>
-<li>Something you <strong>have</strong> — Smartcard, FIDO2-Token, TOTP-App.</li>
-<li>Something you <strong>are</strong> — Biometrie (Fingerprint, Iris, Face).</li>
-<li>Something you <strong>do</strong> — Tastaturanschlag, Maus-Verhalten.</li>
-<li>Somewhere you <strong>are</strong> — Geolocation/IP-Bereich.</li></ul>
-<h4>MFA-Hierarchie</h4>
-<p>Phishing-Resistenz: <strong>FIDO2/WebAuthn</strong> > Smartcard > Push-with-Number-Match > TOTP > SMS-OTP. SMS ist heute schwach (SIM-Swapping).</p>
+                    html: `<p>AAA beschreibt drei aufeinanderfolgende Fragen, die ein System bei jedem Zugriff stellt: <em>„Wer bist du?" (Authentication)</em>, <em>„Was darfst du?" (Authorization)</em> und <em>„Was hast du gemacht?" (Accounting)</em>. Verwechsle diese drei niemals — fast jede Examensfrage zu Identity prüft genau diese Trennschärfe.</p>
+
+<h4>Authentifizierungsfaktoren</h4>
+<p>Ein <strong>Faktor</strong> ist eine Kategorie von Beweismitteln, mit der du deine Identität belegst. Klassisch werden drei Hauptklassen unterschieden, SY0-701 ergänzt zwei moderne:</p>
+<ul>
+<li><strong>Wissen</strong> (something you <em>know</em>) — Passwort, PIN, Sicherheitsfrage. Schwächste Klasse, weil teilbar und phishbar.</li>
+<li><strong>Besitz</strong> (something you <em>have</em>) — Smartcard, FIDO2-Hardware-Token, TOTP-App, Push-Authenticator. Schwer zu klauen ohne physischen Zugriff.</li>
+<li><strong>Inhärenz</strong> (something you <em>are</em>) — Biometrie: Fingerabdruck, Iris, Gesicht. Bequem, aber nicht ersetzbar bei Kompromittierung.</li>
+<li><strong>Verhalten</strong> (something you <em>do</em>) — Tippmuster, Mausbewegung, Gangart. Eher Risikosignal als Primärfaktor.</li>
+<li><strong>Standort</strong> (somewhere you <em>are</em>) — Geofencing, IP-Bereich, GPS. Gut als Kontextfaktor in ABAC.</li>
+</ul>
+<p><strong>Multi-Faktor</strong> bedeutet: mindestens zwei Faktoren <em>aus unterschiedlichen Klassen</em>. Zwei Passwörter sind also kein MFA, ein Passwort plus FIDO2-Token sehr wohl.</p>
+
+<h4>MFA-Hierarchie nach Phishing-Resistenz</h4>
+<p>Nicht jede MFA-Methode ist gleich stark. Die Reihenfolge von oben (am besten) nach unten:</p>
+<ol>
+<li><strong>FIDO2 / WebAuthn</strong> mit Hardware-Schlüssel oder Plattform-Authenticator. Phishing-resistent, weil das Credential kryptografisch an die Origin (Domain) gebunden ist — eine Phishing-Domain bekommt schlicht keine Antwort.</li>
+<li><strong>Smartcard / PIV / CAC</strong> mit Zertifikat. Stark, aber organisatorisch aufwendig.</li>
+<li><strong>Push mit Number-Matching</strong>. Hilft gegen MFA-Fatigue (User muss eine angezeigte Zahl in der App bestätigen, die das System anzeigt).</li>
+<li><strong>TOTP-App</strong> (Google Authenticator, Microsoft Authenticator). Solide, aber nicht origin-gebunden — phishbar via Reverse-Proxy (Evilginx).</li>
+<li><strong>SMS-OTP</strong>. NIST SP 800-63B Rev. 3 stuft SMS als <em>restricted</em> ein, weil SIM-Swapping und SS7-Angriffe trivial sind. Nur als Notfall-Backup.</li>
+</ol>
+
 <h4>Authorization-Modelle</h4>
-<ul><li>DAC (Discretionary) — Owner entscheidet.</li>
-<li>MAC (Mandatory) — Labels, System erzwingt.</li>
-<li>RBAC — Rolle &rarr; Berechtigungen.</li>
-<li>ABAC — attributbasiert (User, Resource, Context).</li></ul>
-<h4>Accounting</h4>
-<p>Zentrales Audit-Logging (RADIUS, TACACS+, syslog), unveränderbarer Audit-Trail. Ohne Accounting keine Forensik.</p>`
+<p>Nach erfolgreicher Authentifizierung entscheidet das System, was du tun darfst. Die vier Kernmodelle:</p>
+<p><strong>DAC</strong> (Discretionary Access Control) — der <em>Owner</em> einer Ressource entscheidet, wer darauf zugreift. Klassisch in Datei-Systemen (Dateibesitzer setzt Rechte). Flexibel, aber schwer zu auditieren — der Admin kontrolliert nicht, was Nutzer freigeben.</p>
+<p><strong>MAC</strong> (Mandatory Access Control) — das <em>System</em> erzwingt Zugriffsregeln anhand sicherheitsklassifizierter Labels (z. B. „Streng geheim"). User können Rechte <em>nicht</em> selbst weitergeben. Standard in militärischen/staatlichen Umgebungen, in SELinux, in Multi-Level-Security-Systemen.</p>
+<p><strong>RBAC</strong> (Role-Based Access Control) — Rechte hängen an Rollen, User werden Rollen zugewiesen. Skaliert in Unternehmen ausgezeichnet, weil neue Mitarbeiter einfach in eine Rolle eingegliedert werden. Falle: <em>Privilege Creep</em> — wer durch viele Stationen geht, sammelt Rollen, die nie wieder entzogen werden. Gegenmaßnahme: regelmäßige <em>Access Reviews / Recertification</em>.</p>
+<p><strong>ABAC</strong> (Attribute-Based Access Control) — Entscheidung anhand von Attributen aus mehreren Quellen: User-Attribute (Abteilung, Clearance), Ressource-Attribute (Klassifizierung), Kontext (Uhrzeit, Standort, Gerätestatus). Maximale Granularität, Grundlage moderner Zero-Trust-Policies.</p>
+
+<h4>Accounting — wer hat was getan?</h4>
+<p>Ohne Accounting gibt es keine Forensik und keine Compliance. Das System protokolliert lückenlos: <em>welche Identität, welche Aktion, welches Objekt, welcher Zeitstempel, welcher Quell-Host?</em> Zentrale Sammlung über Syslog, RADIUS-Accounting, TACACS+ oder ein SIEM. Wichtig: Logs müssen <strong>integritätsgeschützt</strong> sein (Append-Only, Hash-Ketten, separate Log-Plattform), damit ein Angreifer Spuren nicht still löscht.</p>
+<p>RADIUS (RFC 2865) ist der De-facto-Standard für 802.1X-WLAN/-LAN-Auth, VPN und administrative Zugänge. TACACS+ (Cisco) bietet Command-Authorization pro Befehl auf Netzwerkgeräten — granularer als RADIUS, weshalb Netzwerk-Admins TACACS+ bevorzugen.</p>
+
+<h4>Begriffe rund um Privileg</h4>
+<p>Drei Prinzipien tauchen in der Prüfung immer wieder auf und werden gerne verwechselt:</p>
+<ul>
+<li><strong>Least Privilege</strong> — Akteure bekommen <em>nur</em> die Rechte, die sie brauchen. Bezieht sich auf <em>Berechtigungen</em>.</li>
+<li><strong>Need-to-Know</strong> — bezieht sich auf <em>Daten</em>: Du bekommst Zugang zu Informationen nur, wenn du sie für deine Aufgabe brauchst.</li>
+<li><strong>Separation of Duties (SoD)</strong> — kritische Aufgaben werden auf mehrere Personen aufgeteilt: Anforderer ≠ Genehmiger ≠ Ausführer. Verhindert Betrug ohne Kollusion.</li>
+</ul>
+<p>Ergänzt durch <strong>Job Rotation</strong> (rotative Aufgabenverteilung deckt verborgene Manipulationen auf, weil ein Vertreter „andere Spuren" findet) und <strong>Mandatory Vacation</strong> (Pflichturlaub erzwingt Vertretung — aktive Insider-Schemata werden während dieser Zeit sichtbar).</p>`
                 }, {
                     title: 'Kryptografische Grundlagen',
-                    html: `<h4>Symmetrisch</h4>
-<p>AES-128/256 (FIPS 197). Modi: GCM (AEAD, empfohlen), CTR, CBC mit HMAC. Niemals ECB für sensitive Daten (Mustererhalt).</p>
-<h4>Asymmetrisch</h4>
-<p>RSA ≥ 2048 Bit (3072 ab 2030 nach NIST SP 800-131A r3), ECDSA P-256/P-384, Ed25519. Schlüsselaustausch via ECDHE für Forward Secrecy.</p>
-<h4>Hashing</h4>
-<p>SHA-256, SHA-3-256. Niemals MD5 oder SHA-1 für Sicherheit. Passwort-Hashing: <strong>Argon2id</strong> (RFC 9106), bcrypt, scrypt — niemals reines SHA.</p>
-<h4>Digitale Signatur vs. MAC</h4>
-<p>MAC (HMAC, GMAC) liefert Integrität + Authentizität mit gemeinsamem Schlüssel — keine Non-Repudiation. Digitale Signatur (privater Schlüssel des Senders) liefert Non-Repudiation.</p>
-<h4>PKI-Lifecycle</h4>
-<p>CSR → Issuance → Distribution → Use → Renewal/Revocation (CRL/OCSP) → Destruction. CA-Hierarchie: Offline-Root → Issuing-CAs.</p>`
+                    html: `<p>Kryptografie ist kein Selbstzweck, sondern Werkzeug zum Erreichen der CIA-Ziele. Für SY0-701 musst du wissen, <em>welcher Algorithmus welches Ziel erfüllt</em>, <em>warum bestimmte Verfahren als veraltet gelten</em> und <em>wo typische Implementierungsfehler liegen</em> — nicht die mathematischen Innereien.</p>
+
+<h4>Symmetrische Verfahren — schnell, aber Schlüsselverteilung ist hart</h4>
+<p>Beide Seiten teilen denselben Schlüssel. Vorteil: extrem schnell, eignet sich für große Datenmengen. Nachteil: Wie verteile ich den Schlüssel sicher an N Teilnehmer, ohne dass jemand ihn abfängt?</p>
+<p><strong>AES</strong> (FIPS 197, 2001) ist heute der unangefochtene Standard. Schlüssellängen 128, 192, 256 Bit. Wichtig ist nicht primär die Länge, sondern der <strong>Modus</strong>:</p>
+<ul>
+<li><strong>GCM</strong> (Galois/Counter Mode) — <em>AEAD</em>: liefert Verschlüsselung <em>und</em> Integrität in einem Schritt. Standard in TLS 1.3, IPsec, SSH. Erste Wahl für Neuentwicklungen.</li>
+<li><strong>CTR</strong> — schneller Stream-Modus, parallelisierbar; braucht aber zusätzlich einen MAC für Integrität.</li>
+<li><strong>CBC</strong> mit HMAC — Klassiker, korrekt implementiert sicher, aber empfindlich gegen Padding-Oracle-Angriffe (Lucky-13, POODLE), wenn Reihenfolge falsch ist (Encrypt-then-MAC ist Pflicht).</li>
+<li><strong>ECB</strong> — <em>nie</em> für sensitive Daten. Gleiche Klartextblöcke ergeben gleiche Geheimtextblöcke; das berühmte „ECB-Pinguin"-Bild zeigt, dass Strukturen sichtbar bleiben.</li>
+</ul>
+<p><strong>ChaCha20-Poly1305</strong> (RFC 8439) ist die Software-Alternative zu AES-GCM für Plattformen ohne AES-Hardwarebeschleunigung — ebenfalls AEAD, in TLS 1.3 zugelassen, von Google in Mobile-Browsern bevorzugt.</p>
+
+<h4>Asymmetrische Verfahren — langsam, aber lösen das Verteilungsproblem</h4>
+<p>Jeder besitzt ein Schlüsselpaar (öffentlich/privat). Was mit einem öffentlichen Schlüssel verschlüsselt wird, kann nur mit dem privaten entschlüsselt werden — und umgekehrt. Asymmetrische Krypto ist zu langsam für Massendaten und wird daher nur für <em>Schlüsselaustausch</em> und <em>Signaturen</em> verwendet, nicht für Volumenverschlüsselung.</p>
+<p>Aktuelle Empfehlungen (NIST SP 800-131A Rev. 3):</p>
+<ul>
+<li><strong>RSA</strong>: mindestens 2048 Bit, ab 2030 verpflichtend 3072 Bit. RSA-1024 ist bereits seit 2014 unzulässig.</li>
+<li><strong>ECC</strong> (Elliptic Curve): P-256 entspricht etwa RSA-3072 in Sicherheit, ist aber deutlich kompakter und schneller. P-384 für Hochsicherheit.</li>
+<li><strong>Ed25519</strong> — moderne EdDSA-Variante; deterministisch, keine Nonce-Schwächen wie bei klassischem ECDSA, kein Side-Channel über Random.</li>
+</ul>
+
+<h4>Hashing und Passwort-Hashing — zwei verschiedene Welten</h4>
+<p>Ein Hash ist ein Einweg-Fingerabdruck. SHA-256 und SHA-3-256 sind die heute akzeptierten Standards. <strong>MD5</strong> und <strong>SHA-1</strong> gelten als gebrochen — MD5 seit 2008 (Flame-Malware nutzte einen Chosen-Prefix-Kollisionsangriff), SHA-1 spätestens seit der SHAttered-Veröffentlichung 2017.</p>
+<p>Für Passwörter darf man <strong>nie</strong> einen einfachen Hash benutzen, auch nicht mit Salt allein. Ein moderner GPU- oder ASIC-Cluster berechnet Milliarden SHA-256 pro Sekunde. Stattdessen: <strong>Argon2id</strong> (RFC 9106, Gewinner der Password Hashing Competition 2015) — speicher-hart, GPU-resistent, mit konfigurierbarem Memory-Cost und Iterationen. Akzeptable Alternativen: <strong>bcrypt</strong> (Solar Designer, seit 1999) und <strong>scrypt</strong>. Ein Salt pro User ist immer Pflicht; ein systemweiter Pepper als zweite Verteidigungslinie ist Best Practice.</p>
+
+<h4>MAC vs. digitale Signatur — die kritische Unterscheidung</h4>
+<p>Beide schützen Integrität und Authentizität, sind aber nicht austauschbar:</p>
+<p>Ein <strong>MAC</strong> (Message Authentication Code, z. B. HMAC-SHA-256) nutzt einen <em>geteilten</em> Schlüssel. Beide Parteien können MACs erzeugen — also kann <em>keine</em> beweisen, dass die andere etwas signiert hat. Folge: <strong>kein Non-Repudiation</strong>.</p>
+<p>Eine <strong>digitale Signatur</strong> nutzt den privaten Schlüssel des Signers. Verifikation erfolgt mit dem öffentlichen Schlüssel — den jeder hat. Nur der Signer konnte die Signatur erstellen. Folge: <strong>Non-Repudiation</strong>.</p>
+<p>Faustregel: Kommunikation zwischen zwei vertrauenden Parteien → MAC reicht. Verträge, Audit-Logs, Code-Signing → digitale Signatur ist Pflicht.</p>
+
+<h4>Forward Secrecy und der Tod des statischen RSA</h4>
+<p>Klassisches RSA-Key-Exchange (TLS 1.0–1.2) verschlüsselte das Pre-Master-Secret mit dem öffentlichen Server-Schlüssel. Wer den privaten Server-Schlüssel später erbeutet, kann <em>archivierte</em> Sessions entschlüsseln. <strong>Perfect Forward Secrecy</strong> verhindert das durch ephemerale Schlüssel: <strong>ECDHE</strong> oder DHE generiert für jede Session einen Einmalschlüssel, der nach Verbindungsende verworfen wird. TLS 1.3 (RFC 8446, 2018) erlaubt <em>nur noch</em> ephemerale Schlüsselaustausche und entfernt RSA-Key-Exchange ersatzlos.</p>
+
+<h4>PKI in Kürze</h4>
+<p>Die <strong>Public Key Infrastructure</strong> beantwortet eine zentrale Frage: <em>Gehört dieser öffentliche Schlüssel wirklich zu der angegebenen Identität?</em> Eine vertrauenswürdige <strong>CA</strong> bestätigt die Zuordnung durch ein signiertes Zertifikat (X.509, RFC 5280). Lifecycle: Antrag (CSR) → Ausstellung → Verteilung → Nutzung → Erneuerung oder Widerruf → Vernichtung.</p>
+<p>Widerrufe werden über zwei Mechanismen kommuniziert: <strong>CRL</strong> (Certificate Revocation List, periodisch heruntergeladen) und <strong>OCSP</strong> (Online Certificate Status Protocol, Echtzeit). OCSP-Stapling reduziert dabei das Privacy-Problem, dass die CA jeden Verbindungsaufbau eines Nutzers sieht. Ergänzend: <strong>Certificate Transparency</strong> (RFC 6962) — alle Zertifikate von vertrauenswürdigen Browser-CAs müssen in öffentliche Append-Only-Logs eingetragen werden, damit fehlausgestellte Zertifikate auffallen.</p>
+
+<h4>Ein Wort zur Post-Quantum-Welt</h4>
+<p>Quantencomputer würden Shor's Algorithmus auf RSA und ECC anwenden und beide brechen. NIST hat 2024 die ersten Standards finalisiert: <strong>FIPS 203</strong> (ML-KEM, basiert auf Kyber) für Schlüsselaustausch und <strong>FIPS 204</strong> (ML-DSA, basiert auf Dilithium) für Signaturen. Cloudflare und Google rollen seit 2023 hybride TLS-Verfahren (X25519 + ML-KEM) aus. Für SY0-701 reicht das Wissen, <em>dass</em> diese Standards existieren und der Übergang in Migration <em>jetzt</em> beginnt — die „Harvest now, decrypt later"-Bedrohung ist real.</p>`
                 }, {
                     title: 'Zero Trust & Modernisierung',
-                    html: `<h4>Zero Trust Tenets (NIST SP 800-207)</h4>
-<ol><li>Alle Datenquellen und Computing-Services sind Ressourcen.</li>
-<li>Alle Kommunikation wird unabhängig vom Netzwerkstandort gesichert.</li>
-<li>Zugriff erfolgt pro Session, niemals dauerhaft.</li>
-<li>Zugriff wird durch dynamische Policy bestimmt (Identity, Device-Health, Kontext).</li>
-<li>Asset-Integrität wird kontinuierlich überwacht.</li>
-<li>Authentifizierung und Authorization sind dynamisch und werden vor Zugriff erzwungen.</li>
-<li>Soviel Information wie möglich über Zustand wird gesammelt und genutzt.</li></ol>
-<h4>Komponenten</h4>
-<p><strong>PE</strong> (Policy Engine) entscheidet, <strong>PA</strong> (Policy Administrator) konfiguriert, <strong>PEP</strong> (Policy Enforcement Point) setzt durch.</p>
-<h4>SSE / SASE</h4>
-<p>Cloud-natives Security-Bundle (SWG, CASB, ZTNA, FWaaS, DLP) — ersetzt klassische VPN/Perimeter-Architektur. ZTNA öffnet Anwendungen identitätsbasiert ohne Vollnetz-Zugang.</p>`
+                    html: `<p>Zero Trust ist kein Produkt, sondern eine Architektur-Philosophie: <em>„Never trust, always verify."</em> Der klassische Burg-und-Graben-Ansatz — innen vertraulich, außen feindlich — funktioniert in einer Welt mit Cloud-Workloads, mobilen Mitarbeitern und Lieferantenzugängen nicht mehr. Stattdessen wird jeder Zugriff <em>kontinuierlich</em> anhand von Identität, Gerätestatus und Kontext bewertet, unabhängig davon, ob er „aus dem Büro" oder „aus dem Internet" kommt.</p>
+
+<h4>Die sieben Tenets von NIST SP 800-207 (2020)</h4>
+<p>Das Referenzdokument zu Zero Trust ist NIST SP 800-207. Es listet sieben Grundsätze, die du im Examen einzeln zuordnen können solltest:</p>
+<ol>
+<li><strong>Alle Datenquellen und Computing-Services gelten als Ressourcen</strong> — IoT-Sensor, SaaS-API, Datenbank, alles wird gleich behandelt.</li>
+<li><strong>Alle Kommunikation ist gesichert, unabhängig vom Standort</strong> — auch zwischen zwei Servern im selben Rechenzentrum.</li>
+<li><strong>Zugriff erfolgt pro Session</strong> — keine dauerhafte Vertrauensbeziehung; jede Session wird neu bewertet.</li>
+<li><strong>Zugriff wird durch dynamische Policy bestimmt</strong> — Identität, Service-/Asset-Klassifizierung, Verhaltensanomalien, Umweltattribute.</li>
+<li><strong>Asset-Integrität wird kontinuierlich überwacht</strong> — Gerätestatus, Patchlevel, EDR-Telemetrie fließen in Entscheidungen ein.</li>
+<li><strong>Authentifizierung und Autorisierung sind dynamisch und werden vor Zugriff erzwungen</strong> — auch laufende Sessions können neu bewertet werden.</li>
+<li><strong>Maximale Telemetrie wird gesammelt</strong>, um die Policy laufend zu verbessern.</li>
+</ol>
+
+<h4>Logische Komponenten: PE, PA, PEP</h4>
+<p>NIST modelliert die Zero-Trust-Architektur in drei Rollen:</p>
+<p>Die <strong>Policy Engine (PE)</strong> entscheidet — sie nimmt alle relevanten Inputs (Identität, Gerätestatus, Threat-Intel, Verhaltensbasis) und gibt ein Allow/Deny aus. Der <strong>Policy Administrator (PA)</strong> ist der Vermittler, der die Entscheidung der PE in eine konkrete Session-Konfiguration übersetzt: Token ausstellen, Tunnel etablieren, Session beenden. Der <strong>Policy Enforcement Point (PEP)</strong> sitzt im Datenpfad und setzt die Entscheidung tatsächlich durch — typischerweise als Identity-Aware-Proxy, ZTNA-Gateway oder Sidecar in einem Service-Mesh. PE und PA bilden zusammen den <strong>Policy Decision Point (PDP)</strong>, der PEP führt aus.</p>
+<p>Diese Trennung ist wichtig, weil sie verschiedene Vertrauensquellen (CDM, IAM, SIEM, Threat-Intel) in <em>einer</em> zentralen Entscheidungsinstanz zusammenführt — statt Policies zwischen Dutzenden Geräten zu duplizieren.</p>
+
+<h4>SASE und SSE — Cloud-natives Sicherheitsfundament</h4>
+<p>Wenn Zero Trust die Philosophie ist, sind SASE und SSE konkrete Liefermodelle dafür. <strong>SASE</strong> (Secure Access Service Edge, Gartner 2019) bündelt SD-WAN mit einem Cloud-gelieferten Security-Stack zu einem einzigen Service. <strong>SSE</strong> (Security Service Edge, 2021) ist die Sicherheits-Hälfte von SASE ohne den Networking-Teil — gut für Organisationen, die ihr SD-WAN behalten und nur Security konsolidieren wollen.</p>
+<p>Der Stack besteht typischerweise aus:</p>
+<ul>
+<li><strong>SWG</strong> (Secure Web Gateway) — URL-Filter, Malware-Scanning, TLS-Inspection für ausgehenden Web-Traffic.</li>
+<li><strong>CASB</strong> (Cloud Access Security Broker) — Sichtbarkeit und Kontrolle für SaaS-Nutzung; erkennt Schatten-IT, erzwingt DLP-Regeln in Office 365, Salesforce etc.</li>
+<li><strong>ZTNA</strong> (Zero Trust Network Access) — der moderne VPN-Ersatz: User bekommen identitätsbasierten Zugriff genau auf <em>einzelne</em> Anwendungen, statt Layer-3-Routing ins gesamte Firmennetz.</li>
+<li><strong>FWaaS</strong> (Firewall as a Service) — Cloud-bereitgestellte Next-Gen-Firewall.</li>
+<li><strong>DLP</strong> (Data Loss Prevention) — verhindert Abfluss vertraulicher Daten in Cloud-Apps oder über Web.</li>
+</ul>
+
+<h4>Warum klassisches VPN ausstirbt</h4>
+<p>Ein traditionelles Site-VPN gibt dem User nach erfolgreicher Anmeldung Layer-3-Zugang ins Firmennetz — der Notebook ist faktisch „im Büro". Eine einzige kompromittierte Identität öffnet damit die Tür zu allem, was vom internen Netz aus erreichbar ist. Klassische lateral-movement-Angriffe (Pass-the-Hash, Kerberoasting, ZeroLogon) gedeihen genau in dieser Architektur. ZTNA dreht das um: Die Identität wird pro Anwendung neu bewertet, der User sieht nur Anwendungen, für die er aktuell autorisiert ist; alles andere ist nicht einmal erreichbar.</p>
+
+<h4>Wie man Zero Trust nicht einführt</h4>
+<p>Drei Anti-Pattern, die im Examen gerne abgefragt werden und in der Praxis scheitern:</p>
+<ul>
+<li><em>Big-Bang-Migration</em>. Funktioniert in keiner Organisation. Realistischer Weg: einzelne Anwendung, einzelne User-Gruppe, lernen, ausbauen.</li>
+<li><em>Zero Trust = neue Firewall</em>. Falsch. Ohne saubere Identitätsdaten (Identitätsquelle, Geräteinventar, Klassifizierung) funktioniert keine Policy.</li>
+<li><em>Vendor-Lock-in als Lösung</em>. Zero Trust ist eine Architektur, kein Produkt. NIST SP 800-207 ist explizit produktagnostisch.</li>
+</ul>`
                 }],
                 quiz: [
                     q('Welche drei Kontrollkategorien werden in SY0-701 unterschieden?', ['Technisch, administrativ, physisch', 'Hard, soft, medium', 'Network, host, application', 'Internal, external, hybrid'], 0, 'Kategorien (Art) vs. Wirkung (preventive/detective/corrective/...).'),
@@ -145,46 +253,162 @@ Wirkung: präventiv, detektiv, korrigierend, abschreckend, kompensierend, leiten
                 summary: 'Threat-Actors, Angriffsvektoren, Malware-Klassen, Social Engineering, Mitigation-Patterns.',
                 pages: [{
                     title: 'Bedrohungslandschaft',
-                    html: `<h4>Threat Actors</h4>
-<ul><li>Nation-State (APT) — hochressourciert, Spionage/Sabotage.</li>
-<li>Organized Crime — Ransomware, Banking-Trojans.</li>
-<li>Hacktivists — Ideologie.</li>
-<li>Insider Threats (malicious / unintentional).</li>
-<li>Script-Kiddies, Competitors, Shadow IT.</li></ul>
-<h4>Malware-Klassen</h4>
-<p>Virus, Worm, Trojan, RAT, Rootkit, Bootkit, Logic Bomb, Spyware, Adware, Ransomware, Wiper, Cryptominer, Keylogger.</p>
-<h4>Social Engineering</h4>
-<p>Phishing, Spear-Phishing, Whaling, Vishing, Smishing, Pretexting, Baiting, Tailgating, Watering-Hole.</p>
-<h4>Mitigations</h4>
-<p>Patch-Management, Segmentation, MFA, Email-Filter (DMARC/DKIM/SPF), Awareness, Application Allowlisting.</p>`
+                    html: `<p>Bevor man Verteidigungsmaßnahmen wählen kann, muss man verstehen, <em>wer</em> angreift, <em>warum</em>, mit <em>welchen Mitteln</em> und über <em>welche Wege</em>. Dieser Abschnitt baut das Vokabular auf, mit dem Vorfälle, Threat-Intel-Berichte und Red-Team-Reports gelesen werden — und mit dem CompTIA Szenarien formuliert.</p>
+
+<h4>Threat Actors — Motivation, Ressourcen, Vorgehen</h4>
+<p>Angreifer unterscheiden sich nicht primär in den Tools, sondern in <em>Motivation</em> und <em>Ressourcen</em>. Diese beiden Faktoren bestimmen, wie hartnäckig und kreativ ein Angreifer ist und welche Verteidigung sinnvoll ist.</p>
+<p><strong>Nation-State / APT</strong> (Advanced Persistent Threat) — staatlich finanzierte Gruppen wie APT28/Fancy Bear, APT29/Cozy Bear, Lazarus, Volt Typhoon. Ressourcen praktisch unbegrenzt, Geduld in Monaten bis Jahren, Zero-Days erlaubt. Ziele: Spionage, Sabotage kritischer Infrastruktur, geopolitische Hebelwirkung. Gegen APTs hilft kein Tool, sondern nur ein reifes Detection-und-Response-Programm mit MITRE-ATT&CK-getriebener Analytik.</p>
+<p><strong>Organisierte Kriminalität</strong> — operiert wie ein Unternehmen, mit Affiliate-Programmen, Initial-Access-Brokern und Ransomware-as-a-Service-Plattformen (LockBit, BlackCat/ALPHV bis 2024, dann Cl0p, RansomHub). Motivation: Geld. Methoden: Phishing, gestohlene Credentials aus Infostealern, Ausnutzung kürzlich gepatchter CVEs. Modernes Ransomware-Modell ist <em>Double Extortion</em>: erst Daten exfiltrieren, dann verschlüsseln, dann doppelt erpressen.</p>
+<p><strong>Hacktivisten</strong> — ideologisch motiviert (Anonymous, KillNet, IT Army of Ukraine). Typisch sind Defacements, DDoS, Doxing. Methoden meist weniger raffiniert, aber medienwirksam.</p>
+<p><strong>Insider</strong> — die gefährlichste Klasse, weil sie schon legitimen Zugang haben. Unterscheide <em>malicious insider</em> (verärgerter Mitarbeiter, Industriespionage) und <em>unintentional insider</em> (jemand, der auf eine Phishing-Mail klickt). Beide werden durch dieselbe Kontrolle reduziert: Least Privilege, Monitoring privilegierter Konten, DLP.</p>
+<p><strong>Script-Kiddies</strong> nutzen vorgefertigte Tools ohne tieferes Verständnis. Die Bedrohung kommt eher aus Masse als aus Raffinesse. <strong>Konkurrenten</strong> betreiben Wirtschaftsspionage. <strong>Shadow-IT</strong> ist kein Angreifer, aber ein Risiko-Multiplikator: nicht autorisierte SaaS-Nutzung umgeht alle Kontrollen.</p>
+
+<h4>Angriffsvektoren — wie kommt der Angreifer rein?</h4>
+<p>Vector ist der <em>Pfad</em> hinein, nicht das Tool. Häufigste Initial-Access-Vektoren laut Verizon DBIR 2024 / CISA-Statistiken:</p>
+<ul>
+<li><strong>Stolen Credentials</strong> — gephisht, aus Infostealer-Logs, aus Breach-Datenbanken. Gegenmaßnahme: phishing-resistente MFA, regelmäßige Identity-Hygiene.</li>
+<li><strong>Phishing</strong> — Credentials, Token, Malware-Lieferung über E-Mail. Gegenmaßnahme: Email-Authentifizierung (SPF/DKIM/DMARC), URL-Rewriting, Awareness.</li>
+<li><strong>Vulnerable Public-Facing Application</strong> — ungepatchte Citrix, MOVEit, Confluence, Exchange. Gegenmaßnahme: Asset-Inventar + Patch-Management + virtuelle Patches via WAF.</li>
+<li><strong>Supply Chain</strong> — kompromittierter Lieferant oder kompromittierte Software-Abhängigkeit. Gegenmaßnahme: SBOM, Code-Signing, Vendor-Risk-Management.</li>
+<li><strong>Removable Media</strong> — USB-Sticks, oft an Empfangstresen oder auf Parkplätzen platziert. Gegenmaßnahme: USB-Allowlisting, Disable-Auto-Run, Kioske mit Sanitizing.</li>
+</ul>
+
+<h4>Malware-Klassen — was tut der Schadcode?</h4>
+<p>Malware wird nach <em>Verbreitungsweise</em> und <em>Wirkung</em> klassifiziert. Du musst die Begriffe sicher trennen können:</p>
+<ul>
+<li><strong>Virus</strong> — braucht ein Wirts-File und User-Aktion zur Verbreitung.</li>
+<li><strong>Worm</strong> — verbreitet sich selbstständig über Netzwerk-Schwachstellen (WannaCry über EternalBlue/SMBv1).</li>
+<li><strong>Trojan</strong> — tarnt sich als legitime Software.</li>
+<li><strong>RAT</strong> (Remote Access Trojan) — gibt dem Angreifer interaktive Fernsteuerung (DarkComet, NjRAT).</li>
+<li><strong>Rootkit</strong> — versteckt seine Anwesenheit, oft durch Hooks im Kernel oder Userland.</li>
+<li><strong>Bootkit</strong> — befällt den Boot-Prozess (MBR/UEFI), startet vor dem OS und damit vor jedem AV. Beispiel: BlackLotus 2023, erster öffentlich bekannter UEFI-Bootkit, der Secure Boot umging.</li>
+<li><strong>Logic Bomb</strong> — wird durch ein Ereignis getriggert (Datum, Bedingung).</li>
+<li><strong>Spyware / Keylogger</strong> — sammelt Daten still.</li>
+<li><strong>Ransomware</strong> — verschlüsselt Daten, fordert Lösegeld; modern mit Datendiebstahl gekoppelt.</li>
+<li><strong>Wiper</strong> — zerstört Daten ohne Erpressung. Politisch motiviert: NotPetya 2017, HermeticWiper / WhisperGate 2022 gegen Ukraine.</li>
+<li><strong>Cryptominer</strong> — missbraucht CPU/GPU für Cryptomining; oft in kompromittierten Containern.</li>
+</ul>
+
+<h4>Social Engineering — Mensch als Angriffsziel</h4>
+<p>Technik allein reicht nicht: Wenn der User es selbst öffnet, hilft keine Firewall. Social Engineering nutzt menschliche Heuristiken — Autorität, Knappheit, Sympathie, Reziprozität, Angst. Häufige Varianten:</p>
+<ul>
+<li><strong>Phishing</strong> — generische Massen-Mail.</li>
+<li><strong>Spear-Phishing</strong> — gezielt, mit Recherche zum Opfer.</li>
+<li><strong>Whaling</strong> — gegen C-Level / hochrangige Ziele (Vorstand, Finanzleiter).</li>
+<li><strong>Vishing</strong> — per Telefon (Voice).</li>
+<li><strong>Smishing</strong> — per SMS.</li>
+<li><strong>Pretexting</strong> — Aufbau einer fingierten Geschichte (z. B. „IT-Support, ich brauche Ihr Passwort, weil…").</li>
+<li><strong>Baiting</strong> — verlockendes Lockmittel (USB-Stick „Gehälter 2026" auf dem Parkplatz).</li>
+<li><strong>Tailgating / Piggybacking</strong> — physisch hinter einem Berechtigten ins Gebäude folgen.</li>
+<li><strong>Watering Hole</strong> — Angreifer kompromittiert eine Website, die das Zielopfer regelmäßig besucht.</li>
+<li><strong>Business Email Compromise (BEC)</strong> — gefälschte CEO-Anweisung an Buchhaltung. Laut FBI IC3 jährlich der größte Cybercrime-Schaden, oft Milliardenhöhe.</li>
+</ul>
+
+<h4>Standard-Mitigations gegen die Bedrohungslandschaft</h4>
+<p>Keine Einzelmaßnahme verhindert alle Vektoren. Eine wirksame Defensive kombiniert:</p>
+<ul>
+<li><strong>Patch-Management</strong> mit risikobasierter Priorisierung (CVSS plus EPSS plus CISA KEV).</li>
+<li><strong>Netzwerk-Segmentierung und Mikrosegmentierung</strong>, damit ein Initial-Access-Treffer nicht zu lateral movement wird.</li>
+<li><strong>Phishing-resistente MFA</strong> für alle privilegierten und Cloud-Identitäten.</li>
+<li><strong>Email-Authentifizierung</strong> mit SPF, DKIM und DMARC im Reject-Modus, idealerweise plus BIMI.</li>
+<li><strong>Awareness-Training</strong> mit realistischen Phishing-Simulationen — wichtig: Trainings-Erfolg messen, nicht nur Klicks zählen.</li>
+<li><strong>Application Allowlisting</strong> auf hochprivilegierten Endpoints (DCs, Engineering Workstations).</li>
+<li><strong>EDR/XDR mit aktivem SOC</strong> — Erkennung in Stunden, nicht Wochen.</li>
+</ul>`
                 }, {
                     title: 'Application-Layer-Angriffe',
-                    html: `<h4>OWASP Top 10 (2021)</h4>
-<ol><li>A01 Broken Access Control</li><li>A02 Cryptographic Failures</li><li>A03 Injection (SQLi, OS-Cmd, LDAP)</li><li>A04 Insecure Design</li><li>A05 Security Misconfiguration</li><li>A06 Vulnerable & Outdated Components</li><li>A07 Identification & Authentication Failures</li><li>A08 Software & Data Integrity Failures (Supply-Chain)</li><li>A09 Security Logging & Monitoring Failures</li><li>A10 Server-Side Request Forgery (SSRF)</li></ol>
-<h4>Supply-Chain</h4>
-<p>SolarWinds (2020), 3CX (2023), XZ-Utils-Backdoor (2024). Mitigation: SBOM (CycloneDX/SPDX), signierte Artefakte (Sigstore), Reproducible Builds, Pinning.</p>
-<h4>Race Conditions / TOCTOU</h4>
-<p>Time-of-Check vs. Time-of-Use — Attacker manipuliert Resource zwischen Check und Use. Mitigation: atomic operations, file-locks, capability-based access.</p>`
+                    html: `<p>Auf der Anwendungsebene findet die Mehrzahl der Webangriffe statt — und gerade hier scheitern viele Organisationen, weil Entwickler und Security oft getrennt arbeiten. Die <strong>OWASP Top 10</strong> ist die wichtigste Referenz für Web-Anwendungssicherheit; jeder Punkt repräsentiert eine ganze Familie von Schwachstellen, die in der Praxis immer wieder auftauchen.</p>
+
+<h4>OWASP Top 10 (2021) im Detail</h4>
+<p><strong>A01 Broken Access Control</strong> — die häufigste Klasse überhaupt. Der Klassiker: <em>Insecure Direct Object Reference (IDOR)</em>. Eine URL <code>/api/orders/12345</code> zeigt deine Bestellung; <code>/api/orders/12346</code> zeigt die eines Fremden, weil der Server nur prüft, ob du authentifiziert bist, nicht <em>ob die ID dir gehört</em>. Mitigation: Authorization-Check pro Object-Access, niemals nur am Endpoint.</p>
+<p><strong>A02 Cryptographic Failures</strong> (früher „Sensitive Data Exposure") — schlechte Krypto, schwache Algorithmen (MD5, SHA-1, DES), ungeschützte Übertragung, fehlende Verschlüsselung at rest, hartcodierte Schlüssel im Quellcode.</p>
+<p><strong>A03 Injection</strong> — User-Input wird ungefiltert in einen Interpreter (SQL, OS-Shell, LDAP, XPath, ORM) eingebettet. SQLi-Beispiel: ein Login-Formular, in dem <code>' OR '1'='1' --</code> die Authentifizierung umgeht. Mitigation: <strong>parameterisierte Statements</strong>, <strong>Stored Procedures</strong>, ORM mit korrekter Verwendung, niemals String-Konkatenation.</p>
+<p><strong>A04 Insecure Design</strong> — Schwachstellen, die im Entwurf entstehen, nicht in der Implementierung. Beispiel: ein Passwort-Reset-Flow ohne Rate-Limit ist auch dann unsicher, wenn der Code fehlerfrei ist. Gegenmaßnahme: Threat Modeling vor dem Coding.</p>
+<p><strong>A05 Security Misconfiguration</strong> — Default-Passwörter, offene Cloud-Buckets, verbose Error Pages, ungehärtete Frameworks. Häufigste Real-World-Quelle für massenhafte Datenleaks.</p>
+<p><strong>A06 Vulnerable & Outdated Components</strong> — bekannte CVEs in OSS-Abhängigkeiten. Log4Shell (CVE-2021-44228), Spring4Shell (CVE-2022-22965), Struts (Equifax 2017) — alle wären durch konsequentes SCA-Scanning erkannt worden. Mitigation: Software-Composition-Analysis-Tools (Snyk, Dependabot, Trivy) plus SBOM-Pflege.</p>
+<p><strong>A07 Identification & Authentication Failures</strong> — schwache Passwortregeln, fehlendes MFA, anfälliger Session-Reset, Credential-Stuffing-Anfälligkeit.</p>
+<p><strong>A08 Software & Data Integrity Failures</strong> — fehlende Verifikation von Updates, unsichere Deserialisierung, kompromittierte CI/CD-Pipelines (SolarWinds 2020). Mitigation: signierte Artefakte, Dependency-Pinning.</p>
+<p><strong>A09 Security Logging & Monitoring Failures</strong> — fehlende oder unzureichende Logs verhindern Erkennung. Median <em>dwell time</em> von Angreifern liegt laut Mandiant M-Trends 2024 bei 10 Tagen weltweit, oft Monaten in Europa.</p>
+<p><strong>A10 Server-Side Request Forgery (SSRF)</strong> — die Anwendung ruft eine vom Angreifer kontrollierte URL auf und kann so interne Services kontaktieren, die von außen nicht erreichbar sind. In der Cloud besonders gefährlich: SSRF gegen <code>169.254.169.254</code> (Metadata-Service) liefert IAM-Credentials. Capital-One-Breach 2019 nutzte genau diesen Pfad. Mitigation: IMDSv2 erzwingen, Egress-Filter, Allowlist von Ziel-IPs.</p>
+
+<h4>Supply-Chain-Angriffe — der unsichtbare Pfad</h4>
+<p>Wenn man die direkte Mauer nicht durchbricht, kompromittiert man die Lieferanten. Drei Lehrbuch-Fälle:</p>
+<p><strong>SolarWinds (Sunburst, 2020)</strong> — Angreifer kompromittierten den Build-Server der SolarWinds-Orion-Plattform und schleusten eine Backdoor in legitime, signierte Updates. Etwa 18.000 Organisationen erhielten den Trojaner; bei rund hundert wurden gezielte Folgeangriffe durchgeführt. Lehre: Build-Pipelines sind kritische Infrastruktur.</p>
+<p><strong>3CX (2023)</strong> — Doppelte Supply-Chain: ein 3CX-Mitarbeiter installierte eine kompromittierte Trading-App; daraus folgte die Kompromittierung des 3CX-Build-Systems; daraus folgte ein Trojan im 3CX-Desktop-Client an die ganze Kundenbasis.</p>
+<p><strong>XZ Utils Backdoor (CVE-2024-3094, März 2024)</strong> — ein Angreifer arbeitete sich über zwei Jahre als „hilfsbereiter Maintainer" in das XZ-Utils-OSS-Projekt hinein und schleuste eine Backdoor in die Build-Skripte ein, die SSH-Authentifizierung kompromittiert hätte. Knapp vor Auslieferung in Debian/Fedora-Stable von Andres Freund (Microsoft) entdeckt. Lehre: OSS-Maintainership ist ein Angriffsvektor; SBOM allein hätte nicht geholfen.</p>
+<p>Mitigations gegen Supply-Chain: <strong>SBOM</strong> (CycloneDX/SPDX) für Sichtbarkeit, <strong>Code-Signing</strong> mit Sigstore/cosign, <strong>Reproducible Builds</strong>, <strong>SLSA-Level-3</strong> für gehärtete Build-Pipelines, <strong>Dependency-Pinning</strong> mit Hash-Locking, kritische Reviews bei Maintainer-Wechseln.</p>
+
+<h4>Race Conditions und TOCTOU</h4>
+<p><em>Time-of-Check vs. Time-of-Use</em>: Eine Anwendung prüft eine Bedingung (z. B. Datei-Berechtigungen, Kontostand) und nutzt das Ergebnis später — zwischen Check und Use kann ein Angreifer den Zustand ändern. Klassisches Beispiel: Banking-App prüft Saldo, der Angreifer feuert in derselben Millisekunde mehrere Abhebungen ab; alle prüfen den ursprünglichen Saldo und werden genehmigt. Mitigation: <strong>atomare Operationen</strong> (Datenbank-Locks, Compare-and-Swap), <strong>idempotente APIs</strong> mit Request-ID, <strong>Capability-basierte Zugriffsmodelle</strong> statt Pfadprüfung.</p>
+
+<h4>Memory Safety — die alte Familie</h4>
+<p>In C/C++-Code: Buffer-Overflow, Use-after-Free, Integer-Overflow, Format-String-Bugs. Microsoft- und Google-Studien zeigen: ~70 % aller Sicherheits-CVEs in nativem Code stammen aus Memory-Safety-Fehlern. Modern unterdrückt durch ASLR, DEP/NX, Stack Canaries, CFI/CET — aber strukturelle Lösung ist die Migration auf Memory-Safe-Sprachen wie Rust, Go, Swift. CISA und NSA empfehlen seit 2022 ausdrücklich Memory-Safe-Sprachen für Neuentwicklung.</p>`
                 }, {
                     title: 'Netzwerk- und kryptografische Angriffe',
-                    html: `<h4>On-Path-Angriff (Man-in-the-Middle)</h4>
-<p>ARP-Spoofing, DHCP-Spoofing, Rogue-AP, ICMP-Redirect. Mitigation: 802.1X, DHCP-Snooping, Dynamic ARP Inspection, BPDU-Guard.</p>
+                    html: `<p>Netzwerk- und Kryptoangriffe greifen die <em>Wege</em> an, über die Daten fließen. Die Kernidee: Wenn ich nicht in den Endpoint einbrechen kann, manipuliere ich den Pfad dazwischen. Für SY0-701 musst du die wichtigsten Angriffe und ihre konkreten Gegenmaßnahmen sicher zuordnen können.</p>
+
+<h4>On-Path-Angriffe (Man-in-the-Middle)</h4>
+<p>Der Angreifer setzt sich zwischen Client und Server. Auf Layer 2 im LAN gelingt das überraschend einfach, wenn keine Schutzmechanismen aktiv sind:</p>
+<p><strong>ARP-Spoofing</strong> — der Angreifer beantwortet ARP-Requests im LAN mit seiner eigenen MAC und leitet so Datenverkehr um. Tools: ettercap, bettercap. Mitigation: <strong>Dynamic ARP Inspection (DAI)</strong> auf Switches in Verbindung mit DHCP-Snooping; auf Linux statisch <code>arp -s</code> für kritische Hosts.</p>
+<p><strong>DHCP-Spoofing</strong> — ein Rogue-DHCP-Server vergibt manipulierte Default-Gateways oder DNS-Server an Clients. Mitigation: <strong>DHCP-Snooping</strong> auf Switches; nur Trusted-Ports geben DHCP-Antworten weiter.</p>
+<p><strong>Rogue Access Point</strong> — ein WLAN, das wie das Firmen-WLAN aussieht (gleicher SSID), Clients verbinden sich automatisch. <strong>Evil Twin</strong> ist die zielgerichtete Variante. Mitigation: 802.1X mit Server-Zertifikatsvalidierung, WIPS (Wireless IPS) zur Erkennung.</p>
+<p><strong>ICMP Redirect</strong> — Angreifer schickt fingierte Redirects, um den Routing-Pfad zu manipulieren. Mitigation: <code>net.ipv4.conf.all.accept_redirects=0</code>.</p>
+<p>Die <em>strukturelle</em> Antwort gegen On-Path-Angriffe ist nicht eine einzelne Konfiguration, sondern <strong>Ende-zu-Ende-Verschlüsselung mit Authentifizierung</strong>: TLS, SSH, mTLS. Wer alle Verbindungen authentifiziert verschlüsselt, neutralisiert MITM auch dann, wenn das LAN selbst kompromittiert ist.</p>
+
 <h4>DNS-Angriffe</h4>
-<ul><li>Cache-Poisoning (Kaminsky 2008) — DNSSEC mitigiert.</li><li>DNS-Tunneling — Exfil via TXT/CNAME-Records.</li><li>NXDOMAIN-Hijacking via Typo-Squatting.</li></ul>
-<h4>TLS/SSL-Angriffe</h4>
-<p>POODLE (SSL 3.0), BEAST (TLS 1.0 CBC), CRIME/BREACH (Compression), Heartbleed (CVE-2014-0160). Mitigation: TLS 1.2 (mit AEAD) oder TLS 1.3.</p>
-<h4>Replay & Downgrade</h4>
-<p>Replay-Schutz via Nonce/Sequence-Number, Downgrade-Schutz via TLS_FALLBACK_SCSV und HSTS.</p>`
+<p>DNS ist die Achillesferse: alt, weitgehend unverschlüsselt, vertrauenslos.</p>
+<p><strong>Cache-Poisoning</strong> — Dan Kaminsky zeigte 2008, dass DNS-Resolver durch geschickt geratene Transaction-IDs vergiftet werden können. Lange galt Source-Port-Randomization als Pflasterlösung; dauerhaft sicher ist nur <strong>DNSSEC</strong> mit signierten Zonen, weil Antworten dann kryptografisch verifizierbar sind.</p>
+<p><strong>DNS-Tunneling</strong> — Angreifer kodieren C2-Traffic oder exfiltrierte Daten in TXT-, CNAME- oder NULL-Records. Klassischer Trick zur Umgehung von Egress-Filtern, weil DNS in den meisten Netzen ungehindert nach außen darf. Tools: dnscat2, iodine. Mitigation: DNS-Anomalie-Detection (ungewöhnliche Anfragelängen, hohe Frequenz an eine Domain), Protective DNS (Quad9, Cloudflare Gateway, Cisco Umbrella).</p>
+<p><strong>Typo-Squatting / Homograph-Angriffe</strong> — Domains, die echten ähneln (paypa1.com, micros0ft.com, IDN-Mischung wie аpple.com mit kyrillischem а). Mitigation: Browser-Punycode-Anzeige, Email-Filter mit Lookalike-Detection.</p>
+<p>Moderne Privacy-/Sicherheitsergänzungen: <strong>DoT</strong> (DNS over TLS, RFC 7858), <strong>DoH</strong> (DNS over HTTPS, RFC 8484), <strong>DoQ</strong> (DNS over QUIC, RFC 9250) — sie verschlüsseln den Pfad zwischen Client und Resolver.</p>
+
+<h4>Schwachstellen in TLS/SSL</h4>
+<p>Die Geschichte der TLS-Angriffe ist eine Geschichte gestaffelter Schwächen:</p>
+<ul>
+<li><strong>POODLE</strong> (2014, CVE-2014-3566) — Padding-Oracle in SSLv3. Behebung: SSLv3 verbieten.</li>
+<li><strong>BEAST</strong> (2011) — angreift TLS 1.0 mit CBC-Cipher.</li>
+<li><strong>CRIME / BREACH</strong> (2012/2013) — Kompression leakt Geheimnisse über Längenänderungen. Mitigation: TLS-Kompression aus, HTTP-Kompression nur unter strengen Bedingungen.</li>
+<li><strong>Heartbleed</strong> (2014, CVE-2014-0160) — Buffer-Overread in OpenSSL gibt 64 KB Server-RAM preis (inkl. privatem Schlüssel und Sessions). Lehre: Bibliotheks-Bugs sind Kronjuwel-Risiken; OSS-Förderung wurde danach durch CII/OpenSSF deutlich gestärkt.</li>
+<li><strong>Logjam, FREAK, ROBOT</strong> — Downgrade-Angriffe auf veraltete Schlüsselaustausche und PKCS#1-v1.5-Padding.</li>
+</ul>
+<p>Konsequenz: <strong>TLS 1.2 mit AEAD-Suiten oder TLS 1.3</strong> (RFC 8446, 2018) sind heute Pflicht. TLS 1.3 entfernt alle problematischen Altlasten — keine RSA-Key-Exchange, keine CBC, keine Kompression, vereinfachter Handshake mit 1-RTT.</p>
+
+<h4>Replay- und Downgrade-Schutz</h4>
+<p><strong>Replay</strong>: Ein Angreifer fängt eine legitime Nachricht ab und sendet sie später erneut. Mitigation: <em>Nonce</em> (Number used Once), <em>Sequence Numbers</em>, <em>Timestamps</em> mit gegenseitiger Zeitsynchronisation. In Kerberos limitieren Tickets das Replay-Fenster, in TLS verhindern Sequence Numbers im Record-Layer Replays.</p>
+<p><strong>Downgrade</strong>: Angreifer zwingt Verhandlung auf eine schwächere Version oder Cipher-Suite. Schutz: <strong>HSTS</strong> (HTTP Strict Transport Security, RFC 6797) erzwingt HTTPS für Browser; <strong>TLS_FALLBACK_SCSV</strong> erkennt Downgrade-Versuche; in TLS 1.3 ist das Handshake-Transcript signiert, sodass Manipulationen entdeckt werden.</p>
+
+<h4>Wireless-spezifische Angriffe</h4>
+<p>WPA2 wurde 2017 durch <strong>KRACK</strong> (Key Reinstallation Attack) angreifbar; WPA2 mit aktualisiertem Patch ist weiterhin nutzbar, aber WPA3 ist Best Practice. WPA3 nutzt <strong>SAE</strong> (Simultaneous Authentication of Equals, „Dragonfly"), das offline-Brute-Force des Pre-Shared-Keys verhindert. <strong>WPS</strong> (Wi-Fi Protected Setup) hat strukturelle Schwächen und sollte in Unternehmens-WLANs deaktiviert sein. Enterprise-WLAN setzt zusätzlich auf <strong>802.1X</strong> mit EAP-TLS (Zertifikat-basiert) statt Pre-Shared-Key.</p>`
                 }, {
                     title: 'Operationelle Bedrohungen',
-                    html: `<h4>Hardware-Bedrohungen</h4>
-<ul><li>Malicious USB (Rubber Ducky, BadUSB) — emulieren HID-Tastatur.</li><li>Cold Boot Attack — RAM-Reste auslesbar nach Reboot.</li><li>Evil Maid — physischer Zugriff in Hotel/Gebäude.</li><li>Hardware-Implants (Supermicro-Vorwürfe, Fake-Cisco).</li></ul>
+                    html: `<p>Diese Seite sammelt Bedrohungen, die nicht in den klassischen Web-/Netzwerk-Schubladen stecken: Hardware, Cloud-Spezifika, Mobile, OT/ICS. Sie sind in der Realität die Stellen, an denen klassische Verteidigungsmodelle <em>nicht greifen</em> — und genau deshalb prüfungs- und praxisrelevant.</p>
+
+<h4>Hardware-Angriffe</h4>
+<p><strong>Malicious USB</strong> — moderne Geräte tarnen sich als HID (Tastatur), nicht als Speicher: <em>Rubber Ducky</em>, <em>Bash Bunny</em>, <em>OMG-Cable</em>. Eingesteckt tippen sie binnen Sekunden Skripte ab — der Rechner sieht nur „User tippt etwas". USB-Storage-Sperren helfen nicht, weil das Gerät keine Storage-Klasse beansprucht. Wirksam ist nur <strong>Endpoint-Allowlisting für USB-Klassen</strong> bzw. komplette USB-Sperrung an sensitiven Geräten und HID-Whitelisting per VID/PID.</p>
+<p><strong>Cold Boot Attack</strong> — DRAM verliert seinen Inhalt nicht sofort beim Stromabschalten; mit Kühlung kann RAM aus einem laufenden System ausgelesen und Crypto-Schlüssel rekonstruiert werden (BitLocker-Keys, FDE-Master-Keys). Mitigation: Memory-Encryption (AMD SME/SEV, Intel TME), Sleep-Modi vermeiden, Hibernate-Files schützen.</p>
+<p><strong>Evil Maid Attack</strong> — physischer Zugriff während Abwesenheit (Hotelzimmer, Konferenzraum). Angreifer manipuliert Bootloader oder Firmware, beim nächsten Login werden Credentials abgegriffen. Mitigation: <strong>Measured Boot</strong> mit TPM, Secure Boot, Tamper-Evident-Hardware-Siegel, sensible Reisen mit Loaner-Hardware.</p>
+<p><strong>Hardware-Implants</strong> — angeblich oder tatsächlich in der Lieferkette eingebrachte Chips. Die Bloomberg-Reportage 2018 zu Supermicro war umstritten und nie bewiesen, aber gefälschte Cisco-Geräte aus Grauimport sind real. Mitigation: Beschaffung nur über autorisierte Vendoren, Hardware-Authentifizierung (Anti-Counterfeit-Programme).</p>
+
 <h4>Cloud-spezifische Bedrohungen</h4>
-<p>S3-Bucket-Misconfig, IAM-Privilege-Escalation, OAuth-Token-Theft, Shadow-IT, IMDS-Abuse (SSRF gegen 169.254.169.254).</p>
-<h4>Mobile</h4>
-<p>Jailbreak/Rooting umgeht Plattform-Sandbox, Side-Loading, Sideloaded malicious certs (MDM-Phishing).</p>
+<p>In der Cloud verschiebt sich die Angriffsfläche von Netzwerk-Perimeter zu <em>Identitäten</em> und <em>Konfigurationen</em>. Häufigste Probleme:</p>
+<p><strong>Misconfigurierte Storage-Buckets</strong> — öffentlicher Lesezugriff auf S3/Azure Blob/GCS ist die häufigste Quelle für massenhafte Datenleaks. Tools wie <em>Bucket Stream</em> oder <em>S3Scanner</em> finden offene Buckets aus Certificate-Transparency-Logs. Mitigation: Default-Encryption, Block-Public-Access auf Account-Ebene, CSPM-Tools (Wiz, Prowler, ScoutSuite).</p>
+<p><strong>IAM-Privilege-Escalation</strong> — Misconfig in IAM-Policies (z. B. <code>iam:PassRole</code> + <code>lambda:CreateFunction</code>) erlaubt einem Standard-User die Übernahme einer Admin-Rolle. Tools wie <em>Pacu</em> oder <em>PMapper</em> graphen IAM-Pfade. Mitigation: Least Privilege, regelmäßige Access-Analyzer-Läufe, SCPs in AWS Organizations.</p>
+<p><strong>OAuth-/Token-Theft</strong> — moderner Angreifer stiehlt nicht das Passwort, sondern das Session-Cookie oder das Refresh-Token. <em>Pass-the-Cookie</em>-Angriffe umgehen MFA, weil das Cookie bereits eine authentifizierte Session repräsentiert. Mitigation: Token-Binding, kürzere Token-Lifetimes, Conditional Access mit Device-Compliance, FIDO2 mit Platform-Authenticator.</p>
+<p><strong>SSRF gegen IMDS</strong> — der Cloud-Metadaten-Service unter <code>169.254.169.254</code> liefert temporäre IAM-Credentials der zugewiesenen Rolle. Wenn eine Web-Anwendung SSRF-anfällig ist, kann der Angreifer diese Credentials auslesen — wie 2019 bei Capital One (~106 Mio. Datensätze). Mitigation: <strong>IMDSv2</strong> erzwingen (verlangt PUT-Request mit Token-TTL), Egress-Filter, Anwendung kann SSRF-Ziele nicht selbst wählen.</p>
+<p><strong>Schatten-IT</strong> — Mitarbeiter nutzen unfreigegebene SaaS-Dienste mit Firmendaten. Mitigation: CASB mit Discovery-Modus, klare AUP, einfacher Genehmigungsprozess für legitime Bedarfe.</p>
+
+<h4>Mobile-Bedrohungen</h4>
+<p><strong>Jailbreak / Rooting</strong> umgeht die Plattform-Sandbox. Klassische Apple-App-Store- und Android-Play-Store-Sicherheiten greifen dann nicht mehr. MDM-Lösungen erkennen gerootete Geräte und können sie aus dem Firmen-WLAN aussperren.</p>
+<p><strong>Sideloading</strong> — Installation von Apps abseits offizieller Stores. Auf iOS lange unmöglich, auf Android via APK seit jeher; in der EU durch DMA seit 2024 auch auf iOS möglich, was die Angriffsfläche vergrößert.</p>
+<p><strong>Malicious Profiles / MDM-Phishing</strong> — Angreifer überreden Nutzer, ein „Konfigurationsprofil" zu installieren, das das Gerät unter ihre Kontrolle bringt. Mitigation: User-Awareness, MDM-Eigentum nur durch Unternehmen.</p>
+<p><strong>Mobile-Specific-Malware</strong> — Pegasus (NSO Group) ist der bekannteste Stalkerware-Spyware-Komplex; nutzt Zero-Click-Exploits in iMessage, kompromittiert iPhones vollständig. Lehre: hochrangige Ziele brauchen Lockdown-Mode, Reisemobilgeräte und striktes App-Hygiene-Regime.</p>
+
 <h4>OT/ICS-Bedrohungen</h4>
-<p>Stuxnet (2010), TRITON (2017), Industroyer2 (2022). Modbus, DNP3, S7 sind ohne Auth/Crypto designed — Segmentierung ist Pflicht (Purdue-Modell).</p>`
+<p>Operational Technology (Industriesteuerungen, SCADA, PLCs, Sensoren) wurde historisch in <em>physisch isolierten</em> Netzen betrieben — ohne Authentifizierung, ohne Verschlüsselung, weil das Netz selbst die Sicherheit war. Heute ist diese Isolation oft zerlöchert (Remote-Wartung, IT-OT-Konvergenz, Cloud-Anbindung). Drei Lehrbuch-Vorfälle:</p>
+<p><strong>Stuxnet (2010)</strong> — erster bekannter Cyberwaffen-Einsatz gegen Industriesteuerungen. Vier Zero-Days, Verbreitung über USB-Sticks (überquerte Air-Gap), Manipulation von Siemens S7-PLCs zur Sabotage iranischer Urananreicherungs-Zentrifugen, gleichzeitig Tarnung gegenüber WinCC-HMI. Lehre: Air-Gap allein ist keine Sicherheit; signierte PLC-Programme und Application-Allowlisting auf Engineering-Workstations sind Pflicht.</p>
+<p><strong>TRITON / TRISIS (2017)</strong> — gezielter Angriff auf <em>Safety Instrumented Systems</em> (Schneider Triconex) einer petrochemischen Anlage in Saudi-Arabien. Erstmals direkter Angriff auf <em>Safety</em>, nicht nur Verfügbarkeit; Konsequenz wäre potenziell tödliche Anlagensicherung gewesen. Zugeschrieben dem CNIIHM (russisches Forschungsinstitut).</p>
+<p><strong>Industroyer / CrashOverride (2016) und Industroyer2 (2022)</strong> — speziell gegen Stromnetz-Protokolle (IEC 61850, IEC 60870-5-104, IEC 61131-3). Industroyer2 wurde 2022 gegen ukrainische Energieversorger eingesetzt, durch CERT-UA und ESET vor Auslösung gestoppt.</p>
+<p>Mitigation in OT folgt dem <strong>Purdue-Modell</strong> (ISA-95 / IEC 62443): klare Schichten von Level 0 (Sensoren) bis Level 4 (Enterprise IT), zwischen Level 3 und 4 eine industrielle DMZ. Konkret: <em>unidirektionale Gateways (Data Diodes)</em>, Application-Whitelisting auf Engineering-Workstations, USB-Sanitizing-Kioske vor der OT-Zone, ICS-spezifische Anomalie-Detection (Modbus, DNP3, S7-Comm, Profinet) und keine direkten Internetzugänge aus PLC-Netzen.</p>`
                 }],
                 quiz: [
                     q('Was ist eine SYN-Flood?', ['UDP-Reflection', 'TCP-Half-Open-Sessions zur Erschöpfung von Server-Ressourcen', 'ICMP-Flood', 'DNS-Cache-Vergiftung'], 1, 'Mitigation: SYN-Cookies, Rate-Limiting, SYN-Proxy.'),
@@ -245,46 +469,181 @@ Wirkung: präventiv, detektiv, korrigierend, abschreckend, kompensierend, leiten
                 summary: 'Netzwerk-Topologien, Cloud-Modelle, Hardening, Datenschutzkonzepte.',
                 pages: [{
                     title: 'Architektur-Bausteine',
-                    html: `<h4>Netzwerksegmentierung</h4>
-<ul><li>VLANs, VRFs, Firewalls, Microsegmentation.</li>
-<li>DMZ — exponierte Services hinter zweiter Firewall.</li>
-<li>Screened Subnet als modernerer Begriff.</li></ul>
-<h4>Cloud Service Models</h4>
-<p>SaaS ⊃ PaaS ⊃ IaaS — Verantwortung nach unten zunehmend beim Kunden.</p>
-<h4>Datenschutz-Konzepte</h4>
-<ul><li>Data at Rest: FDE, TDE.</li><li>Data in Transit: TLS 1.3, IPsec.</li><li>Data in Use: TEE, Confidential Computing.</li></ul>
+                    html: `<p>Sicherheitsarchitektur ist die Disziplin, in der die Schutzziele aus Kapitel 1 in <em>konkrete strukturelle Entscheidungen</em> übersetzt werden: Welches Netz darf mit welchem reden? Wo enden Vertrauensgrenzen? Wie werden Daten in jedem Zustand geschützt? Diese Seite legt das Fundament; SY0-701 prüft daraus überwiegend Szenario-Fragen, in denen du das richtige Architektur-Element wählen musst.</p>
+
+<h4>Netzwerk-Segmentierung</h4>
+<p>Segmentierung beschränkt den Schaden, den ein einzelner kompromittierter Host anrichten kann. Ohne Segmentierung sieht ein Angreifer nach Initial-Access in einem Notebook auch den Domain-Controller, die Buchhaltungsserver und das Backup. Mit Segmentierung sieht er nur die Subnetze, mit denen sein Host explizit kommunizieren darf.</p>
+<p>Die Werkzeuge dafür liegen auf verschiedenen Schichten:</p>
+<ul>
+<li><strong>VLANs</strong> trennen Broadcast-Domänen auf Layer 2 — billig, aber ohne ACL-Filter zwischen VLANs nutzlos. VLAN-Hopping (Double-Tagging, Switch-Spoofing) ist möglich, wenn Native-VLAN und Trunk-Konfiguration unsauber sind.</li>
+<li><strong>VRFs</strong> (Virtual Routing and Forwarding) trennen ganze Routing-Tabellen auf Layer 3 — typisch in Carrier- und größeren Enterprise-Netzen.</li>
+<li><strong>Firewalls / NGFWs</strong> setzen Filter zwischen Segmenten durch und liefern Stateful-Inspection, IPS, App-ID, TLS-Inspection.</li>
+<li><strong>Mikrosegmentierung</strong> (Illumio, NSX, Cilium, Calico) zieht Filter <em>pro Workload</em>; die Policy hängt an Identität/Label, nicht an IP. Ergebnis: Ost-West-Traffic im Rechenzentrum wird auf das tatsächlich benötigte Minimum reduziert.</li>
+</ul>
+<p>Die <strong>DMZ</strong> (Demilitarized Zone, modern <em>Screened Subnet</em>) ist ein klassischer Sonderfall: Internet-erreichbare Dienste (Webserver, Mailrelays) leben in einem eigenen Segment zwischen externer und interner Firewall. Wird ein DMZ-Host kompromittiert, blockiert die innere Firewall den Sprung ins Backend.</p>
+
+<h4>Cloud-Service-Modelle und das Shared-Responsibility-Modell</h4>
+<p>Die Frage „wer ist für welche Sicherheit zuständig" entscheidet in der Cloud über alles. Sie ist im <em>Shared-Responsibility-Modell</em> jedes Providers dokumentiert. Faustformel: Je weiter unten im Stack, desto mehr Verantwortung beim Kunden.</p>
+<ul>
+<li><strong>IaaS</strong> (z. B. EC2, Azure VMs) — Kunde verantwortet OS-Patches, OS-Hardening, Anwendungen, Daten, IAM. Provider verantwortet Hypervisor und Hardware.</li>
+<li><strong>PaaS</strong> (z. B. App Service, Lambda, RDS) — Provider übernimmt OS und Runtime; Kunde verantwortet Anwendung, Daten, IAM.</li>
+<li><strong>SaaS</strong> (z. B. Microsoft 365, Salesforce) — Provider verantwortet alles bis zur Anwendung; Kunde verantwortet <em>weiterhin</em> Daten, Identitäten und Konfiguration. Häufig vergessen: Auch in SaaS musst du Backups, MFA und DLP selbst regeln.</li>
+</ul>
+<p>Ergänzend: <strong>FaaS</strong> (serverless) verschiebt fast alle Operations zum Provider, lässt aber Code-Sicherheit und IAM beim Kunden. <strong>CSPM</strong>-Tools (Cloud Security Posture Management) wie Wiz, Prisma Cloud oder Defender for Cloud prüfen Konfigurationen kontinuierlich gegen CIS-Benchmarks und Provider-Best-Practices.</p>
+
+<h4>Datenschutz nach Zustand</h4>
+<p>Daten werden anhand ihres Zustands unterschiedlich geschützt:</p>
+<p><strong>Data at Rest</strong> — auf Datenträgern. Schutz durch <em>Full Disk Encryption</em> (BitLocker, FileVault, dm-crypt/LUKS), durch <em>Transparent Data Encryption</em> in Datenbanken (SQL Server TDE, Oracle TDE, AWS RDS at-rest) oder durch <em>Object-Level-Encryption</em> in Storage-Diensten (S3 SSE-KMS, Azure Storage SSE). Der Schlüssel sollte hardwaregebunden sein — TPM für Endpoints, HSM oder Cloud-KMS für Server.</p>
+<p><strong>Data in Transit</strong> — auf dem Weg zwischen zwei Endpunkten. Schutz durch TLS 1.2/1.3 für Anwendungstraffic, IPsec für Site-to-Site-VPN, SSH für administrative Sessions, SMB 3.x mit Encryption für Datei-Sharing.</p>
+<p><strong>Data in Use</strong> — während der Verarbeitung im Speicher. Klassisch der unbeschützte Zustand; modern adressiert durch <strong>Confidential Computing</strong>: Intel SGX, AMD SEV-SNP, ARM CCA. Eine <em>Trusted Execution Environment (TEE)</em> isoliert den Speicher eines Workloads selbst gegenüber dem Hypervisor und einem Cloud-Operator. Microsoft Azure Confidential VMs und Google Confidential Compute sind produktive Angebote.</p>
+
 <h4>Hardening</h4>
-<p>Disable unused services, secure baselines (CIS Benchmarks), Patch-Lifecycle, signierte Bootkette.</p>`
+<p>Hardening reduziert die Angriffsfläche eines Systems. Die strukturierte Vorgehensweise:</p>
+<ol>
+<li><strong>Baseline aus etablierten Quellen</strong> — CIS Benchmarks (Windows, Linux, AWS, Kubernetes), DISA STIGs (für DoD-Umgebungen), Vendor-Hardening-Guides. Diese liefern hunderte konkrete Settings pro Plattform.</li>
+<li><strong>Nicht benötigte Dienste deaktivieren</strong> — alter Telnet-Zugang, ungenutzte SMBv1, IIS-Default-Sites, anonymous-FTP. Was nicht läuft, kann nicht ausgenutzt werden.</li>
+<li><strong>Default-Credentials ändern</strong> — sehr häufig Ursache von Breaches; gilt für Router, Switches, IPMI/iDRAC, Datenbanken, IoT.</li>
+<li><strong>Patch-Lifecycle</strong> — geregelter Prozess: Inventarisieren, Identifizieren, Bewerten, Testen, Ausrollen, Verifizieren. Risikobasierte Priorisierung mit CVSS, EPSS und CISA KEV.</li>
+<li><strong>Signierte Bootkette</strong> — UEFI Secure Boot, Measured Boot mit TPM, Linux IMA, Mobile-Plattform-Verified-Boot. Verhindert, dass manipulierte Bootloader unentdeckt starten.</li>
+<li><strong>Drift-Erkennung</strong> — kontinuierliches Compliance-Scanning (OpenSCAP, InSpec, Tenable, Defender Vulnerability Management) erkennt Abweichungen von der Baseline.</li>
+</ol>`
                 }, {
                     title: 'Identity & Access Architecture',
-                    html: `<h4>Federation</h4>
-<p>SAML 2.0 (XML, Enterprise), OAuth 2.0/2.1 (Authorization-Framework), OpenID Connect (Identity-Layer auf OAuth). SCIM (RFC 7644) für User-Provisioning.</p>
-<h4>SSO</h4>
-<p>IdP (Okta, Entra ID, PingFederate, Keycloak) → SP. Reduziert Passwort-Wiederverwendung; erhöht Impact bei IdP-Kompromittierung → MFA + Conditional Access Pflicht.</p>
-<h4>Conditional Access</h4>
-<ul><li>Signale: User-Risk, Sign-in-Risk, Device-Compliance, Location, App.</li><li>Aktionen: Block, MFA fordern, Session-Limit.</li></ul>
-<h4>Directory Services</h4>
-<p>Active Directory (LDAP/Kerberos), Azure Entra ID (Cloud-native), LDAP-RFC 4511. Tier-Modell: Tier 0 (DCs) ≠ Tier 1 (Server) ≠ Tier 2 (Workstations).</p>`
+                    html: `<p>Identität ist in modernen Architekturen der eigentliche Perimeter. Wo früher die Firewall „innen vs. außen" bestimmte, entscheidet heute das Identitätssystem darüber, wer auf welche Cloud-Ressourcen, SaaS-Apps und APIs zugreifen darf. Ein kompromittiertes IdP kompromittiert in Sekunden das gesamte Tenant — deshalb gehört IAM zu den meistgeprüften und sicherheitskritischsten Architekturthemen.</p>
+
+<h4>Federation — Vertrauen zwischen Domänen</h4>
+<p>Federation erlaubt, dass eine Identität aus einem Vertrauensbereich in einem anderen genutzt wird, ohne dass dort separate Konten existieren. Drei Standards musst du sicher trennen können:</p>
+<p><strong>SAML 2.0</strong> (OASIS, 2005) — XML-basiert, etabliert in Enterprise-SaaS-Anbindungen. Drei Rollen: <em>Identity Provider</em> (IdP) authentifiziert, <em>Service Provider</em> (SP) erhält die Assertion, <em>User-Agent</em> ist der Browser. Klassisch eingesetzt für Web-SSO; deutlich schwerer für mobile/native Apps.</p>
+<p><strong>OAuth 2.0/2.1</strong> (RFC 6749 bzw. Draft) — ist <em>kein</em> Authentifizierungsprotokoll, sondern ein <em>Authorization-Framework</em>. Es liefert <em>Access Tokens</em>, die einer Anwendung delegierten Zugriff auf eine Ressource geben („App XY darf in deinem Namen deinen Kalender lesen"). Wer OAuth allein zur Authentifizierung verwendet, baut ein Sicherheitsproblem.</p>
+<p><strong>OpenID Connect (OIDC)</strong> — Identity-Layer auf OAuth 2.0; fügt das <em>ID Token</em> (JWT) hinzu, das die Identität des Users beschreibt. OIDC ist heute der Standard für moderne Web- und Mobile-Logins.</p>
+<p><strong>SCIM</strong> (System for Cross-domain Identity Management, RFC 7643/7644) — automatisiert Benutzer-Provisioning und -Deprovisioning zwischen IdP und Anwendungen. Wichtig, damit ausscheidende Mitarbeiter nicht in fünfzig SaaS-Tools weiterhin aktiv sind.</p>
+
+<h4>Single Sign-On — Nutzen und Risiko</h4>
+<p>SSO reduziert Passwort-Wiederverwendung, weil Nutzer nur noch einen starken Login pflegen, und ermöglicht zentrale Policies. Gleichzeitig vergrößert SSO den <em>Blast Radius</em>: Wer das IdP-Konto übernimmt, übernimmt alle angeschlossenen Anwendungen. Die strukturelle Antwort: <em>phishing-resistente MFA</em>, <em>Conditional Access</em>, <em>Privileged Identity Management</em> mit Just-in-Time-Eskalation und kontinuierliches Audit.</p>
+<p>Marktführende IdPs sind <em>Microsoft Entra ID</em> (ehemals Azure AD), <em>Okta</em>, <em>Ping</em>, im Open-Source-Bereich <em>Keycloak</em> und <em>Authentik</em>.</p>
+
+<h4>Conditional Access — adaptive Entscheidung</h4>
+<p>Statisches „Username + Passwort = Zugang" ist zu grob. Conditional Access (Microsoft) bzw. Adaptive Access (Okta, Ping) wertet bei jeder Anmeldung Kontextsignale aus und entscheidet adaptiv:</p>
+<ul>
+<li><strong>User-Risk</strong> — geleakte Credentials, Anmeldemuster, Travel-Anomalien.</li>
+<li><strong>Sign-in-Risk</strong> — IP-Reputation, Tor-Nutzung, atypische Geräte.</li>
+<li><strong>Device-Compliance</strong> — ist das Gerät verwaltet, gepatcht, mit aktivem EDR?</li>
+<li><strong>Standort</strong> — bekannte Länder vs. ungewöhnliche.</li>
+<li><strong>Anwendung</strong> — Risiko-Stufe der Zielanwendung (Outlook Web vs. Admin-Center).</li>
+</ul>
+<p>Mögliche Aktionen: Allow, Block, MFA fordern, Session begrenzen, Download blockieren, Compliance-Dialog erzwingen. Eine reife Policy unterscheidet zwischen normalen Usern, privilegierten Usern und Notfall-Konten („Break-Glass-Accounts"), die bewusst von Conditional Access ausgenommen, dafür aber mit Hardware-Token gesichert und besonders überwacht sind.</p>
+
+<h4>Directory Services und das Tier-Modell</h4>
+<p>Das traditionelle <strong>Active Directory</strong> nutzt LDAP zur Abfrage und Kerberos zur Authentifizierung; es bleibt in vielen Unternehmen identitätsbestimmend. <strong>Microsoft Entra ID</strong> ist Cloud-nativ, kennt keine Domain-Controller-Replikation und nutzt OAuth/OIDC. Hybride Umgebungen verbinden beides via <em>Entra Connect</em> mit Password-Hash-Sync, Pass-Through-Authentication oder Federation.</p>
+<p>Sicherheitskritisch ist das <strong>Tier-Modell</strong> nach Microsofts <em>Enhanced Security Admin Environment</em>:</p>
+<ul>
+<li><strong>Tier 0</strong> — Domain-Controller, AD CS, ADFS, Backup-Server, Hypervisoren der DCs. Wer hier Admin ist, beherrscht die gesamte Forest.</li>
+<li><strong>Tier 1</strong> — Server, Anwendungen, Datenbanken.</li>
+<li><strong>Tier 2</strong> — Workstations, Endgeräte, Helpdesk.</li>
+</ul>
+<p>Goldene Regel: <em>Tier-übergreifende Anmeldungen</em> sind verboten. Ein Tier-0-Admin meldet sich <em>niemals</em> an einer Tier-2-Workstation an, weil dort Credential-Diebstahl (Mimikatz, LSASS-Dump) wahrscheinlich ist. Praktisch durchgesetzt mit dedizierten Admin-Workstations (PAWs) und Authentication Policy Silos.</p>
+<p>Klassische AD-Angriffe, die du benennen können solltest: <em>Pass-the-Hash</em>, <em>Pass-the-Ticket</em>, <em>Kerberoasting</em> (SPN-Service-Tickets offline brute-forcen), <em>AS-REP-Roasting</em>, <em>DCSync</em>, <em>Golden Ticket</em>, <em>Silver Ticket</em>, <em>ZeroLogon</em> (CVE-2020-1472). Schutz: privileged-account-Hygiene, Credential Guard, LAPS für lokale Admin-Passwörter, Tier-Modell.</p>`
                 }, {
                     title: 'Resilience & Recovery',
-                    html: `<h4>Hochverfügbarkeit</h4>
-<ul><li>Active-Active vs. Active-Passive.</li><li>Load-Balancer (Layer 4 vs. Layer 7).</li><li>Anycast für globale Lastverteilung.</li></ul>
+                    html: `<p>Resilienz beantwortet die Frage: <em>Was passiert, wenn etwas kaputtgeht?</em> Die CIA-Triade enthält ausdrücklich Verfügbarkeit; ohne robuste Resilienz-Architektur ist Sicherheit unvollständig. CompTIA prüft hier vor allem Begriffe (RTO, RPO, MTTR, MTBF, Site-Typen) und das Verständnis, wann welcher Mechanismus passt.</p>
+
+<h4>Hochverfügbarkeit</h4>
+<p>Hochverfügbarkeit (HA) wird in <em>Neunen</em> gemessen: 99,9 % („three nines") erlaubt etwa 8,76 Stunden Downtime pro Jahr; 99,99 % („four nines") erlaubt nur 52 Minuten. Architekturmuster:</p>
+<ul>
+<li><strong>Active-Active</strong> — beide Instanzen verarbeiten produktiv Last; bei Ausfall einer übernimmt die andere ohne Failover-Zeit. Voraussetzung: zustandsloser Service oder konsistente Replikation.</li>
+<li><strong>Active-Passive</strong> — eine Instanz aktiv, die zweite wartet als Standby. Failover dauert Sekunden bis Minuten. Häufig bei Datenbanken, weil Multi-Master kompliziert ist.</li>
+<li><strong>N+1 / N+2</strong> — Kapazitätsplanung mit Reserven, damit Ausfälle nicht zur Sättigung führen.</li>
+</ul>
+<p><strong>Load Balancer</strong> verteilen Last. <em>Layer-4-LB</em> (HAProxy TCP-Mode, NLB, IPVS) entscheiden anhand von IP/Port und sind extrem schnell. <em>Layer-7-LB</em> (NGINX, Envoy, ALB) verstehen HTTP, können routen, TLS terminieren, WAF-Funktionen und Health-Checks fahren. <strong>Anycast</strong> verteilt Last global, indem dieselbe IP von mehreren Standorten aus angekündigt wird; das BGP-Routing leitet Anfragen zum nächsten Standort. Cloudflare, Google und große CDNs nutzen Anycast.</p>
+
 <h4>Backup-Strategie 3-2-1-1-0</h4>
-<p>3 Kopien, 2 Medien, 1 offsite, 1 immutable/offline, 0 Backup-Fehler bei Restore-Test.</p>
-<h4>Site-Typen</h4>
-<table><tr><th>Typ</th><th>RTO</th><th>Kosten</th></tr><tr><td>Hot</td><td>Minuten</td><td>Hoch</td></tr><tr><td>Warm</td><td>Stunden</td><td>Mittel</td></tr><tr><td>Cold</td><td>Tage</td><td>Niedrig</td></tr></table>
-<h4>BCP/DRP</h4>
-<p>BCP = Business Continuity (Prozesse), DRP = Disaster Recovery (IT). BIA bestimmt RTO/RPO. Übungen: Tabletop, Walkthrough, Simulation, Parallel, Full-Interruption.</p>`
+<p>Die alte 3-2-1-Regel (drei Kopien, zwei Medien, eine offsite) wurde nach den Ransomware-Wellen ab 2019 erweitert auf <strong>3-2-1-1-0</strong>:</p>
+<ul>
+<li><strong>3</strong> Kopien (Original + 2 Backups) gegen Datenverlust.</li>
+<li><strong>2</strong> verschiedene Medien gegen medienspezifische Defekte.</li>
+<li><strong>1</strong> Kopie offsite gegen Standort-Disaster.</li>
+<li><strong>1</strong> Kopie <em>immutable</em> oder offline (Tape, Object-Lock, S3 Object Lock im Compliance-Mode) — kann durch Ransomware nicht verschlüsselt werden, weil sie schreibgeschützt oder gar nicht im Netzwerk ist.</li>
+<li><strong>0</strong> Fehler bei <em>regelmäßigen Restore-Tests</em>. Ein nicht getestetes Backup ist kein Backup.</li>
+</ul>
+<p>Backup-Strategien klassifizieren sich in <em>Full</em>, <em>Differential</em> (Änderungen seit letztem Full) und <em>Incremental</em> (Änderungen seit letztem Backup, egal welcher Art). Differential = einfacheres Restore, mehr Speicher; Incremental = effizient, aber Restore-Kette muss vollständig sein.</p>
+
+<h4>Site-Typen für Disaster Recovery</h4>
+<table>
+<thead><tr><th>Typ</th><th>RTO</th><th>Daten-Aktualität (RPO)</th><th>Kosten</th><th>Wann sinnvoll?</th></tr></thead>
+<tbody>
+<tr><td><strong>Hot Site</strong></td><td>Minuten</td><td>fast in Echtzeit (sync. Replikation)</td><td>Hoch</td><td>kritische Tier-1-Systeme</td></tr>
+<tr><td><strong>Warm Site</strong></td><td>Stunden</td><td>Stunden</td><td>Mittel</td><td>wichtige, aber nicht echtzeitkritische Systeme</td></tr>
+<tr><td><strong>Cold Site</strong></td><td>Tage</td><td>letzter Backup</td><td>Niedrig</td><td>Tier-3-Systeme, regulatorische Mindestanforderungen</td></tr>
+<tr><td><strong>Cloud-DR</strong></td><td>Minuten – Stunden</td><td>flexibel</td><td>OPEX-basiert</td><td>moderne Standardlösung</td></tr>
+</tbody></table>
+<p>Cloud-DR (Pilot-Light, Warm-Standby, Multi-Site) ist heute oft günstiger und schneller als ein eigenes Cold-Site-Rechenzentrum.</p>
+
+<h4>BCP, DRP, BIA — die Begrifflichkeit</h4>
+<p>Diese drei werden im Examen gerne vermischt:</p>
+<ul>
+<li><strong>BCP</strong> (Business Continuity Plan) — wie hält das Unternehmen <em>Geschäftsprozesse</em> am Laufen, auch wenn IT teilweise oder ganz ausfällt? Beinhaltet alternative Standorte, Notbesetzung, manuelle Workarounds.</li>
+<li><strong>DRP</strong> (Disaster Recovery Plan) — wie wird die <em>IT</em> nach einem Disaster wiederhergestellt? Konkrete Run-Books, Reihenfolge, Verantwortliche.</li>
+<li><strong>BIA</strong> (Business Impact Analysis) — Vorarbeit zu BCP/DRP. Bestimmt für jeden Geschäftsprozess <em>RTO</em> (Recovery Time Objective), <em>RPO</em> (Recovery Point Objective) und <em>MTD/MTPD</em> (Maximum Tolerable Downtime). Aus BIA wird die DR-Architektur abgeleitet.</li>
+</ul>
+<p>Ein BCP/DRP-Dokument ohne Test ist Papier. Übungsstufen, vom günstig-leicht zum teuer-realistisch:</p>
+<ol>
+<li><strong>Tabletop</strong> — Beteiligte besprechen Szenario am Tisch. Prüft Pläne und Rollen.</li>
+<li><strong>Walkthrough / Structured Walk-Through</strong> — Plan wird Schritt für Schritt durchgegangen.</li>
+<li><strong>Simulation</strong> — Ereignis wird ohne reale Auswirkungen simuliert.</li>
+<li><strong>Parallel</strong> — DR-Site wird hochgefahren und parallel zur Produktion betrieben.</li>
+<li><strong>Full Interruption</strong> — Produktion wird tatsächlich umgeschaltet. Maximaler Realismus, maximales Risiko.</li>
+</ol>`
                 }, {
                     title: 'Mobile, IoT, OT, Embedded',
-                    html: `<h4>Mobile</h4>
-<p>MDM/UEM (Intune, Jamf, Workspace ONE). BYOD vs. COPE vs. CYOD. Container/Workspace trennt privat von geschäftlich.</p>
+                    html: `<p>Geräte abseits klassischer Server und Workstations stellen eigene Architekturen — und eigene Risiken. CompTIA prüft hier vor allem Modelle (BYOD/COPE/CYOD), Schutzkonzepte (MDM/UEM) und das Verständnis, warum klassische IT-Sicherheitskonzepte bei IoT/OT teilweise versagen.</p>
+
+<h4>Mobile-Strategie</h4>
+<p>Drei Modelle für Firmen-Smartphones unterscheiden, wer Eigentümer ist und wie viel Kontrolle das Unternehmen hat:</p>
+<ul>
+<li><strong>BYOD</strong> (Bring Your Own Device) — User-eigenes Gerät. Bequem und billig, aber: keine Volldurchsetzung von Policies, Datenschutzkonflikte, schwierige Untersuchung bei Vorfall. Lösung: <em>Container/Workspace</em> (Android Work Profile, iOS „User Enrollment"), der nur den geschäftlichen Bereich verwaltet.</li>
+<li><strong>COPE</strong> (Corporate-Owned, Personally Enabled) — Firmen-Gerät mit erlaubter privater Nutzung. Volle Verwaltung möglich, User akzeptiert Mischnutzung.</li>
+<li><strong>CYOD</strong> (Choose Your Own Device) — User wählt aus Firmen-Liste; Eigentum bleibt Firma.</li>
+<li><strong>COBO</strong> (Corporate-Owned, Business-Only) — höchste Kontrolle, keine private Nutzung; üblich für hochsensible Bereiche.</li>
+</ul>
+<p><strong>MDM</strong> (Mobile Device Management) und sein moderner Nachfolger <strong>UEM</strong> (Unified Endpoint Management, deckt Mobile <em>und</em> Desktop ab) erzwingen Policies: PIN/Biometrie-Pflicht, Verschlüsselung, App-Store-Restriktion, Remote-Wipe, Compliance-Reporting. Marktführend: <em>Microsoft Intune</em>, <em>Jamf</em> (Apple-spezialisiert), <em>VMware Workspace ONE</em>, <em>MobileIron/Ivanti</em>.</p>
+
 <h4>IoT-Sicherheit</h4>
-<ul><li>Default-Credentials ändern.</li><li>Firmware signiert + automatisch updaten (EU-CRA-Pflicht).</li><li>Segmentation in eigenes IoT-VLAN.</li><li>NIST IR 8259 — Foundational Cybersecurity Activities.</li></ul>
-<h4>OT/ICS (Purdue-Modell)</h4>
-<p>Level 0 (Sensoren/Aktoren) … Level 5 (Enterprise). DMZ zwischen Level 3 und 4. Strikte Asymmetrie: IT → OT erlaubt, OT → IT minimal. IEC 62443 Industrial Cybersecurity.</p>
+<p>Das Internet of Things bringt klassische Sicherheitsprobleme in Massen: schwache Default-Credentials, kein Update-Pfad, ungeschützte Management-Schnittstellen, Cloud-Backends mit Misconfig. Die Mirai-Botnet-Welle 2016 (~600.000 IoT-Geräte) zeigte, wie groß der Schaden durch schwache Default-Passwörter sein kann — ein einziger DDoS auf Dyn legte Twitter, Reddit, Spotify lahm.</p>
+<p>Pflichtmaßnahmen für IoT-Deployment:</p>
+<ul>
+<li><strong>Default-Credentials ändern</strong> oder Onboarding-Flow erzwingt zwingend Änderung.</li>
+<li><strong>Signierte Firmware</strong> mit automatischen Updates über sicheren Kanal (TLS-MQTT, OTA-Mechanismus). Pflicht in der EU durch den <strong>Cyber Resilience Act</strong> (CRA, in Kraft 2024, voll wirksam 2027).</li>
+<li><strong>Segmentierung in eigene IoT-VLANs</strong> mit Filter zum Rest des Netzes. IoT-Geräte sollen <em>nicht</em> mit Engineering-Workstations oder DCs reden können.</li>
+<li><strong>Schwachstellen-Disclosure-Kanal</strong> nach RFC 9116 (security.txt).</li>
+<li><strong>Telemetrie</strong> minimieren und schützen — IoT-Daten sind oft personenbezogen (Standort, Bewegung).</li>
+</ul>
+<p>Referenzen: <strong>NIST IR 8259</strong> (Foundational Cybersecurity Activities for IoT Device Manufacturers, 2020) und die ETSI-EN-303-645-Reihe (Consumer-IoT-Cybersecurity).</p>
+
+<h4>OT/ICS und das Purdue-Modell</h4>
+<p>Operational Technology steuert physische Prozesse: Stromnetze, Wasserwerke, Pipelines, Fertigungsstraßen, Gebäudeleittechnik. Anders als IT-Systeme darf hier <em>kein</em> Reboot zur Patch-Zeit erfolgen — eine Anlage ist rund um die Uhr in Betrieb, ein Patchfehler kann physische Schäden bedeuten. Daraus folgen radikal andere Architekturprinzipien.</p>
+<p>Das <strong>Purdue Reference Model</strong> (ISA-95, integriert in IEC 62443) strukturiert Industrieumgebungen in Schichten:</p>
+<ul>
+<li><strong>Level 0</strong> — physische Prozesse: Sensoren, Aktoren.</li>
+<li><strong>Level 1</strong> — Basic Control: PLCs, RTUs, DCS-Controller.</li>
+<li><strong>Level 2</strong> — Supervisory Control: HMIs, SCADA-Server.</li>
+<li><strong>Level 3</strong> — Site Operations: Historian, MES, Engineering-Workstations.</li>
+<li><strong>iDMZ</strong> — industrielle DMZ zwischen Level 3 und 4.</li>
+<li><strong>Level 4</strong> — Site Business Planning, ERP-Anbindung.</li>
+<li><strong>Level 5</strong> — Enterprise IT.</li>
+</ul>
+<p>Strenge Asymmetrie: Daten dürfen <em>von OT nach IT</em> über die iDMZ replizieren (Historian-Daten, Telemetrie); Verbindungen <em>von IT nach OT</em> sind streng minimiert und gehen über Jump-Hosts mit MFA und Session-Recording. Idealerweise <em>unidirektionale Gateways</em> (Data Diodes) wo möglich.</p>
+<p><strong>IEC 62443</strong> ist der internationale Standard für industrielle Cybersicherheit. Er definiert <em>Security Levels</em> (SL 1–4), <em>Foundational Requirements</em> und Zertifizierungen für Komponenten und Systeme. Hersteller wie Siemens, Rockwell und Schneider liefern zunehmend 62443-zertifizierte Geräte.</p>
+
 <h4>Embedded-Constraints</h4>
-<p>Geringer RAM/Flash, oft kein TLS-Stack — LwM2M, CoAP-DTLS, OSCORE als leichte Alternativen.</p>`
+<p>Embedded-Geräte (Mikrocontroller, Sensoren, medizinische Geräte) haben oft nur Kilobytes an RAM und können keine vollen TLS-Stacks fahren. Leichtgewichtige Alternativen:</p>
+<ul>
+<li><strong>DTLS</strong> (RFC 9147) — Datagram-TLS für UDP-basierte Anwendungen.</li>
+<li><strong>CoAP</strong> mit DTLS — IoT-spezifisches Anwendungsprotokoll.</li>
+<li><strong>OSCORE</strong> (RFC 8613) — Object Security für constrained Devices auf Anwendungsebene; schützt Payloads auch über Proxies.</li>
+<li><strong>LwM2M</strong> — Device-Management-Standard der OMA SpecWorks.</li>
+<li><strong>MQTT</strong> mit TLS — bei kontinuierlichen Verbindungen, MQTT-Broker mit Zertifikats-Auth.</li>
+</ul>
+<p>Für sichere Bootketten in Embedded-Umgebungen: <em>Secure Boot</em> mit ROM-basiertem Root of Trust, signierte Firmware-Stages, Anti-Rollback-Counter (Versions-Downgrade auf alte verwundbare Firmware verhindern).</p>`
                 }],
                 quiz: [
                     q('Welcher Anwendungsfall ist klassisch für TPM?', ['VPN-Routing', 'Speichern des BitLocker-Volume-Master-Keys gebunden an die Hardware', 'WAF-Funktion', 'DNS-Auflösung'], 1, 'TPM versiegelt Schlüssel an PCR-Werte; ausgebaute Disk in fremder Hardware ist unlesbar.'),
@@ -345,42 +704,191 @@ Wirkung: präventiv, detektiv, korrigierend, abschreckend, kompensierend, leiten
                 summary: 'Logging, Monitoring, IR-Grundlagen, Vulnerability Management.',
                 pages: [{
                     title: 'Operativer Betrieb',
-                    html: `<h4>Logging</h4>
-<p>Zentrale Sammlung über Syslog, Windows Event Forwarding (WEF), OpenTelemetry. Aufbewahrungsfristen nach Compliance.</p>
-<h4>Vulnerability Management</h4>
-<p>CVSS v3.1 / v4.0, Patch-Lifecycle, EPSS für Priorisierung, KEV-Catalog (CISA Known Exploited Vulns).</p>
-<h4>Incident Response Basics</h4>
-<p>Preparation → Identification → Containment → Eradication → Recovery → Lessons Learned.</p>
-<h4>Backups</h4>
-<p>3-2-1-1-0; immutable; getestete Restores; air-gapped.</p>`
+                    html: `<p>Security Operations ist der Alltagsteil von Security: Logs prüfen, Schwachstellen schließen, Vorfälle bearbeiten, Backups testen. Hier entscheidet sich, ob die Architektur aus Kapitel 3 in der Realität trägt — oder ob ein gut entworfenes System still scheitert, weil niemand die richtigen Logs ansieht.</p>
+
+<h4>Logging als Fundament</h4>
+<p>Ohne strukturierte Logs existiert ein Vorfall nicht — er wird nicht erkannt, nicht analysiert, nicht aufgeklärt. Ein professioneller Logging-Stack umfasst:</p>
+<ul>
+<li><strong>Quellen</strong> — Betriebssystem (Windows Event Log, Linux journald/auditd), Anwendungen, Netzwerk-Geräte (Syslog), Cloud (CloudTrail, Azure Activity Log, GCP Audit Logs), Identity (Sign-in-Logs), EDR-Telemetrie.</li>
+<li><strong>Transport</strong> — Syslog (RFC 5424) ist Standard für Netzwerk; <em>Windows Event Forwarding</em> (WEF) für Domain-Hosts; <em>OpenTelemetry</em> für moderne Applikationsmetriken/Traces; <em>Beats/Fluent Bit/Vector</em> als leichtgewichtige Agenten.</li>
+<li><strong>Speicherung</strong> — manipulationsgeschützt, idealerweise append-only mit Hash-Ketten oder WORM-Storage. Compliance-Aufbewahrung typisch 6–12 Monate „heiß" für Suche, längeren Zeitraum kühler. PCI-DSS verlangt 12 Monate, mindestens 3 davon online; viele Forensik-Frameworks verlangen 1 Jahr; deutsche Steuerrechtsfristen sind länger.</li>
+</ul>
+<p>Sehr verbreitet sind Fehler beim Zeitstempel: <em>NTP-Synchronisation</em> ist Pflicht, sonst lassen sich Ereignisse über Hosts hinweg nicht korrelieren. Logs sollten in <em>UTC</em> oder mit klarer Zeitzonenkennung gespeichert werden.</p>
+
+<h4>Vulnerability Management — risikobasiert priorisieren</h4>
+<p>Eine Organisation mit zehntausenden Hosts kann nicht alle CVEs am selben Tag schließen. Priorisierung erfolgt anhand mehrerer Signale:</p>
+<ul>
+<li><strong>CVSS</strong> v3.1 oder v4.0 — Basis-Score 0–10 anhand Exploitability + Impact. Liefert eine grobe Schwere, aber nicht alle CVSS-9-Lücken werden tatsächlich ausgenutzt.</li>
+<li><strong>EPSS</strong> (Exploit Prediction Scoring System, FIRST.org, regelmäßige Updates) — Wahrscheinlichkeit (0–1), dass eine CVE in den nächsten 30 Tagen ausgenutzt wird. EPSS ≥ 0,7 ist ein starker Frühindikator.</li>
+<li><strong>CISA KEV</strong> (Known Exploited Vulnerabilities Catalog) — Liste von CVEs, die <em>nachweislich</em> ausgenutzt werden. Für US-Bundesbehörden (BOD 22-01) gelten enge Fristen; für jede Organisation ist KEV die Top-Priorität.</li>
+<li><strong>Asset-Kontext</strong> — eine RCE auf einem isolierten Test-VM ist weniger dringlich als eine Auth-Bypass-Lücke auf einem Domain-Controller.</li>
+</ul>
+<p>Patch-SLAs werden anhand dieser Signale definiert, z. B. CISA-KEV ≤ 7 Tage, Critical ≤ 14 Tage, High ≤ 30 Tage, Medium ≤ 90 Tage. Wichtige Ergänzung: <em>Mitigation</em> (virtueller Patch via WAF/IPS-Signatur, Service-Disable) kann ein Patchfenster überbrücken, wenn Patchen nicht sofort möglich ist.</p>
+
+<h4>Incident-Response-Lifecycle (NIST SP 800-61 Rev. 2)</h4>
+<p>Der NIST-Standardzyklus hat sechs Phasen, die du sicher beherrschen musst:</p>
+<ol>
+<li><strong>Preparation</strong> — Pläne, Run-Books, Forensik-Toolkit, Kontaktlisten, Übungen. Findet <em>vor</em> dem Vorfall statt.</li>
+<li><strong>Detection & Analysis</strong> — Erkennen über SIEM/EDR/User-Reports, Triagieren, Scope ermitteln.</li>
+<li><strong>Containment</strong> — Schaden eingrenzen. Kurz-Containment (Host vom Netz nehmen) und Lang-Containment (segmentierte saubere Umgebung). <em>Niemals</em> direkt löschen, bevor Forensik gesichert ist.</li>
+<li><strong>Eradication</strong> — Persistenz, Backdoors, Webshells, kompromittierte Konten entfernen.</li>
+<li><strong>Recovery</strong> — Systeme aus sauberen Quellen wiederherstellen, schrittweise zurückführen, Monitoring intensivieren.</li>
+<li><strong>Post-Incident / Lessons Learned</strong> — innerhalb weniger Wochen, mit allen Beteiligten; Ergebnisse fließen in Preparation zurück.</li>
+</ol>
+<p>Häufige Anti-Pattern: vor Containment sofort neu installieren (Forensik weg, Angreifer kommt vielleicht zurück); Recovery, ohne den Initial-Access-Vector zu kennen (Re-Infektion garantiert); kein Lessons-Learned-Termin (gleiche Lücke wird wiederholt ausgenutzt).</p>
+
+<h4>Backups als letzte Verteidigungslinie</h4>
+<p>Ransomware-Angreifer wissen genau, dass Backups ihr Geschäftsmodell sprengen — und attackieren deshalb gezielt das Backup-System. Praktisch unverzichtbar:</p>
+<ul>
+<li><strong>3-2-1-1-0-Regel</strong> wie in Kapitel 3 beschrieben.</li>
+<li><strong>Air-Gap</strong> oder <em>Object Lock / Immutable Storage</em> — eine Kopie, an die selbst ein kompromittierter Domain-Admin nicht heran kommt.</li>
+<li><strong>Getrennte Identitäten</strong> für Backup-Administration (eigene Domäne oder Cloud-Tenant).</li>
+<li><strong>Restore-Tests</strong> mit dokumentierten RTOs — mindestens vierteljährlich für Tier-1-Systeme.</li>
+<li><strong>Backup-Monitoring</strong> — fehlgeschlagene Backups dürfen niemals unbemerkt bleiben.</li>
+</ul>`
                 }, {
                     title: 'Detection-Stack',
-                    html: `<h4>SIEM</h4>
-<p>Splunk, Microsoft Sentinel, Elastic Security, Chronicle, IBM QRadar. Aufgaben: Normalisierung, Korrelation, Alerting, Dashboards, Compliance-Reporting.</p>
-<h4>EDR/XDR</h4>
-<p>Process-Tree, Memory-Scanning, Behavioral-Analytics, automated Response. XDR korreliert Endpoint + Email + Identity + Cloud.</p>
-<h4>NDR (Network Detection & Response)</h4>
-<p>Zeek/Bro, Suricata, Corelight, Vectra. Beaconing-Detection, DNS-Tunneling, Lateral Movement über Flow-Analytics.</p>
-<h4>UEBA</h4>
-<p>User/Entity Behavior Analytics — Baselines, Abweichungen markieren (Impossible Travel, Off-hours-Logon, ungewöhnlicher Datenzugriff).</p>`
+                    html: `<p>Detektion ist die zweite Säule operativer Sicherheit (neben Prävention) und der Grund, warum reife Organisationen ein <em>Security Operations Center</em> (SOC) betreiben — intern, extern als MDR-Service oder hybrid. Die Werkzeugkette deckt verschiedene Sichten ab: SIEM aggregiert, EDR/XDR analysiert Endpoints, NDR analysiert Netzwerkverhalten, UEBA macht Anomalien sichtbar.</p>
+
+<h4>SIEM — Security Information and Event Management</h4>
+<p>Ein SIEM ist die zentrale Korrelationsmaschine. Es nimmt heterogene Logs entgegen, normalisiert sie auf ein gemeinsames Schema (z. B. ECS bei Elastic, ASIM bei Sentinel, CIM bei Splunk), korreliert nach Regeln und löst Alarme aus.</p>
+<p>Aktuelle Hauptvertreter:</p>
+<ul>
+<li><strong>Splunk Enterprise Security</strong> — Marktklassiker, sehr flexibel, lizenzkostenintensiv (Volumen-basiert).</li>
+<li><strong>Microsoft Sentinel</strong> — Cloud-natives SIEM auf Log Analytics + Logic Apps; tiefe Integration mit Microsoft-Ökosystem; KQL als Query-Sprache.</li>
+<li><strong>Elastic Security</strong> — basiert auf Elastic Stack; gute Open-Tier-Variante.</li>
+<li><strong>Google Chronicle / SecOps</strong> — extreme Skalierung, Festpreis pro User.</li>
+<li><strong>IBM QRadar</strong> — etabliert in Enterprise-Umgebungen.</li>
+</ul>
+<p>Aufgaben über reines Logging hinaus: <em>Threat Intelligence</em> einbinden (IoCs aus MISP, Mandiant, Recorded Future), <em>Compliance-Reporting</em> (PCI, ISO, HIPAA), <em>Hunting-Workflows</em>, <em>Case-Management</em>.</p>
+<p><strong>SOAR</strong> (Security Orchestration, Automation, Response) ergänzt SIEM um Playbooks: Wenn Alert X eintritt, automatisch Schritte Y und Z ausführen — Konto sperren, Host isolieren, Ticket erstellen, Threat-Intel abfragen. Marktführer: Splunk SOAR (ehem. Phantom), Palo Alto Cortex XSOAR, Microsoft Sentinel Logic Apps, Tines.</p>
+
+<h4>EDR und XDR — Endpoint-zentrische Detektion</h4>
+<p><strong>EDR</strong> (Endpoint Detection and Response) sammelt detaillierte Prozess-, Datei-, Netzwerk- und Registry-Events vom Endpoint und führt Verhaltensanalyse aus. Statt nur Signaturen zu prüfen (klassisches AV), erkennt EDR Muster wie:</p>
+<ul>
+<li>Ein Office-Prozess startet PowerShell mit verschleierten Flags (typisch für Phishing-Document-Macros).</li>
+<li>Ein Prozess injiziert in lsass.exe, um Credentials zu stehlen (Mimikatz-Pattern).</li>
+<li>Ein User-Prozess öffnet plötzlich SMB-Verbindungen zu allen DCs (Lateral-Movement-Indikator).</li>
+</ul>
+<p>Marktführer: CrowdStrike Falcon, Microsoft Defender for Endpoint, SentinelOne, Palo Alto Cortex XDR, Sophos Intercept X, Trend Vision One.</p>
+<p><strong>XDR</strong> (Extended Detection and Response) korreliert über Endpoint hinaus: Email-Telemetrie, Identity-Logs, Cloud-Workloads, SaaS. Eine Phishing-Mail (Email-Sensor) → Klick auf Link → Malware-Drop am Endpoint (EDR) → Anmeldung von ungewöhnlicher IP (Identity) → wird in einem einzigen Alert mit vollständiger Kette dargestellt. Ohne XDR müsste der Analyst diese Kette manuell aus drei Konsolen zusammensetzen.</p>
+
+<h4>NDR — Network Detection and Response</h4>
+<p>NDR analysiert Netzwerkverhalten unabhängig vom Endpoint und ist deshalb wertvoll für unagentierte Geräte (IoT, OT, Drucker, BYOD). Klassische NDR-Erkenntnisse:</p>
+<ul>
+<li><strong>Beaconing</strong> — periodische Verbindungen mit C2-Servern, oft mit konstantem Intervall und Jitter.</li>
+<li><strong>DNS-Tunneling</strong> — auffällig lange/unstrukturierte DNS-Queries.</li>
+<li><strong>Lateral Movement</strong> — SMB-/RPC-/RDP-Bewegungen jenseits üblicher Pfade.</li>
+<li><strong>Datenexfiltration</strong> — ungewöhnlich große ausgehende Datenmengen, vor allem über DNS, ICMP oder verschlüsselte Cloud-Storage-APIs.</li>
+</ul>
+<p>Tools: <em>Zeek</em> (ehemals Bro) für tiefe Protokollanalyse, <em>Suricata</em> als Signatur-IDS/IPS, <em>Corelight</em> als kommerzielles Zeek-Plus, <em>Vectra AI</em>, <em>Darktrace</em> mit ML-Fokus, <em>ExtraHop</em>.</p>
+
+<h4>UEBA — User and Entity Behavior Analytics</h4>
+<p>Klassische Regeln scheitern an unbekannten Angriffen. UEBA baut <em>Verhaltens-Baselines</em> pro Identität und Entität (Server, Service-Account) auf und meldet signifikante Abweichungen. Typische Erkenntnisse:</p>
+<ul>
+<li><strong>Impossible Travel</strong> — derselbe User loggt sich innerhalb von 30 Minuten aus Berlin und Tokio ein.</li>
+<li><strong>Off-hours Logon</strong> — ein Mitarbeiter, der sonst nur Mo-Fr 8-18 arbeitet, meldet sich Sonntag um 03:00 an einem DC an.</li>
+<li><strong>Atypischer Datenzugriff</strong> — ein Buchhalter öffnet plötzlich ein Engineering-Repository.</li>
+<li><strong>Service-Account-Anomalien</strong> — ein Service-Account meldet sich interaktiv an statt im Service-Kontext.</li>
+</ul>
+<p>UEBA ist heute meist Bestandteil moderner SIEMs (Sentinel UEBA, Splunk UBA, Exabeam) oder XDR-Plattformen (Defender for Identity, CrowdStrike Identity Protection).</p>
+
+<h4>Threat Hunting — proaktiv suchen, nicht nur Alarme abarbeiten</h4>
+<p>Reaktive Detection wartet auf Alerts. <em>Threat Hunting</em> formuliert eine Hypothese („Wenn ein Angreifer in unserem Netz ist, würde er Schritt X tun") und sucht aktiv in Telemetrie nach Indikatoren — auch ohne aktuellen Alarm. Strukturen wie das <strong>MITRE ATT&CK Framework</strong> (aktuell Version 15+) liefern Taktiken (z. B. Lateral Movement) und Techniken (z. B. T1021 Remote Services), entlang derer gehunted wird. Wichtige Ergänzung: <em>Pyramid of Pain</em> (David Bianco) — IoCs wie Hashes sind billig zu wechseln, TTPs (Tools, Techniques, Procedures) sind für Angreifer schmerzhaft zu ändern. Detection auf TTP-Level ist nachhaltig wirksam.</p>`
                 }, {
                     title: 'Hardening-Lifecycle',
-                    html: `<h4>Baselines</h4>
-<ul><li>CIS Benchmarks pro OS/Plattform.</li><li>DISA STIGs (Defense Information Systems Agency).</li><li>Microsoft Security Baselines (SCM/Intune).</li></ul>
-<h4>Patch-Management</h4>
-<p>Inventory → Detection → Test (Dev/Stage) → Deployment → Verification. SLA nach Severity (z. B. Critical ≤ 7 Tage, High ≤ 30 Tage).</p>
-<h4>Configuration-Mgmt</h4>
-<p>Ansible, Puppet, Chef, DSC, GPO. Drift-Detection vergleicht Soll- vs. Ist-Zustand.</p>
+                    html: `<p>Hardening ist kein einmaliges Projekt, sondern ein Lebenszyklus. Die meisten kompromittierten Systeme waren irgendwann gehärtet — Drift, Konfigurationsänderungen und neue Software-Versionen haben die Baseline ausgehöhlt. Diese Seite beschreibt, wie eine Organisation Hardening dauerhaft hält.</p>
+
+<h4>Sicherheits-Baselines aus etablierten Quellen</h4>
+<p>Niemand erfindet Hardening selbst. Anerkannte Quellen:</p>
+<ul>
+<li><strong>CIS Benchmarks</strong> — Center for Internet Security; Hunderte detaillierte Settings pro OS und Plattform (Windows, RHEL, Ubuntu, macOS, AWS, Azure, GCP, Kubernetes, Docker, MS-SQL, PostgreSQL, IIS, Apache, Browser). Frei verfügbar; kommerzielle Tools setzen sie automatisch durch.</li>
+<li><strong>DISA STIGs</strong> (Security Technical Implementation Guides) — vom US-DoD; sehr strikt, Pflicht in DoD-Umgebungen, branchenweit als Referenz genutzt. Werden mit Tools wie <em>SCAP Compliance Checker</em> oder <em>OpenSCAP</em> automatisiert geprüft.</li>
+<li><strong>Microsoft Security Baselines</strong> — über die <em>Security Compliance Toolkit</em> oder direkt in <em>Intune</em> verfügbar.</li>
+<li><strong>BSI IT-Grundschutz</strong> — deutsches Pendant; in Behörden- und KRITIS-Kontext verbreitet.</li>
+</ul>
+<p>Anwendung: Eine Organisation wählt eine Baseline (oft CIS Level 1 für Standard, Level 2 für hochsensible Systeme), definiert begründete Abweichungen und scannt regelmäßig auf Compliance.</p>
+
+<h4>Patch-Management als Prozess</h4>
+<p>Ein robuster Patch-Prozess folgt fünf Stufen:</p>
+<ol>
+<li><strong>Inventory</strong> — was läuft überhaupt? Asset-Datenbank mit Software-Versionen. Tools: Lansweeper, Tanium, Microsoft Configuration Manager, Snipe-IT. Ohne vollständiges Inventar gibt es kein vollständiges Patching.</li>
+<li><strong>Detection</strong> — welche bekannten CVEs betreffen diese Assets? Vulnerability-Scanner: Tenable Nessus, Qualys VMDR, Rapid7 InsightVM, Greenbone, Microsoft Defender Vulnerability Management.</li>
+<li><strong>Test</strong> — Patches in Staging-Umgebung. Microsoft-Patch-Tuesday-Releases haben in der Vergangenheit gelegentlich Produktionsfehler verursacht; ungeprüftes Direkt-Deployment ist Hochrisiko.</li>
+<li><strong>Deployment</strong> — phasenweise: Pilot-Gruppe → breite Welle → Nachzügler. Tooling: WSUS/Configuration Manager, Intune Update Rings, Patch Management in Tenable, Automox.</li>
+<li><strong>Verification</strong> — Re-Scan, Bestätigung, Reporting an Management.</li>
+</ol>
+<p>SLAs werden risikobasiert gesetzt; CISA-KEV-Lücken haben oft 7-Tage-SLA, Critical 14, High 30, Medium 90. Bei <em>Out-of-Band-Patches</em> (Notfall-Patches außerhalb des Patch-Tuesday-Rhythmus) verkürzt sich die Frist drastisch.</p>
+
+<h4>Configuration Management und Drift-Detection</h4>
+<p>Moderne Hardening-Wirklichkeit verzichtet auf manuelle Klick-Konfiguration. Stattdessen wird die Soll-Konfiguration als Code beschrieben:</p>
+<ul>
+<li><strong>Ansible</strong> — agentless, YAML-basiert, weit verbreitet.</li>
+<li><strong>Puppet, Chef</strong> — etablierte Klassiker mit Master-Agent-Architektur.</li>
+<li><strong>PowerShell DSC</strong> für Windows-Workloads.</li>
+<li><strong>Terraform</strong> für Cloud-Infrastruktur.</li>
+<li><strong>Group Policy / Intune</strong> für Microsoft-Umgebungen.</li>
+</ul>
+<p>Der Mehrwert: Drift-Detection vergleicht den Ist-Zustand des Systems gegen die deklarierte Soll-Konfiguration. Abweichungen werden gemeldet oder automatisch zurückgesetzt. Das verhindert, dass ein „Quick-Fix" eines Admins über Monate Kontrollen aushöhlt.</p>
+
 <h4>Secrets-Management</h4>
-<p>HashiCorp Vault, AWS Secrets Manager, Azure Key Vault. Rotation + dynamic credentials. Niemals Secrets in Git committen — Pre-Commit-Hooks (gitleaks, trufflehog).</p>`
+<p>Zugangsdaten, API-Keys, Datenbank-Passwörter und Zertifikate sollten <em>nie</em> hartcodiert oder in Git eingecheckt werden. Mehrere Schichten arbeiten zusammen:</p>
+<ul>
+<li><strong>Secrets-Vaults</strong> — HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, GCP Secret Manager, CyberArk. Vault holt zur Laufzeit ab; nichts liegt in Code oder Config-Dateien.</li>
+<li><strong>Dynamic Credentials</strong> — Secrets, die kurzfristig ausgestellt werden (Vault Database-Engine, AWS STS Assume-Role mit kurzen Lifetimes). Reduziert Schaden bei Leaks drastisch.</li>
+<li><strong>Rotation</strong> — automatisierte Rotation für Service-Accounts, API-Keys, Zertifikate. ACME-Protokoll (Let's Encrypt) für TLS-Zertifikate ist hier vorbildlich.</li>
+<li><strong>Pre-Commit-Hooks</strong> — <em>gitleaks</em>, <em>trufflehog</em>, <em>detect-secrets</em> verhindern, dass Secrets ins Repository wandern.</li>
+<li><strong>Just-in-Time-Privilege</strong> — Tools wie Microsoft PIM, BeyondTrust, Teleport gewähren Admin-Rechte nur für definierte Zeitfenster mit MFA.</li>
+</ul>
+
+<h4>Anti-Pattern</h4>
+<p>Drei Fehler, die in der Praxis immer wieder vorkommen:</p>
+<ul>
+<li><em>„Wir haben mal eine Baseline ausgerollt"</em> ohne Drift-Detection: Innerhalb von Monaten ist sie erodiert.</li>
+<li><em>„Critical Patches innerhalb von 24 Stunden"</em> ohne Test-Umgebung: Produktionsausfälle führen dann dazu, dass die Policy beim nächsten Patch ignoriert wird.</li>
+<li><em>Geheime API-Keys in Git, „dafür Repository privat"</em>: Pull-Mirror, kompromittierte Entwickler-Konten, oder Wechsel zu Public reichen — Secret ist verbrannt.</li>
+</ul>`
                 }, {
                     title: 'Compliance & Datenschutz',
-                    html: `<h4>Frameworks</h4>
-<table><tr><th>Framework</th><th>Fokus</th></tr><tr><td>NIST CSF 2.0</td><td>Cybersecurity-Framework (Govern, Identify, Protect, Detect, Respond, Recover)</td></tr><tr><td>ISO 27001:2022</td><td>ISMS, zertifizierbar</td></tr><tr><td>SOC 2</td><td>Service-Organisationen, Trust Service Criteria</td></tr><tr><td>PCI-DSS v4</td><td>Kartendaten</td></tr><tr><td>HIPAA</td><td>US-Gesundheitsdaten</td></tr></table>
-<h4>Datenschutz</h4>
-<ul><li>DSGVO (EU): 72-h-Meldepflicht (Art. 33), DSFA (Art. 35), DPO (Art. 37).</li><li>NIS2-RL (2022/2555) — Pflicht ab 18.10.2024 in nationale Gesetze.</li><li>DORA (EU 2022/2554) — Finanzsektor, ab 17.01.2025.</li><li>EU-CRA (Cyber Resilience Act, 2024) — Produkthaftung mit digitalen Elementen.</li></ul>
-<h4>Privacy by Design</h4>
-<p>Datenminimierung, Pseudonymisierung, Anonymisierung, Encryption, Access Control by Default.</p>`
+                    html: `<p>Compliance ist nicht das Ziel von Sicherheit, aber sie definiert Mindestanforderungen, die regulatorisch durchgesetzt werden. Für Security+ musst du die wichtigsten Frameworks unterscheiden können — wofür sie gelten, wer sie prüft, was sie verlangen.</p>
+
+<h4>Internationale Frameworks</h4>
+<table>
+<thead><tr><th>Framework</th><th>Zweck</th><th>Charakter</th></tr></thead>
+<tbody>
+<tr><td><strong>NIST CSF 2.0</strong> (2024)</td><td>Cybersecurity-Referenzrahmen</td><td>Freiwillig, 6 Funktionen: <em>Govern, Identify, Protect, Detect, Respond, Recover</em>. Govern wurde 2024 neu eingeführt.</td></tr>
+<tr><td><strong>ISO/IEC 27001:2022</strong></td><td>Information Security Management System</td><td>Zertifizierbar, 93 Controls in Annex A (umstrukturiert vs. 2013).</td></tr>
+<tr><td><strong>ISO/IEC 27002:2022</strong></td><td>Best-Practice-Guidance zu 27001</td><td>Nicht zertifizierbar, ergänzt 27001.</td></tr>
+<tr><td><strong>SOC 2 (Type 1/2)</strong></td><td>Service-Organisationen, Trust Service Criteria</td><td>AICPA, jährliche Auditberichte; Type 2 prüft Effektivität über Zeitraum.</td></tr>
+<tr><td><strong>PCI-DSS v4.0</strong> (2024 verpflichtend)</td><td>Zahlungskartendaten</td><td>12 Anforderungen, durch Kartenmarken (Visa, Mastercard) durchgesetzt.</td></tr>
+<tr><td><strong>HIPAA</strong></td><td>US-Gesundheitsdaten (PHI)</td><td>Pflicht für Provider, Insurer, Business Associates.</td></tr>
+<tr><td><strong>CIS Controls v8</strong></td><td>18 priorisierte Controls</td><td>Praxisorientiert, gut für KMU als Einstieg.</td></tr>
+</tbody></table>
+<p>NIST CSF 2.0 ist die wahrscheinlich wichtigste Referenz, weil sie als Meta-Framework auf andere mappt. ISO 27001 ist der zertifizierbare Standard, den europäische Unternehmen Kunden gegenüber vorweisen können. SOC 2 ist im US-SaaS-Markt de-facto Pflicht.</p>
+
+<h4>EU-Regulatorik</h4>
+<p>Die EU hat in den letzten Jahren ein dichtes Regulierungsnetz aufgebaut, das du als Sicherheitsverantwortlicher kennen musst:</p>
+<ul>
+<li><strong>DSGVO / GDPR</strong> (Verordnung 2016/679, anwendbar seit 25.05.2018) — Schutz personenbezogener Daten. Kernpflichten: Rechtsgrundlage, Datenminimierung, Betroffenenrechte (Auskunft, Löschung, Portabilität), Pflicht zur <em>Meldung von Datenpannen</em> innerhalb von 72 Stunden (Art. 33), <em>Datenschutz-Folgenabschätzung</em> (DSFA, Art. 35) bei hohen Risiken, <em>Datenschutzbeauftragter</em> (DPO, Art. 37) bei bestimmten Konstellationen. Bußgelder bis 4 % weltweiter Jahresumsatz.</li>
+<li><strong>NIS2-Richtlinie</strong> (2022/2555) — Netz- und Informationssicherheitspflichten für „wesentliche" und „wichtige" Einrichtungen in 18 Sektoren (Energie, Wasser, Gesundheit, ICT, digitale Dienste etc.). Umsetzungsfrist 18.10.2024; in Deutschland verzögert. Pflichten: Risikomanagement, Sicherheitsmaßnahmen, Meldepflicht (24 h Frühwarnung, 72 h Vorfallsmeldung, 1 Monat Abschlussbericht), Geschäftsleitungs-Verantwortung mit persönlicher Haftung.</li>
+<li><strong>DORA</strong> (Verordnung 2022/2554, Digital Operational Resilience Act) — Finanzsektor, anwendbar ab 17.01.2025. Pflichten: ICT-Risikomanagement, Incident-Reporting, Penetrationstests (TLPT — Threat-Led Penetration Testing alle 3 Jahre für kritische Institute), strikte Drittparteien-Aufsicht, harmonisierte Meldepflicht.</li>
+<li><strong>EU Cyber Resilience Act</strong> (CRA, in Kraft 2024, voll anwendbar 2027) — Produkte mit digitalen Elementen müssen Sicherheitsanforderungen erfüllen, Sicherheitsupdates für definierte Mindestlebensdauer liefern, Schwachstellen-Disclosure-Prozess haben (RFC 9116 security.txt). CE-Kennzeichnung wird um Cybersecurity ergänzt.</li>
+<li><strong>EU AI Act</strong> (Verordnung 2024/1689) — risikobasierter Rahmen für KI-Systeme; Hochrisiko-KI muss Transparenz-, Robustheits- und Cybersicherheitsanforderungen erfüllen.</li>
+</ul>
+
+<h4>Privacy by Design und Privacy by Default</h4>
+<p>Beide Konzepte sind durch DSGVO Art. 25 verbindlich. Sie verlangen, dass Datenschutz <em>im Systementwurf</em> berücksichtigt wird, nicht nachträglich aufgesetzt:</p>
+<ul>
+<li><strong>Datenminimierung</strong> — nur das erheben, was tatsächlich gebraucht wird; Speicherfristen automatisch durchsetzen.</li>
+<li><strong>Pseudonymisierung</strong> — Identifikatoren durch Tokens ersetzen; Re-Identifizierung nur über separat geschützte Schlüssel möglich.</li>
+<li><strong>Anonymisierung</strong> — irreversibel; danach fällt der Datensatz aus dem DSGVO-Anwendungsbereich. Wichtig: bloßes Hashing identifizierender Felder ist meist <em>nicht</em> Anonymisierung im rechtlichen Sinn.</li>
+<li><strong>Encryption at Rest und in Transit</strong> per Default.</li>
+<li><strong>Access Control by Default</strong> — neue Konten haben minimale Rechte; Aufstockung nur durch genehmigten Prozess.</li>
+<li><strong>Default-Privacy-Settings</strong> in Anwendungen — die datenschutzfreundliche Variante muss aktiv abgewählt werden, nicht aktiv gewählt.</li>
+</ul>
+
+<h4>Datenklassifizierung</h4>
+<p>Eine sinnvolle Klassifikation ist Voraussetzung für jede DLP- und Zugriffspolicy. Typische öffentliche-Sektor-Hierarchie: <em>Public, Internal, Confidential, Restricted/Top Secret</em>. In Unternehmen häufig: <em>Public, Internal, Confidential, Highly Confidential</em>. Jeder Stufe sind konkrete Schutzanforderungen zugeordnet (Verschlüsselung, Zugriffsbeschränkung, Aufbewahrung, Löschpflicht, Externer Versand erlaubt/nicht erlaubt). Ohne Klassifizierung ist DLP weitgehend Raten.</p>`
                 }],
                 quiz: [
                     q('Was bedeutet CVSS?', ['Common Vulnerability Scoring System', 'Cyber Vulnerability Standard', 'Critical Virus Signature System', 'Compliance Verification Standard'], 0, 'CVSS v3.1 / v4.0: 0–10-Score zur Priorisierung.'),
@@ -454,46 +962,212 @@ Wirkung: präventiv, detektiv, korrigierend, abschreckend, kompensierend, leiten
                 summary: 'Detection, Threat Hunting, MITRE ATT&CK, Sigma, SIEM-Patterns.',
                 pages: [{
                     title: 'Analytisches Toolkit',
-                    html: `<h4>MITRE ATT&CK</h4>
-<p>14 Tactics × ~200 Techniques. Mapping von Detections und Hunts gegen die Matrix.</p>
-<h4>Detection-Engineering</h4>
-<p>Hypothese → Sigma-Rule → SIEM-Detection → Atomic-Red-Team-Validation → Tuning.</p>
+                    html: `<p>CySA+ ist die analystenorientierte Zertifizierung der CompTIA-Familie. Anders als Security+, das breit Grundlagen prüft, fokussiert CS0-003 auf <em>Detektion</em>, <em>Analyse</em> und <em>Response</em>. Dieses Kapitel legt das Vokabular und Werkzeug-Set fest, mit dem ein moderner SOC-Analyst arbeitet — und gegen das CompTIA Szenarien formuliert.</p>
+
+<h4>MITRE ATT&CK als analytisches Rückgrat</h4>
+<p>Das <strong>MITRE ATT&CK Framework</strong> (Adversarial Tactics, Techniques and Common Knowledge) ist die wichtigste Wissensbasis für moderne Detection. Es beschreibt, <em>was</em> Angreifer tun, organisiert in:</p>
+<ul>
+<li><strong>14 Tactics</strong> — die Ziele eines Angreifers in jeder Angriffsphase: Reconnaissance, Resource Development, Initial Access, Execution, Persistence, Privilege Escalation, Defense Evasion, Credential Access, Discovery, Lateral Movement, Collection, Command and Control, Exfiltration, Impact.</li>
+<li><strong>~200 Techniques</strong> und Hunderte <em>Sub-Techniques</em> — die konkreten Methoden. Beispielsweise gehört zur Tactic <em>Lateral Movement</em> die Technique <em>T1021 Remote Services</em> mit Sub-Techniques für SMB/Windows-Admin-Shares, RDP, SSH, VNC.</li>
+<li><strong>Procedures</strong> — beobachtete reale Implementierungen durch konkrete Gruppen (z. B. APT29, Lazarus, FIN7). Diese Schicht ist enzyklopädisch dokumentiert.</li>
+</ul>
+<p>Praktischer Nutzen: Jede produzierte Detection-Regel und jeder Hunt sollte gegen die Matrix gemappt werden. Daraus entsteht eine <em>Detection Coverage Heatmap</em>, die zeigt, welche Techniken erkannt werden und wo Lücken klaffen. Tools wie <em>DeTT&CT</em> (Mark Bakker, Marcus Bakker) oder die <em>ATT&CK Navigator</em>-Web-UI helfen bei der Visualisierung.</p>
+<p>ATT&CK wird laufend gepflegt; aktuelle Version v15+ (2024). Verwende immer die aktuell veröffentlichte Version, da Techniken regelmäßig hinzukommen oder neu strukturiert werden (z. B. wurde T1003 OS Credential Dumping mehrfach refaktoriert).</p>
+
+<h4>Detection-Engineering als Disziplin</h4>
+<p>Klassische Vendor-out-of-the-box-Regeln sind nicht ausreichend. Reife SOCs betreiben Detection-Engineering wie Software-Engineering — mit Versionskontrolle, Tests und CI:</p>
+<ol>
+<li><strong>Hypothese</strong> — was möchte ich erkennen? Beispiel: „Lateral Movement über WMI von einer User-Workstation auf einen DC."</li>
+<li><strong>Sigma-Regel</strong> formulieren — vendor-neutrale YAML-basierte Regelsprache, die in SIEM-spezifische Queries übersetzt werden kann (Splunk SPL, KQL, ES|QL, Chronicle UDM, etc.).</li>
+<li><strong>Deployment</strong> ins SIEM in einem Test-Index, um False-Positive-Rate zu beobachten.</li>
+<li><strong>Validation</strong> — die Erkennung wird aktiv getestet, indem das Verhalten kontrolliert ausgelöst wird (siehe Atomic Red Team weiter unten).</li>
+<li><strong>Tuning</strong> — Allowlists für legitime Tools (z. B. WMI von SCCM-Servern), Schwellenwerte anpassen.</li>
+<li><strong>Productionizing</strong> — versionierte Regel im Repo, Severity, Runbook, MITRE-Mapping, Owner. <em>Detection-as-Code</em>.</li>
+</ol>
+
 <h4>Beaconing-Detection</h4>
-<p>Konstantes Intervall mit Jitter < 20 % und kleine Payloads → C2-Verdacht (Cobalt Strike, Sliver, Mythic).</p>
-<h4>EDR-Telemetrie</h4>
-<p>Process-Tree, Command-Line, Module-Loads, ETW, AMSI, Sysmon Event IDs (1, 3, 7, 11, 13, 22).</p>`
+<p>Command-and-Control (C2)-Frameworks (Cobalt Strike, Sliver, Mythic, Brute Ratel, Havoc) etablieren typischerweise periodische Verbindungen zur Operator-Infrastruktur. Charakteristika:</p>
+<ul>
+<li>Konstantes Intervall (Beacon-Interval), oft 60 Sekunden bis mehrere Minuten.</li>
+<li><em>Jitter</em> — bewusste zufällige Variation, oft 10–30 %, um Detection zu erschweren.</li>
+<li>Kleine Payloads, kurze Sessions.</li>
+<li>Regelmäßiges TLS- oder HTTPS-Profil zu wenig populären Domains; manchmal mit gefälschtem User-Agent.</li>
+</ul>
+<p>Erkennung erfolgt über statistische Analyse von <em>Inter-Packet-Times</em> über längere Zeiträume — nicht über Einzelpakete. Tools: <em>RITA</em> (Active Countermeasures), <em>Zeek</em> mit Beaconing-Modulen, NDR-Plattformen, in modernen SIEMs als Anomalie-Detection-Modell.</p>
+
+<h4>EDR-Telemetrie auf Windows</h4>
+<p>Windows-Endpoints liefern reichhaltige Telemetrie, die ein EDR-Agent korreliert:</p>
+<ul>
+<li><strong>Process Tree und Command-Line</strong> — entscheidend für „Living-off-the-Land"-Erkennung. <em>winword.exe → cmd.exe → powershell.exe -enc &lt;Base64&gt;</em> ist verdächtig, auch wenn jeder Einzelprozess legitim ist.</li>
+<li><strong>Module Loads</strong> — verdächtige DLLs in legitimen Prozessen (DLL-Sideloading, Process-Hollowing).</li>
+<li><strong>ETW</strong> (Event Tracing for Windows) — tiefe Kernel-Tracing-Schnittstelle; moderne EDRs konsumieren ETW direkt.</li>
+<li><strong>AMSI</strong> (Antimalware Scan Interface) — Plug-In-Punkt, an dem Skript-Inhalte (PowerShell, JScript, VBS, Office Macros) vor Ausführung an AV/EDR übergeben werden. Angreifer versuchen <em>AMSI-Bypass</em> via Patching im Userspace.</li>
+<li><strong>Sysmon</strong> (System Monitor, Sysinternals) — kostenloser, lange unterstützter Detection-Hilfsdienst. Wichtige Event-IDs:</li>
+</ul>
+<table>
+<thead><tr><th>Sysmon Event ID</th><th>Was es protokolliert</th></tr></thead>
+<tbody>
+<tr><td><strong>1</strong></td><td>Process Create — inkl. Command-Line, Parent</td></tr>
+<tr><td><strong>3</strong></td><td>Network Connect</td></tr>
+<tr><td><strong>7</strong></td><td>Image/DLL-Load</td></tr>
+<tr><td><strong>11</strong></td><td>File Create</td></tr>
+<tr><td><strong>13</strong></td><td>Registry Set Value</td></tr>
+<tr><td><strong>22</strong></td><td>DNS Query (Sysmon v10+)</td></tr>
+</tbody></table>
+<p>Eine etablierte Sysmon-Konfiguration ist <em>SwiftOnSecurity/sysmon-config</em> (häufig modifiziert für Org-Spezifika). Auf Linux ist <em>auditd</em> oder modern <em>eBPF</em> (Falco, Tetragon, Tracee) das Pendant.</p>`
                 }, {
-                    title: 'Threat Hunting Methodik',
-                    html: `<h4>Hunt-Modelle</h4>
-<ul><li><strong>PEAK</strong> (Prepare, Execute, Act with Knowledge) — SANS-Framework.</li><li><strong>TaHiTI</strong> — Targeted Hunting integrating Threat Intelligence.</li><li><strong>Sqrrl-Loop</strong> — Hypothesis → Investigation → Uncover → Inform.</li></ul>
+                    title: 'Threat-Hunting-Methodik',
+                    html: `<p>Threat Hunting ist die proaktive, hypothesengetriebene Suche nach Angreifer-Aktivität — auch wenn aktuell kein Alarm läuft. Hintergrund: Angreifer halten sich oft Wochen bis Monate unentdeckt im Netz. Mandiant M-Trends 2024 berichtet eine globale mediane <em>Dwell Time</em> von 10 Tagen, in Europa typischerweise länger. Hunting reduziert diese Zeit drastisch — vorausgesetzt es ist methodisch.</p>
+
+<h4>Hunt-Modelle</h4>
+<p>Mehrere Methodiken konkurrieren in der Praxis. Du musst sie nicht alle einsetzen, aber CompTIA prüft die Begriffe:</p>
+<ul>
+<li><strong>PEAK</strong> (Prepare, Execute, Act with Knowledge) — SANS-Framework, sehr operationalisiert. Drei Phasen mit klar definierten Inputs und Outputs.</li>
+<li><strong>TaHiTI</strong> (Targeted Hunting integrating Threat Intelligence) — von niederländischen Banken entwickelt; integriert Threat Intel als Hypothesen-Quelle.</li>
+<li><strong>Sqrrl-Loop</strong> (Hypothesis → Investigation → Uncover → Inform) — die klassische Vier-Phasen-Schleife, von Sqrrl/AWS popularisiert.</li>
+<li><strong>Hypothesis-Driven Hunting</strong> nach David Bianco — Hypothese aus Threat Intel, ATT&CK oder Anomalie wird formuliert, mit Telemetrie validiert.</li>
+</ul>
+
 <h4>Hypothesen-Quellen</h4>
-<p>Threat-Intel-Reports, ATT&CK Top-Techniques (Red-Canary), Crown-Jewels-Analyse, Anomalien aus SIEM-Baselines.</p>
+<p>Eine gute Hunt-Hypothese ist konkret, falsifizierbar und auf vorhandene Telemetrie zurückführbar. Quellen:</p>
+<ul>
+<li><strong>Threat-Intel-Reports</strong> — z. B. Mandiant-, CrowdStrike-, ESET-, Microsoft-Threat-Reports zu konkreten Akteuren.</li>
+<li><strong>ATT&CK Top-Techniques</strong> — Red Canary veröffentlicht jährlich den <em>Threat Detection Report</em> mit den am häufigsten beobachteten Techniken (Top: T1059 Command and Scripting Interpreter, T1027 Obfuscated Files, T1218 System Binary Proxy Execution).</li>
+<li><strong>Crown-Jewels-Analyse</strong> — was sind die wertvollsten Assets, wie würde ein Angreifer dorthin gelangen, welche Spuren hinterlässt jeder dieser Pfade?</li>
+<li><strong>SIEM-Anomalien</strong> — auffällige Baselines (UEBA), die unter dem Alarm-Schwellwert geblieben sind.</li>
+<li><strong>CISA-Advisories</strong> und <strong>Joint Advisories</strong> mit IoCs und TTPs zu aktuellen Kampagnen.</li>
+</ul>
+
 <h4>Pyramid of Pain (David Bianco)</h4>
-<ol><li>Hash-Werte (trivial)</li><li>IPs</li><li>Domains</li><li>Network/Host Artefakte</li><li>Tools</li><li>TTPs (am schmerzhaftesten für Angreifer)</li></ol>
-<h4>Diamond Model</h4>
-<p>Adversary, Capability, Infrastructure, Victim — vier Knoten, Pivot-Punkte für Investigations.</p>`
+<p>Das Modell ordnet Indikatoren danach, wie schmerzhaft es für den Angreifer ist, sie zu wechseln. Detection auf hohen Stufen ist nachhaltig wirksam:</p>
+<ol>
+<li><strong>Hash-Werte</strong> — trivial zu ändern (eine Byte-Änderung reicht). Detection allein über Hashes ist kurzlebig.</li>
+<li><strong>IP-Adressen</strong> — leicht zu wechseln (neue VPS).</li>
+<li><strong>Domains</strong> — DNS-Updates dauern, kosten ein bisschen.</li>
+<li><strong>Network/Host Artefakte</strong> — User-Agent-Strings, Mutex-Namen, Registry-Pfade. Mittel.</li>
+<li><strong>Tools</strong> — Cobalt Strike, Mimikatz; Wechsel kostet Geld und Aufwand.</li>
+<li><strong>TTPs</strong> — Tactics, Techniques, Procedures. Hier müsste der Angreifer sein gesamtes Vorgehen ändern. Maximaler Schmerz, maximale Detection-Rendite.</li>
+</ol>
+
+<h4>Diamond Model of Intrusion Analysis</h4>
+<p>Das Diamond-Modell (Caltagirone, Pendergast, Betz, 2013) modelliert jeden Vorfall als Beziehung zwischen vier Knoten: <strong>Adversary</strong> (Angreifer), <strong>Capability</strong> (Tool/Malware), <strong>Infrastructure</strong> (C2-Domain, IP) und <strong>Victim</strong> (Ziel). Verbindungen zwischen den Knoten heißen <em>Edges</em>.</p>
+<p>Praktischer Nutzen: Wenn ein Knoten bekannt ist, kann man von dort zu den anderen pivotieren. Beispiel: Wir kennen die C2-Domain (Infrastructure) → über passive DNS finden wir andere Domains derselben IP → diese gehören mutmaßlich derselben Capability/Adversary → andere Victims werden sichtbar. Threat-Intel-Plattformen wie MISP, OpenCTI oder ThreatConnect arbeiten implizit diamond-orientiert.</p>
+
+<h4>Validierung von Detections</h4>
+<p>Eine Hunt-Hypothese muss <em>fälschbar</em> sein. Wenn keine Telemetrie sie widerlegen oder bestätigen kann, ist sie nicht hunt-tauglich. Praktisch heißt das: Bevor ein Hunt durchgeführt wird, prüft der Analyst, ob die nötigen Logquellen existieren und retentioniert werden. Fehlende Telemetrie ist selbst eine wichtige Erkenntnis: Sie führt zu Verbesserungen am Logging-Stack.</p>`
                 }, {
-                    title: 'Log-Quellen & Telemetrie',
-                    html: `<h4>Endpoint</h4>
-<p>Windows-Security-Log, Sysmon, PowerShell ScriptBlock-Log, AMSI, ETW, Defender-Events, auditd, eBPF (Falco), unified Apple Log.</p>
-<h4>Netzwerk</h4>
-<p>NetFlow/IPFIX/sFlow, Zeek (conn.log, dns.log, http.log, ssl.log), Suricata, Firewall-Logs, Proxy-Logs.</p>
-<h4>Identity</h4>
-<p>Entra ID Sign-in/Audit-Logs, AD 4624/4625/4768/4769/4672, IdP-Logs (Okta, Auth0), MFA-Logs.</p>
-<h4>Cloud</h4>
-<p>AWS CloudTrail + GuardDuty, Azure Activity + Defender, GCP Cloud Audit Logs, Kubernetes-Audit, OCI-Audit.</p>
-<h4>Application</h4>
-<p>Web-Server-Access-Logs, App-Logs (strukturiert mit OpenTelemetry), DB-Audit, WAF-Logs, API-Gateway-Logs.</p>`
+                    title: 'Log-Quellen und Telemetrie',
+                    html: `<p>Detection ist nur so gut wie die zugrundeliegende Telemetrie. Diese Seite gibt einen Überblick über die wichtigsten Logquellen und ihre typischen Inhalte — Wissen, das CompTIA in Szenarien gerne abfragt („Welche Logquelle würden Sie konsultieren, um …?").</p>
+
+<h4>Endpoint-Telemetrie</h4>
+<p>Auf <strong>Windows</strong>:</p>
+<ul>
+<li><strong>Security Event Log</strong> — Anmeldungen, Privilege-Use, Object Access, Audit-Policy-Changes. Wichtige IDs: 4624 (Logon), 4625 (Failed Logon), 4672 (Special Privileges Assigned), 4688 (Process Create), 4768/4769/4770 (Kerberos), 4720 (User Created), 4732 (Group Membership).</li>
+<li><strong>Sysmon</strong> wie auf der vorherigen Seite beschrieben — die qualitativ wichtigste Ergänzung des Standard-Logs.</li>
+<li><strong>PowerShell ScriptBlock-Log</strong> (Event ID 4104) — protokolliert ausgeführte Skripte vollständig, auch wenn sie obfuskiert in -EncodedCommand kommen. Pflicht in jedem ernstzunehmenden Hardening.</li>
+<li><strong>AMSI-Telemetrie</strong> — Skript-Inhalte zum Scan-Zeitpunkt.</li>
+<li><strong>ETW</strong> — Kernel-Tracing, von EDRs konsumiert.</li>
+<li><strong>Defender Operational Logs</strong> — Erkennungs-Events, vom EDR ergänzt.</li>
+</ul>
+<p>Auf <strong>Linux</strong>:</p>
+<ul>
+<li><strong>auditd</strong> — Systemcall- und Datei-Audit. Konfiguration via auditctl/Regeldateien (<em>/etc/audit/rules.d/</em>).</li>
+<li><strong>journald</strong> — strukturierte Sammlung aller Systemd-Logs.</li>
+<li><strong>eBPF-basierte Tools</strong> — Falco, Tetragon, Tracee. Beobachten Kernel-Ereignisse mit niedrigem Overhead.</li>
+<li><strong>Bash History</strong> mit Audit-Plug-Ins.</li>
+</ul>
+<p>Auf <strong>macOS</strong>: <em>Unified Logging System</em> (<code>log show</code>), Endpoint Security Framework (ESF), Configuration Profiles über MDM.</p>
+
+<h4>Netzwerk-Telemetrie</h4>
+<ul>
+<li><strong>NetFlow / IPFIX / sFlow</strong> — Metadaten zu Netzwerkflüssen (Quelle, Ziel, Bytes, Pakete, Dauer). Pflicht für Beaconing-/Anomalie-Erkennung; Volumen handhabbar, weil keine Payloads.</li>
+<li><strong>Zeek</strong> — protokollbewusste Netzwerk-Logs: <em>conn.log</em> (Verbindungen), <em>dns.log</em>, <em>http.log</em>, <em>ssl.log</em> (TLS-Handshakes inkl. SNI, Cipher, JA3-Fingerprint), <em>files.log</em>. Eine der wichtigsten Detection-Quellen für reife SOCs.</li>
+<li><strong>Suricata</strong> — Signatur-IDS/IPS, kompatibel mit Snort-Regeln; eve.json als strukturierter Output.</li>
+<li><strong>Firewall-Logs</strong> — erlaubte/blockierte Verbindungen.</li>
+<li><strong>Proxy-Logs</strong> — HTTP(S)-Anfragen, URL, User-Agent, Hash-Reputation.</li>
+<li><strong>DNS-Logs</strong> — eine der wertvollsten Quellen überhaupt; Tools wie BIND-Querylog, Pi-hole-FTL, Microsoft-DNS-Analytics, Protective DNS.</li>
+</ul>
+
+<h4>Identity-Telemetrie</h4>
+<p>In der Cloud-Welt ist die Identitäts-Logquelle oft wichtiger als die Endpoint-Logs:</p>
+<ul>
+<li><strong>Microsoft Entra ID Sign-in Logs</strong> — alle Anmeldeversuche inkl. Risiko-Bewertung.</li>
+<li><strong>Microsoft Entra ID Audit Logs</strong> — administrative Aktionen (Rollen-Zuweisung, App-Registration, Conditional Access-Änderungen).</li>
+<li><strong>Active Directory Logs</strong> — vor allem die DC-Security-Logs mit den 4768/4769/4770/4624-IDs.</li>
+<li><strong>IdP-Logs anderer Anbieter</strong> — Okta, Auth0, Ping; ähnlicher Inhalt mit eigenem Schema.</li>
+<li><strong>MFA-Logs</strong> — wer hat MFA gefordert, akzeptiert, abgelehnt? Wichtig für MFA-Fatigue-Erkennung.</li>
+</ul>
+
+<h4>Cloud-Telemetrie</h4>
+<ul>
+<li><strong>AWS CloudTrail</strong> — alle API-Aufrufe im AWS-Konto. CloudTrail-Lake oder CloudTrail-Logs in S3 für SIEM-Forwarding. Ergänzt durch <em>GuardDuty</em> (managed Threat Detection mit ML).</li>
+<li><strong>Azure Activity Log</strong> + <em>Microsoft Defender for Cloud</em> + <em>Microsoft Sentinel</em>.</li>
+<li><strong>GCP Cloud Audit Logs</strong> (Admin Activity, Data Access, System Events).</li>
+<li><strong>Kubernetes Audit-Logs</strong> — kritisch für API-Server-Aktivität in Clustern.</li>
+<li><strong>Container-Runtime-Logs</strong> — Docker, containerd, eBPF-Sensoren wie Falco im Cluster.</li>
+</ul>
+
+<h4>Anwendungs-Telemetrie</h4>
+<p>Web- und API-Anwendungen liefern wichtige Logquellen, die häufig vergessen werden:</p>
+<ul>
+<li><strong>Web-Server-Access-Logs</strong> — Apache/NGINX/IIS. Anfragepfade, User-Agents, Statuscodes.</li>
+<li><strong>Anwendungs-Logs</strong> — strukturiert, idealerweise via OpenTelemetry und dem ECS- oder OTLP-Schema.</li>
+<li><strong>Datenbank-Audit</strong> — SQL Server Extended Events, MySQL Audit Plug-In, PostgreSQL pgAudit.</li>
+<li><strong>WAF-Logs</strong> — geblockte Angriffe gegen die Anwendung.</li>
+<li><strong>API-Gateway-Logs</strong> — typischerweise pro Request mit Authentifizierungsinformationen.</li>
+</ul>
+<p>Eine sinnvolle Reihenfolge bei Onboarding eines neuen SIEM: Identity → Endpoint (EDR + Sysmon) → Cloud-Audit → Netzwerk-Flow → Anwendung. Diese Reihenfolge entspricht dem Detection-Wert pro investiertem Aufwand.</p>`
                 }, {
                     title: 'SOC-Workflows',
-                    html: `<h4>Tier-Modell</h4>
-<ul><li><strong>Tier 1</strong> Triage — Erstbewertung, einfache Eskalationen.</li><li><strong>Tier 2</strong> Investigation — tiefere Analyse, Containment.</li><li><strong>Tier 3</strong> Hunt/IR — spezialisierte Forensik, Threat Hunting.</li></ul>
-<h4>Alert Fatigue</h4>
-<p>Tuning-Strategie: Use-Case-Reviews, Detection-as-Code in Git, CI-Tests gegen Goldsamples, Severity-Buckets, Alert-Konsolidierung in Cases.</p>
-<h4>Continuous Validation</h4>
-<p>Atomic Red Team (Red Canary), Caldera (MITRE), Stratus Red Team (Cloud), AttackIQ, SafeBreach — BAS (Breach & Attack Simulation).</p>
+                    html: `<p>Diese Seite beschreibt, wie ein modernes SOC arbeitet — vom Eingang eines Alerts bis zur strukturellen Verbesserung der Detection-Pipeline. CompTIA prüft hier vor allem Tier-Modell, Ursachen für Alert Fatigue und Konzepte rund um kontinuierliche Validierung.</p>
+
+<h4>Tier-Modell des SOC</h4>
+<p>Klassische SOCs sind in Tiers organisiert, jeder mit definierter Verantwortung:</p>
+<ul>
+<li><strong>Tier 1 — Triage</strong>: Erstbewertung neu eingehender Alerts. Schnelle Klassifikation in <em>True Positive</em>, <em>False Positive</em>, <em>Benign True Positive</em> (legitimes Verhalten, das wie ein Angriff aussieht). Eskalation an Tier 2 mit allen relevanten Kontextinformationen.</li>
+<li><strong>Tier 2 — Investigation</strong>: tiefere Analyse, Korrelation über Logs, initiale Containment-Maßnahmen (Konto sperren, Host isolieren). Übergibt komplexe Fälle an Tier 3.</li>
+<li><strong>Tier 3 — Hunt/IR</strong>: spezialisierte Forensik, proaktives Threat Hunting, koordinierte Response bei größeren Vorfällen. Bauen Detections aus realen Vorfällen.</li>
+<li><strong>Detection-Engineering</strong>: dedizierte Funktion (oft Teil von Tier 3) mit Fokus auf Regelqualität, Tuning, MITRE-Coverage.</li>
+</ul>
+<p>Moderne Trends: <em>Flat SOC</em> ohne strikte Tiers (Senior-Analysten arbeiten auch Triage), <em>Follow-the-Sun</em>-Modelle mit Tier-1-Standorten in mehreren Zeitzonen, <em>MDR</em> (Managed Detection and Response) als ausgelagerte Tier-1/Tier-2-Funktion.</p>
+
+<h4>Alert Fatigue und ihre Ursachen</h4>
+<p>Wenn ein SOC pro Tag hunderte Alerts mit hoher False-Positive-Quote erhält, leidet die Qualität: Echte Vorfälle werden übersehen, Analysten brennen aus, Reaktionszeiten steigen. Ursachen und Gegenmaßnahmen:</p>
+<ul>
+<li><strong>Niedrige Detection-Spezifität</strong>: zu generische Regeln. Gegenmaßnahme: Use-Case-Reviews, regelmäßige Regel-Audits, Schwellwerte und Allowlists.</li>
+<li><strong>Fehlendes Tuning</strong>: Out-of-the-Box-Regeln werden ungeprüft aktiviert. Gegenmaßnahme: <em>Detection-as-Code</em> in Git, Pull-Request-Workflow, CI-Tests gegen Goldsamples.</li>
+<li><strong>Fehlende Severity-Kategorisierung</strong>: alle Alerts gleich dringlich. Gegenmaßnahme: Severity-Buckets (Critical/High/Medium/Low) mit verschiedenen SLAs und Eskalationspfaden.</li>
+<li><strong>Alert-Schwemme statt Cases</strong>: dieselbe Aktivität triggert zehn Regeln. Gegenmaßnahme: <em>Case-Management</em> in SOAR oder SIEM bündelt korrelierte Alerts in einen Vorfall.</li>
+<li><strong>Falsche Metriken</strong>: SOC wird an Anzahl bearbeiteter Alerts gemessen. Gegenmaßnahme: Bessere Metriken sind <em>MTTD</em> (Mean Time to Detect), <em>MTTR</em> (Mean Time to Respond), <em>Detection-Coverage</em> nach ATT&CK, <em>True-Positive-Rate</em>.</li>
+</ul>
+
+<h4>Continuous Validation — kontinuierliche Detection-Prüfung</h4>
+<p>Eine Detection-Regel, die nie geprüft wurde, ist eine ungetestete Annahme. <em>Breach and Attack Simulation</em> (BAS) sowie <em>Atomic Testing</em> validieren regelmäßig, ob Detections noch funktionieren. Tools:</p>
+<ul>
+<li><strong>Atomic Red Team</strong> (Red Canary, MIT-Lizenz) — kleine, ATT&CK-gemappte Test-Skripte. Beispiel: führe T1003.001 (LSASS Memory Dumping) aus → prüfe, ob das EDR alarmiert.</li>
+<li><strong>Caldera</strong> (MITRE) — autonomes Adversary-Emulation-Framework, das ATT&CK-Operationen orchestriert.</li>
+<li><strong>Stratus Red Team</strong> (DataDog) — Cloud-spezifische Adversary-Emulation für AWS, Azure, GCP, Kubernetes.</li>
+<li><strong>AttackIQ, SafeBreach, Cymulate</strong> — kommerzielle BAS-Plattformen mit kontinuierlicher Coverage und Reporting.</li>
+</ul>
+<p>Wichtig: BAS muss in Produktivumgebungen mit klarer Genehmigung und Kommunikation an Tier 1 erfolgen, sonst entstehen falsche Vorfallsbearbeitungen oder echte Gegenmaßnahmen werden ausgeführt.</p>
+
 <h4>Purple Teaming</h4>
-<p>Iteratives Red+Blue — Detection-Gaps live identifizieren, Sigma-Regeln entwickeln, MITRE-Heatmap aktualisieren.</p>`
+<p>Reines Red-Team-Engagement testet Verteidigungsfähigkeit, übergibt aber nur einen Abschlussbericht. Klassisches Blue-Team baut Detections, ohne realistische Angreifer-TTPs erlebt zu haben. <strong>Purple Teaming</strong> verbindet beide iterativ:</p>
+<ol>
+<li>Red-Team führt eine ATT&CK-Technik kontrolliert aus.</li>
+<li>Blue-Team prüft live, ob die Erkennung greift.</li>
+<li>Gaps werden gemeinsam analysiert, neue Sigma-Regeln formuliert, MITRE-Heatmap aktualisiert.</li>
+<li>Wiederholung mit nächster Technik.</li>
+</ol>
+<p>Ergebnis nach einem Purple-Team-Engagement: messbar verbesserte Detection-Coverage, gemeinsam gewachsenes Verständnis, Defender lernt Angreifer-Methoden direkt am Live-Beispiel.</p>
+
+<h4>Anti-Pattern</h4>
+<ul>
+<li><em>„Wir haben ein SIEM gekauft"</em> ohne Use-Case-Programm — Tool ohne Pflege liefert nur teure Logs.</li>
+<li><em>Tier 1 ohne Mentoring</em>: hohe Fluktuation, schlechte Triage-Qualität, kein Wissensaufbau.</li>
+<li><em>Detection ohne Validation</em>: niemand weiß, ob die Regeln noch funktionieren.</li>
+<li><em>Regelpflege ohne Versionierung</em>: Änderungen verschwinden, alte Regeln werden ungeprüft beibehalten.</li>
+</ul>`
                 }],
                 quiz: [
                     q('Welches Sysmon-Event-ID erfasst Process Creation?', ['1', '3', '11', '22'], 0, 'ID 1 = ProcessCreate. 3 = NetworkConnect. 11 = FileCreate. 22 = DnsQuery.'),
