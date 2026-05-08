@@ -154,7 +154,7 @@
                 {
                     q: 'RSA-Sicherheit: Faktoreziere $N=143$ und beschreibe, wie damit der private Schlüssel rekonstruiert werden kann (gegeben $e=7$).',
                     h: 'Probedivisionen mit kleinen Primzahlen. Anschließend $d\\equiv e^{-1}\\pmod{\\varphi(N)}$.',
-                    s: '$143=11\\cdot 13\\Rightarrow p=11,\\ q=13$.<br>$\\varphi(N)=10\\cdot 12=120$.<br>$d\\equiv 7^{-1}\\pmod{120}$: erw. Euklid: $\\gcd(7,120)=1$, $1=7\\cdot 103 - 120\\cdot 6$. Probe: $7\\cdot 103=721=6\\cdot 120+1$. ✓<br>$$\\boxed{d=103}$$ Folgerung: kennt man $N$'s Faktoren, ist RSA gebrochen $\\Rightarrow$ Sicherheit beruht auf Schwierigkeit der Faktorisierung.'
+                    s: '$143=11\\cdot 13\\Rightarrow p=11,\\ q=13$.<br>$\\varphi(N)=10\\cdot 12=120$.<br>$d\\equiv 7^{-1}\\pmod{120}$: erw. Euklid: $\\gcd(7,120)=1$, $1=7\\cdot 103 - 120\\cdot 6$. Probe: $7\\cdot 103=721=6\\cdot 120+1$. ✓<br>$$\\boxed{d=103}$$ Folgerung: kennt man die Faktoren von $N$, ist RSA gebrochen $\\Rightarrow$ Sicherheit beruht auf Schwierigkeit der Faktorisierung.'
                 },
                 {
                     q: 'Wende den Chinesischen Restsatz (CRT) an: löse $x\\equiv 2\\pmod 3$, $x\\equiv 3\\pmod 5$, $x\\equiv 2\\pmod 7$.',

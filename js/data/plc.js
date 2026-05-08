@@ -290,6 +290,6 @@
                         '<strong>Wahl von $\\varepsilon$:</strong><ul><li>für <code>REAL</code> (single): $\\varepsilon \\geq 10^{-6}$ als untere Faustregel ($\\sim 10$-fache Maschinengenauigkeit $\\epsilon_\\text{m} \\approx 1.19\\cdot 10^{-7}$).</li><li>für <code>LREAL</code> (double): $\\varepsilon \\geq 10^{-12}$.</li></ul>Praktisch problemspezifisch &mdash; eine Position-Toleranz von 1&nbsp;µm hat andere $\\varepsilon$ als ein Druck-Vergleich in bar.<br>$\\boxed{|x - 0.1|_{\\text{REAL}} \\approx 1.49\\cdot 10^{-9},\\;\\text{daher Toleranzvergleich mit }\\varepsilon}$'
                 }
             ]
-        }
+        ]
     };
 })();

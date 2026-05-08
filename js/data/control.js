@@ -25,20 +25,20 @@
             Endwertsatz: $\\lim_{t\\to\\infty}y(t)=\\lim_{s\\to 0} sY(s)$<br>
             Anfangswertsatz: $\\lim_{t\\to 0^+}y(t)=\\lim_{s\\to\\infty} sY(s)$<br><br>
             <strong>Bode</strong><br>
-            $|G(j\omega)|_{dB}=20\log_{10}|G(j\omega)|$, $\varphi=\arg G(j\omega)$<br><br>
+            $|G(j\\omega)|_{dB}=20\\log_{10}|G(j\\omega)|$, $\\varphi=\\arg G(j\\omega)$<br><br>
             <strong>Zeitkonstanten / Spezifikationen</strong><br>
-            PT1-Anstiegszeit ($10\%\to 90\%$): $t_r\approx 2{,}2\,T$<br>
-            PT2-Überschwingen: $\ddot M_p=\exp(-\pi D/\sqrt{1-D^2})$<br><br>
+            PT1-Anstiegszeit ($10\%\\to 90\%$): $t_r\\approx 2{,}2\\,T$<br>
+            PT2-Überschwingen: $\\ddot M_p=\\exp(-\\pi D/\\sqrt{1-D^2})$<br><br>
             <strong>Lead-/Lag-Glied</strong><br>
-            $G_{lead}(s)=\dfrac{1+\alpha T s}{1+T s}$ mit $\alpha>1$ (Phasenanhebung)<br><br>
+            $G_{lead}(s)=\\dfrac{1+\\alpha T s}{1+T s}$ mit $\\alpha>1$ (Phasenanhebung)<br><br>
             <strong>Reale D-Glieder (DT1)</strong><br>
-            $G_{DT1}(s)=\dfrac{T_v s}{1+T_1 s}$<br><br>
+            $G_{DT1}(s)=\\dfrac{T_v s}{1+T_1 s}$<br><br>
             <strong>Routh-Hurwitz Schema</strong><br>
-            Erste Spalte $>0$ für alle Zeilen $\Rightarrow$ stabil<br><br>
+            Erste Spalte $>0$ für alle Zeilen $\\Rightarrow$ stabil<br><br>
             <strong>Smith-Prädiktor</strong> (Totzeit-Kompensation)<br>
-            $G_{eff}(s)=\dfrac{G_R}{1+G_R G_{Modell}(1-e^{-T_t s})}$<br><br>
+            $G_{eff}(s)=\\dfrac{G_R}{1+G_R G_{Modell}(1-e^{-T_t s})}$<br><br>
             <strong>Anti-Windup</strong><br>
-            Back-Calculation: $u_I\leftarrow u_I + (u_{sat}-u)/T_t$ während Sättigung
+            Back-Calculation: $u_I\\leftarrow u_I + (u_{sat}-u)/T_t$ während Sättigung
         `,
         levels: [
             // L1
@@ -73,24 +73,24 @@
                     h: 'Setze $s=j\\omega$ ein.',
                     s: '$G(j\\omega)=\\dfrac{K_i}{j\\omega}=-j\\dfrac{K_i}{\\omega}$.<br>$|G(j\\omega)|=\\dfrac{K_i}{\\omega}$. Phase: $-90^\\circ$ (konstant).<br>Im Bode: -20 dB/Dekade Steigung, durch $\\omega = K_i$ bei 0 dB.'                },
                 {
-                    q: 'Wie groß ist die Anstiegszeit $t_r$ ($10\,\%\to 90\,\%$) eines PT1-Glieds mit $T=0{,}2\,\text{s}$?',
-                    h: 'Faustformel: $t_r\approx 2{,}2\,T$. (Aus $1-e^{-t/T}=0{,}9$ und $0{,}1$.)',
-                    s: '$t_{90}=T\ln 10\approx 2{,}303\,T$. $t_{10}=T\ln(10/9)\approx 0{,}105\,T$. $t_r=t_{90}-t_{10}\approx 2{,}197\,T$.<br>Mit $T=0{,}2\,\text{s}$: $t_r\approx 0{,}44\,\text{s}$.<br>$$\boxed{t_r\approx 0{,}44\,\text{s}}$$'
+                    q: 'Wie groß ist die Anstiegszeit $t_r$ ($10\\,\%\\to 90\\,\%$) eines PT1-Glieds mit $T=0{,}2\\,\\text{s}$?',
+                    h: 'Faustformel: $t_r\\approx 2{,}2\\,T$. (Aus $1-e^{-t/T}=0{,}9$ und $0{,}1$.)',
+                    s: '$t_{90}=T\\ln 10\\approx 2{,}303\\,T$. $t_{10}=T\\ln(10/9)\\approx 0{,}105\\,T$. $t_r=t_{90}-t_{10}\\approx 2{,}197\\,T$.<br>Mit $T=0{,}2\\,\\text{s}$: $t_r\\approx 0{,}44\\,\\text{s}$.<br>$$\\boxed{t_r\\approx 0{,}44\\,\\text{s}}$$'
                 },
                 {
-                    q: 'Reihenschaltung zweier PT1-Glieder $G_1=\dfrac{1}{1+s}$ und $G_2=\dfrac{2}{1+0{,}5\,s}$. Bestimme $G(s)$ und die DC-Verstärkung.',
+                    q: 'Reihenschaltung zweier PT1-Glieder $G_1=\\dfrac{1}{1+s}$ und $G_2=\\dfrac{2}{1+0{,}5\\,s}$. Bestimme $G(s)$ und die DC-Verstärkung.',
                     h: 'Reihe = Multiplikation. DC-Verstärkung: $G(0)$.',
-                    s: '$G(s)=G_1 G_2 = \dfrac{2}{(1+s)(1+0{,}5\,s)}$.<br>$G(0)=2$.<br>Pole: $-1$ und $-2$ (aus $1+0{,}5\,s=0\Rightarrow s=-2$). System ist stabil.<br>$$\boxed{G(s)=\dfrac{2}{(1+s)(1+0{,}5\,s)},\ K=2}$$'
+                    s: '$G(s)=G_1 G_2 = \\dfrac{2}{(1+s)(1+0{,}5\\,s)}$.<br>$G(0)=2$.<br>Pole: $-1$ und $-2$ (aus $1+0{,}5\\,s=0\\Rightarrow s=-2$). System ist stabil.<br>$$\\boxed{G(s)=\\dfrac{2}{(1+s)(1+0{,}5\\,s)},\ K=2}$$'
                 },
                 {
                     q: 'Warum ist der ideale D-Regler $G_D=K_d s$ in der Praxis nicht realisierbar? Welche Realisierung wird stattdessen verwendet?',
                     h: 'Hochfrequenzverstärkung von idealem D wird unendlich.',
-                    s: 'Idealer D: $|G_D(j\omega)|=K_d\omega\to\infty$ für $\omega\to\infty$ $\Rightarrow$ extreme Rauschverstärkung, kein kausaler Realisierer (Zähler-grad > Nenner-grad).<br>Realer DT1: $G_{DT1}(s)=\dfrac{T_v s}{1+T_1 s}$ mit $T_1\ll T_v$ (z.B. $T_1=T_v/10$). Begrenzt die Hochfrequenzverstärkung auf $T_v/T_1$ und macht das Glied physikalisch realisierbar.'
+                    s: 'Idealer D: $|G_D(j\\omega)|=K_d\\omega\\to\\infty$ für $\\omega\\to\\infty$ $\\Rightarrow$ extreme Rauschverstärkung, kein kausaler Realisierer (Zähler-grad > Nenner-grad).<br>Realer DT1: $G_{DT1}(s)=\\dfrac{T_v s}{1+T_1 s}$ mit $T_1\\ll T_v$ (z.B. $T_1=T_v/10$). Begrenzt die Hochfrequenzverstärkung auf $T_v/T_1$ und macht das Glied physikalisch realisierbar.'
                 },
                 {
-                    q: 'Bestimme die Übertragungsfunktion einer Parallelschaltung von $G_1=\dfrac{2}{s+1}$ und $G_2=\dfrac{1}{s}$ (gleicher Eingang, summierende Ausgänge).',
+                    q: 'Bestimme die Übertragungsfunktion einer Parallelschaltung von $G_1=\\dfrac{2}{s+1}$ und $G_2=\\dfrac{1}{s}$ (gleicher Eingang, summierende Ausgänge).',
                     h: 'Parallel = Summe. Auf gemeinsamen Nenner bringen.',
-                    s: '$G(s)=G_1+G_2 = \dfrac{2}{s+1}+\dfrac{1}{s}=\dfrac{2s+(s+1)}{s(s+1)}=\dfrac{3s+1}{s(s+1)}$.<br>$$\boxed{G(s)=\dfrac{3s+1}{s(s+1)}}$$'                }
+                    s: '$G(s)=G_1+G_2 = \\dfrac{2}{s+1}+\\dfrac{1}{s}=\\dfrac{2s+(s+1)}{s(s+1)}=\\dfrac{3s+1}{s(s+1)}$.<br>$$\\boxed{G(s)=\\dfrac{3s+1}{s(s+1)}}$$'                }
             ],
             // L2
             [
@@ -125,23 +125,23 @@
                     s: '$2D\\omega_n=4\\Rightarrow \\omega_n=4/(2D)=4/\\sqrt{2}=2\\sqrt{2}\\approx 2{,}83$.<br>$\\omega_n^2=3+2K_R\\Rightarrow K_R=(\\omega_n^2-3)/2=(8-3)/2 = 2{,}5$.<br>$$\\boxed{K_R=2{,}5}$$'                },
                 {
                     q: 'Wende das Routh-Schema auf $P(s)=s^4+2s^3+3s^2+4s+5$ an und beurteile Stabilität.',
-                    h: 'Erste Spalte: alle positiv $\Rightarrow$ stabil. Zeichenwechsel zählt RHP-Pole.',
-                    s: 'Routh-Tableau:<br>$s^4: 1\quad 3\quad 5$<br>$s^3: 2\quad 4$<br>$s^2: (2\cdot 3-1\cdot 4)/2 = 1\quad 5$<br>$s^1: (1\cdot 4 - 2\cdot 5)/1 = -6$<br>$s^0: 5$<br>Erste Spalte: $1,2,1,-6,5$ — zwei Vorzeichenwechsel ($+\to -$, $-\to +$).<br>$$\boxed{2\ \text{Pole in RHP}\Rightarrow\text{instabil}}$$'
+                    h: 'Erste Spalte: alle positiv $\\Rightarrow$ stabil. Zeichenwechsel zählt RHP-Pole.',
+                    s: 'Routh-Tableau:<br>$s^4: 1\\quad 3\\quad 5$<br>$s^3: 2\\quad 4$<br>$s^2: (2\\cdot 3-1\\cdot 4)/2 = 1\\quad 5$<br>$s^1: (1\\cdot 4 - 2\\cdot 5)/1 = -6$<br>$s^0: 5$<br>Erste Spalte: $1,2,1,-6,5$ — zwei Vorzeichenwechsel ($+\\to -$, $-\\to +$).<br>$$\\boxed{2\ \\text{Pole in RHP}\\Rightarrow\\text{instabil}}$$'
                 },
                 {
-                    q: 'PI-Regler $G_R(s)=K_p+K_i/s$ mit Strecke $G_S(s)=\dfrac{1}{1+Ts}$. Welche stationäre Regelabweichung tritt bei Rampensignal $w(t)=t$ auf?',
-                    h: 'PI auf PT1 ergibt Regelkreis vom Typ 1; Ramp-Fehler $e_\infty=1/K_v$ mit $K_v=\lim_{s\to 0}sG_0(s)$.',
-                    s: '$G_0=G_R G_S=\dfrac{K_p s+K_i}{s(1+Ts)}$.<br>$K_v=\lim_{s\to 0}sG_0(s)=\lim_{s\to 0}\dfrac{K_p s+K_i}{1+Ts}=K_i$.<br>$$\boxed{e_\infty=\dfrac{1}{K_i}}$$ (durch Erhöhung von $K_i$ verkleinerbar; PI eliminiert Sprungfehler vollständig).'
+                    q: 'PI-Regler $G_R(s)=K_p+K_i/s$ mit Strecke $G_S(s)=\\dfrac{1}{1+Ts}$. Welche stationäre Regelabweichung tritt bei Rampensignal $w(t)=t$ auf?',
+                    h: 'PI auf PT1 ergibt Regelkreis vom Typ 1; Ramp-Fehler $e_\\infty=1/K_v$ mit $K_v=\\lim_{s\\to 0}sG_0(s)$.',
+                    s: '$G_0=G_R G_S=\\dfrac{K_p s+K_i}{s(1+Ts)}$.<br>$K_v=\\lim_{s\\to 0}sG_0(s)=\\lim_{s\\to 0}\\dfrac{K_p s+K_i}{1+Ts}=K_i$.<br>$$\\boxed{e_\\infty=\\dfrac{1}{K_i}}$$ (durch Erhöhung von $K_i$ verkleinerbar; PI eliminiert Sprungfehler vollständig).'
                 },
                 {
-                    q: 'Lead-Glied $G_L(s)=\dfrac{1+\alpha T s}{1+T s}$, $\alpha>1$. Bei welcher Frequenz $\omega_m$ tritt die maximale Phasenanhebung auf, und wie groß ist sie?',
-                    h: '$\omega_m=1/(T\sqrt{\alpha})$ (geometrisches Mittel der Eckfrequenzen). $\sin\varphi_{max}=(\alpha-1)/(\alpha+1)$.',
-                    s: 'Eckfrequenzen: $\omega_1=1/(\alpha T)$ (Nullstelle), $\omega_2=1/T$ (Pol).<br>Maximum bei $\omega_m=\sqrt{\omega_1\omega_2}=1/(T\sqrt\alpha)$.<br>$\varphi_{max}=\arctan\sqrt\alpha-\arctan(1/\sqrt\alpha)$, äquivalent: $\sin\varphi_{max}=\dfrac{\alpha-1}{\alpha+1}$.<br>Beispiel $\alpha=10$: $\sin\varphi_{max}=9/11\Rightarrow \varphi_{max}\approx 54{,}9°$.<br>$$\boxed{\omega_m=1/(T\sqrt\alpha),\ \sin\varphi_{max}=(\alpha-1)/(\alpha+1)}$$'
+                    q: 'Lead-Glied $G_L(s)=\\dfrac{1+\\alpha T s}{1+T s}$, $\\alpha>1$. Bei welcher Frequenz $\\omega_m$ tritt die maximale Phasenanhebung auf, und wie groß ist sie?',
+                    h: '$\\omega_m=1/(T\\sqrt{\\alpha})$ (geometrisches Mittel der Eckfrequenzen). $\\sin\\varphi_{max}=(\\alpha-1)/(\\alpha+1)$.',
+                    s: 'Eckfrequenzen: $\\omega_1=1/(\\alpha T)$ (Nullstelle), $\\omega_2=1/T$ (Pol).<br>Maximum bei $\\omega_m=\\sqrt{\\omega_1\\omega_2}=1/(T\\sqrt\\alpha)$.<br>$\\varphi_{max}=\\arctan\\sqrt\\alpha-\\arctan(1/\\sqrt\\alpha)$, äquivalent: $\\sin\\varphi_{max}=\\dfrac{\\alpha-1}{\\alpha+1}$.<br>Beispiel $\\alpha=10$: $\\sin\\varphi_{max}=9/11\\Rightarrow \\varphi_{max}\\approx 54{,}9°$.<br>$$\\boxed{\\omega_m=1/(T\\sqrt\\alpha),\ \\sin\\varphi_{max}=(\\alpha-1)/(\\alpha+1)}$$'
                 },
                 {
                     q: 'Berechne die Störübertragungsfunktion $G_z(s)=Y(s)/Z(s)$ bei Eingangsstörung der Strecke. Standard-Regelkreis mit $G_R, G_S$.',
                     h: 'Störung am Streckeneingang: $Y=G_S(U+Z)$, $U=-G_R Y$. Auflösen.',
-                    s: '$Y=G_S(-G_R Y+Z)\Rightarrow Y(1+G_R G_S)=G_S Z$.<br>$$\boxed{G_z(s)=\dfrac{G_S(s)}{1+G_R(s)G_S(s)}}$$<br>Folgerung: hohe Schleifenverstärkung $\Rightarrow$ kleine Störempfindlichkeit. Bei tiefen Frequenzen mit Integrator $\Rightarrow G_z\to 0$ (perfekte Stör-Unterdrückung).'                }
+                    s: '$Y=G_S(-G_R Y+Z)\\Rightarrow Y(1+G_R G_S)=G_S Z$.<br>$$\\boxed{G_z(s)=\\dfrac{G_S(s)}{1+G_R(s)G_S(s)}}$$<br>Folgerung: hohe Schleifenverstärkung $\\Rightarrow$ kleine Störempfindlichkeit. Bei tiefen Frequenzen mit Integrator $\\Rightarrow G_z\\to 0$ (perfekte Stör-Unterdrückung).'                }
             ],
             // L3
             [
@@ -176,23 +176,23 @@
                     s: '$A-BK=\\begin{pmatrix}0&1\\\\-k_1&-1-k_2\\end{pmatrix}$.<br>$\\det(sI-A_{cl})=s(s+1+k_2)+k_1=s^2+(1+k_2)s+k_1$.<br>Wunsch: $(s+2)(s+3)=s^2+5s+6$.<br>Vergleich: $1+k_2=5\\Rightarrow k_2=4$, $k_1=6$.<br>$$\\boxed{K=[6,\\ 4]}$$'                },
                 {
                     q: 'Smith-Prädiktor: Strecke $G_S(s)=G_0(s)e^{-T_t s}$ mit Totzeit $T_t$. Skizziere den Reglerentwurf, sodass die Totzeit aus der charakteristischen Gleichung verschwindet.',
-                    h: 'Idee: Modell $\hat G_0$ ohne Totzeit + Korrektur durch Differenz $\hat G_0(1-e^{-T_t s})$.',
-                    s: 'Effektiver Regelkreis (bei perfektem Modell) hat charakteristisches Polynom $1+G_R\hat G_0=0$ — die Totzeit $e^{-T_t s}$ erscheint nur in der Vorwärtsdynamik, nicht im Rückführzweig.<br>Damit kann $G_R$ als wäre keine Totzeit vorhanden ausgelegt werden (z.B. nach Betragsoptimum).<br>Voraussetzung: gutes Modell. Bei Modellfehlern $\Delta\hat G$ entsteht Stabilitätsproblem $\Rightarrow$ Robustheitsabschätzung nötig.<br>$$\boxed{G_R\text{ entwerfen für totzeitfreie Strecke }\hat G_0}$$'
+                    h: 'Idee: Modell $\\hat G_0$ ohne Totzeit + Korrektur durch Differenz $\\hat G_0(1-e^{-T_t s})$.',
+                    s: 'Effektiver Regelkreis (bei perfektem Modell) hat charakteristisches Polynom $1+G_R\\hat G_0=0$ — die Totzeit $e^{-T_t s}$ erscheint nur in der Vorwärtsdynamik, nicht im Rückführzweig.<br>Damit kann $G_R$ als wäre keine Totzeit vorhanden ausgelegt werden (z.B. nach Betragsoptimum).<br>Voraussetzung: gutes Modell. Bei Modellfehlern $\\Delta\\hat G$ entsteht Stabilitätsproblem $\\Rightarrow$ Robustheitsabschätzung nötig.<br>$$\\boxed{G_R\\text{ entwerfen für totzeitfreie Strecke }\\hat G_0}$$'
                 },
                 {
-                    q: 'Beobachterentwurf (Luenberger): $\dot x=Ax+Bu$, $y=Cx$ mit $A=\begin{pmatrix}0&1\\-2&-3\end{pmatrix}$, $C=(1,\,0)$. Wähle $L$ so, dass die Beobachterpole bei $-5,-6$ liegen.',
+                    q: 'Beobachterentwurf (Luenberger): $\\dot x=Ax+Bu$, $y=Cx$ mit $A=\\begin{pmatrix}0&1\\-2&-3\\end{pmatrix}$, $C=(1,\\,0)$. Wähle $L$ so, dass die Beobachterpole bei $-5,-6$ liegen.',
                     h: '$A_{obs}=A-LC$. Char. Polynom mit Wunsch-Polynom $(s+5)(s+6)$ vergleichen.',
-                    s: '$L=\begin{pmatrix}l_1\\l_2\end{pmatrix}$, $LC=\begin{pmatrix}l_1&0\\l_2&0\end{pmatrix}$.<br>$A-LC=\begin{pmatrix}-l_1&1\\-2-l_2&-3\end{pmatrix}$.<br>$\det(sI-(A-LC))=(s+l_1)(s+3)+(2+l_2)=s^2+(l_1+3)s+(3l_1+2+l_2)$.<br>Vergleich mit $s^2+11s+30$: $l_1+3=11\Rightarrow l_1=8$. $3\cdot 8+2+l_2=30\Rightarrow l_2=4$.<br>$$\boxed{L=(8,\ 4)^T}$$ Beobachterpole sollten $\sim 2{,}\dots,5\times$ schneller als Reglerpole sein (Trennungsprinzip).'
+                    s: '$L=\\begin{pmatrix}l_1\\l_2\\end{pmatrix}$, $LC=\\begin{pmatrix}l_1&0\\l_2&0\\end{pmatrix}$.<br>$A-LC=\\begin{pmatrix}-l_1&1\\-2-l_2&-3\\end{pmatrix}$.<br>$\\det(sI-(A-LC))=(s+l_1)(s+3)+(2+l_2)=s^2+(l_1+3)s+(3l_1+2+l_2)$.<br>Vergleich mit $s^2+11s+30$: $l_1+3=11\\Rightarrow l_1=8$. $3\\cdot 8+2+l_2=30\\Rightarrow l_2=4$.<br>$$\\boxed{L=(8,\ 4)^T}$$ Beobachterpole sollten $\\sim 2{,}\\dots,5\\times$ schneller als Reglerpole sein (Trennungsprinzip).'
                 },
                 {
-                    q: 'Anti-Windup für PI-Regler mit Stellgrößenbeschränkung $u\in[u_{min},u_{max}]$: erläutere die Back-Calculation-Methode und gib die zusätzliche Differentialgleichung an.',
+                    q: 'Anti-Windup für PI-Regler mit Stellgrößenbeschränkung $u\\in[u_{min},u_{max}]$: erläutere die Back-Calculation-Methode und gib die zusätzliche Differentialgleichung an.',
                     h: 'Stellsignal nach Sättigung mit nicht-saturiertem vergleichen, Differenz zurückführen auf I-Anteil.',
-                    s: 'Standard-PI: $\dot x_I = K_i e$, $u = K_p e + x_I$, $u_{sat}=\text{sat}(u)$.<br>Back-Calculation: $\dot x_I = K_i e + \dfrac{1}{T_t}(u_{sat}-u)$.<br>Wenn $u=u_{sat}$ (nicht in Sättigung): zusätzlicher Term ist $0$, normaler PI.<br>Sobald $u\neq u_{sat}$ (Sättigung aktiv): Term $<0$ bzw. $>0$ stoppt das Aufintegrieren des I-Anteils $\Rightarrow$ kein Wind-up.<br>Tracking-Zeit $T_t$: typischerweise $T_t=\sqrt{T_n T_v}$ oder $T_t=T_n$ für PI.<br>$$\boxed{\dot x_I = K_i e + (u_{sat}-u)/T_t}$$'
+                    s: 'Standard-PI: $\\dot x_I = K_i e$, $u = K_p e + x_I$, $u_{sat}=\\text{sat}(u)$.<br>Back-Calculation: $\\dot x_I = K_i e + \\dfrac{1}{T_t}(u_{sat}-u)$.<br>Wenn $u=u_{sat}$ (nicht in Sättigung): zusätzlicher Term ist $0$, normaler PI.<br>Sobald $u\\neq u_{sat}$ (Sättigung aktiv): Term $<0$ bzw. $>0$ stoppt das Aufintegrieren des I-Anteils $\\Rightarrow$ kein Wind-up.<br>Tracking-Zeit $T_t$: typischerweise $T_t=\\sqrt{T_n T_v}$ oder $T_t=T_n$ für PI.<br>$$\\boxed{\\dot x_I = K_i e + (u_{sat}-u)/T_t}$$'
                 },
                 {
-                    q: 'IMC (Internal Model Control): Strecke $G_S(s)$ minimalphasig, Wunsch-Filterzeitkonstante $\lambda$. Gib den IMC-Regler $G_R$ und den äquivalenten klassischen Regler $G_C$ an.',
-                    h: 'IMC-Regler: $G_R = G_S^{-1} F$ mit $F(s)=1/(1+\lambda s)^n$. Klassisch: $G_C=G_R/(1-G_R G_S)$.',
-                    s: 'Filterordnung $n$ so wählen, dass $G_R$ kausal ist (Zähler-grad $\le$ Nenner-grad).<br>$G_R=G_S^{-1}\cdot\dfrac{1}{(1+\lambda s)^n}$.<br>Äquivalenz: $G_C(s)=\dfrac{G_R(s)}{1-G_R(s)G_S(s)}=\dfrac{1}{G_S(s)\,((1+\lambda s)^n-1)}$.<br>Vorteil: ein einziger Tuning-Parameter $\lambda$ (Trade-off Performance vs. Robustheit). Für $\lambda\to 0$: aggressives Verhalten; für $\lambda\to\infty$: weiches Verhalten.<br>$$\boxed{G_C(s)=\dfrac{1}{G_S(s)\,((1+\lambda s)^n-1)}}$$'                }
+                    q: 'IMC (Internal Model Control): Strecke $G_S(s)$ minimalphasig, Wunsch-Filterzeitkonstante $\\lambda$. Gib den IMC-Regler $G_R$ und den äquivalenten klassischen Regler $G_C$ an.',
+                    h: 'IMC-Regler: $G_R = G_S^{-1} F$ mit $F(s)=1/(1+\\lambda s)^n$. Klassisch: $G_C=G_R/(1-G_R G_S)$.',
+                    s: 'Filterordnung $n$ so wählen, dass $G_R$ kausal ist (Zähler-grad $\\le$ Nenner-grad).<br>$G_R=G_S^{-1}\\cdot\\dfrac{1}{(1+\\lambda s)^n}$.<br>Äquivalenz: $G_C(s)=\\dfrac{G_R(s)}{1-G_R(s)G_S(s)}=\\dfrac{1}{G_S(s)\\,((1+\\lambda s)^n-1)}$.<br>Vorteil: ein einziger Tuning-Parameter $\\lambda$ (Trade-off Performance vs. Robustheit). Für $\\lambda\\to 0$: aggressives Verhalten; für $\\lambda\\to\\infty$: weiches Verhalten.<br>$$\\boxed{G_C(s)=\\dfrac{1}{G_S(s)\\,((1+\\lambda s)^n-1)}}$$'                }
             ]
         ]
     };
