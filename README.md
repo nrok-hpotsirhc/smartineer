@@ -1,6 +1,6 @@
 # Smartineer — Engineering Knowledge Reloaded
 
-Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 9 Kategorien, 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie (~270 gesamt) und mit isolierten Musterlösungen samt Rechenweg.
+Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 10 Kategorien, 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie (~300 gesamt) und mit isolierten Musterlösungen samt Rechenweg.
 
 > **Stack**: React 18 (CDN, JSX via Babel-standalone) · Tailwind CSS (CDN) · Chart.js · KaTeX  
 > **Auslieferung**: Klassische Website **und** installierbare PWA (Desktop, Android, iOS)  
@@ -26,7 +26,7 @@ Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein e
 
 ## Features
 
-- 🎯 **9 Kategorien**: Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze
+- 🎯 **10 Kategorien**: Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3)
 - 📊 **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **10 Aufgaben** = ~**270 Aufgaben** insgesamt
 - 🧮 **KaTeX-gerenderte Formeln** in Aufgaben, Hinweisen und Lösungen
 - ⚛️ **React-UI** (Hooks, Functional Components) mit weichen Übergangs-Animationen, Gradient-Hero, animierten Fortschrittsbalken und Hover-Effekten
@@ -164,6 +164,7 @@ Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht
 | Kryptographie | Modulararithmetik, RSA, Diffie-Hellman, ECDSA, ECC, Hashes, Post-Quantum |
 | Blockchain | Hash-Ketten, Merkle-Trees, PoW/PoS, Difficulty, Smart Contracts, Layer-2, Rollups |
 | Neuronale Netze | Aktivierungen, Backprop, SGD/Adam, Regularisierung, CNN, Batch-Norm, Universal Approximation |
+| PLC-Programmierung | IEC 61131-3 (ST/KOP/FUP/AWL), Datentypen, Selbsthaltung, TON/CTU/R_TRIG, Scan-Zyklus, Hysterese, PI mit Anti-Windup, Race-Conditions |
 
 ---
 

@@ -5,7 +5,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v2-react-pwa';
+const CACHE_VERSION = 'smartineer-v3-plc';
 const APP_SHELL = [
     './',
     './index.html',
@@ -21,6 +21,7 @@ const APP_SHELL = [
     './js/data/crypto.js',
     './js/data/blockchain.js',
     './js/data/neural_nets.js',
+    './js/data/plc.js',
     './icons/icon.svg',
     './icons/icon-192.svg',
     './icons/icon-512.svg'
