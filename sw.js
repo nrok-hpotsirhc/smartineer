@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v11-didactic';
+const CACHE_VERSION = 'smartineer-v12-export-allgemeinmed';
 const APP_SHELL = [
     './',
     './index.html',
@@ -27,6 +27,7 @@ const APP_SHELL = [
     './js/data/schueler.js',
     './js/data/schulung_securityx.js',
     './js/data/schulung_starter.js',
+    './js/data/schulung_allgemeinmedizin.js',
     './icons/icon.svg',
     './icons/icon-192.svg',
     './icons/icon-512.svg'

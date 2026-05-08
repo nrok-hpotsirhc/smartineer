@@ -17,6 +17,20 @@ Am Ende **jeder** Arbeitseinheit (Commit, PR, Agent-Antwort) ist ein knapper **S
 
 Ehrlichkeit ist Pflicht: Lücken (z.B. zu wenige Quiz-Fragen, fehlende PBQ-Simulation, ungeprüfte Quelle) **dürfen nicht verschwiegen werden**. Wer einen Block knapp unter die Mindestanforderung liefert, muss den Gap explizit benennen.
 
+### 0.1 Gegenprüfungs- und Roll-Forward-Pflicht (verbindlich)
+
+Vor jedem neuen Status-Report ist der **vorherige** Status-Report aus der laufenden Konversation zu sichten und Punkt für Punkt durchzugehen:
+
+- Jeder zuvor unter **OFFEN / DRINGEND** gelistete Punkt ist explizit zu prüfen:
+  - Erledigt? → in den neuen **DONE**-Block übernehmen (mit Verweis darauf, dass er aus dem letzten Report stammt).
+  - Weiterhin offen? → erneut unter **OFFEN / DRINGEND** auflisten, ggf. mit aktualisiertem Stand.
+  - Hinfällig geworden? → kurz begründen, warum (Anforderung verworfen, durch andere Lösung ersetzt, …).
+- Anschließend werden die alten **OFFEN / DRINGEND**-Punkte durch die **neuen** offenen Punkte ersetzt — der Report bildet damit immer den aktuellen Stand ab, nicht nur die Delta-Sicht der letzten Aktion.
+- **NICE-TO-HAVE** wird ebenfalls fortgeschrieben: erledigte Items entfernen, neue ergänzen.
+- Werden offene Punkte bewusst **nicht** angegangen (z.B. wegen Scope), ist das im Report festzuhalten — sie verschwinden nicht stillschweigend.
+
+Diese Roll-Forward-Pflicht gilt insbesondere für AI-Coding-Agents: Verlasse dich nicht darauf, dass der Nutzer die alten Punkte mitgibt — lies den letzten Status-Report im Konversations-Verlauf und gleiche ab.
+
 ---
 
 ## 1. Projekt-Mission
@@ -533,5 +547,73 @@ Pflichtfelder pro Kapitel: `id`, `title`, `summary`, `pages` (≥ 1), `quiz` (�
 - **Mehr Quiz-Fragen**: einfach an `quiz`-Array anhängen. UI sampelt automatisch 10 zufällige.
 - **Mehr Lehrseiten**: an `pages` anhängen. Reader nutzt `pages.length` automatisch.
 - **PBQ-Style-Aufgaben** (Drag-Drop / Sequenz-Eingabe): noch **nicht** implementiert; bei Bedarf neue Stage einführen, **nicht** Multi-Choice missbrauchen.
+
+### 18.9 Vorbereitungs-Status für unfertige Schulungen
+
+Schulungen, deren Inhalte noch in Recherche/Vorbereitung sind, dürfen als Gerüst eingespielt werden, müssen aber **klar gekennzeichnet** sein:
+
+- Auf Schulungs-Ebene Feld `status: 'preparation'` setzen — die Schulungen-Index-Karte zeigt dann automatisch den Badge „In Vorbereitung".
+- Schema-Vollständigkeit ist Pflicht: Jedes Kapitel braucht `pages` (mindestens Platzhalter-Lehrseiten mit `<p><strong>In Vorbereitung.</strong> …</p>` und Scope-Liste) und `quiz` (mindestens eine Schema-konforme Platzhalter-Frage). Kein leeres `pages: []` oder `quiz: []`.
+- Quellen-Vorgabe für die spätere Befüllung in der IIFE-Header-Kommentar-Sektion dokumentieren (welche Leitlinien, Lehrbuch-Auflagen, Standards mit Jahr/Version).
+- Sobald die Recherche-Datei vorliegt: `status` entfernen, Platzhalter-Pages durch volle didaktische Prosa ersetzen (§18.6), Platzhalter-Quiz durch ≥ 50 quellenbasierte Fragen pro Kapitel ersetzen (§18.4), `CACHE_VERSION` bumpen.
+- Beispiel: `js/data/schulung_allgemeinmedizin.js` (Stand: Vorbereitung, wartet auf Recherche-Datei).
+
+---
+
+## 19. Export / Import des Lernfortschritts (plattformübergreifend)
+
+Da der Fortschritt rein in `localStorage` lebt und damit gerätegebunden ist, bietet das Dashboard Buttons zum Export und Import einer **plattform-portablen JSON-Datei**.
+
+### 19.1 Datei-Schema
+
+```json
+{
+  "format": "smartineer-progress",
+  "version": 1,
+  "exportedAt": "2026-05-08T12:34:56.000Z",
+  "data": {
+    "wissen_reloaded_progress_v1": { "<catId>|<level>|<idx>": 1, ... },
+    "smartineer_schulungen_v1": { "<trainingId>": { "<chapterId>": { "lastPage": 0, "quizBest": { "score": 8, "total": 10, "date": "..." } } } }
+  }
+}
+```
+
+- Pflichtfelder: `format`, `version`, `data`. `format === 'smartineer-progress'` ist die Validierungs-Magic.
+- Erlaubte Storage-Keys im `data`-Objekt sind ausschließlich die in `EXPORT_KEYS` definierten — derzeit `STORAGE_KEY` (Ingenieurs-Track) und `SCHULUNGEN_KEY` (Schulungen-Track).
+- **Nicht im Export**: `THEME_KEY`, `INSTALL_DISMISS_KEY`, Schüler-Drill-Zustand. Diese sind gerätespezifisch und sollen beim Wechsel zwischen Geräten **nicht** überschrieben werden.
+
+### 19.2 Verhalten
+
+- **Export**: erzeugt Blob, lädt als `smartineer-fortschritt-<ISO-Stamp>.json` herunter. Funktioniert auf Chrome/Edge/Firefox/Safari (Desktop und mobil). Auf iOS landet die Datei in „Dateien"; per AirDrop/E-Mail portabel.
+- **Import**: liest JSON via `FileReader`, validiert `format`/`version`, führt einen **Merge** durch:
+  - Ingenieurs-Track: Vereinigung der Solved-Keys (gelöst bleibt gelöst).
+  - Schulungen-Track: pro `(training, chapter)` größtes `lastPage` und besseres `quizBest` (höhere Quote gewinnt) wird übernommen.
+- Nach erfolgreichem Import: `window.location.reload()`, damit alle Hooks den neuen Storage-Stand lesen.
+
+### 19.3 Erweiterungsregeln
+
+- Neuer Storage-Key (z.B. zukünftiger Schüler-Persistenz-Key) wird ergänzt, indem er in `EXPORT_KEYS` aufgenommen wird **und** ein passender Merge-Pfad in `mergeProgressKey()` definiert wird. Schema-Version bei jeder breaking-change inkrementieren (`EXPORT_VERSION`) und im Import-Pfad alte Versionen migrieren oder ablehnen.
+- Niemals personenbezogene Daten in den Export aufnehmen.
+- Niemals `THEME_KEY` oder `INSTALL_DISMISS_KEY` in den Export aufnehmen — würde User-Einstellungen auf dem Zielgerät stillschweigend verändern.
+- Keine binären Formate (z.B. msgpack, protobuf): das Format muss in jedem Texteditor lesbar bleiben — auch zur manuellen Inspektion und Debugging.
+
+### 19.4 Anti-Pattern
+
+- Export per Cloud-Upload an einen Server — widerspricht der Architektur (kein Backend, keine Telemetrie, §1).
+- Import ohne Merge (Hard-Replace als Default) — würde fortgeschrittene Lerner auf dem Zielgerät zurücksetzen.
+- Reset des Fortschritts vor dem Import „zur Sicherheit" — bricht die Merge-Garantien.
+
+---
+
+## 20. Responsive Navigation
+
+Die Top-Navigation wird auf Mobil/PWA häufig zu breit, wenn alle Tabs als Text gerendert werden. Daher gilt:
+
+- Desktop ab Tailwind-Breakpoint `md` (≥ 768 px): klassische Text-Labels (`Dashboard`, `Training`, `Cheatsheets`, `Schulungen`, `Schüler`, `Hell/Dunkel`).
+- Unter `md`: nur **Icons** (24×24 Inline-SVG, Stroke-only, `currentColor`), Texte sind via `hidden md:inline` ausgeblendet. Brand-Wortmarke „Smartineer" verschwindet unter `sm`, das Logo bleibt sichtbar.
+- Jeder Icon-Button hat `title` und `aria-label` mit dem Klartext-Label. Aktiver Tab zusätzlich `aria-current="page"`.
+- Icons leben inline in `app.jsx` (`NAV_ICONS`), nicht als separate Asset-Dateien — Service Worker muss nicht zusätzlich cachen.
+- Beim Hinzufügen neuer Top-Level-Views: passendes Icon in `NAV_ICONS` ergänzen, sonst rendert die Mobile-Variante leer.
+- Keine externen Icon-Bibliotheken (Heroicons-CDN, FontAwesome) — vermeidet zusätzliche CDN-Abhängigkeit und respektiert §1 (keine zusätzlichen Frameworks ohne Diskussion).
 
 

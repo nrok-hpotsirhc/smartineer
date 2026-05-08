@@ -9,6 +9,109 @@ const INSTALL_DISMISS_KEY = 'smartineer_install_dismissed_v1';
 const THEME_KEY = 'smartineer_theme_v1'; // 'dark' | 'light' (Default: 'dark')
 const SCHULUNGEN_KEY = 'smartineer_schulungen_v1'; // { [trainingId]: { [chapterId]: { lastPage, quizBest } } }
 
+// ---------------------------------------------------------------- Export / Import
+// Plattform-portables JSON-Format zur Synchronisation des Lernfortschritts
+// zwischen Geräten. Enthält bewusst KEINE personenbezogenen Daten — nur
+// die in localStorage gehaltenen Lern-Keys. Theme/Install-Dismiss bleiben
+// gerätespezifisch und werden NICHT exportiert.
+const EXPORT_FORMAT = 'smartineer-progress';
+const EXPORT_VERSION = 1;
+const EXPORT_KEYS = [STORAGE_KEY, SCHULUNGEN_KEY];
+
+function buildExportPayload() {
+    const data = {};
+    EXPORT_KEYS.forEach((k) => {
+        try {
+            const raw = localStorage.getItem(k);
+            data[k] = raw ? JSON.parse(raw) : null;
+        } catch (e) { data[k] = null; }
+    });
+    return {
+        format: EXPORT_FORMAT,
+        version: EXPORT_VERSION,
+        exportedAt: new Date().toISOString(),
+        data
+    };
+}
+
+function downloadProgressFile() {
+    const payload = buildExportPayload();
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    a.href = url;
+    a.download = `smartineer-fortschritt-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function applyImportedPayload(payload, mode) {
+    if (!payload || payload.format !== EXPORT_FORMAT) {
+        throw new Error('Datei ist keine Smartineer-Fortschrittsdatei.');
+    }
+    if (typeof payload.version !== 'number' || payload.version > EXPORT_VERSION) {
+        throw new Error('Dateiversion wird nicht unterstützt (' + payload.version + ').');
+    }
+    const incoming = payload.data || {};
+    EXPORT_KEYS.forEach((k) => {
+        const next = incoming[k];
+        if (next === undefined) return;
+        if (next === null) {
+            if (mode === 'replace') localStorage.removeItem(k);
+            return;
+        }
+        if (mode === 'merge') {
+            let current = {};
+            try { current = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { current = {}; }
+            const merged = mergeProgressKey(k, current, next);
+            localStorage.setItem(k, JSON.stringify(merged));
+        } else {
+            localStorage.setItem(k, JSON.stringify(next));
+        }
+    });
+}
+
+// Tiefen-Merge speziell für die zwei bekannten Strukturen.
+function mergeProgressKey(key, current, incoming) {
+    if (key === STORAGE_KEY) {
+        // Flach: { 'cat|lvl|idx': 1 } — Vereinigung reicht (gelöst bleibt gelöst).
+        return { ...current, ...incoming };
+    }
+    if (key === SCHULUNGEN_KEY) {
+        // { trainingId: { chapterId: { lastPage, quizBest, quizLast } } }
+        const out = { ...current };
+        Object.keys(incoming || {}).forEach((tid) => {
+            const cur = out[tid] || {};
+            const inc = incoming[tid] || {};
+            const merged = { ...cur };
+            Object.keys(inc).forEach((cid) => {
+                const a = cur[cid] || {};
+                const b = inc[cid] || {};
+                merged[cid] = {
+                    ...a, ...b,
+                    lastPage: Math.max(a.lastPage || 0, b.lastPage || 0),
+                    quizBest: pickBetterQuiz(a.quizBest, b.quizBest)
+                };
+            });
+            out[tid] = merged;
+        });
+        return out;
+    }
+    return { ...current, ...incoming };
+}
+
+function pickBetterQuiz(a, b) {
+    if (!a) return b || undefined;
+    if (!b) return a;
+    const ra = (a.score || 0) / Math.max(1, a.total || 0);
+    const rb = (b.score || 0) / Math.max(1, b.total || 0);
+    return rb > ra ? b : a;
+}
+
 // ---------------------------------------------------------------- Hooks
 function useProgress() {
     const [progress, setProgress] = useState(() => {
@@ -61,6 +164,52 @@ function categoryStats(cat, isSolved) {
 }
 
 // ---------------------------------------------------------------- Nav
+const NAV_ICONS = {
+    dashboard: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+             strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="9" />
+            <rect x="14" y="3" width="7" height="5" />
+            <rect x="14" y="12" width="7" height="9" />
+            <rect x="3" y="16" width="7" height="5" />
+        </svg>
+    ),
+    training: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+             strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+            <path d="M12 2v4" />
+            <path d="M5 10l-2 2 2 2" />
+            <path d="M19 10l2 2-2 2" />
+            <circle cx="12" cy="14" r="6" />
+            <path d="M9 14l2 2 4-4" />
+        </svg>
+    ),
+    cheatsheet: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+             strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+            <path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z" />
+            <path d="M8 8h7" />
+            <path d="M8 12h7" />
+            <path d="M8 16h4" />
+        </svg>
+    ),
+    schulungen: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+             strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+            <path d="M3 7l9-4 9 4-9 4-9-4z" />
+            <path d="M3 7v6c0 2 4 4 9 4s9-2 9-4V7" />
+            <path d="M21 11v5" />
+        </svg>
+    ),
+    schueler: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+             strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+            <circle cx="12" cy="8" r="3.5" />
+            <path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6" />
+        </svg>
+    )
+};
+
 function Nav({ view, setView, theme, onToggleTheme }) {
     const items = [
         { id: 'dashboard', label: 'Dashboard' },
@@ -76,7 +225,7 @@ function Nav({ view, setView, theme, onToggleTheme }) {
                     <a href="./" className="flex items-center gap-2 min-w-0 flex-shrink" aria-label="Smartineer Home">
                         <img src="icons/icon.svg" alt="" width="36" height="36"
                              className="w-9 h-9 rounded-xl shadow-lg flex-shrink-0" />
-                        <span className="text-base sm:text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent truncate">Smartineer</span>
+                        <span className="hidden sm:inline text-base sm:text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent truncate">Smartineer</span>
                     </a>
                     <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                         {items.map(it => {
@@ -84,18 +233,36 @@ function Nav({ view, setView, theme, onToggleTheme }) {
                             return (
                                 <button key={it.id}
                                     onClick={() => setView(it.id)}
-                                    className={`nav-btn whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${active
+                                    title={it.label}
+                                    aria-label={it.label}
+                                    aria-current={active ? 'page' : undefined}
+                                    className={`nav-btn inline-flex items-center justify-center gap-2 whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${active
                                         ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30'
                                         : 'text-slate-300 hover:text-white hover:bg-slate-700/60'}`}>
-                                    {it.label}
+                                    <span className="md:hidden flex" aria-hidden="true">{NAV_ICONS[it.id]}</span>
+                                    <span className="hidden md:inline">{it.label}</span>
                                 </button>
                             );
                         })}
                         <button onClick={onToggleTheme}
                             title={theme === 'dark' ? 'Auf hell umschalten' : 'Auf dunkel umschalten'}
                             aria-label="Farbschema umschalten"
-                            className="ml-1 sm:ml-2 whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium border border-slate-600 text-slate-200 hover:bg-slate-700/60 transition">
-                            {theme === 'dark' ? 'Hell' : 'Dunkel'}
+                            className="ml-1 sm:ml-2 inline-flex items-center justify-center whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium border border-slate-600 text-slate-200 hover:bg-slate-700/60 transition">
+                            <span className="md:hidden flex" aria-hidden="true">
+                                {theme === 'dark' ? (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                         strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                                        <circle cx="12" cy="12" r="4" />
+                                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                                    </svg>
+                                ) : (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                         strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                                        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+                                    </svg>
+                                )}
+                            </span>
+                            <span className="hidden md:inline">{theme === 'dark' ? 'Hell' : 'Dunkel'}</span>
                         </button>
                     </div>
                 </div>
@@ -192,7 +359,7 @@ function CategoryCard({ cat, stats, onOpen, idx }) {
     );
 }
 
-function Dashboard({ data, order, isSolved, onOpenCategory, onReset, onInstall }) {
+function Dashboard({ data, order, isSolved, onOpenCategory, onReset, onInstall, onExport, onImport }) {
     const totals = useMemo(() => {
         let total = 0, done = 0;
         order.forEach(k => { const s = categoryStats(data[k], isSolved); total += s.total; done += s.done; });
@@ -220,6 +387,20 @@ function Dashboard({ data, order, isSolved, onOpenCategory, onReset, onInstall }
                             className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all">
                             Fortschritt zurücksetzen
                         </button>
+                        {onExport && (
+                            <button onClick={onExport}
+                                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all"
+                                title="Lernfortschritt als JSON-Datei sichern und auf andere Geräte übertragen">
+                                Fortschritt exportieren
+                            </button>
+                        )}
+                        {onImport && (
+                            <button onClick={onImport}
+                                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all"
+                                title="Fortschritt aus zuvor exportierter JSON-Datei einspielen">
+                                Fortschritt importieren
+                            </button>
+                        )}
                         {onInstall && (
                             <button onClick={onInstall}
                                 className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition-all">
@@ -879,7 +1060,12 @@ function Schulungen() {
                                         <div className="text-xs font-bold uppercase tracking-wider text-slate-500">{t.code}</div>
                                         <h3 className="text-xl font-bold text-slate-800">{t.name}</h3>
                                     </div>
-                                    <span className="text-xs font-bold px-2 py-1 rounded-full bg-blue-100 text-blue-700 whitespace-nowrap">{tp.chapterCount} Kapitel</span>
+                                    <div className="flex flex-col items-end gap-1">
+                                        <span className="text-xs font-bold px-2 py-1 rounded-full bg-blue-100 text-blue-700 whitespace-nowrap">{tp.chapterCount} Kapitel</span>
+                                        {t.status === 'preparation' && (
+                                            <span className="text-xs font-bold px-2 py-1 rounded-full bg-amber-100 text-amber-800 whitespace-nowrap">In Vorbereitung</span>
+                                        )}
+                                    </div>
                                 </div>
                                 <p className="text-sm text-slate-600 mb-4">{t.desc}</p>
                                 <div className="space-y-2">
@@ -1285,6 +1471,50 @@ function App() {
         if (window.confirm('Wirklich allen lokalen Fortschritt zurücksetzen?')) reset();
     };
 
+    // ---------- Export / Import Fortschritt
+    const fileInputRef = useRef(null);
+
+    const onExport = () => {
+        try { downloadProgressFile(); }
+        catch (e) { window.alert('Export fehlgeschlagen: ' + (e && e.message || e)); }
+    };
+
+    const onImportClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+            fileInputRef.current.click();
+        }
+    };
+
+    const onImportFile = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            let payload;
+            try { payload = JSON.parse(reader.result); }
+            catch (err) {
+                window.alert('Datei ist kein gültiges JSON.');
+                return;
+            }
+            const choice = window.confirm(
+                'Fortschritt aus Datei importieren.\n\n'
+                + 'OK = mit vorhandenem Fortschritt zusammenführen (gelöste Aufgaben bleiben gelöst, beste Quiz-Werte gewinnen).\n'
+                + 'Abbrechen = Import abbrechen.'
+            );
+            if (!choice) return;
+            try {
+                applyImportedPayload(payload, 'merge');
+                window.alert('Import erfolgreich. Die App wird jetzt neu geladen, damit alle Ansichten aktualisiert werden.');
+                window.location.reload();
+            } catch (err) {
+                window.alert('Import fehlgeschlagen: ' + (err && err.message || err));
+            }
+        };
+        reader.onerror = () => window.alert('Datei konnte nicht gelesen werden.');
+        reader.readAsText(file);
+    };
+
     const showInstallButton = !platform.isStandalone && (deferredEvent || platform.isIOS || platform.isAndroid);
 
     if (!order.length) {
@@ -1302,6 +1532,7 @@ function App() {
                 {view === 'dashboard' && (
                     <Dashboard data={data} order={order} isSolved={isSolved}
                         onOpenCategory={openCategory} onReset={onReset}
+                        onExport={onExport} onImport={onImportClick}
                         onInstall={showInstallButton ? () => setInstallOpen(true) : null} />
                 )}
                 {view === 'training' && (
@@ -1324,6 +1555,10 @@ function App() {
             </footer>
             <InstallPrompt open={installOpen} onClose={closeInstall}
                 deferredEvent={deferredEvent} platform={platform} />
+            <input ref={fileInputRef} type="file" accept="application/json,.json"
+                onChange={onImportFile}
+                style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
+                aria-hidden="true" tabIndex={-1} />
         </>
     );
 }
