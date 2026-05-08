@@ -22,7 +22,15 @@
             $H_i=H(T_i)$, paarweise: $H_{ij}=H(H_i\\|H_j)$, bis Root<br>
             Tiefe: $\\log_2 n$, Beweisgröße $O(\\log n)$<br><br>
             <strong>Geburtstagsangriff (Hash-Kollision)</strong><br>
-            Erwartete Anzahl Hashes für Kollision: $\\sim \\sqrt{\\pi N/2}$ bei $N=2^n$
+            Erwartete Anzahl Hashes für Kollision: $\\sim \\sqrt{\\pi N/2}$ bei $N=2^n$<br><br>
+            <strong>SPV / Light-Client</strong><br>
+            Verifiziert nur Header-Kette + Merkle-Inklusionsbeweise (kein voller Zustand)<br><br>
+            <strong>Fork-Choice (LMD-GHOST)</strong><br>
+            Kette mit größtem Latest-Message-Driven-Subtree-Gewicht (Ethereum 2)<br><br>
+            <strong>Payment Channel (Lightning)</strong><br>
+            Off-chain Aktualisierung über Commitment-Transactions; On-chain nur Eröffnung & Schluss<br><br>
+            <strong>MEV (Maximal Extractable Value)</strong><br>
+            Gewinn aus Reordering, Front-/Back-Running, Sandwich-Attacks innerhalb eines Blocks
         `,
         levels: [
             // L1
@@ -56,6 +64,26 @@
                     q: 'Was ist der Unterschied zwischen Proof of Work und Proof of Stake bezüglich Energiebedarf und Sicherheit?',
                     h: 'Vergleich Energie, Angriffsvektor, Finalität.',
                     s: '<strong>PoW</strong>: Sicherheit durch Hashing-Aufwand. Energiebedarf hoch (Bitcoin ~150 TWh/a). Angriff: 51 % Hashpower.<br><strong>PoS</strong>: Validatoren werden gewichtet nach Stake; bei Fehlverhalten Slashing. Energiebedarf < 1 % von PoW. Angriff: 33 % (Liveness) bzw. 51-66 % (Safety, je nach Protokoll). Finalität schneller (Casper FFG bei Ethereum: 2 Epochen ≈ 12 min).'
+                },
+                {
+                    q: 'Was enthält der Genesis-Block, und warum ist er besonders?',
+                    h: 'Erster Block, kein Vorgänger.',
+                    s: 'Genesis-Block (Höhe 0): hardcoded im Protokoll, hat keinen Vorgänger-Hash (Feld auf 0 gesetzt). Enthält bei Bitcoin ein Coinbase-Tx mit dem berühmten Header-Zitat "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks".<br>Besonderheit: bildet den Vertrauensanker — alle nachfolgenden Hashes verketten sich darauf zurück. Manipulation des Genesis erzeugt eine andere Chain (anderes Netzwerk).'
+                },
+                {
+                    q: 'Wie viele Bestätigungen werden bei Bitcoin üblicherweise als sicher angesehen, und was bedeutet das in Minuten?',
+                    h: 'Faustregel + Blockzeit.',
+                    s: 'Standard: <strong>6 Bestätigungen</strong> $\\Rightarrow 6\\cdot 10\\,\\text{min}=60\\,\\text{min}$.<br>Heuristik: bei Hashpower-Angreifer mit $q\\le 10\\%$ liegt die Erfolgswahrscheinlichkeit eines Reorgs unter $0{,}1\\%$ (Nakamoto-Tabelle).<br>Höhere Beträge ($\\to$ Börsen): 60+ Bestätigungen.'
+                },
+                {
+                    q: 'Was ist eine Coinbase-Transaktion, und welche Felder sind besonders?',
+                    h: 'Erste Tx eines Blocks, kein Input.',
+                    s: 'Coinbase-Tx: spezielle Tx, die <strong>keinen normalen Input</strong> hat (Input zeigt auf 0×0…0). Sie erzeugt neue Coins als Block-Reward + Tx-Fees als Output an die Adresse des Miners.<br>Das Input-Feld enthält frei wählbare Daten — Miner nutzen es u. a. für extraNonce (siehe L2.4) und Botschaften.<br>Coinbase-Outputs sind 100 Blöcke lang gesperrt (Bitcoin maturity rule).'
+                },
+                {
+                    q: 'Erkläre, wie ein SPV/Light-Client einen Zahlungseingang verifiziert, ohne die gesamte Chain zu speichern.',
+                    h: 'Header-Kette + Merkle-Proof.',
+                    s: '1) Light-Client speichert nur Block-Header (~80 B/Block, ~4 MB für Bitcoin gesamt).<br>2) Empfängt vom Full Node: Tx + Merkle-Proof (Pfad bis Root).<br>3) Verifiziert: a) PoW jedes Headers, b) Merkle-Proof gegen Root des Blocks, c) Block ist tief genug eingebettet.<br>Vertrauensannahme: ehrliche Mehrheit unter den verbundenen Full Nodes (kann durch Bloom-Filter aufgeweicht werden $\\Rightarrow$ Privatsphäre-Tradeoff).'
                 }
             ],
             // L2
@@ -89,6 +117,31 @@
                     q: 'UTXO vs. Account-Modell: erkläre den fundamentalen Unterschied und je einen Vorteil.',
                     h: 'Bitcoin (UTXO) vs. Ethereum (Accounts).',
                     s: '<strong>UTXO (Bitcoin)</strong>: Zustand = Menge unverbrauchter Outputs. Tx verbrauchen Inputs und erzeugen Outputs. Vorteil: parallele Validierung, gute Privatsphäre, einfache Off-chain-Konstruktionen (Lightning).<br><strong>Account (Ethereum)</strong>: Zustand = Mapping Adresse → (Balance, Nonce, Storage). Vorteil: einfaches Programmiermodell für Smart Contracts, kompakte Tx (kein UTXO-Management).'
+                },
+                {
+                    q: 'Was ist der Mempool, und welchen Einfluss haben die Tx-Fees auf Block-Inklusion?',
+                    h: 'Lokaler Pool ungebestätigter Tx; Miner sortieren nach $\\text{fee}/\\text{vByte}$.',
+                    s: 'Mempool: lokaler Speicher jedes Nodes für validierte, aber unbestätigte Tx. Bei Block-Erstellung sortiert der Miner Kandidaten nach <strong>Fee-Rate</strong> (Sat/vByte bzw. Gwei/Gas) absteigend, bis Block voll ist.<br>Konsequenz: in Stoßzeiten dauern Low-Fee-Tx beliebig lange. Replace-by-Fee (RBF, BIP-125) erlaubt nachträgliches Fee-Bumping.'
+                },
+                {
+                    q: 'Warum braucht Ethereum eine Account-Nonce, und wie schützt sie vor Replay-Angriffen?',
+                    h: 'Sequenznummer pro Account verhindert Tx-Wiedergabe.',
+                    s: 'Jede Tx enthält eine vom Sender erwartete Nonce $n_e$. Der Konsens akzeptiert sie nur, wenn $n_e = n_{state}$ (aktueller Account-Nonce). Nach Inklusion wird $n_{state} \\mathrel{+}= 1$.<br>Effekt: dieselbe signierte Tx ist nur einmal gültig $\\Rightarrow$ kein Replay. Zusätzlich verhindert es Double-Submits beim Pool-Drift.<br>Cross-Chain-Replay (z.B. ETH/ETC nach Fork) wird durch Chain-ID in EIP-155 verhindert.'
+                },
+                {
+                    q: 'Erkläre Eclipse- vs. Sybil-Attacke im P2P-Netzwerk einer Blockchain.',
+                    h: 'Sybil: viele Identitäten. Eclipse: Opfer komplett umstellen.',
+                    s: '<strong>Sybil-Attacke</strong>: Angreifer erstellt viele Pseudo-Identitäten/Nodes, um Stimmrecht zu manipulieren. PoW/PoS schützen, indem Stimmrecht an Ressourcen (Hashrate/Stake) gekoppelt ist statt an Identitäten.<br><strong>Eclipse-Attacke</strong>: Angreifer kontrolliert <em>alle</em> Peer-Verbindungen eines Opfer-Knotens und filtert dessen Sicht auf das Netz $\\Rightarrow$ Doppel-Spend gegen dieses Opfer möglich.<br>Schutz: viele/anchor Verbindungen, IP-Diversität, Tor-Vermeidung von gleichen ASNs.'
+                },
+                {
+                    q: 'Berechne die theoretischen Bitcoin-Outputs nach 4 Halvings, ausgehend von 50 BTC/Block.',
+                    h: 'Geometrische Reihe.',
+                    s: '210000 Blöcke pro Halving-Periode. Reward: 50 → 25 → 12,5 → 6,25 → 3,125.<br>Nach 4 Halvings (840000 Blöcke): $210000\\cdot(50+25+12{,}5+6{,}25)=210000\\cdot 93{,}75=19\\,687\\,500\\,\\text{BTC}$.<br>Bis ins Unendliche (Limes): $210000\\cdot 50/(1-0{,}5)=210000\\cdot 100=21\\,000\\,000\\,\\text{BTC}$.<br>$$\\boxed{\\text{Total cap }21\\,\\text{Mio. BTC}}$$'
+                },
+                {
+                    q: 'Was ist eine Soft Fork, was eine Hard Fork? Welche Kompatibilität ergibt sich für alte Nodes?',
+                    h: 'Regel-Verschärfung vs. -Erweiterung.',
+                    s: '<strong>Soft Fork</strong>: neue Regeln <em>verschärfen</em> die alten. Alte Nodes akzeptieren neue Blöcke weiterhin (rückwärtskompatibel). Beispiel: SegWit (BIP-141).<br><strong>Hard Fork</strong>: neue Regeln <em>weiten</em> Gültigkeit aus oder ändern grundlegend (z.B. Blockgröße, EVM-Opcodes). Alte Nodes lehnen neue Blöcke ab $\\Rightarrow$ Chain-Split, falls nicht alle upgraden. Beispiel: Bitcoin Cash, Ethereum-Merge.'
                 }
             ],
             // L3
@@ -122,6 +175,26 @@
                     q: 'Erkläre den Unterschied zwischen einem Layer-1 (z.B. Ethereum mainnet) und einem Layer-2 Rollup (Optimistic vs. ZK).',
                     h: 'Skalierung durch Auslagern der Ausführung. Sicherheit durch unterschiedliche Beweisverfahren.',
                     s: '<strong>Layer-1</strong>: alle Nodes verifizieren alle Tx; volle Dezentralität, aber begrenzter Durchsatz (Ethereum ~15 TPS).<br><strong>Optimistic Rollup</strong> (z.B. Arbitrum): Tx werden off-chain ausgeführt, On-chain wird der Zustands-Diff committed. Streitfall durch <em>fraud proofs</em> in einem Challenge-Window (z.B. 7 Tage) anfechtbar.<br><strong>ZK Rollup</strong> (z.B. zkSync, StarkNet): Off-chain-Ausführung wird durch <em>Validity Proof</em> (SNARK/STARK) verifiziert. On-chain prüft nur den Beweis. Vorteile: schnelle Finalität, keine Challenge-Period; Nachteil: höhere Beweis-Erzeugung-Kosten, kompliziertere Toolchain.'
+                },
+                {
+                    q: 'Erkläre einen Atomic Swap zwischen Bitcoin und Litecoin via HTLC. Welche kryptografischen Bausteine sichern Atomarität?',
+                    h: 'Hash-Time-Locked Contract: Hash-Lock und Time-Lock auf beiden Chains.',
+                    s: '1) Alice wählt Geheimnis $s$, berechnet $H=\\text{SHA-256}(s)$. Sperrt BTC mit Skript: "auszahlen wenn Bob Preimage zu $H$ liefert vor Block $N$, sonst Alice nach $N$".<br>2) Bob sperrt LTC mit demselben $H$, kürzerer Timeout $N\'<N$.<br>3) Alice claimt LTC mit $s$ → veröffentlicht $s$ on-chain.<br>4) Bob extrahiert $s$ und claimt BTC.<br><strong>Atomarität</strong>: entweder beide Swaps gehen durch (über $s$), oder keiner (Refund über Time-Lock). Trustless. Schwachstelle: Free-Option-Risiko und Online-Anforderung.'
+                },
+                {
+                    q: 'Lightning Payment Channel: erkläre Eröffnung, Update und unkooperatives Schließen. Welche Rolle spielen Penalty-Transactions?',
+                    h: 'Funding-Tx + Commitment-Tx + Revocation-Keys.',
+                    s: '<strong>Eröffnung</strong>: 2-of-2-Multisig-Funding-Tx on-chain (z.B. 1 BTC).<br><strong>Update</strong>: beide signieren neue Commitment-Tx, die den aktuellen Saldo darstellt; alte Commitment-Tx werden durch <em>Revocation-Secrets</em> entwertet.<br><strong>Cooperative Close</strong>: gemeinsam unterschriebene Schluss-Tx.<br><strong>Unilateral Close</strong>: Partei broadcastet ihre Commitment-Tx. Bei alter (unfair) Commitment kann Gegenseite mit Revocation-Secret innerhalb des Timelocks <em>Penalty-Tx</em> einreichen und den gesamten Channel-Saldo beanspruchen.<br>Sicherheit: ständig Watchtower-Service oder eigene Online-Präsenz erforderlich.'
+                },
+                {
+                    q: 'MEV (Maximal Extractable Value): erläutere Sandwich-Attack auf einen DEX-Trade und Mitigations (z.B. Flashbots, Private Mempool, MEV-Boost).',
+                    h: 'Front-Run + Back-Run um eine User-Tx.',
+                    s: '<strong>Sandwich</strong>: Bot sieht User-Buy in Mempool. Front-Run: kauft das Asset zuerst (höherer Gas-Preis), pumpt Preis auf AMM. User-Buy zahlt schlechteren Preis. Back-Run: Bot verkauft sofort danach. Differenz ist MEV-Gewinn auf Kosten des Users.<br><strong>Mitigations</strong>: 1) <em>Flashbots/MEV-Boost</em> — User sendet Tx in Private-Mempool an Builder, Auktion erlaubt MEV-Internalisierung. 2) <em>Slippage-Limits</em> auf AMMs. 3) <em>CoW Swap</em>, Batch-Auctions, faire Reihenfolge (Threshold-Encryption, Encrypted Mempools wie Shutter Network).'
+                },
+                {
+                    q: 'Account Abstraction (ERC-4337): was ändert sich gegenüber EOAs, und welche Use-Cases werden möglich?',
+                    h: 'Smart-Contract-Wallets als First-Class, Bundler/Paymaster.',
+                    s: 'EOA (klassisch): privater Schlüssel = Account, fest definierte Signaturlogik (ECDSA/secp256k1), nur ETH zahlt Gas.<br><strong>ERC-4337</strong>: Wallets sind Smart Contracts. UserOperation-Objekte werden über einen <em>Bundler</em> in einen Block eingespeist; <em>Paymaster</em> kann Gas in ERC-20 oder gesponsert bezahlen.<br>Use-Cases: 1) <em>Social Recovery</em> (Multi-Faktor statt Seed-Phrase). 2) <em>Session Keys</em> für Spiele/dApps. 3) <em>Spending Limits</em>, Whitelists. 4) <em>Multisig out of the box</em>. 5) Passwordless via WebAuthn/Passkeys. Erfolgt ohne Hard Fork (Layer auf normaler EVM).'
                 }
             ]
         ]

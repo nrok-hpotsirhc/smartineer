@@ -27,7 +27,15 @@
             Shared Secret: $S=B^a=A^b=g^{ab}\\bmod p$<br><br>
             <strong>Hashfunktionen</strong><br>
             Eigenschaften: Pre-image-, 2nd-pre-image-, Kollisionsresistenz<br>
-            Geburtstagsparadoxon: Kollision bei $\\sim 2^{n/2}$ Hashes (Bit-Länge $n$)
+            Geburtstagsparadoxon: Kollision bei $\\sim 2^{n/2}$ Hashes (Bit-Länge $n$)<br><br>
+            <strong>HMAC</strong><br>
+            $\\text{HMAC}_K(m) = H((K\\oplus opad)\\,\\|\\,H((K\\oplus ipad)\\,\\|\\,m))$<br><br>
+            <strong>AES-Modi (Sicherheits-Stichworte)</strong><br>
+            ECB unsicher, CBC braucht zufälligen IV, CTR/GCM dürfen Nonce <em>nie</em> wiederverwenden<br><br>
+            <strong>Passwort-KDFs</strong><br>
+            PBKDF2/Argon2/scrypt: Salz $s$, Iterationen $t$ $\\Rightarrow$ Brute-Force-Kosten $\\propto t$<br><br>
+            <strong>Lattice-Krypto (LWE)</strong><br>
+            $b = As + e \\bmod q$, mit Fehlervektor $e$ klein. Sicher gegen Quantenangriffe.
         `,
         levels: [
             // L1
@@ -61,6 +69,26 @@
                     q: 'Welche Eigenschaften definieren eine kryptographische Hashfunktion?',
                     h: 'Drei klassische Forderungen.',
                     s: '1. Pre-Image-Resistenz: zu gegebenem $h$ ist es schwer, ein $m$ mit $H(m)=h$ zu finden.<br>2. Second-Pre-Image-Resistenz: zu gegebenem $m_1$ ist es schwer, $m_2\\neq m_1$ mit gleichem Hash zu finden.<br>3. Kollisionsresistenz: schwer, zwei beliebige $m_1\\neq m_2$ mit $H(m_1)=H(m_2)$ zu finden.<br>Zusätzlich: deterministisch, schnell, lawinenartiger Effekt.'
+                },
+                {
+                    q: 'Berechne $\\gcd(48, 36)$ und $\\gcd(17, 13)$ mit dem Euklidischen Algorithmus.',
+                    h: 'Wiederhole $\\gcd(a,b)=\\gcd(b,\\,a\\bmod b)$.',
+                    s: '$\\gcd(48,36)$: $48=1\\cdot 36+12$; $36=3\\cdot 12+0$ $\\Rightarrow \\boxed{12}$.<br>$\\gcd(17,13)$: $17=1\\cdot 13+4$; $13=3\\cdot 4+1$; $4=4\\cdot 1+0$ $\\Rightarrow \\boxed{1}$ (teilerfremd).'
+                },
+                {
+                    q: 'Welche Wirkung hat ein Salt bei der Passwort-Speicherung?',
+                    h: 'Vorberechnete Tabellen + identische Hashes für identische Passwörter.',
+                    s: 'Salt $s$ ist ein zufälliger, pro Account einzigartiger Wert: gespeichert wird $(s,\\ H(s\\,\\|\\,p))$.<br>Wirkung: 1) Rainbow-Tables nutzlos (jede Salz-Variante bräuchte eigene Tabelle); 2) gleiche Passwörter ergeben unterschiedliche Hashes; 3) Brute-Force muss pro Account einzeln laufen.<br>Best Practice: Salz $\\ge 128$ Bit + langsame KDF (Argon2id mit hohem $t$ und Speicher-Hardness).'
+                },
+                {
+                    q: 'Symmetrisch oder asymmetrisch? Ordne zu: AES, RSA, SHA-256, Diffie-Hellman, ECDSA, HMAC.',
+                    h: 'Asymmetrisch: zwei Schlüssel (privat/öffentlich). Hashes haben keinen Schlüssel im klassischen Sinn.',
+                    s: 'Symmetrisch (geheimer Schlüssel): <strong>AES</strong>, <strong>HMAC</strong> (MAC, keine Verschlüsselung).<br>Asymmetrisch: <strong>RSA</strong>, <strong>Diffie-Hellman</strong>, <strong>ECDSA</strong>.<br>Hashfunktion (kein Schlüssel): <strong>SHA-256</strong>.'
+                },
+                {
+                    q: 'Welche Modi sind authentifizierte Verschlüsselung (AEAD), und warum sind sie heute Standard?',
+                    h: 'AEAD = Confidentiality + Integrity in einem Schritt.',
+                    s: 'AEAD-Modi: <strong>AES-GCM</strong>, <strong>ChaCha20-Poly1305</strong>, AES-CCM. Sie produzieren neben dem Chiffrat ein Authentifizierungstag, sodass Manipulation erkannt wird.<br>Vorteil gegenüber Encrypt-then-MAC manuell: weniger Implementierungsfehler, ein einziger Schlüssel, Pipeline-Optimierung möglich.<br>TLS 1.3 erlaubt nur noch AEAD-Suites.'
                 }
             ],
             // L2
@@ -94,6 +122,31 @@
                     q: 'Warum ist ECB-Modus (Electronic Codebook) bei Block-Chiffren unsicher? Welche Modi werden bevorzugt?',
                     h: 'Gleiche Klartextblöcke ergeben gleiche Chiffrate $\\Rightarrow$ Strukturmuster erkennbar.',
                     s: 'ECB: $C_i=E_K(M_i)$ — gleiche Klartextblöcke führen zu gleichen Chiffratblöcken. Bilder erkennt man weiterhin (klassisches Pinguin-Beispiel).<br>Bevorzugte Modi: <strong>CBC</strong> (Verkettung mit IV), <strong>CTR</strong> (Counter, parallelisierbar), <strong>GCM</strong> (CTR + Authentifizierung). GCM ist heute Standard für TLS.'
+                },
+                {
+                    q: 'Warum ist CTR-Nonce-Wiederverwendung katastrophal? Demonstriere mit zwei Klartexten $M_1, M_2$ und identischem Keystream $K$.',
+                    h: 'Stromchiffre-Eigenschaft: $C_i = M_i \\oplus K$.',
+                    s: 'Bei gleicher Nonce: $C_1=M_1\\oplus K$, $C_2=M_2\\oplus K$.<br>$\\Rightarrow C_1\\oplus C_2 = M_1\\oplus M_2$ — der Keystream verschwindet, die XOR-Summe der Klartexte ist öffentlich!<br>Bei strukturierten Klartexten (ASCII, Header) lassen sich beide aus diesem XOR rekonstruieren (Crib-Dragging). Lesson: Nonce <em>nie</em> wiederverwenden — eindeutige Counter oder Random-96-Bit (GCM) sind Pflicht.'
+                },
+                {
+                    q: 'HMAC: berechne $\\text{HMAC}_K(m)$ schematisch und erkläre, warum naive $H(K\\,\\|\\,m)$ unsicher ist.',
+                    h: 'Length-Extension-Angriff bei Merkle-Damgård-Hashes (SHA-1, SHA-256).',
+                    s: 'HMAC: $H((K\\oplus opad)\\,\\|\\,H((K\\oplus ipad)\\,\\|\\,m))$ mit $opad=0x5c\\dots$, $ipad=0x36\\dots$.<br>Naive $H(K\\,\\|\\,m)$: Angreifer kennt $H(K\\,\\|\\,m)$ und kann ohne $K$ einen gültigen Tag für $m\\,\\|\\,\\text{padding}\\,\\|\\,m\\\'$ berechnen (Length-Extension), da der interne Hashzustand vorhersehbar fortgesetzt werden kann.<br>HMACs doppelter Hash unterbindet diesen Angriff.'
+                },
+                {
+                    q: 'PBKDF2 vs. Argon2: welche Parameter erhöhen die Brute-Force-Kosten, und welcher KDF ist heute empfohlen?',
+                    h: 'Iterationen, Speicher-Hardness, Parallelität.',
+                    s: 'PBKDF2: nur Iterationen $t$ (CPU-bound). GPUs/ASICs sind ~1000× schneller als CPUs $\\Rightarrow$ Brute-Force begünstigt.<br>Argon2 (Argon2id empfohlen): zusätzlich Speicher-Hardness $m$ und Parallelität $p$. ASICs/GPUs verlieren Vorteil, weil Speicher teuer ist.<br>OWASP 2024: <strong>Argon2id</strong> (m=19 MiB, t=2, p=1) oder scrypt; PBKDF2-HMAC-SHA-256 mit $\\ge 600\\,000$ Iterationen nur für Legacy.'
+                },
+                {
+                    q: 'ECDSA-Signatur (skizziert): warum führt eine wiederverwendete Nonce $k$ zur Schlüssel-Extraktion?',
+                    h: 'Zwei Signaturen $(r,s_1),(r,s_2)$ mit gleichem $r$ ergeben System für $d$.',
+                    s: 'ECDSA: $r = (kG)_x\\bmod n$, $s = k^{-1}(H(m)+r d)\\bmod n$.<br>Bei Wiederverwendung: $s_1-s_2 = k^{-1}(H(m_1)-H(m_2))\\Rightarrow k = (H(m_1)-H(m_2))/(s_1-s_2)$. Mit $k$ folgt $d = (s_1 k - H(m_1))/r$.<br>Praxis-Beispiel: PS3-Master-Key 2010 (Sony nutzte konstantes $k$).<br>Empfehlung: deterministisches ECDSA nach RFC 6979 oder Ed25519, das diese Klasse von Bugs ausschließt.'
+                },
+                {
+                    q: 'Berechne den modularen Logarithmus $\\log_2 x \\equiv ?\\pmod{11}$ für $x=8$ via Baby-Step-Giant-Step (oder einfach durch Probieren).',
+                    h: '$2^a\\equiv 8\\pmod{11}$. Probieren: $a=1,2,3,...$',
+                    s: '$2^1=2$, $2^2=4$, $2^3=8$. ✓<br>$$\\boxed{\\log_2 8\\equiv 3\\pmod{11}}$$ Hinweis: Ordnung von 2 mod 11: $2^{10}=1024\\equiv 1$, also Ordnung teilt 10. Tatsächlich Ordnung 10 (2 ist Primitivwurzel mod 11).'
                 }
             ],
             // L3
@@ -127,6 +180,21 @@
                     q: 'Quanten-Resilienz: welche heute verbreiteten Verfahren werden durch Shor-Algorithmus gebrochen, welche nicht? Welche Post-Quantum-Kandidaten sind bereits NIST-standardisiert?',
                     h: 'Shor: polynomial für Faktorisierung und diskrete Logarithmen. Symmetrische Verfahren via Grover nur quadratisch betroffen.',
                     s: 'Gebrochen durch Shor: <strong>RSA</strong>, <strong>DH</strong>, <strong>ECC</strong>, <strong>ECDSA</strong> (alle auf Faktorisierung/diskretem Log basierend).<br>Nur quadratisch geschwächt durch Grover: AES, SHA-2/3 — Verdopplung der Schlüssellänge bringt Sicherheit zurück.<br>NIST-PQC-Standards (2024): <strong>ML-KEM (Kyber)</strong> für Schlüsselkapselung, <strong>ML-DSA (Dilithium)</strong> und <strong>SLH-DSA (SPHINCS+)</strong> für Signaturen, <strong>FN-DSA (Falcon)</strong> in Vorbereitung. Migration empfohlen für Langzeit-vertrauliche Daten.'
+                },
+                {
+                    q: 'Schnorr-Signatur: skizziere Signieren und Verifikation. Warum ist sie deterministisch + linear (Vorteil gegenüber ECDSA)?',
+                    h: 'Schlüssel $(d, P=dG)$, Signatur $(R,s)$ mit $R=kG$, $e=H(R\\,\\|\\,P\\,\\|\\,m)$, $s=k+ed$.',
+                    s: '<strong>Sign:</strong> Wähle $k$ (zufällig oder deterministisch RFC 6979). $R=kG$, $e=H(R\\|P\\|m)$, $s=k+e\\cdot d\\bmod n$. Signatur: $(R,s)$.<br><strong>Verify:</strong> $sG \\stackrel{?}{=} R + eP$.<br>Vorteile: <em>Linearität</em> $\\Rightarrow$ Schlüssel-Aggregation (MuSig), Batch-Verifikation, Threshold-Signaturen einfacher als bei ECDSA. Bitcoin Taproot (BIP-340) nutzt Schnorr seit 2021.<br>Patent abgelaufen 2008.'
+                },
+                {
+                    q: 'Lattice-LWE: erkläre das LWE-Problem und warum es Quanten-resistent ist (Stichworte Worst-Case zu Average-Case-Reduktion).',
+                    h: '$b = As+e \\bmod q$ mit kleinem Fehler $e$. Aufgabe: aus $(A,b)$ den Vektor $s$ rekonstruieren.',
+                    s: 'LWE-Problem: gegeben $A\\in\\mathbb{Z}_q^{m\\times n}$ und $b=As+e\\bmod q$ mit Gauß-Fehler $e$, finde $s$. Ohne $e$ wäre es lineares Gleichungssystem (trivial); mit Fehler ist es nachweislich so schwer wie kürzeste-Vektor-Probleme (SVP) in Gittern im Worst-Case (Regev 2005).<br>Quanten-resistenz: kein bekannter Quantenalgorithmus bricht SVP polynomial. Shor wirkt nur auf Gruppen mit verborgenen Untergruppen (Faktorisierung, dlog).<br>Anwendung: ML-KEM (Kyber) basiert auf Modul-LWE; Hauptkandidat NIST PQC.'
+                },
+                {
+                    q: 'Zero-Knowledge: erkläre Schnorr-Identifikation als Σ-Protokoll und beweise die drei Eigenschaften (Vollständigkeit, Soundness, Zero-Knowledge).',
+                    h: 'Commitment-Challenge-Response: $R=kG$, $c$ Challenge, $s=k+cd$.',
+                    s: '<strong>Protokoll:</strong> Prover kennt $d$ mit $P=dG$. 1) Sendet $R=kG$. 2) Verifier sendet zufällige Challenge $c$. 3) Prover antwortet $s=k+cd\\bmod n$. 4) Verifier prüft $sG=R+cP$.<br><strong>Vollständigkeit:</strong> ehrlicher Prover besteht: $sG=(k+cd)G=R+cP$. ✓<br><strong>Soundness:</strong> kann Prover für 2 verschiedene Challenges $c_1\\neq c_2$ gültig antworten, lässt sich $d=(s_1-s_2)/(c_1-c_2)$ extrahieren $\\Rightarrow$ er kennt $d$.<br><strong>Zero-Knowledge (HVZK):</strong> Simulator wählt $s,c$ zufällig und setzt $R=sG-cP$ — Verteilung identisch, ohne $d$.<br>Fiat-Shamir: $c=H(R\\|P\\|m)$ macht es nicht-interaktiv $\\Rightarrow$ Schnorr-Signatur.'
                 }
             ]
         ]

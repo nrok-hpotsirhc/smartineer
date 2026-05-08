@@ -28,7 +28,18 @@
             LC-Schwingkreis: $\\omega_0=1/\\sqrt{LC}$<br><br>
             <strong>Thermodynamik</strong><br>
             Ideales Gas: $pV=nRT$. 1. HS: $\\Delta U=Q+W$<br>
-            Carnot: $\\eta=1-T_k/T_w$
+            Carnot: $\\eta=1-T_k/T_w$<br><br>
+            <strong>Wellen / Optik</strong><br>
+            Doppler (akustisch, Quelle bewegt): $f\'=f\\cdot c/(c-v_q)$ (Annäherung)<br>
+            Bragg-Reflexion: $2d\\sin\\theta=n\\lambda$<br>
+            Brechung (Snellius): $n_1\\sin\\alpha_1=n_2\\sin\\alpha_2$<br><br>
+            <strong>Fluiddynamik</strong><br>
+            Bernoulli: $p+\\tfrac12\\rho v^2+\\rho g h = \\text{const}$<br>
+            Reynolds: $\\mathrm{Re}=\\rho v L/\\eta$ (turbulent ab $\\sim 2300$ in Rohren)<br><br>
+            <strong>Wärmeleitung (Fourier)</strong><br>
+            $\\dot Q = -\\lambda A\\,dT/dx$<br><br>
+            <strong>Festkörper / Quanten</strong><br>
+            Photon: $E=hf=hc/\\lambda$. Fermi-Energie: $E_F=\\dfrac{\\hbar^2}{2m}(3\\pi^2 n)^{2/3}$
         `,
         levels: [
             // L1
@@ -62,6 +73,26 @@
                     q: 'Welche Wärmemenge ist nötig, um $1\\,\\text{kg}$ Wasser von $20°\\text{C}$ auf $80°\\text{C}$ zu erwärmen? ($c=4{,}19\\,\\text{kJ/(kg K)}$.)',
                     h: '$Q=mc\\Delta T$.',
                     s: '$Q=1\\cdot 4{,}19\\cdot 10^3\\cdot 60 = 251{,}4\\,\\text{kJ}$.<br>$$\\boxed{Q\\approx 251\\,\\text{kJ}}$$'
+                },
+                {
+                    q: 'Berechne die Energie eines Photons der Wellenlänge $\\lambda=500\\,\\text{nm}$ (sichtbares Grün). $h=6{,}626\\cdot 10^{-34}\\,\\text{Js}$, $c=3\\cdot 10^8\\,\\text{m/s}$.',
+                    h: '$E=hc/\\lambda$.',
+                    s: '$E=6{,}626\\cdot 10^{-34}\\cdot 3\\cdot 10^8/(500\\cdot 10^{-9})=3{,}98\\cdot 10^{-19}\\,\\text{J}$.<br>$\\div 1{,}6\\cdot 10^{-19}\\approx 2{,}48\\,\\text{eV}$.<br>$$\\boxed{E\\approx 2{,}48\\,\\text{eV}}$$'
+                },
+                {
+                    q: 'Brechung: ein Lichtstrahl tritt aus Luft ($n_1=1{,}0$) in Glas ($n_2=1{,}5$) unter $\\alpha_1=30°$ ein. Berechne den Brechungswinkel $\\alpha_2$.',
+                    h: 'Snellius $n_1\\sin\\alpha_1=n_2\\sin\\alpha_2$.',
+                    s: '$\\sin\\alpha_2=(1\\cdot 0{,}5)/1{,}5=1/3\\Rightarrow \\alpha_2\\approx 19{,}47°$.<br>$$\\boxed{\\alpha_2\\approx 19{,}5°}$$ (zum Lot hin gebrochen).'
+                },
+                {
+                    q: 'Bernoulli: in einer waagerechten Rohrverengung wird die Strömungsgeschwindigkeit von $v_1=2\\,\\text{m/s}$ auf $v_2=6\\,\\text{m/s}$ erhöht. Wie ändert sich der Druck? ($\\rho=1000\\,\\text{kg/m}^3$).',
+                    h: '$\\Delta p = p_2-p_1 = -\\tfrac12\\rho(v_2^2-v_1^2)$.',
+                    s: '$\\Delta p = -0{,}5\\cdot 1000\\cdot (36-4)=-16\\,000\\,\\text{Pa}=-16\\,\\text{kPa}$.<br>$$\\boxed{p_2 - p_1 = -16\\,\\text{kPa}}$$ Druck sinkt in Verengung (Hydrodynamisches Paradoxon).'
+                },
+                {
+                    q: 'Reynoldszahl: Wasser strömt mit $v=1\\,\\text{m/s}$ durch ein Rohr mit $L=D=0{,}05\\,\\text{m}$. ($\\rho=1000$, $\\eta=10^{-3}\\,\\text{Pa s}$). Laminar oder turbulent?',
+                    h: '$\\mathrm{Re}=\\rho v L/\\eta$, kritisch $\\sim 2300$.',
+                    s: '$\\mathrm{Re}=1000\\cdot 1\\cdot 0{,}05/10^{-3}=50\\,000$.<br>$\\gg 2300$, also <strong>turbulent</strong>.<br>$$\\boxed{\\mathrm{Re}=5\\cdot 10^4\\Rightarrow\\text{turbulent}}$$'
                 }
             ],
             // L2
@@ -95,6 +126,31 @@
                     q: 'Ein idealer Carnot-Prozess arbeitet zwischen $T_w=600\\,\\text{K}$ und $T_k=300\\,\\text{K}$. Berechne den Wirkungsgrad.',
                     h: '$\\eta=1-T_k/T_w$ (Temperaturen in Kelvin).',
                     s: '$\\eta=1-300/600=0{,}5=50\\%$.<br>$$\\boxed{\\eta=50\\%}$$ Theoretisches Maximum bei diesen Reservoirtemperaturen.'
+                },
+                {
+                    q: 'Doppler-Effekt: ein Krankenwagen mit Sirene $f=1000\\,\\text{Hz}$ nähert sich mit $v_q=20\\,\\text{m/s}$. Welche Frequenz hört der ruhende Beobachter? ($c=343\\,\\text{m/s}$).',
+                    h: '$f\' = f\\cdot c/(c-v_q)$ bei sich nähernder Quelle.',
+                    s: '$f\'=1000\\cdot 343/(343-20)=1000\\cdot 343/323\\approx 1062\\,\\text{Hz}$.<br>$$\\boxed{f\'\\approx 1062\\,\\text{Hz}}$$ Höher als $f$ — beim Vorbeifahren springt sie auf $f\'\'=1000\\cdot 343/363\\approx 945\\,\\text{Hz}$.'
+                },
+                {
+                    q: 'Bragg-Reflexion: Röntgenstrahlung mit $\\lambda=0{,}154\\,\\text{nm}$ (Cu-K$\\alpha$) wird an Kristall mit $d=0{,}2\\,\\text{nm}$ gebeugt. Bei welchem Winkel $\\theta$ tritt die 1. Ordnung auf?',
+                    h: '$2d\\sin\\theta=n\\lambda$, $n=1$.',
+                    s: '$\\sin\\theta=\\lambda/(2d)=0{,}154/0{,}4=0{,}385$.<br>$\\theta\\approx 22{,}65°$.<br>$$\\boxed{\\theta\\approx 22{,}7°}$$ (gemessen vom Kristallplan, nicht vom Lot).'
+                },
+                {
+                    q: 'Wärmeleitung: Wand $A=10\\,\\text{m}^2$, $d=0{,}2\\,\\text{m}$, $\\lambda=0{,}5\\,\\text{W/(m K)}$, $T_i=20°C$, $T_a=0°C$. Berechne den Wärmestrom $\\dot Q$.',
+                    h: '$\\dot Q = \\lambda A\\Delta T/d$.',
+                    s: '$\\dot Q=0{,}5\\cdot 10\\cdot 20/0{,}2=500\\,\\text{W}$.<br>$$\\boxed{\\dot Q=500\\,\\text{W}}$$ Heizungsleistung, um stationär zu kompensieren.'
+                },
+                {
+                    q: 'Drehimpulserhaltung: Eiskunstläuferin mit $I_1=4\\,\\text{kg m}^2$ und $\\omega_1=2\\,\\text{rad/s}$ zieht Arme an $\\Rightarrow I_2=2\\,\\text{kg m}^2$. Welche Endwinkelgeschwindigkeit, welche Energieänderung?',
+                    h: '$L=I\\omega = $ const. $E_{rot}=\\tfrac12 I\\omega^2$.',
+                    s: '$\\omega_2 = I_1\\omega_1/I_2 = 4\\cdot 2/2 = 4\\,\\text{rad/s}$.<br>$E_1=\\tfrac12\\cdot 4\\cdot 4=8\\,\\text{J}$, $E_2=\\tfrac12\\cdot 2\\cdot 16=16\\,\\text{J}$.<br>$\\Delta E = +8\\,\\text{J}$ aus Muskelarbeit (Arme gegen Zentrifugalkraft anziehen).<br>$$\\boxed{\\omega_2=4\\,\\text{rad/s},\\ \\Delta E=+8\\,\\text{J}}$$'
+                },
+                {
+                    q: 'Plattenkondensator: $A=0{,}01\\,\\text{m}^2$, $d=1\\,\\text{mm}$, Vakuum. Berechne $C$ und Energie bei $U=100\\,\\text{V}$. ($\\varepsilon_0=8{,}85\\cdot 10^{-12}$).',
+                    h: '$C=\\varepsilon_0 A/d$, $W=\\tfrac12 CU^2$.',
+                    s: '$C=8{,}85\\cdot 10^{-12}\\cdot 0{,}01/10^{-3}=8{,}85\\cdot 10^{-11}\\,\\text{F}\\approx 88{,}5\\,\\text{pF}$.<br>$W=0{,}5\\cdot 8{,}85\\cdot 10^{-11}\\cdot 10^4 = 4{,}43\\cdot 10^{-7}\\,\\text{J}\\approx 0{,}44\\,\\mu\\text{J}$.<br>$$\\boxed{C\\approx 88{,}5\\,\\text{pF},\\ W\\approx 0{,}44\\,\\mu\\text{J}}$$'
                 }
             ],
             // L3
@@ -128,6 +184,31 @@
                     q: 'Berechne die relativistische kinetische Energie eines Protons mit Geschwindigkeit $v=0{,}8\\,c$. ($m_p c^2 \\approx 938\\,\\text{MeV}$).',
                     h: 'Lorentzfaktor $\\gamma=1/\\sqrt{1-(v/c)^2}$. $E_{kin}=(\\gamma-1)mc^2$.',
                     s: '$\\gamma=1/\\sqrt{1-0{,}64}=1/\\sqrt{0{,}36}=1/0{,}6\\approx 1{,}667$.<br>$E_{kin}=(1{,}667-1)\\cdot 938\\,\\text{MeV}\\approx 625\\,\\text{MeV}$.<br>$$\\boxed{E_{kin}\\approx 625\\,\\text{MeV}}$$ Klassisch wäre $\\tfrac12 m v^2\\approx 300\\,\\text{MeV}$ (deutlich zu wenig).'
+                },
+                {
+                    q: 'Fermi-Energie eines freien Elektronengases in Kupfer ($n=8{,}5\\cdot 10^{28}\\,\\text{m}^{-3}$). Berechne $E_F$ in eV. ($\\hbar=1{,}055\\cdot 10^{-34}\\,\\text{Js}$, $m_e=9{,}11\\cdot 10^{-31}\\,\\text{kg}$).',
+                    h: '$E_F=\\dfrac{\\hbar^2}{2m_e}(3\\pi^2 n)^{2/3}$.',
+                    s: '$3\\pi^2 n\\approx 29{,}6\\cdot 8{,}5\\cdot 10^{28}\\approx 2{,}52\\cdot 10^{30}$.<br>$(...)^{2/3}\\approx (2{,}52\\cdot 10^{30})^{2/3}\\approx 1{,}85\\cdot 10^{20}\\,\\text{m}^{-2}$.<br>$\\hbar^2/(2m_e)=(1{,}055\\cdot 10^{-34})^2/(2\\cdot 9{,}11\\cdot 10^{-31})\\approx 6{,}10\\cdot 10^{-39}\\,\\text{J m}^2$.<br>$E_F\\approx 6{,}10\\cdot 10^{-39}\\cdot 1{,}85\\cdot 10^{20}\\approx 1{,}13\\cdot 10^{-18}\\,\\text{J}\\approx 7{,}05\\,\\text{eV}$.<br>$$\\boxed{E_F\\approx 7\\,\\text{eV}}$$ (Literaturwert: 7,0 eV ✓).'
+                },
+                {
+                    q: 'Erzwungene gedämpfte Schwingung: System aus L3.1 ($m=1, d=2, k=5$) mit Anregung $F_0\\cos\\omega t$, $F_0=1$. Berechne Resonanzamplitude $A(\\omega)$ und Resonanzfrequenz $\\omega_R$.',
+                    h: '$A(\\omega)=F_0/m\\,/\\sqrt{(\\omega_0^2-\\omega^2)^2+(2D\\omega_0\\omega)^2}$. Resonanz $\\omega_R=\\omega_0\\sqrt{1-2D^2}$.',
+                    s: '$\\omega_0^2=5$, $D=1/\\sqrt 5$, $2D^2=0{,}4$.<br>$\\omega_R=\\sqrt 5\\cdot\\sqrt{0{,}6}=\\sqrt{3}\\approx 1{,}732$.<br>$A(\\omega_R)=1/(2D\\omega_0\\sqrt{1-D^2})=1/(2\\cdot 1/\\sqrt 5\\cdot\\sqrt 5\\cdot\\sqrt{0{,}8})=1/(2\\sqrt{0{,}8})\\approx 0{,}559$.<br>$$\\boxed{\\omega_R\\approx 1{,}73,\\ A(\\omega_R)\\approx 0{,}56}$$ Verstärkungsfaktor $A/A_0 = A\\cdot k = 2{,}79$.'
+                },
+                {
+                    q: 'Photoelektrischer Effekt: Cäsium hat Austrittsarbeit $W_a=2{,}1\\,\\text{eV}$. Welche maximale Wellenlänge löst Photoelektronen aus, und welche kinetische Energie haben sie bei $\\lambda=300\\,\\text{nm}$?',
+                    h: 'Einstein: $hf=W_a+E_{kin,max}$. Grenzwellenlänge: $\\lambda_g=hc/W_a$.',
+                    s: '$\\lambda_g = hc/W_a = 1240\\,\\text{eV nm}/2{,}1\\,\\text{eV}\\approx 590\\,\\text{nm}$ (gelb).<br>Bei $\\lambda=300\\,\\text{nm}$: $hf=1240/300\\approx 4{,}13\\,\\text{eV}$.<br>$E_{kin,max}=4{,}13-2{,}1\\approx 2{,}03\\,\\text{eV}$.<br>$$\\boxed{\\lambda_g\\approx 590\\,\\text{nm},\\ E_{kin,max}\\approx 2{,}0\\,\\text{eV}}$$'
+                },
+                {
+                    q: 'Maxwellsche Gleichung in Integralform: leite den verschiebungs-strombasierten Ampère-Maxwell für einen Plattenkondensator ($I_C$ Leitungsstrom, kein Leiter zwischen Platten) im stationären Sinusbetrieb her.',
+                    h: '$\\oint H\\,d\\ell=I_{eingeschlossen}+\\varepsilon_0 d\\Phi_E/dt$.',
+                    s: 'Zwischen den Platten: $I_{leit}=0$, aber $E$ ändert sich. Mit $E=U/d$ und $U=Q/C$: $\\dot E=\\dot Q/(Cd)=I_C/(Cd)$.<br>Verschiebungsstrom durch Plattenfläche: $I_v=\\varepsilon_0 A\\,dE/dt=\\varepsilon_0 A I_C/(Cd)$. Mit $C=\\varepsilon_0 A/d$ folgt $I_v=I_C$.<br>$\\Rightarrow$ Konsistenz von Ampère-Maxwell: derselbe magnetische Fluss um den Draht wie um den Kondensator-Spalt. Hier ist Maxwells Erweiterung essentiell.'
+                },
+                {
+                    q: 'Quanten-Tunneleffekt: Wahrscheinlichkeit, dass ein Elektron durch eine Rechteckbarriere ($V=10\\,\\text{eV}$, Breite $a=0{,}5\\,\\text{nm}$) tunnelt mit $E=5\\,\\text{eV}$. ($\\hbar=1{,}055\\cdot 10^{-34}$, $m_e=9{,}11\\cdot 10^{-31}$).',
+                    h: 'Näherung: $T\\approx \\exp(-2\\kappa a)$ mit $\\kappa=\\sqrt{2m(V-E)}/\\hbar$.',
+                    s: '$V-E=5\\,\\text{eV}=8\\cdot 10^{-19}\\,\\text{J}$.<br>$\\kappa=\\sqrt{2\\cdot 9{,}11\\cdot 10^{-31}\\cdot 8\\cdot 10^{-19}}/1{,}055\\cdot 10^{-34}=\\sqrt{1{,}458\\cdot 10^{-48}}/1{,}055\\cdot 10^{-34}\\approx 1{,}21\\cdot 10^{-24}/1{,}055\\cdot 10^{-34}\\approx 1{,}15\\cdot 10^{10}\\,\\text{m}^{-1}$.<br>$2\\kappa a = 2\\cdot 1{,}15\\cdot 10^{10}\\cdot 5\\cdot 10^{-10}=11{,}5$.<br>$T\\approx e^{-11{,}5}\\approx 1{,}0\\cdot 10^{-5}$.<br>$$\\boxed{T\\approx 10^{-5}}$$ Stark abstands-/höhenabhängig (exponentiell). Basis von Tunneldioden, REM-Mikroskop.'
                 }
             ]
         ]

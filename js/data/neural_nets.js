@@ -27,7 +27,17 @@
             $\\partial E/\\partial W^{(l)}=\\delta^{(l)}(a^{(l-1)})^T$, $\\partial E/\\partial b^{(l)}=\\delta^{(l)}$<br><br>
             <strong>Gradient Descent</strong><br>
             $w \\leftarrow w - \\eta\\,\\nabla_w E$<br>
-            Adam: adaptive Lernrate aus 1./2. Moment des Gradienten
+            Adam: adaptive Lernrate aus 1./2. Moment des Gradienten<br><br>
+            <strong>Dropout (Inverted)</strong><br>
+            Training: $a_i \\leftarrow a_i\\cdot m_i / (1-p)$, $m_i\\sim\\mathrm{Bernoulli}(1-p)$. Inferenz: identisch<br><br>
+            <strong>RNN-Update</strong><br>
+            $h_t = \\phi(W_h h_{t-1} + W_x x_t + b)$, BPTT durch Zeitachse<br><br>
+            <strong>LSTM-Gates</strong><br>
+            $f,i,o = \\sigma(\\dots)$, $\\tilde c=\\tanh(\\dots)$, $c_t = f\\odot c_{t-1}+i\\odot\\tilde c$, $h_t=o\\odot \\tanh c_t$<br><br>
+            <strong>Self-Attention (Transformer)</strong><br>
+            $\\text{Att}(Q,K,V)=\\mathrm{softmax}(QK^T/\\sqrt{d_k})V$<br><br>
+            <strong>L1- vs. L2-Regularisierung</strong><br>
+            L1 fördert Sparsity (manche $w_i=0$), L2 schrumpft alle gleichmäßig (Weight Decay)
         `,
         levels: [
             // L1
@@ -61,6 +71,26 @@
                     q: 'Wieso wird in tiefen Netzen meist ReLU statt Sigmoid eingesetzt?',
                     h: 'Vanishing Gradient.',
                     s: 'Sigmoid sättigt für $|z|\\gg 0$ ($\\sigma\'\\to 0$) $\\Rightarrow$ Gradienten werden in tieferen Schichten exponentiell klein (<strong>Vanishing Gradient</strong>). ReLU hat konstante Ableitung 1 für $z>0$ $\\Rightarrow$ Gradienten klingen nicht ab. Vorteile auch: einfache Berechnung, sparse Aktivierung.<br>Nachteil ReLU: "Dying ReLU" für $z<0$. Lösungen: Leaky ReLU, ELU, GELU.'
+                },
+                {
+                    q: 'Berechne den binären Cross-Entropy-Verlust $E=-(t\\ln y + (1-t)\\ln(1-y))$ für $t=1$ und $y=0{,}9$.',
+                    h: 'Nur ein Term aktiv bei One-Hot.',
+                    s: '$E = -(1\\cdot \\ln 0{,}9 + 0\\cdot \\ln 0{,}1) = -\\ln 0{,}9 \\approx 0{,}105$.<br>$$\\boxed{E\\approx 0{,}105}$$ Falls $y=0{,}1$ wäre: $E=-\\ln 0{,}1\\approx 2{,}303$ — viel höhere Strafe für sicher-falsche Vorhersage (asymmetrisch).'
+                },
+                {
+                    q: 'Welcher Wertebereich kommt bei Softmax raus, und wie groß ist die Summe der Ausgaben?',
+                    h: 'Wahrscheinlichkeitsverteilung.',
+                    s: '$s_i = e^{z_i}/\\sum_j e^{z_j} \\in (0,1)$.<br>$\\sum_i s_i = \\sum_i e^{z_i}/\\sum_j e^{z_j} = 1$.<br>$$\\boxed{s_i\\in (0,1),\\ \\sum s_i=1}$$ Daher als Klassifikations-Output (Wahrscheinlichkeitsverteilung über $K$ Klassen) verwendet.'
+                },
+                {
+                    q: 'Was ist Overfitting, und welche zwei Indikatoren erkennt man im Lernkurven-Diagramm?',
+                    h: 'Train-Loss vs. Val-Loss-Verlauf.',
+                    s: 'Overfitting: Modell lernt Trainingsdaten auswendig statt zu generalisieren.<br>Indikatoren: 1) Trainings-Loss sinkt weiter, während <strong>Validierungs-Loss steigt</strong>. 2) Große Lücke zwischen Trainings-Acc und Val-Acc.<br>Gegenmaßnahmen: Regularisierung (L1/L2), Dropout, Data Augmentation, Early Stopping, mehr Daten, kleineres Modell.'
+                },
+                {
+                    q: 'Wie viele Parameter hat eine Fully-Connected-Schicht mit 100 Eingängen und 50 Ausgängen?',
+                    h: 'Gewichte + Biases.',
+                    s: 'Gewichte: $100\\cdot 50 = 5000$.<br>Biases: $50$.<br>Gesamt: $5050$ Parameter.<br>$$\\boxed{5050}$$ Allgemein: $n_{in}\\cdot n_{out} + n_{out}$.'
                 }
             ],
             // L2
@@ -94,6 +124,31 @@
                     q: 'Stochastic Gradient Descent (SGD) mit Mini-Batch-Größe 32: was sind Vor- und Nachteile gegenüber Batch-Gradient-Descent (alles auf einmal)?',
                     h: 'Schätz-Varianz vs. Effizienz vs. Generalisierung.',
                     s: '<strong>Vorteile Mini-Batch</strong>: deutlich schneller (vektorisierte GPU-Operationen), passender Speicherverbrauch, Rauschen im Gradient hilft beim Verlassen schlechter lokaler Minima/Sattelpunkte (impliziter Regularisierungseffekt).<br><strong>Nachteile</strong>: ungenauerer Schätzer pro Schritt, Lernrate sensibel.<br>Empirisch: typische Batchgrößen 32–512; größere Batches benötigen oft proportional größere Lernraten und Warmup-Phasen.'
+                },
+                {
+                    q: 'Inverted Dropout: bei Training-Dropout-Rate $p=0{,}25$, was wird mit den Aktivierungen während Training gemacht und was bei Inferenz?',
+                    h: 'Skalierung erfolgt während Training, Inferenz unverändert.',
+                    s: '<strong>Training</strong>: Maske $m_i\\sim\\mathrm{Bernoulli}(1-p)=\\mathrm{Bernoulli}(0{,}75)$; $a_i \\leftarrow a_i\\cdot m_i / (1-p) = a_i\\cdot m_i / 0{,}75$.<br>Erwartung pro Aktivierung bleibt gleich: $\\mathbb{E}[a_i\\cdot m_i/(1-p)] = a_i\\cdot 0{,}75/0{,}75 = a_i$.<br><strong>Inferenz</strong>: keinerlei Skalierung, keine Maske $\\Rightarrow$ deterministische, stabile Vorhersage. Vorteil ggü. klassischem Dropout: kein Modellumstellen zur Inferenz nötig.'
+                },
+                {
+                    q: 'L1 vs. L2-Regularisierung: welcher Strafterm, welcher Effekt auf die Gewichte?',
+                    h: 'L1: $\\sum|w_i|$. L2: $\\sum w_i^2$.',
+                    s: '<strong>L1</strong>: $\\lambda\\sum|w_i|$, Gradient = $\\lambda\\,\\text{sign}(w_i)$ (konstant). Treibt kleine Gewichte exakt auf Null $\\Rightarrow$ <strong>Sparsity</strong> (eingebaute Feature-Auswahl).<br><strong>L2</strong>: $\\lambda\\sum w_i^2$, Gradient = $2\\lambda w_i$ (proportional). Schrumpft alle Gewichte gleichmäßig, aber selten exakt auf 0. Glättere Lösungen.<br>Kombination = Elastic Net: $\\alpha\\|w\\|_1 + (1-\\alpha)\\|w\\|_2^2$.'
+                },
+                {
+                    q: 'Lernrate-Schedule: warum verwendet man Learning-Rate-Decay (z.B. Cosine oder StepLR), und was sind typische Schemata?',
+                    h: 'Anfangs grob, später fein.',
+                    s: 'Hohe initiale Lernrate $\\eta_0$ erlaubt schnelles Konvergieren in eine Region. Reduktion erlaubt feine Optimierung im Minimum, ohne hin- und herzuspringen.<br>Schemata:<br>• <strong>Step</strong>: $\\eta\\leftarrow \\eta\\cdot \\gamma$ alle $N$ Epochen ($\\gamma=0{,}1$).<br>• <strong>Exponential</strong>: $\\eta_t = \\eta_0 e^{-\\lambda t}$.<br>• <strong>Cosine Annealing</strong>: $\\eta_t = \\eta_{min}+\\tfrac12(\\eta_0-\\eta_{min})(1+\\cos(\\pi t/T))$.<br>• <strong>Warmup + Decay</strong> (Transformer): linear hoch, danach $1/\\sqrt t$ ab.'
+                },
+                {
+                    q: 'Self-Attention: berechne die Aufmerksamkeitsgewichte für $Q=K=\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}$, $d_k=2$, ohne Wertvektoren ($V=I$).',
+                    h: '$\\mathrm{softmax}(QK^T/\\sqrt{d_k})$.',
+                    s: '$QK^T = I$ (Einheitsmatrix).<br>Skalierung: $I/\\sqrt 2$.<br>Zeile 1: $\\mathrm{softmax}(1/\\sqrt 2,\\ 0)$. $e^{0{,}707}\\approx 2{,}03$, $e^0=1$, Summe $3{,}03$.<br>Gewichte: $(0{,}67,\\ 0{,}33)$. Analog für Zeile 2.<br>Output: $A V = A$. <strong>Diagonal-Dominanz</strong> ist erwartet: jeder Token ist sich selbst am ähnlichsten.'
+                },
+                {
+                    q: 'Bias-Variance-Tradeoff: wie verändern sich Bias und Variance, wenn man die Modellkomplexität (Anzahl Parameter) erhöht?',
+                    h: 'Underfitting vs. Overfitting.',
+                    s: 'Geringe Komplexität: hoher Bias (Modell zu simpel, systematischer Fehler), niedrige Variance.<br>Hohe Komplexität: niedriger Bias, hohe Variance (Modell sehr sensitiv auf Trainingsdaten).<br>Ziel: Sweet-Spot wo Total-Error $= \\text{Bias}^2+\\text{Variance}+\\sigma^2$ minimal.<br>Moderne Erkenntnis (Double Descent): bei sehr großen, überparametrisierten Modellen kann der Test-Error nochmal sinken — entgegen klassischer U-Kurve.'
                 }
             ],
             // L3
@@ -127,6 +182,31 @@
                     q: 'Batch-Normalisierung: beschreibe die Operation pro Mini-Batch und ihre Auswirkungen auf Training.',
                     h: 'Standardisieren über Batch-Achse, anschließend lernbare $\\gamma,\\beta$.',
                     s: 'Pro Aktivierung im Mini-Batch:<br>$\\mu_B=\\tfrac1m\\sum x_i$, $\\sigma_B^2=\\tfrac1m\\sum(x_i-\\mu_B)^2$.<br>$\\hat x_i=(x_i-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}$.<br>$y_i = \\gamma\\hat x_i + \\beta$ (lernbar).<br>Effekte: stabilisiert Training (geringerer Internal Covariate Shift), erlaubt höhere Lernraten, hat leichten Regularisierungseffekt durch Batch-Rauschen, reduziert Sensitivität gegen Initialisierung.<br>Im Inferenzmodus werden gleitende Mittelwerte aus Training verwendet.'
+                },
+                {
+                    q: 'RNN Vanishing/Exploding Gradient: warum tritt das Problem in BPTT besonders auf, und welche Architektur löst es?',
+                    h: 'Produkt vieler Jacobi-Matrizen über Zeitachse.',
+                    s: 'Bei BPTT propagiert der Gradient durch $T$ Zeitschritte: $\\partial L/\\partial h_0 = \\prod_{t=1}^T (\\partial h_t/\\partial h_{t-1})$. Bei wiederholter Multiplikation einer Matrix mit Spektralradius $\\rho$: <br>• $\\rho<1$: Gradient $\\to 0$ (Vanishing) — frühe Schritte unbeeinflusst.<br>• $\\rho>1$: Gradient $\\to\\infty$ (Exploding).<br><strong>Lösung: LSTM/GRU</strong> mit additivem Cell-State und multiplikativen Gates: $c_t = f_t\\odot c_{t-1} + i_t\\odot \\tilde c_t$. Dadurch direkter Pfad ohne Sättigungsmultiplikation; Forget-Gate kann $f_t\\approx 1$ lernen $\\Rightarrow$ konstantes Gradientenfließen ("Constant Error Carousel").<br>Zusätzlich: Gradient Clipping gegen Exploding.'
+                },
+                {
+                    q: 'Transformer Self-Attention vs. RNN: welche Vorteile bei Langzeit-Abhängigkeiten, welche Nachteile bei langen Sequenzen?',
+                    h: 'Pfad-Länge vs. Komplexität.',
+                    s: '<strong>Vorteile</strong>: jede Position hat $O(1)$ Pfad-Länge zu jeder anderen (RNN: $O(n)$) $\\Rightarrow$ Langzeit-Abhängigkeiten leichter lernbar. Vollständige Parallelisierung (RNN: sequentiell).<br><strong>Nachteile</strong>: Aufmerksamkeit-Matrix ist $n\\times n \\Rightarrow O(n^2)$ Speicher und Zeit pro Layer; bei langen Texten/Bildern teuer.<br>Mitigations: Sparse Attention (Longformer), FlashAttention (Speicher-effiziente Implementierung), Linear Attention (Performer), State-Space-Modelle (Mamba) mit $O(n)$.'
+                },
+                {
+                    q: 'Knowledge Distillation: wie wird ein kleines "Student"-Netz von einem großen "Teacher"-Netz trainiert? Welche Loss-Funktion wird üblicherweise eingesetzt?',
+                    h: 'Soft Targets vs. Hard Labels, Temperaturskalierung.',
+                    s: 'Teacher liefert Soft-Probabilities $p_T = \\mathrm{softmax}(z_T/T)$ mit Temperatur $T>1$ (verteilt Wahrscheinlichkeitsmasse glatter $\\Rightarrow$ "Dark Knowledge" über Klassenverhältnisse).<br>Loss = $\\alpha\\cdot \\text{CE}(p_S, y)$ (echte Labels) $+ (1-\\alpha)\\cdot T^2\\cdot \\mathrm{KL}(p_T\\|p_S)$ (Soft-Match).<br>Student lernt nicht nur "ist Klasse 5", sondern auch "Klasse 3 ist ähnlicher als Klasse 7" $\\Rightarrow$ bessere Generalisierung als Training nur auf Hard-Labels. Beispiele: DistilBERT (40 % kleiner, 97 % Performance).'
+                },
+                {
+                    q: 'GAN-Verlust (Original Goodfellow): schreibe das Min-Max-Spiel und erkläre Mode Collapse.',
+                    h: 'Discriminator vs. Generator, Wasserstein-Variante als Mitigation.',
+                    s: 'Original-GAN:<br>$\\min_G\\max_D \\mathbb{E}_{x\\sim p_{data}}[\\log D(x)] + \\mathbb{E}_{z\\sim p_z}[\\log(1-D(G(z)))]$.<br>Discriminator $D$ maximiert Klassifikation echt/fake; Generator $G$ minimiert (will $D$ täuschen).<br><strong>Mode Collapse</strong>: $G$ findet eine kleine Menge Outputs, die $D$ überzeugen, und ignoriert die Diversität von $p_{data}$. Symptom: alle generierten Bilder sehen gleich aus.<br>Mitigation: <em>WGAN-GP</em> (Wasserstein-Loss + Gradient-Penalty), <em>Spectral Norm</em>, Mini-Batch-Discrimination, Unrolled GANs.'
+                },
+                {
+                    q: 'Diffusion-Modelle: skizziere Forward- und Reverse-Prozess. Welcher Loss wird trainiert?',
+                    h: 'Schrittweise Rauschen hinzufügen / entfernen.',
+                    s: '<strong>Forward</strong>: $q(x_t|x_{t-1}) = \\mathcal{N}(x_t;\\,\\sqrt{1-\\beta_t}\\,x_{t-1},\\,\\beta_t I)$ — fügt schrittweise Gauß-Rauschen hinzu, bis $x_T \\approx \\mathcal{N}(0,I)$ nach $T$ Schritten ($T\\sim 1000$).<br><strong>Reverse</strong>: parametrisiertes Netz $\\epsilon_\\theta(x_t,t)$ lernt, das Rauschen zu schätzen. Sampling: $x_{t-1} = \\frac{1}{\\sqrt{\\alpha_t}}(x_t - \\frac{\\beta_t}{\\sqrt{1-\\bar\\alpha_t}}\\epsilon_\\theta) + \\sigma_t z$.<br><strong>Loss (DDPM, simplified)</strong>: $L = \\mathbb{E}_{t,x_0,\\epsilon}\\|\\epsilon - \\epsilon_\\theta(\\sqrt{\\bar\\alpha_t}x_0+\\sqrt{1-\\bar\\alpha_t}\\epsilon,\\,t)\\|^2$. Sehr stabil im Training (kein Min-Max wie GAN), höchste Bildqualität (Stable Diffusion, DALL-E 3, Sora).'
                 }
             ]
         ]

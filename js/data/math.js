@@ -30,7 +30,19 @@
             Ableitung: $\\mathcal{L}\\{f'\\}=sF(s)-f(0)$<br><br>
             <strong>Lineare Algebra</strong><br>
             $\\det(2\\times2)=ad-bc$, Inverse: $A^{-1}=\\tfrac{1}{\\det A}\\!\\begin{pmatrix}d & -b\\\\ -c & a\\end{pmatrix}$<br>
-            Eigenwerte: $\\det(A-\\lambda I)=0$
+            Eigenwerte: $\det(A-\lambda I)=0$<br>
+            Cramer: $x_i=\det A_i/\det A$<br>
+            Skalarprodukt: $\vec a\cdot\vec b=|\vec a||\vec b|\cos\theta$<br><br>
+            <strong>Vektoranalysis</strong><br>
+            Rotation: $\operatorname{rot}\vec F=\nabla\times\vec F$<br>
+            Stokes: $\oint_{\partial S}\vec F\cdot d\vec r=\iint_S(\nabla\times\vec F)\cdot d\vec A$<br>
+            Gauß: $\oiint\vec F\cdot d\vec A=\iiint\nabla\cdot\vec F\,dV$<br><br>
+            <strong>Funktionentheorie</strong><br>
+            Cauchy-Integralformel: $f(z_0)=\dfrac{1}{2\pi j}\oint_C\dfrac{f(z)}{z-z_0}dz$<br>
+            Parseval: $\tfrac{1}{2\pi}\!\int_{-\pi}^{\pi}|f|^2 dx=\tfrac{a_0^2}{4}+\tfrac12\sum(a_n^2+b_n^2)$<br><br>
+            <strong>Reihen-Konvergenz</strong><br>
+            Quotient: $\lim|a_{n+1}/a_n|<1\Rightarrow$ konvergent<br>
+            Wurzel: $\lim\sqrt[n]{|a_n|}<1\Rightarrow$ konvergent
         `,
         levels: [
             // ----------------- LEVEL 1 -----------------
@@ -63,8 +75,26 @@
                 {
                     q: 'Berechne $\\lim_{x\\to 0}\\dfrac{\\sin(3x)}{x}$.',
                     h: 'Standard-Grenzwert $\\lim_{u\\to 0}\\sin(u)/u = 1$.',
-                    s: 'Erweitern: $\\dfrac{\\sin(3x)}{x}=3\\cdot\\dfrac{\\sin(3x)}{3x}\\xrightarrow{x\\to 0} 3\\cdot 1 = 3$.<br>$$\\boxed{=3}$$'
-                }
+                    s: 'Erweitern: $\\dfrac{\\sin(3x)}{x}=3\\cdot\\dfrac{\\sin(3x)}{3x}\\xrightarrow{x\\to 0} 3\\cdot 1 = 3$.<br>$$\\boxed{=3}$$'                },
+                {
+                    q: 'Bestimme den Winkel zwischen $\vec a=(1,2,2)$ und $\vec b=(2,0,1)$.',
+                    h: '$\cos\theta=\dfrac{\vec a\cdot\vec b}{|\vec a||\vec b|}$.',
+                    s: '$\vec a\cdot\vec b = 1\cdot 2+2\cdot 0+2\cdot 1 = 4$.<br>$|\vec a|=\sqrt{1+4+4}=3$, $|\vec b|=\sqrt{4+0+1}=\sqrt 5$.<br>$\cos\theta = 4/(3\sqrt 5)\approx 0{,}596$.<br>$$\boxed{\theta\approx 53{,}4^\circ}$$'
+                },
+                {
+                    q: 'Bilde die Ableitung von $f(x)=\dfrac{x^2}{x+1}$.',
+                    h: 'Quotientenregel $(u/v)\'=(u\'v-uv\')/v^2$.',
+                    s: '$u=x^2,\ u\'=2x$. $v=x+1,\ v\'=1$.<br>$f\'(x)=\dfrac{2x(x+1)-x^2}{(x+1)^2}=\dfrac{x^2+2x}{(x+1)^2}=\dfrac{x(x+2)}{(x+1)^2}$.<br>$$\boxed{f\'(x)=\dfrac{x(x+2)}{(x+1)^2}}$$'
+                },
+                {
+                    q: 'Zerlege $\dfrac{1}{x(x+1)}$ in Partialbrüche.',
+                    h: 'Ansatz $\dfrac{A}{x}+\dfrac{B}{x+1}$, Koeffizientenvergleich.',
+                    s: '$1=A(x+1)+Bx$. Bei $x=0$: $A=1$. Bei $x=-1$: $-B=1\Rightarrow B=-1$.<br>$$\boxed{\dfrac{1}{x(x+1)}=\dfrac{1}{x}-\dfrac{1}{x+1}}$$<br>Anwendung: $\int=\ln|x|-\ln|x+1|+C$.'
+                },
+                {
+                    q: 'Löse mit der Cramerschen Regel: $2x+y=5,\ x-y=1$.',
+                    h: '$x_i=\det A_i/\det A$ mit $A_i$: $i$-te Spalte durch $\vec b$ ersetzt.',
+                    s: '$\det A=\det\!\begin{pmatrix}2&1\\1&-1\end{pmatrix}=-3$.<br>$\det A_x=\det\!\begin{pmatrix}5&1\\1&-1\end{pmatrix}=-6\Rightarrow x=-6/-3=2$.<br>$\det A_y=\det\!\begin{pmatrix}2&5\\1&1\end{pmatrix}=-3\Rightarrow y=-3/-3=1$.<br>$$\boxed{x=2,\ y=1}$$'                }
             ],
             // ----------------- LEVEL 2 -----------------
             [
@@ -96,8 +126,26 @@
                 {
                     q: 'Berechne den Gradienten und Divergenz von $\\vec F(x,y,z)=(xy,\\,y^2,\\,xz)$ und $f(x,y,z)=x^2 y + z$.',
                     h: '$\\nabla f=(\\partial_x f,\\partial_y f,\\partial_z f)$. $\\operatorname{div}\\vec F=\\partial_x F_x+\\partial_y F_y+\\partial_z F_z$.',
-                    s: 'Gradient: $\\nabla f=(2xy,\\,x^2,\\,1)$.<br>Divergenz: $\\operatorname{div}\\vec F = y + 2y + x = x+3y$.<br>$$\\boxed{\\nabla f=(2xy, x^2, 1),\\quad \\operatorname{div}\\vec F=x+3y}$$'
-                }
+                    s: 'Gradient: $\\nabla f=(2xy,\\,x^2,\\,1)$.<br>Divergenz: $\\operatorname{div}\\vec F = y + 2y + x = x+3y$.<br>$$\\boxed{\\nabla f=(2xy, x^2, 1),\\quad \\operatorname{div}\\vec F=x+3y}$$'                },
+                {
+                    q: 'Berechne das Doppelintegral $\iint_{\mathbb{R}^2} e^{-(x^2+y^2)}\,dA$ via Polarkoordinaten.',
+                    h: '$dA=r\,dr\,d\varphi$, $x^2+y^2=r^2$.',
+                    s: '$\int_0^{2\pi}\!\int_0^\infty e^{-r^2} r\,dr\,d\varphi$.<br>Inneres Integral: Substitution $u=r^2$, $du=2r\,dr\Rightarrow \tfrac12\!\int_0^\infty e^{-u}du=\tfrac12$.<br>Äußeres: $2\pi\cdot\tfrac12=\pi$.<br>$$\boxed{=\pi}$$<br>Folgerung: $\int_{-\infty}^\infty e^{-x^2}dx=\sqrt\pi$ (Gauss-Integral).'
+                },
+                {
+                    q: 'Untersuche die Reihe $\sum_{n=1}^\infty \dfrac{n!}{n^n}$ auf Konvergenz mit dem Quotientenkriterium.',
+                    h: '$L=\lim_{n\to\infty}|a_{n+1}/a_n|$. Konvergent für $L<1$.',
+                    s: '$\dfrac{a_{n+1}}{a_n}=\dfrac{(n+1)!}{(n+1)^{n+1}}\cdot\dfrac{n^n}{n!}=\dfrac{n^n}{(n+1)^n}=\!\left(\dfrac{n}{n+1}\right)^{\!n}$.<br>$\lim_{n\to\infty}\!\left(1-\tfrac{1}{n+1}\right)^{\!n}=1/e\approx 0{,}368<1$.<br>$$\boxed{\text{konvergent}}$$'
+                },
+                {
+                    q: 'Bestimme die Hesse-Matrix von $f(x,y)=x^3+xy^2-3x$ und klassifiziere den kritischen Punkt $(1,0)$.',
+                    h: '$\nabla f=0$ liefert kritische Punkte. Hesse $H$, Definitheit über Eigenwerte/Determinante.',
+                    s: '$\nabla f=(3x^2+y^2-3,\ 2xy)$. Bei $(1,0)$: $(0,0)$ ✓.<br>$H=\begin{pmatrix}6x & 2y\\ 2y & 2x\end{pmatrix}$. Bei $(1,0)$: $\begin{pmatrix}6&0\\0&2\end{pmatrix}$.<br>EW: $6,2 > 0$ $\Rightarrow$ positiv definit $\Rightarrow$ <strong>lokales Minimum</strong>.<br>$$\boxed{(1,0)\ \text{lokales Minimum}}$$'
+                },
+                {
+                    q: 'Berechne $\int_0^\infty x\,e^{-x^2}\,dx$.',
+                    h: 'Substitution $u=x^2$.',
+                    s: '$u=x^2\Rightarrow du=2x\,dx$. $\int_0^\infty x e^{-x^2}dx=\tfrac12\!\int_0^\infty e^{-u}du=\tfrac12[-e^{-u}]_0^\infty=\tfrac12$.<br>$$\boxed{=\tfrac12}$$'                }
             ],
             // ----------------- LEVEL 3 -----------------
             [
@@ -129,8 +177,26 @@
                 {
                     q: 'Berechne mit Residuensatz $\\oint_{|z|=2}\\dfrac{1}{z^2-1}\\,dz$.',
                     h: '$\\dfrac{1}{z^2-1}=\\dfrac{1}{(z-1)(z+1)}$. Beide Pole liegen im Kreis. Residuum bei einfachem Pol: $\\operatorname*{Res}_{z=z_0}f=\\lim_{z\\to z_0}(z-z_0)f(z)$.',
-                    s: '$\\operatorname{Res}_{z=1}=\\dfrac{1}{1+1}=\\tfrac12$. $\\operatorname{Res}_{z=-1}=\\dfrac{1}{-1-1}=-\\tfrac12$.<br>Summe: $0$. Nach Residuensatz $\\oint = 2\\pi j\\cdot\\sum\\operatorname{Res}=0$.<br>$$\\boxed{=0}$$'
-                }
+                    s: '$\\operatorname{Res}_{z=1}=\\dfrac{1}{1+1}=\\tfrac12$. $\\operatorname{Res}_{z=-1}=\\dfrac{1}{-1-1}=-\\tfrac12$.<br>Summe: $0$. Nach Residuensatz $\\oint = 2\\pi j\\cdot\\sum\\operatorname{Res}=0$.<br>$$\\boxed{=0}$$'                },
+                {
+                    q: 'Wende die Cauchy-Integralformel an: $\oint_{|z|=2}\dfrac{e^z}{z-1}\,dz$.',
+                    h: '$f(z_0)=\dfrac{1}{2\pi j}\oint\dfrac{f(z)}{z-z_0}dz$, also $\oint=2\pi j\,f(z_0)$, falls $z_0$ innen.',
+                    s: '$f(z)=e^z$ analytisch in $|z|\le 2$. $z_0=1$ liegt innerhalb.<br>$\oint = 2\pi j\cdot e^1 = 2\pi e\,j$.<br>$$\boxed{=2\pi e\,j\approx 17{,}08\,j}$$'
+                },
+                {
+                    q: 'Anwendung des Stokes-Theorems: berechne $\oint_C \vec F\cdot d\vec r$ für $\vec F=(-y,x,0)$ über den Einheitskreis in der $xy$-Ebene.',
+                    h: 'Stokes: $\oint=\iint_S(\nabla\times\vec F)\cdot d\vec A$. Hier $d\vec A=\hat z\,dA$.',
+                    s: '$\nabla\times\vec F=(\partial_y 0-\partial_z x,\,\partial_z(-y)-\partial_x 0,\,\partial_x x-\partial_y(-y))=(0,0,2)$.<br>$(\nabla\times\vec F)\cdot\hat z = 2$. $\iint_S 2\,dA = 2\cdot\pi\cdot 1^2 = 2\pi$.<br>$$\boxed{=2\pi}$$'
+                },
+                {
+                    q: 'Wärmeleitungsgleichung $u_t=u_{xx}$, $0<x<L$, $u(0,t)=u(L,t)=0$, $u(x,0)=\sin(\pi x/L)$. Bestimme $u(x,t)$ via Separation.',
+                    h: 'Ansatz $u=X(x)T(t)$. Eigenwerte $\lambda_n=(n\pi/L)^2$.',
+                    s: 'Separation: $T\'/T = X\'\'/X = -\lambda$.<br>$X_n(x)=\sin(n\pi x/L)$, $T_n(t)=e^{-(n\pi/L)^2 t}$.<br>Anfangsbedingung passt nur zu $n=1$.<br>$$\boxed{u(x,t)=\sin(\pi x/L)\,e^{-(\pi/L)^2 t}}$$<br>Interpretation: höhere Moden klingen schneller ab.'
+                },
+                {
+                    q: 'Berechne $\int_{-\infty}^\infty \dfrac{1}{1+x^2}\,dx$ mit Hilfe des Residuensatzes (oberer Halbkreis).',
+                    h: 'Pol bei $z=j$ in oberer Halbebene. $\operatorname{Res}_{j}=\lim_{z\to j}(z-j)\cdot\dfrac{1}{(z-j)(z+j)}$.',
+                    s: '$\operatorname{Res}_{z=j}=\dfrac{1}{2j}$. Halbkreis-Beitrag verschwindet ($|f|\sim 1/R^2$). $\Rightarrow \int = 2\pi j\cdot\dfrac{1}{2j}=\pi$.<br>$$\boxed{=\pi}$$<br>Konsistent mit elementarem Resultat $\arctan x|_{-\infty}^\infty=\pi$.'                }
             ]
         ]
     };

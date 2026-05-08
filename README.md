@@ -1,6 +1,6 @@
 # Smartineer — Engineering Knowledge Reloaded
 
-Eine schlanke, modulare Single-Page-Anwendung, mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 9 Kategorien, 3 Schwierigkeitsstufen, ~18 Aufgaben je Kategorie und mit isolierten Musterlösungen samt Rechenweg.
+Eine schlanke, modulare Single-Page-Anwendung, mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 9 Kategorien, 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie (~270 gesamt) und mit isolierten Musterlösungen samt Rechenweg.
 
 > **Stack**: Vanilla JS · Tailwind CSS (CDN) · Chart.js · KaTeX  
 > **Hosting**: optimiert für GitHub Pages (kein Build-Schritt)
@@ -25,7 +25,7 @@ Eine schlanke, modulare Single-Page-Anwendung, mit der ein erfahrener Ingenieur 
 ## Features
 
 - 🎯 **9 Kategorien**: Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze
-- 📊 **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **6 Aufgaben** = ~**162 Aufgaben** insgesamt
+- 📊 **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **10 Aufgaben** = ~**270 Aufgaben** insgesamt
 - 🧮 **KaTeX-gerenderte Formeln** in Aufgaben, Hinweisen und Lösungen
 - 🧠 **Cheatsheets** je Kategorie mit zwei Reitern:
   1. **Formeln** (kompakte Übersicht)

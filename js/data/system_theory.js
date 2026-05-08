@@ -25,7 +25,16 @@
             Steuerbarkeit: $\\operatorname{rank}[B,\\,AB,\\,A^2 B,\\,\\dots,\\,A^{n-1}B]=n$<br>
             Beobachtbarkeit: $\\operatorname{rank}[C^T,\\,A^T C^T,\\,\\dots]^T=n$<br><br>
             <strong>Pol-Stabilität</strong><br>
-            Stabil $\\iff$ alle Pole bzw. EW von $A$ in linker Halbebene
+            Stabil $\\iff$ alle Pole bzw. EW von $A$ in linker Halbebene<br><br>
+            <strong>Frequenzgang</strong><br>
+            $G(j\\omega) = |G(j\\omega)|\\,e^{j\\arg G(j\\omega)}$, sinusförmiges Eingangs $\\Rightarrow$ sinusförmiges Ausgangs (gleiche Frequenz)<br><br>
+            <strong>Faltungs-Eigenschaften</strong><br>
+            kommutativ $f*g=g*f$, assoziativ, distributiv, $\\delta$ neutral<br><br>
+            <strong>Stabilitäts-Margin</strong><br>
+            Phasenrand $\\varphi_R = 180° + \\arg G(j\\omega_d)$ bei $|G(j\\omega_d)|=1$<br>
+            Amplitudenrand $A_R = 1/|G(j\\omega_\\pi)|$ bei $\\arg G(j\\omega_\\pi)=-180°$<br><br>
+            <strong>Small-Gain-Theorem</strong><br>
+            Rückkopplung von $G_1, G_2$ stabil, falls $\\lVert G_1\\rVert_\\infty \\cdot \\lVert G_2\\rVert_\\infty < 1$
         `,
         levels: [
             // L1
@@ -59,6 +68,26 @@
                     q: 'Ein System hat Impulsantwort $h(t)=e^{-t}\\sigma(t)$. Ist es BIBO-stabil?',
                     h: 'BIBO: $\\int|h(t)|dt < \\infty$.',
                     s: '$\\int_0^\\infty e^{-t}dt=[-e^{-t}]_0^\\infty=1<\\infty$. ✓<br>$$\\boxed{\\text{BIBO-stabil}}$$'
+                },
+                {
+                    q: 'Welche Frequenz hat der Ausgang eines LTI-Systems mit Eingangs $u(t) = \\sin(5t)$? Begründe.',
+                    h: 'Eigenschaft sinusförmiger LTI-Antwort.',
+                    s: 'LTI-Systeme haben sinus-treue Eigenschaft: bei sinusförmigem Eingang (Frequenz $\\omega$) ist der eingeschwungene Ausgang ebenfalls sinusförmig mit <strong>gleicher Frequenz</strong> $\\omega=5\\,\\text{rad/s}$. Lediglich Amplitude und Phase ändern sich gemäß $|G(j\\omega)|$ bzw. $\\arg G(j\\omega)$.'
+                },
+                {
+                    q: 'Beweise die Kommutativität der Faltung: $f*g=g*f$.',
+                    h: 'Substitution $\\tau\' = t-\\tau$.',
+                    s: '$(f*g)(t)=\\int f(\\tau)g(t-\\tau)d\\tau$. Substitution $\\tau\'=t-\\tau$, $d\\tau\'=-d\\tau$:<br>$=\\int f(t-\\tau\')g(\\tau\')d\\tau\' = (g*f)(t)$. ∎'
+                },
+                {
+                    q: 'Untersuche, ob das System $y(t)=x^2(t)$ linear ist.',
+                    h: 'Superposition prüfen.',
+                    s: '$T\\{ax_1+bx_2\\}=(ax_1+bx_2)^2=a^2 x_1^2+2ab x_1 x_2+b^2 x_2^2$.<br>$aT\\{x_1\\}+bT\\{x_2\\}=a x_1^2+b x_2^2$.<br>$\\neq$ allgemein. <strong>Nicht linear</strong> (memoryless nichtlineare Funktion).'
+                },
+                {
+                    q: 'Bestimme die Pole von $G(s)=\\dfrac{s+2}{s^2+5s+6}$ und beurteile die Stabilität.',
+                    h: 'Nenner-Nullstellen.',
+                    s: '$s^2+5s+6=(s+2)(s+3)=0\\Rightarrow s_{1,2}=-2,-3$.<br>Pol bei $s=-2$ kürzt sich gegen Zähler-Nullstelle (Pol-Nullstellen-Kürzung).<br>Effektiv: $G(s)=1/(s+3)$, einziger Pol $s=-3$ in linker Halbebene.<br>$$\\boxed{\\text{BIBO-stabil}}$$'
                 }
             ],
             // L2
@@ -92,6 +121,26 @@
                     q: 'Berechne die Impulsantwort des Systems mit Übertragungsfunktion $G(s)=\\dfrac{1}{s+5}$ und gib den Wert bei $t=0{,}2\\,\\text{s}$ an.',
                     h: '$h(t)=\\mathcal{L}^{-1}\\{G(s)\\}$.',
                     s: '$h(t)=e^{-5t}\\sigma(t)$.<br>$h(0{,}2)=e^{-1}\\approx 0{,}368$.<br>$$\\boxed{h(0{,}2)\\approx 0{,}368}$$'
+                },
+                {
+                    q: 'Berechne die statische Verstärkung von $G(s)=\\dfrac{4(s+1)}{s^2+3s+2}$.',
+                    h: 'Endwertsatz / $G(0)$.',
+                    s: '$K_s = \\lim_{s\\to 0} G(s) = G(0) = \\dfrac{4\\cdot 1}{0+0+2} = 2$.<br>$$\\boxed{K_s = 2}$$ Bedeutung: bei Sprung-Eingang Höhe $1$ stellt sich stationär $y_\\infty = 2$ ein.'
+                },
+                {
+                    q: 'Frequenzgang: berechne $|G(j\\omega)|$ und $\\arg G(j\\omega)$ für $G(s)=1/(s+1)$ bei $\\omega = 1\\,\\text{rad/s}$.',
+                    h: '$s=j\\omega$ einsetzen.',
+                    s: '$G(j\\cdot 1) = 1/(1+j) = (1-j)/2$.<br>$|G| = 1/\\sqrt{1^2+1^2} = 1/\\sqrt 2 \\approx 0{,}707$ (-3 dB).<br>$\\arg G = -\\arctan(1/1) = -45°$.<br>$$\\boxed{|G|\\approx 0{,}707,\\ \\arg G = -45°}$$ Eckfrequenz des PT1.'
+                },
+                {
+                    q: 'Beobachtbarkeit prüfen: $A=\\begin{pmatrix}-1&0\\\\0&-2\\end{pmatrix}$, $C=\\begin{pmatrix}1&0\\end{pmatrix}$.',
+                    h: '$\\mathcal{O}=\\begin{pmatrix}C\\\\CA\\end{pmatrix}$.',
+                    s: '$CA=\\begin{pmatrix}1&0\\end{pmatrix}\\begin{pmatrix}-1&0\\\\0&-2\\end{pmatrix}=\\begin{pmatrix}-1&0\\end{pmatrix}$.<br>$\\mathcal{O}=\\begin{pmatrix}1&0\\\\-1&0\\end{pmatrix}$, $\\det=0\\Rightarrow$ Rang $=1<2$.<br>$$\\boxed{\\text{Nicht beobachtbar}}$$ Mode $x_2$ (EW $-2$) ist von $C$ nicht messbar.'
+                },
+                {
+                    q: 'Endwertsatz: berechne $\\lim_{t\\to\\infty} y(t)$ für $Y(s) = \\dfrac{2}{s(s+3)}$.',
+                    h: '$\\lim_{t\\to\\infty} y(t) = \\lim_{s\\to 0} sY(s)$ (falls Pole von $sY(s)$ in LHE).',
+                    s: '$sY(s) = 2/(s+3)$. Pol bei $s=-3$ (LHE). ✓<br>$\\lim_{s\\to 0} 2/(s+3) = 2/3$.<br>$$\\boxed{y_\\infty = 2/3}$$'
                 }
             ],
             // L3
@@ -125,6 +174,31 @@
                     q: 'Energie-Definitionen: Wann ist ein Signal energie- bzw. leistungsbegrenzt? Klassifiziere $x(t)=e^{-|t|}$ und $x(t)=\\cos(\\omega_0 t)$.',
                     h: 'Energie: $E=\\int|x|^2 dt < \\infty$. Leistung: $P=\\lim_T (1/T)\\int_{-T/2}^{T/2}|x|^2 dt < \\infty$.',
                     s: '$e^{-|t|}$: $E=\\int_{-\\infty}^{\\infty}e^{-2|t|}dt=2\\int_0^\\infty e^{-2t}dt=1<\\infty$. <strong>Energiesignal.</strong> $P=0$.<br>$\\cos\\omega_0 t$: $E=\\infty$ (periodisch). $P=\\lim_T (1/T)\\int (1+\\cos 2\\omega_0 t)/2\\,dt=1/2$. <strong>Leistungssignal.</strong>'
+                },
+                {
+                    q: 'Bestimme Phasen- und Amplitudenrand für $G(s)=\\dfrac{1}{s(s+1)^2}$ in offener Schleife (Daumenwerte: Durchtrittsfrequenz, $\\omega_\\pi$).',
+                    h: 'Phasenrand bei $|G|=1$; Amplitudenrand bei Phase $-180°$.',
+                    s: 'Phase: $\\arg G(j\\omega) = -90°-2\\arctan(\\omega)$.<br>$-180°$ bei $-2\\arctan\\omega = -90° \\Rightarrow \\omega_\\pi = 1\\,\\text{rad/s}$.<br>$|G(j1)| = 1/(1\\cdot (\\sqrt 2)^2) = 1/2$. $A_R = 1/0{,}5 = 2$ ($6\\,\\text{dB}$).<br>Durchtrittsfrequenz: $|G(j\\omega_d)|=1$. Numerisch $\\omega_d \\approx 0{,}68$. $\\arg G(j 0{,}68)\\approx -90°-2\\cdot 34{,}2°=-158{,}4°$, $\\varphi_R \\approx 21{,}6°$.<br>Schwacher Phasenrand $\\Rightarrow$ in Praxis Lead-Glied zur Stabilisierung.'
+                },
+                {
+                    q: 'Small-Gain-Theorem: stabilisiere die Rückkopplung von $G_1(s)=\\dfrac{0{,}5}{s+1}$ und $G_2(s)=\\dfrac{0{,}8}{s+2}$.',
+                    h: '$\\lVert G\\rVert_\\infty = \\sup_\\omega |G(j\\omega)|$. Für PT1 beim Maximum bei $\\omega=0$.',
+                    s: '$\\lVert G_1\\rVert_\\infty = |G_1(0)| = 0{,}5$.<br>$\\lVert G_2\\rVert_\\infty = |G_2(0)| = 0{,}4$.<br>Produkt $= 0{,}2 < 1$. ✓<br>$$\\boxed{\\text{Rückkopplung stabil nach Small-Gain-Theorem}}$$ Hinreichende, aber nicht notwendige Bedingung.'
+                },
+                {
+                    q: 'Modale Zerlegung: bestimme die Zustandstrafo $z=Tx$, die $A=\\begin{pmatrix}0&1\\\\-2&-3\\end{pmatrix}$ in Diagonalform überführt, und gib das transformierte Modell an.',
+                    h: 'EV als Spalten von $T^{-1}$, dann $\\Lambda = T A T^{-1}$ diagonal mit EW.',
+                    s: 'EW $\\lambda_1=-1, \\lambda_2=-2$ (siehe L2.2).<br>EV: $v_1=(1,-1)^T$, $v_2=(1,-2)^T$.<br>$T^{-1}=\\begin{pmatrix}1 & 1\\\\ -1 & -2\\end{pmatrix}$, $T = \\begin{pmatrix}2 & 1\\\\ -1 & -1\\end{pmatrix}$ (siehe L3.5).<br>Im neuen System: $\\dot z = \\Lambda z + T B u$, $y = C T^{-1} z$, mit $\\Lambda = \\operatorname{diag}(-1,-2)$. Modes entkoppelt $\\Rightarrow$ einfache Analyse pro Eigen-Mode.'
+                },
+                {
+                    q: 'Minimale Realisierung: ist $A=\\begin{pmatrix}-1&0\\\\0&-2\\end{pmatrix}$, $B=\\begin{pmatrix}1\\\\1\\end{pmatrix}$, $C=\\begin{pmatrix}1&0\\end{pmatrix}$ minimal? Begründe.',
+                    h: 'Steuerbarkeit + Beobachtbarkeit prüfen.',
+                    s: 'Steuerbarkeit: $AB=(-1,-2)^T$. $\\mathcal{C}=\\begin{pmatrix}1&-1\\\\1&-2\\end{pmatrix}$, $\\det=-1\\neq 0$. ✓<br>Beobachtbarkeit: $CA=(-1,0)$. $\\mathcal{O}=\\begin{pmatrix}1&0\\\\-1&0\\end{pmatrix}$, Rang $1<2$. ✗<br>Mode $x_2$ ist nicht beobachtbar $\\Rightarrow$ <strong>nicht minimal</strong>. Minimale Realisierung hat Ordnung 1: $G(s)=C(sI-A)^{-1}B = 1/(s+1)$.'
+                },
+                {
+                    q: 'Kalman-Zerlegung: erläutere die 4 Subsysteme einer allgemeinen LTI-Realisation.',
+                    h: 'Kombinationen aus (un)steuerbar × (un)beobachtbar.',
+                    s: 'Jede LTI-Realisation lässt sich (durch Ähnlichkeitstrafo) in 4 Subsysteme zerlegen:<br>1. <strong>Steuerbar & beobachtbar</strong> $(S\\cap B)$: erscheint in $G(s)$, minimal.<br>2. <strong>Steuerbar & nicht-beobachtbar</strong> $(S\\cap \\bar B)$: nicht in $G(s)$, aber zustandsdynamisch erregbar.<br>3. <strong>Nicht-steuerbar & beobachtbar</strong> $(\\bar S\\cap B)$: erscheint in Anfangszustandsantwort, nicht in $G(s)$.<br>4. <strong>Nicht-steuerbar & nicht-beobachtbar</strong> $(\\bar S\\cap \\bar B)$: völlig versteckt.<br>$G(s)$ enthält nur Subsystem 1. Modes aus 2-4 müssen für interne Stabilität zusätzlich stabil sein.'
                 }
             ]
         ]
