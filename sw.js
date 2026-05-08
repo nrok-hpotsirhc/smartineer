@@ -1,11 +1,12 @@
 /* Smartineer Service Worker
  * Strategie:
- *   - App-Shell precachen (Install).
+ *   - App-Shell precachen (Install) — resilient: einzelne Fehler brechen Install nicht ab.
+ *   - Navigation: Cache-First mit Hintergrundupdate (kein Blank-Screen bei schlechter Verbindung).
  *   - Same-origin GET: Cache-First mit Background-Update.
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v6-schueler-cyber';
+const CACHE_VERSION = 'smartineer-v7-robust';
 const APP_SHELL = [
     './',
     './index.html',
@@ -29,10 +30,21 @@ const APP_SHELL = [
     './icons/icon-512.svg'
 ];
 
+// Jede Datei einzeln cachen — ein Fehler bricht nicht die gesamte Installation ab.
+function precacheAll(cache, urls) {
+    return Promise.all(
+        urls.map((url) =>
+            cache.add(url).catch((err) => {
+                console.warn('[SW] Precache fehlgeschlagen für', url, err);
+            })
+        )
+    );
+}
+
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_VERSION)
-            .then((cache) => cache.addAll(APP_SHELL))
+            .then((cache) => precacheAll(cache, APP_SHELL))
             .then(() => self.skipWaiting())
     );
 });
@@ -54,10 +66,23 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(req.url);
     const sameOrigin = url.origin === self.location.origin;
 
-    // Navigation -> index.html offline-Fallback
+    // Navigation: Cache-First → sofortiger Start aus Cache, Hintergrundupdate.
+    // Kein network-first, damit die App auch bei schlechter Verbindung sofort lädt.
     if (req.mode === 'navigate') {
         event.respondWith(
-            fetch(req).catch(() => caches.match('./index.html'))
+            caches.match('./index.html').then((cached) => {
+                // Hintergrundupdate: index.html im Cache aktualisieren
+                const networkUpdate = fetch(req).then((res) => {
+                    if (res && res.status === 200) {
+                        const copy = res.clone();
+                        caches.open(CACHE_VERSION).then((c) => c.put('./index.html', copy));
+                    }
+                    return res;
+                }).catch(() => null);
+
+                // Sofort aus Cache liefern; falls kein Cache, auf Netzwerk warten
+                return cached || networkUpdate;
+            })
         );
         return;
     }
@@ -72,7 +97,7 @@ self.addEventListener('fetch', (event) => {
                         caches.open(CACHE_VERSION).then((c) => c.put(req, copy));
                     }
                     return res;
-                }).catch(() => cached);
+                }).catch(() => null);
                 return cached || network;
             })
         );
