@@ -1,0 +1,135 @@
+/* Physik */
+(function () {
+    window.APP_DATA = window.APP_DATA || {};
+    window.APP_ORDER = window.APP_ORDER || [];
+    const id = 'physics';
+    if (!window.APP_ORDER.includes(id)) window.APP_ORDER.push(id);
+
+    window.APP_DATA[id] = {
+        id,
+        name: 'Physik',
+        desc: 'Klassische Mechanik, Elektrodynamik, Schwingungen, Wellen, Thermodynamik &mdash; Grundlage fürs Hardware-Verständnis.',
+        formulas: `
+            <strong>Kinematik (gerad. konst. Beschleunigung)</strong><br>
+            $v=v_0+at$, $s=s_0+v_0 t+\\tfrac12 a t^2$, $v^2-v_0^2=2a\\Delta s$<br><br>
+            <strong>Newton</strong><br>
+            $\\vec F=m\\vec a$, $\\vec p=m\\vec v$, Impulssatz: $\\vec F=d\\vec p/dt$<br><br>
+            <strong>Energie</strong><br>
+            $E_{kin}=\\tfrac12 m v^2$, $E_{pot}=mgh$, $W=\\int\\vec F\\cdot d\\vec s$<br><br>
+            <strong>Rotation</strong><br>
+            $\\vec M=\\vec r\\times\\vec F$, $L=I\\omega$, $E_{rot}=\\tfrac12 I\\omega^2$<br>
+            Vollzylinder: $I=\\tfrac12 m r^2$; Kugel: $I=\\tfrac25 mr^2$; Hohlzylinder: $I=mr^2$<br><br>
+            <strong>Elektrodynamik</strong><br>
+            Coulomb: $F=\\dfrac{1}{4\\pi\\varepsilon_0}\\dfrac{q_1 q_2}{r^2}$<br>
+            Lorentz: $\\vec F=q(\\vec E+\\vec v\\times\\vec B)$<br>
+            Induktion: $U_{ind}=-\\dfrac{d\\Phi}{dt}$<br><br>
+            <strong>Schwingungen</strong><br>
+            Federpendel: $\\omega=\\sqrt{k/m}$. Math. Pendel: $\\omega=\\sqrt{g/l}$<br>
+            LC-Schwingkreis: $\\omega_0=1/\\sqrt{LC}$<br><br>
+            <strong>Thermodynamik</strong><br>
+            Ideales Gas: $pV=nRT$. 1. HS: $\\Delta U=Q+W$<br>
+            Carnot: $\\eta=1-T_k/T_w$
+        `,
+        levels: [
+            // L1
+            [
+                {
+                    q: 'Ein Auto fährt mit $v_0=108\\,\\text{km/h}$. Es bremst mit $a=-5\\,\\text{m/s}^2$. Berechne den Bremsweg.',
+                    h: 'Erst km/h $\\to$ m/s. Dann $v^2=v_0^2+2a\\Delta s$ mit $v=0$.',
+                    s: '$v_0=108/3{,}6=30\\,\\text{m/s}$.<br>$0=30^2+2(-5)s\\Rightarrow s=900/10=90\\,\\text{m}$.<br>$$\\boxed{s=90\\,\\text{m}}$$'
+                },
+                {
+                    q: 'Ein Elektron ($|q|=1{,}6\\cdot 10^{-19}\\,\\text{C}$) fliegt mit $v=10^6\\,\\text{m/s}$ senkrecht zu $B=0{,}5\\,\\text{T}$. Berechne den Betrag der Lorentzkraft.',
+                    h: '$F=|q|vB\\sin 90°$.',
+                    s: '$F=1{,}6\\cdot 10^{-19}\\cdot 10^6\\cdot 0{,}5 = 8\\cdot 10^{-14}\\,\\text{N}$.<br>$$\\boxed{F=8\\cdot 10^{-14}\\,\\text{N}}$$'
+                },
+                {
+                    q: 'Trägheitsmoment eines homogenen Vollzylinders (Masse $m$, Radius $r$) um die Symmetrieachse?',
+                    h: 'Standardformel.',
+                    s: '$$\\boxed{I=\\tfrac12 m r^2}$$'
+                },
+                {
+                    q: 'Ein Federpendel hat $m=0{,}5\\,\\text{kg}$ und $k=200\\,\\text{N/m}$. Bestimme Eigenfrequenz $\\omega_0$ und Periodendauer $T$.',
+                    h: '$\\omega=\\sqrt{k/m}$, $T=2\\pi/\\omega$.',
+                    s: '$\\omega_0=\\sqrt{200/0{,}5}=\\sqrt{400}=20\\,\\text{rad/s}$.<br>$T=2\\pi/20\\approx 0{,}314\\,\\text{s}$.<br>$$\\boxed{\\omega_0=20\\,\\text{rad/s},\\ T\\approx 0{,}314\\,\\text{s}}$$'
+                },
+                {
+                    q: 'Coulomb-Kraft zwischen zwei Punktladungen $q_1=q_2=1\\,\\mu\\text{C}$ im Abstand $r=1\\,\\text{m}$ (im Vakuum, $1/(4\\pi\\varepsilon_0)\\approx 8{,}99\\cdot 10^9$).',
+                    h: '$F=k q_1 q_2/r^2$ mit $k=1/(4\\pi\\varepsilon_0)$.',
+                    s: '$F=8{,}99\\cdot 10^9 \\cdot (10^{-6})^2 / 1^2 = 8{,}99\\cdot 10^{-3}\\,\\text{N}$.<br>$$\\boxed{F\\approx 9\\,\\text{mN}}$$'
+                },
+                {
+                    q: 'Welche Wärmemenge ist nötig, um $1\\,\\text{kg}$ Wasser von $20°\\text{C}$ auf $80°\\text{C}$ zu erwärmen? ($c=4{,}19\\,\\text{kJ/(kg K)}$.)',
+                    h: '$Q=mc\\Delta T$.',
+                    s: '$Q=1\\cdot 4{,}19\\cdot 10^3\\cdot 60 = 251{,}4\\,\\text{kJ}$.<br>$$\\boxed{Q\\approx 251\\,\\text{kJ}}$$'
+                }
+            ],
+            // L2
+            [
+                {
+                    q: 'Auf eine schiefe Ebene (Neigung $30°$, reibungsfrei) wird ein Klotz $m=2\\,\\text{kg}$ gestellt. Berechne die Beschleunigung entlang der Ebene.',
+                    h: 'Hangabtriebskraft: $F=mg\\sin\\alpha$. $a=F/m$.',
+                    s: '$a=g\\sin 30°=9{,}81\\cdot 0{,}5=4{,}905\\,\\text{m/s}^2$.<br>$$\\boxed{a\\approx 4{,}9\\,\\text{m/s}^2}$$ (massenunabhängig).'
+                },
+                {
+                    q: 'Berechne die Geschwindigkeit, mit der eine Vollkugel den Endpunkt einer schiefen Ebene (Höhe $h=1\\,\\text{m}$) ohne Schlupf erreicht.',
+                    h: 'Energieerhaltung: $mgh=\\tfrac12 mv^2+\\tfrac12 I\\omega^2$, $v=\\omega r$, $I=\\tfrac25 mr^2$.',
+                    s: '$mgh=\\tfrac12 mv^2+\\tfrac12\\cdot \\tfrac25 mr^2\\cdot v^2/r^2=\\tfrac12 mv^2(1+\\tfrac25)=\\tfrac{7}{10}mv^2$.<br>$v=\\sqrt{10gh/7}=\\sqrt{10\\cdot 9{,}81\\cdot 1/7}\\approx 3{,}74\\,\\text{m/s}$.<br>$$\\boxed{v\\approx 3{,}74\\,\\text{m/s}}$$ Vergleich: ohne Rollen $v=\\sqrt{2gh}\\approx 4{,}43\\,\\text{m/s}$ (Energie steckt in Rotation).'
+                },
+                {
+                    q: 'Ein LC-Schwingkreis: $L=1\\,\\text{mH}$, $C=1\\,\\mu\\text{F}$. Berechne Resonanzfrequenz $f_0$.',
+                    h: '$\\omega_0=1/\\sqrt{LC}$, $f_0=\\omega_0/(2\\pi)$.',
+                    s: '$\\omega_0=1/\\sqrt{10^{-3}\\cdot 10^{-6}}=1/\\sqrt{10^{-9}}=\\sqrt{10^9}\\approx 3{,}162\\cdot 10^4\\,\\text{rad/s}$.<br>$f_0\\approx 5033\\,\\text{Hz}\\approx 5\\,\\text{kHz}$.<br>$$\\boxed{f_0\\approx 5\\,\\text{kHz}}$$'
+                },
+                {
+                    q: 'Ein elastischer Stoß: $m_1=2\\,\\text{kg}$ mit $v_1=4\\,\\text{m/s}$ trifft ruhendes $m_2=1\\,\\text{kg}$. Berechne $v_1\',\\,v_2\'$ nach dem Stoß.',
+                    h: 'Impuls- und Energieerhaltung. Standardformeln: $v_1\'=\\dfrac{m_1-m_2}{m_1+m_2}v_1$, $v_2\'=\\dfrac{2m_1}{m_1+m_2}v_1$.',
+                    s: '$v_1\'=(2-1)/(2+1)\\cdot 4 = 4/3\\approx 1{,}33\\,\\text{m/s}$.<br>$v_2\'=2\\cdot 2/3\\cdot 4 = 16/3\\approx 5{,}33\\,\\text{m/s}$.<br>Kontrolle Impuls: $2\\cdot 4 = 8 = 2\\cdot 4/3 + 1\\cdot 16/3 = 24/3=8$. ✓<br>$$\\boxed{v_1\'\\approx 1{,}33,\\ v_2\'\\approx 5{,}33\\,\\text{m/s}}$$'
+                },
+                {
+                    q: 'Eine Spule mit $N=200$ Windungen umschließt einen magn. Fluss, der sich linear von $0$ auf $0{,}1\\,\\text{Vs}$ in $50\\,\\text{ms}$ ändert. Welche Induktionsspannung tritt auf?',
+                    h: 'Faraday: $U=-N\\,d\\Phi/dt$.',
+                    s: '$|U|=200\\cdot 0{,}1/0{,}05 = 200\\cdot 2 = 400\\,\\text{V}$.<br>$$\\boxed{|U|=400\\,\\text{V}}$$ Vorzeichen nach Lenzscher Regel: induzierter Strom wirkt der Flussänderung entgegen.'
+                },
+                {
+                    q: 'Ein idealer Carnot-Prozess arbeitet zwischen $T_w=600\\,\\text{K}$ und $T_k=300\\,\\text{K}$. Berechne den Wirkungsgrad.',
+                    h: '$\\eta=1-T_k/T_w$ (Temperaturen in Kelvin).',
+                    s: '$\\eta=1-300/600=0{,}5=50\\%$.<br>$$\\boxed{\\eta=50\\%}$$ Theoretisches Maximum bei diesen Reservoirtemperaturen.'
+                }
+            ],
+            // L3
+            [
+                {
+                    q: 'Gedämpfte Schwingung: $m\\ddot x + d\\dot x + kx = 0$. Bestimme Bewegungsgleichung-Kennwerte und Klassifikation für $m=1$, $d=2$, $k=5$.',
+                    h: '$\\omega_0=\\sqrt{k/m}$. Dämpfungsmaß $D=d/(2\\sqrt{km})$. $D<1$ unterdämpft, $D=1$ aperiodisch, $D>1$ kriechend.',
+                    s: '$\\omega_0=\\sqrt{5}\\approx 2{,}24$.<br>$D=2/(2\\sqrt{5})=1/\\sqrt{5}\\approx 0{,}447 <1$.<br>$\\omega_d=\\omega_0\\sqrt{1-D^2}=\\sqrt{5}\\sqrt{0{,}8}=2$.<br>$$\\boxed{\\text{Unterdämpft};\\ \\omega_d=2\\,\\text{rad/s}}$$ Lösung: $x(t)=e^{-t}(C_1\\cos 2t+C_2\\sin 2t)$.'
+                },
+                {
+                    q: 'Maxwell: bestimme den Verschiebungsstrom $i_v$ in einem Plattenkondensator mit Plattenfläche $A=10^{-3}\\,\\text{m}^2$, in dem $E$ mit $dE/dt = 10^9\\,\\text{V/(m s)}$ steigt. ($\\varepsilon_0=8{,}85\\cdot 10^{-12}$).',
+                    h: '$i_v=\\varepsilon_0 A\\,dE/dt$.',
+                    s: '$i_v=8{,}85\\cdot 10^{-12}\\cdot 10^{-3}\\cdot 10^9 = 8{,}85\\cdot 10^{-6}\\,\\text{A}\\approx 8{,}85\\,\\mu\\text{A}$.<br>$$\\boxed{i_v\\approx 8{,}85\\,\\mu\\text{A}}$$'
+                },
+                {
+                    q: 'Ein Elektron beschleunigt durch eine Spannung $U=1\\,\\text{kV}$ aus der Ruhe. Berechne (nicht-relativistisch) die Geschwindigkeit. ($m_e=9{,}11\\cdot 10^{-31}\\,\\text{kg}$).',
+                    h: 'Energiesatz: $eU=\\tfrac12 m_e v^2$.',
+                    s: '$v=\\sqrt{2eU/m_e}=\\sqrt{2\\cdot 1{,}6\\cdot 10^{-19}\\cdot 1000/9{,}11\\cdot 10^{-31}}=\\sqrt{3{,}51\\cdot 10^{14}}\\approx 1{,}87\\cdot 10^7\\,\\text{m/s}$.<br>$$\\boxed{v\\approx 1{,}87\\cdot 10^7\\,\\text{m/s}}\\approx 6\\% c$$ (gerade noch nicht-relativistisch zulässig).'
+                },
+                {
+                    q: 'Stehende Welle auf einer Saite ($L=0{,}5\\,\\text{m}$, beidseitig fest). Welche Eigenfrequenzen treten auf, wenn die Wellengeschwindigkeit $c=300\\,\\text{m/s}$ ist?',
+                    h: '$\\lambda_n=2L/n$, $f_n=c/\\lambda_n = nc/(2L)$.',
+                    s: '$f_n = n\\cdot 300/(2\\cdot 0{,}5)=n\\cdot 300\\,\\text{Hz}$.<br>Grundfrequenz $f_1=300\\,\\text{Hz}$, Oberschwingungen $f_n=n\\cdot 300\\,\\text{Hz}$.<br>$$\\boxed{f_n=n\\cdot 300\\,\\text{Hz}}$$'
+                },
+                {
+                    q: 'Plancksche Strahlung: berechne die Wellenlänge des Strahlungsmaximums eines schwarzen Körpers bei $T=3000\\,\\text{K}$ (Wiensches Verschiebungsgesetz $\\lambda_{max}T=b$, $b=2{,}898\\cdot 10^{-3}\\,\\text{m K}$).',
+                    h: '$\\lambda_{max}=b/T$.',
+                    s: '$\\lambda_{max}=2{,}898\\cdot 10^{-3}/3000\\approx 9{,}66\\cdot 10^{-7}\\,\\text{m}\\approx 966\\,\\text{nm}$ (nahes Infrarot).<br>$$\\boxed{\\lambda_{max}\\approx 966\\,\\text{nm}}$$'
+                },
+                {
+                    q: 'Berechne die relativistische kinetische Energie eines Protons mit Geschwindigkeit $v=0{,}8\\,c$. ($m_p c^2 \\approx 938\\,\\text{MeV}$).',
+                    h: 'Lorentzfaktor $\\gamma=1/\\sqrt{1-(v/c)^2}$. $E_{kin}=(\\gamma-1)mc^2$.',
+                    s: '$\\gamma=1/\\sqrt{1-0{,}64}=1/\\sqrt{0{,}36}=1/0{,}6\\approx 1{,}667$.<br>$E_{kin}=(1{,}667-1)\\cdot 938\\,\\text{MeV}\\approx 625\\,\\text{MeV}$.<br>$$\\boxed{E_{kin}\\approx 625\\,\\text{MeV}}$$ Klassisch wäre $\\tfrac12 m v^2\\approx 300\\,\\text{MeV}$ (deutlich zu wenig).'
+                }
+            ]
+        ]
+    };
+})();
