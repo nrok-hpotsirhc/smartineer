@@ -1,9 +1,10 @@
 # Smartineer — Engineering Knowledge Reloaded
 
-Eine schlanke, modulare Single-Page-Anwendung, mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 9 Kategorien, 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie (~270 gesamt) und mit isolierten Musterlösungen samt Rechenweg.
+Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 9 Kategorien, 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie (~270 gesamt) und mit isolierten Musterlösungen samt Rechenweg.
 
-> **Stack**: Vanilla JS · Tailwind CSS (CDN) · Chart.js · KaTeX  
-> **Hosting**: optimiert für GitHub Pages (kein Build-Schritt)
+> **Stack**: React 18 (CDN, JSX via Babel-standalone) · Tailwind CSS (CDN) · Chart.js · KaTeX  
+> **Auslieferung**: Klassische Website **und** installierbare PWA (Desktop, Android, iOS)  
+> **Hosting**: optimiert für GitHub Pages — **kein Build-Schritt**
 
 ---
 
@@ -11,6 +12,7 @@ Eine schlanke, modulare Single-Page-Anwendung, mit der ein erfahrener Ingenieur 
 
 - [Features](#features)
 - [Live-Demo / Hosting](#live-demo--hosting)
+- [Als App installieren (PWA)](#als-app-installieren-pwa)
 - [Schnellstart lokal](#schnellstart-lokal)
 - [Projektstruktur](#projektstruktur)
 - [Kategorien-Übersicht](#kategorien-übersicht)
@@ -27,13 +29,15 @@ Eine schlanke, modulare Single-Page-Anwendung, mit der ein erfahrener Ingenieur 
 - 🎯 **9 Kategorien**: Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze
 - 📊 **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **10 Aufgaben** = ~**270 Aufgaben** insgesamt
 - 🧮 **KaTeX-gerenderte Formeln** in Aufgaben, Hinweisen und Lösungen
-- 🧠 **Cheatsheets** je Kategorie mit zwei Reitern:
+- ⚛️ **React-UI** (Hooks, Functional Components) mit weichen Übergangs-Animationen, Gradient-Hero, animierten Fortschrittsbalken und Hover-Effekten
+- 📲 **PWA**: voll installierbar auf Desktop / Android / iOS, **offline-fähig** durch Service-Worker-Caching
+- 🧭 **Cheatsheets** je Kategorie mit zwei Reitern:
   1. **Formeln** (kompakte Übersicht)
   2. **Musterlösungen** (vollständig isoliert mit Rechenweg und Kommentaren)
 - 💾 **Lokaler Lernfortschritt** via `localStorage` (kein Backend, kein Tracking)
 - 📈 **Dashboard** mit Radarchart deiner Kompetenzverteilung
 - 🌐 **Modular & erweiterbar**: jede Kategorie ist eine eigene Datei in `js/data/`. Neue Aufgaben hinzufügen = eine Datei editieren, Browser neu laden, fertig.
-- 🚀 **Zero-Build**: kein npm, kein Webpack, kein Babel — pure HTML/CSS/JS
+- 🚀 **Zero-Build**: kein npm, kein Webpack — React/JSX werden via **Babel-standalone zur Laufzeit** im Browser transpiliert
 
 ---
 
@@ -60,6 +64,45 @@ npx serve .
 
 Dann `http://localhost:8000` öffnen.
 
+> **Hinweis zum Service Worker**: Der SW registriert sich nur über `http(s)://`-Origins, **nicht** über `file://`. Für ein vollständiges PWA-Verhalten (Offline-Cache, Install-Prompt) lokal einen kleinen Webserver verwenden.
+
+---
+
+## Als App installieren (PWA)
+
+Smartineer kann zusätzlich zur klassischen Website-Nutzung als **eigenständige App** auf Desktop und Mobilgerät installiert werden. Nach der Installation startet die App ohne Browser-Leiste, ist offline verfügbar und lädt deutlich schneller.
+
+### 🖥️ Desktop (Chrome / Edge / Brave)
+
+1. Smartineer im Browser öffnen.
+2. In der Adressleiste rechts erscheint ein **Install-Symbol** (kleines Monitor-/Plus-Icon).
+3. Klicken → **„Installieren"**. Die App taucht im Startmenü / Dock auf.
+
+Alternativ: Auf dem Dashboard den Button **„📲 Als App installieren"** klicken.
+
+### 🤖 Android (Chrome / Edge)
+
+1. Smartineer in Chrome öffnen.
+2. Bei erstem Besuch erscheint nach kurzer Zeit ein Hinweis-Popup — auf **„Jetzt installieren"** tippen.
+3. Falls geschlossen: **Menü** (⋮ oben rechts) → **„App installieren"** bzw. **„Zum Startbildschirm hinzufügen"**.
+
+### 🍏 iOS / iPadOS (Safari)
+
+Auf iOS unterstützt nur **Safari** die Installation als PWA (Chrome auf iOS funktioniert **nicht** — Apple-Restriktion).
+
+1. Smartineer in **Safari** öffnen.
+2. Unten in der Browser-Leiste auf das **Teilen-Symbol** (Quadrat mit Pfeil nach oben) tippen.
+3. Im Aktions-Sheet nach unten scrollen → **„Zum Home-Bildschirm"** wählen.
+4. Oben rechts mit **„Hinzufügen"** bestätigen.
+
+Die App erscheint dann mit eigenem Icon auf dem Homescreen und läuft im Vollbild ohne Adressleiste.
+
+> Beim ersten Besuch auf einem Mobilgerät blendet Smartineer automatisch eine kurze Installations-Anleitung ein. Mit „Nicht mehr fragen" wird der Hinweis dauerhaft ausgeblendet (`localStorage`-Flag `smartineer_install_dismissed_v1`).
+
+### Offline-Verhalten
+
+Nach erstem Aufruf werden alle App-Shell-Dateien (HTML, CSS, JSX, alle Aufgaben-Module, Icons, Manifest) sowie die wichtigsten CDN-Ressourcen (Tailwind, Chart.js, KaTeX) lokal zwischengespeichert. Smartineer ist danach **vollständig offline nutzbar**, der Lernfortschritt bleibt im `localStorage` erhalten.
+
 ---
 
 ## Schnellstart lokal
@@ -78,13 +121,20 @@ Es werden keine Abhängigkeiten installiert. Alle Bibliotheken werden per CDN ge
 
 ```
 smartineer/
-├── index.html                  # SPA-Shell (Dashboard / Training / Cheatsheet)
+├── index.html                  # SPA-Shell (React-Mount, PWA-Hooks, Script-Reihenfolge)
+├── manifest.webmanifest        # PWA-Manifest (Name, Icons, Display-Mode)
+├── sw.js                       # Service Worker (Offline-Cache, Stale-while-revalidate)
 ├── .nojekyll                   # GitHub Pages: Jekyll deaktivieren
 ├── README.md                   # diese Datei
+├── AGENTS.md                   # Konventionen für Entwickler/AI-Agents
+├── icons/                      # PWA-Icons (SVG, gradient-basiert)
+│   ├── icon.svg
+│   ├── icon-192.svg
+│   └── icon-512.svg
 ├── css/
-│   └── styles.css              # eigenes Styling (Pills, Tabs, Status-Badges …)
+│   └── styles.css              # Pills, Animationen, Safe-Area, Scrollbars
 └── js/
-    ├── app.js                  # Anwendungslogik (Routing, Rendering, Progress)
+    ├── app.jsx                 # React-App (Hooks, Komponenten, Install-Prompt)
     └── data/
         ├── math.js             # Höhere Mathematik
         ├── control.js          # Regelungstechnik
@@ -97,7 +147,7 @@ smartineer/
         └── neural_nets.js      # Neuronale Netze
 ```
 
-Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht ihre `id` in `window.APP_ORDER`. Reihenfolge in der UI = Reihenfolge der `<script>`-Tags in `index.html`.
+Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht ihre `id` in `window.APP_ORDER`. Reihenfolge in der UI = Reihenfolge der `<script>`-Tags in `index.html`. React liest beim Mount aus diesen Globals — **keine** `import`-Statements nötig.
 
 ---
 
@@ -128,8 +178,10 @@ Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht
 ### Neue Kategorie hinzufügen
 
 1. Neue Datei `js/data/<id>.js` nach Vorbild der bestehenden anlegen.
-2. In `index.html` einen `<script src="js/data/<id>.js"></script>` **vor** `js/app.js` einfügen.
-3. Die UI (Sidebar, Dashboard, Radarchart) übernimmt die Kategorie automatisch.
+2. In `index.html` einen `<script src="js/data/<id>.js"></script>` **vor** den React-/Babel-Skripten einfügen.
+3. Die Datei zusätzlich in der `APP_SHELL`-Liste in `sw.js` ergänzen (sonst kein Offline-Cache).
+4. `CACHE_VERSION` in `sw.js` hochzählen, damit Bestandsuser den neuen Stand beziehen.
+5. Die UI (Sidebar, Dashboard, Radarchart) übernimmt die Kategorie automatisch.
 
 ---
 
@@ -172,9 +224,20 @@ window.APP_DATA[id] = {
 
 ## Wissenschaftliche Korrektheit
 
-Alle Aufgaben und Lösungen wurden bewusst auf etablierte Lehrbuch-Konventionen ausgerichtet (Lutz/Wendt, Föllinger, Lunze, Khalil, Bishop, Goodfellow, Spong, Nakamoto-Whitepaper, NIST-Standards). Numerische Ergebnisse sind im Allgemeinen auf 3 signifikante Stellen gerundet. Bei zwei legitimen Vorzeichen-/Definitions-Konventionen ist die jeweils gewählte Konvention im Lösungsweg angegeben.
+> ⚠️ **VERBINDLICH: Alle Aufgaben, Hinweise und Musterlösungen MÜSSEN wissenschaftlich korrekt sein.**  
+> Eine inhaltlich falsche Aufgabe ist ein **Bug** — nicht eine „Kleinigkeit". Bevor eine Aufgabe ins Repo geht, ist die Korrektheit gegen mindestens eine etablierte Quelle (Lehrbuch, peer-reviewter Artikel, akzeptierter Standard) zu prüfen. Im Zweifel: weglassen, nicht raten.
 
-> Trotz sorgfältiger Erstellung können Tippfehler oder Inkonsistenzen auftreten. Bitte Issues / PRs willkommen!
+Konkrete Mindestanforderungen:
+
+- Alle Formeln, Schritte und Endergebnisse werden **nachgerechnet** und gegen die Quelle geprüft.
+- Bei mehreren legitimen Konventionen (Vorzeichen, Frequenz vs. Kreisfrequenz, …) wird die gewählte **explizit** im Lösungstext genannt.
+- Numerik auf 3 signifikante Stellen, Annäherungen mit `\\approx`, Standards mit Jahr/Version.
+- Bei Sicherheits-/Crypto-Themen: keine veralteten Verfahren (DES, MD5, SHA-1, RSA-1024) als „ok" darstellen — nur als **klar gekennzeichnetes** Negativbeispiel.
+- Modellannahmen (Linearisierung, kleine Auslenkung, ideale Bauteile, …) **vor** der Lösung explizit nennen.
+
+Die Inhalte folgen den Konventionen etablierter Lehrwerke (Lutz/Wendt, Föllinger, Lunze, Khalil, Bishop, Goodfellow, Spong, Nakamoto-Whitepaper, NIST-Standards). Numerische Ergebnisse sind im Allgemeinen auf 3 signifikante Stellen gerundet. Bei zwei legitimen Vorzeichen-/Definitions-Konventionen ist die jeweils gewählte Konvention im Lösungsweg angegeben.
+
+> Trotz sorgfältiger Erstellung können Tippfehler oder Inkonsistenzen auftreten — bitte sofort als Issue/PR melden, **insbesondere** bei inhaltlich-fachlichen Fehlern.
 
 ---
 

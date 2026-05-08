@@ -13,11 +13,15 @@ Smartineer ist eine **statische Single-Page-Anwendung** zum Reaktivieren von Ing
 
 **Nicht-Ziele** (bewusst weggelassen):
 - Kein Backend, keine Datenbank, kein Auth.
-- Kein Build-Schritt (kein npm/webpack/vite/babel).
+- Kein Build-Schritt (kein npm/webpack/vite). React + JSX werden via **Babel-standalone zur Laufzeit im Browser** transpiliert.
 - Kein User-Tracking, keine Telemetrie.
-- Keine schweren Frameworks (React/Vue/Angular).
 
-Wer eines dieser Nicht-Ziele einführen will, **muss vorher in einem Issue diskutieren**.
+**Erlaubt** seit der React-/PWA-Migration:
+- React (UMD-CDN) + ReactDOM + Babel-standalone.
+- Service Worker + Web App Manifest (PWA).
+- Tailwind-basierte Animationen / CSS-Keyframes.
+
+Wer trotzdem einen Build-Schritt, ein zusätzliches Framework, ein Backend o.ä. einführen will, **muss vorher in einem Issue diskutieren**.
 
 ---
 
@@ -26,10 +30,13 @@ Wer eines dieser Nicht-Ziele einführen will, **muss vorher in einem Issue disku
 | Schicht | Wahl | Lieferweg | Anmerkung |
 |---|---|---|---|
 | Layout | Tailwind CSS | CDN (`cdn.tailwindcss.com`) | JIT im Browser, keine `tailwind.config.js` |
+| UI-Framework | React 18 (UMD) | unpkg-CDN | Functional Components + Hooks |
+| JSX-Transform | Babel-standalone | unpkg-CDN | `<script type="text/babel" data-presets="react">` — **kein Build-Schritt** |
 | Charts | Chart.js v4 | jsdelivr CDN | Nur für Radar auf Dashboard |
 | Math | KaTeX 0.16.x + auto-render | jsdelivr CDN | Delimiters: `$...$`, `$$...$$` |
-| Logik | Vanilla JS (ES2017+) | lokal | Kein Modul-Bundling, keine `import`-Statements |
-| Persistenz | `localStorage` | Browser | Key: `wissen_reloaded_progress_v1` |
+| Logik | JSX / ES2017+ | lokal | Kein Modul-Bundling, keine `import`-Statements (React/ReactDOM aus globalem Scope) |
+| Persistenz | `localStorage` | Browser | Key: `wissen_reloaded_progress_v1`, Install-Dismiss: `smartineer_install_dismissed_v1` |
+| PWA | Web App Manifest + Service Worker | lokal (`manifest.webmanifest`, `sw.js`) | Cache-First für App-Shell, Stale-While-Revalidate für CDNs |
 
 **Browser-Ziele**: aktuelle Evergreen-Browser (Chrome, Firefox, Edge, Safari letzte 2 Jahre). IE wird nicht unterstützt.
 
@@ -39,14 +46,20 @@ Wer eines dieser Nicht-Ziele einführen will, **muss vorher in einem Issue disku
 
 ```
 smartineer/
-├── index.html              # SPA-Shell — DOM-Skelett, Script-Ladereihenfolge
+├── index.html              # SPA-Shell — React-Mount, Script-Ladereihenfolge, PWA-Hooks
+├── manifest.webmanifest    # PWA-Manifest (Name, Icons, Display-Mode)
+├── sw.js                   # Service Worker (App-Shell-Cache, Offline-Support)
 ├── .nojekyll               # MUSS existieren (GitHub Pages)
 ├── README.md               # Anwender-Doku (DE)
 ├── AGENTS.md               # dieses Dokument
+├── icons/
+│   ├── icon.svg            # Master-Icon (any/maskable)
+│   ├── icon-192.svg        # 192px-Variante
+│   └── icon-512.svg        # 512px-Variante
 ├── css/
-│   └── styles.css          # eigenes CSS (Pills, Tabs, Status)
+│   └── styles.css          # eigenes CSS (Pills, Animationen, Safe-Area, Scrollbar)
 └── js/
-    ├── app.js              # Anwendungslogik (Routing, Render, Progress)
+    ├── app.jsx             # React-App (alle Komponenten, Hooks, Install-Prompt, Routing)
     └── data/
         ├── <id>.js         # eine Datei pro Kategorie (siehe §5)
         └── ...
@@ -54,8 +67,9 @@ smartineer/
 
 **Regeln**:
 - Keine neuen Top-Level-Ordner ohne Diskussion.
-- Keine Binärdateien (Bilder, Fonts) ohne Notwendigkeit — Lade-Performance!
+- **Keine Binär-Bilder** (PNG/JPG) — Icons sind SVG (Performance + git-friendly).
 - Keine Lockfiles, keine `node_modules/`, keine `package.json` (es gibt kein npm-Projekt).
+- `manifest.webmanifest` und `sw.js` müssen am **Repo-Root** liegen (Service-Worker-Scope = `/`).
 
 ---
 
@@ -64,10 +78,12 @@ smartineer/
 In `index.html` werden Skripte in dieser Reihenfolge geladen:
 
 1. Tailwind, Chart.js, KaTeX (CDN, im `<head>` mit `defer` wo möglich).
-2. **Alle** `js/data/<id>.js` — Reihenfolge bestimmt die Reihenfolge in Sidebar/Dashboard/Radar.
-3. Zuletzt `js/app.js`.
+2. **Alle** `js/data/<id>.js` — Reihenfolge bestimmt die Reihenfolge in Sidebar/Dashboard/Radar. Diese Skripte registrieren `window.APP_DATA` / `window.APP_ORDER` und müssen **vor** React/Babel laden.
+3. React + ReactDOM (UMD, production) und Babel-standalone (CDN).
+4. `<script type="text/babel" data-presets="react" src="js/app.jsx"></script>` — die App.
+5. Inline-Snippet für `navigator.serviceWorker.register('sw.js')`.
 
-Wer eine neue Kategorie einfügt, muss den `<script>`-Tag manuell vor `js/app.js` ergänzen.
+Wer eine neue Kategorie einfügt, muss den `<script>`-Tag manuell **vor** den React/Babel-Skripten ergänzen **und** `sw.js`-`APP_SHELL` um die Datei erweitern (sonst kein Offline-Fallback).
 
 ---
 
@@ -164,7 +180,22 @@ Wenn du **eine** Aufgabe hinzufügst, müssen **alle** folgenden Punkte erledigt
 
 ---
 
-## 8. Wissenschaftliche Korrektheit
+## 8. Wissenschaftliche Korrektheit — **VERBINDLICH**
+
+> ⚠️ **HARTE ANFORDERUNG: Alle Aufgaben, Hinweise und Lösungen MÜSSEN wissenschaftlich korrekt sein.**  
+> Eine inhaltlich falsche Aufgabe ist **kein** akzeptabler Zustand — sie ist ein Bug und muss vor dem Einchecken behoben werden. Im Zweifel: Aufgabe weglassen oder im Issue diskutieren, **nicht** raten.
+
+Konkret bedeutet das:
+
+- Jede Formel, jeder Lösungsschritt und jedes numerische Ergebnis ist gegen mindestens eine **etablierte Quelle** (Lehrbuch, peer-reviewter Artikel, akzeptierter Standard) zu verifizieren.
+- Bei mehreren legitimen Konventionen wird die gewählte **explizit benannt** (z.B. Vorzeichen-Konvention, Frequenz vs. Kreisfrequenz, Zeitkonstante vs. Eigenfrequenz).
+- Numerische Ergebnisse sind nachzurechnen — nicht nur abzuschreiben — und auf **3 signifikante Stellen** zu runden, sofern nicht anders sinnvoll.
+- Annäherungen mit `\\approx` und Fehlerangabe.
+- Bei Standards (NIST PQC, IEEE, ISO, RFC) **immer** Jahr / Version angeben.
+- Bei Sicherheits-/Crypto-Themen: keine veralteten Empfehlungen (DES, MD5, SHA-1, RSA-1024) als „ok" darstellen — nur als Negativbeispiel mit klarer Kennzeichnung.
+- Bei Modellannahmen (lineare Näherung, idealisierte Bauteile, kleine Auslenkung, …) Annahme **vor** der Lösung explizit nennen.
+
+### Bevorzugte Standardquellen
 
 - Quellen-Konventionen (Lutz/Wendt, Föllinger, Lunze, Khalil, Bishop, Goodfellow, Spong, Nakamoto, NIST) bevorzugen.
 - Bei zwei legitimen Vorzeichen-/Definitions-Konventionen die gewählte **explizit benennen**.
@@ -253,6 +284,41 @@ Minimum-Set:
 | GitHub Pages 404 für `js/data/...` | `.nojekyll` fehlt | leere Datei `.nojekyll` im Repo-Root |
 
 ---
+
+## 14a. PWA-Architektur
+
+Smartineer ist gleichzeitig **Website** und **installierbare PWA**. Beides muss funktionsfähig bleiben.
+
+**Manifest (`manifest.webmanifest`)**:
+- `start_url`/`scope` = `./` (relativ — funktioniert auf GitHub Pages und localhost).
+- `display: standalone`, `theme_color: #1e3a8a`, `background_color: #0f172a`.
+- Icons als SVG (`icons/icon.svg`, `icon-192.svg`, `icon-512.svg`).
+- Bei Änderungen am Manifest: `CACHE_VERSION` in `sw.js` bumpen.
+
+**Service Worker (`sw.js`)**:
+- `CACHE_VERSION` als String-Konstante; **Bei jeder Änderung an App-Shell oder Daten-Skripten hochzählen** — sonst zeigen User die alte Version.
+- `APP_SHELL`-Liste enthält **alle** lokal gehosteten Dateien (HTML, CSS, JSX, alle `js/data/*.js`, Manifest, Icons). Beim Hinzufügen einer neuen Kategorie unbedingt erweitern.
+- Strategie: Cache-First für same-origin, Stale-While-Revalidate für CDN-Ressourcen, Navigation-Fallback auf `index.html`.
+- Niemals POSTs/Sensible Daten cachen (gibt es im Projekt nicht — falls eingeführt: explizit ausschließen).
+
+**Install-Prompt** (`InstallPrompt`-Komponente in `app.jsx`):
+- Listener auf `beforeinstallprompt` (Chrome/Edge/Android) — Event abfangen, später triggern.
+- iOS-Erkennung via `/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream` → eigenes Modal mit Anleitung „Teilen → Zum Home-Bildschirm".
+- Standalone-Erkennung via `matchMedia('(display-mode: standalone)')` und `navigator.standalone` — wenn schon installiert, kein Prompt.
+- Persistente Ablehnung via `localStorage`-Key `smartineer_install_dismissed_v1`. Diesen Key nicht ohne Versions-Bump umbenennen.
+
+**iOS-Besonderheiten**:
+- Apple-spezifische Meta-Tags: `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`, `apple-mobile-web-app-title`, `apple-touch-icon`.
+- Safe-Area in `css/styles.css` via `env(safe-area-inset-*)`.
+
+## 14b. React-UI / Animationen
+
+- **Functional Components** + Hooks (`useState`, `useEffect`, `useMemo`, `useRef`, `useCallback`). **Keine** Class-Components.
+- KaTeX wird nach Mount/Update via `useKaTeX(deps)`-Custom-Hook über einen `ref` aufgerufen.
+- **Keine** State-Management-Bibliothek (Redux/Zustand/Recoil) — Zustand bleibt im `<App>`-Root und wird per Props heruntergereicht.
+- Animationen ausschließlich via CSS-Keyframes in `css/styles.css` (`view-fade`, `card-fade`, `slide-in`, `slide-up`, `task-fade`) und Tailwind-Transitions. **Keine** Framer-Motion-/Lottie-CDN-Abhängigkeiten ohne Diskussion.
+- `prefers-reduced-motion` MUSS respektiert werden (bereits in `styles.css`).
+- HTML-Inhalt aus `q`/`h`/`s`/`formulas` wird via `dangerouslySetInnerHTML` injiziert — daher: **keine** vom User beeinflussten Daten in diese Felder; nur statische, von Maintainern gepflegte Inhalte.
 
 ## 15. Roadmap-Pflege
 

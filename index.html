@@ -2,140 +2,43 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wissen Reloaded &mdash; Ingenieur-Brain-Update</title>
-    <meta name="description" content="Interaktives Aufgaben- und Cheatsheet-Repository zur Reaktivierung von Ingenieurswissen: Mathematik, Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Smartineer — Wissen Reloaded</title>
+    <meta name="description" content="Interaktives Aufgaben- und Cheatsheet-Repository zur Reaktivierung von Ingenieurswissen: Mathematik, Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze. PWA-fähig — auch offline auf Mobilgeräten installierbar.">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Smartineer">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+    <!-- Tailwind, Chart.js, KaTeX -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <nav class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <span class="text-xl sm:text-2xl font-bold tracking-tight text-blue-400">&#9881; Wissen Reloaded</span>
-                <div class="flex items-center space-x-1 sm:space-x-3">
-                    <button data-view="view-dashboard" class="nav-btn px-3 py-2 rounded-md text-sm font-medium bg-blue-800 text-white">Dashboard</button>
-                    <button data-view="view-training" class="nav-btn px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700">Training</button>
-                    <button data-view="view-cheatsheet" class="nav-btn px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700">Cheatsheets</button>
-                </div>
-            </div>
+    <!-- React-Mount-Punkt -->
+    <div id="react-root"></div>
+
+    <!-- Fallback, falls JS deaktiviert -->
+    <noscript>
+        <div style="padding:2rem;max-width:680px;margin:2rem auto;background:#fff;border:1px solid #e2e8f0;border-radius:12px;font-family:system-ui">
+            <h1 style="font-weight:bold;color:#0f172a">Smartineer benötigt JavaScript</h1>
+            <p style="color:#475569">Diese Anwendung läuft als statische SPA bzw. Progressive Web App vollständig im Browser.
+            Bitte aktiviere JavaScript, um Aufgaben und Cheatsheets zu nutzen.</p>
         </div>
-    </nav>
+    </noscript>
 
-    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="main-content">
-
-        <!-- DASHBOARD -->
-        <section id="view-dashboard" class="view-section">
-            <div class="text-center max-w-3xl mx-auto mb-10">
-                <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Willkommen zurück, Ingenieur.</h1>
-                <p class="text-base md:text-lg text-slate-600">Reaktiviere systematisch dein Wissen in 9 Kategorien. Jede gelöste Aufgabe füllt das Wissensradar &mdash; Fortschritt wird lokal in deinem Browser gespeichert.</p>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-10 flex flex-col md:flex-row items-center gap-8 mb-10">
-                <div class="w-full md:w-1/2">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-3">Dein Kompetenz-Profil</h2>
-                    <p class="text-slate-600 mb-6">Blau = Ziel, Orange = aktueller Fortschritt (Anteil als gelöst markierter Aufgaben pro Kategorie).</p>
-                    <div class="flex flex-wrap gap-3">
-                        <button id="btn-start-training" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition">Training starten &#10142;</button>
-                        <button id="btn-reset-progress" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-lg transition">Fortschritt zurücksetzen</button>
-                    </div>
-                    <p id="progress-summary" class="text-sm text-slate-500 mt-4"></p>
-                </div>
-                <div class="w-full md:w-1/2 flex justify-center">
-                    <div class="chart-container">
-                        <canvas id="skillsRadarChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div id="dashboard-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-        </section>
-
-        <!-- TRAINING -->
-        <section id="view-training" class="view-section hide flex flex-col md:flex-row gap-6">
-            <aside class="w-full md:w-1/4 flex flex-col gap-2">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold text-slate-800 uppercase text-sm tracking-wider mb-3 border-b pb-2">Kategorien</h3>
-                    <div id="category-list" class="flex flex-col gap-1"></div>
-                </div>
-            </aside>
-
-            <div class="w-full md:w-3/4">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8 min-h-[600px]">
-                    <div id="training-intro" class="mb-6">
-                        <h2 id="cat-title" class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Kategorie wählen</h2>
-                        <p id="cat-desc" class="text-slate-600">Wähle links ein Thema aus.</p>
-                    </div>
-
-                    <div id="task-area" class="hide">
-                        <div class="flex flex-wrap border-b border-slate-200 mb-6">
-                            <button class="lvl-btn border-b-2 border-blue-600 text-blue-600 font-medium py-2 px-4 focus:outline-none" data-lvl="0">Level 1 <span class="count" data-lvl-count="0"></span></button>
-                            <button class="lvl-btn border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium py-2 px-4 focus:outline-none" data-lvl="1">Level 2 <span class="count" data-lvl-count="1"></span></button>
-                            <button class="lvl-btn border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium py-2 px-4 focus:outline-none" data-lvl="2">Level 3 <span class="count" data-lvl-count="2"></span></button>
-                        </div>
-
-                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                            <div id="task-pills" class="flex flex-wrap gap-2"></div>
-                            <div class="flex items-center gap-2">
-                                <button id="btn-prev-task" class="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded">&larr; Vorherige</button>
-                                <span id="task-counter" class="text-sm text-slate-500"></span>
-                                <button id="btn-next-task" class="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded">Nächste &rarr;</button>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-50 p-6 rounded-lg border border-slate-200 mb-6">
-                            <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Aufgabe</h4>
-                            <div id="task-question" class="text-base md:text-lg text-slate-800 math-block min-h-[60px]"></div>
-                        </div>
-
-                        <div class="flex flex-wrap gap-3 mb-6">
-                            <button id="btn-show-hint" class="bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 font-medium py-2 px-4 rounded transition">&#9888; Formel / Ansatz</button>
-                            <button id="btn-show-solution" class="bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 px-4 rounded transition">&#10003; Musterlösung</button>
-                            <button id="btn-mark-solved" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded transition">&#9745; Als gelöst markieren</button>
-                        </div>
-
-                        <div id="hint-box" class="hide bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-md">
-                            <h4 class="text-sm font-bold text-amber-800 mb-1">Formel / Ansatz</h4>
-                            <div id="task-hint" class="text-amber-900 math-block"></div>
-                        </div>
-
-                        <div id="solution-box" class="hide bg-emerald-50 border border-emerald-200 p-6 rounded-lg">
-                            <h4 class="text-sm font-bold text-emerald-800 uppercase tracking-wide mb-3 border-b border-emerald-200 pb-2">Musterlösung &amp; Rechenweg</h4>
-                            <div id="task-solution" class="text-emerald-900 math-block"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CHEATSHEET -->
-        <section id="view-cheatsheet" class="view-section hide">
-            <div class="text-center max-w-3xl mx-auto mb-8">
-                <h1 class="text-3xl font-extrabold text-slate-900 mb-3">Cheatsheets &amp; Isolierte Musterlösungen</h1>
-                <p class="text-slate-600">Zwei strikt getrennte Bereiche: <strong>1)</strong> kompakte Formelsammlung und <strong>2)</strong> isolierter Lösungskatalog mit Rechenweg und Kommentaren.</p>
-            </div>
-
-            <div class="flex flex-wrap justify-center gap-3 mb-6">
-                <button id="tab-formulas" class="bg-slate-800 text-white font-bold py-2.5 px-6 rounded-lg shadow">1) Formelsammlung</button>
-                <button id="tab-solutions" class="bg-white text-slate-800 border border-slate-300 hover:bg-slate-50 font-bold py-2.5 px-6 rounded-lg shadow">2) Isolierte Lösungen</button>
-            </div>
-
-            <div id="cheatsheet-formulas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-            <div id="cheatsheet-solutions" class="hide flex flex-col gap-8"></div>
-        </section>
-
-    </main>
-
-    <footer class="bg-slate-900 text-slate-400 py-6 text-center text-sm mt-auto">
-        <p>Wissen Reloaded &copy; 2026 &middot; Ingenieur-Brain-Update</p>
-    </footer>
-
-    <!-- Daten-Module: einfach editierbar/erweiterbar -->
+    <!-- Daten-Module: registrieren window.APP_DATA / window.APP_ORDER -->
     <script src="js/data/math.js"></script>
     <script src="js/data/control.js"></script>
     <script src="js/data/digital_control.js"></script>
@@ -146,7 +49,23 @@
     <script src="js/data/blockchain.js"></script>
     <script src="js/data/neural_nets.js"></script>
 
-    <!-- App-Logik -->
-    <script src="js/app.js"></script>
+    <!-- React + ReactDOM (UMD via CDN) und Babel-standalone (JSX-Transform im Browser) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- App-Logik (JSX wird zur Laufzeit transpiliert — kein Build-Schritt nötig) -->
+    <script type="text/babel" data-presets="react" src="js/app.jsx"></script>
+
+    <!-- Service-Worker-Registrierung (PWA) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('sw.js').catch(function (err) {
+                    console.warn('[Smartineer] SW-Registrierung fehlgeschlagen:', err);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
