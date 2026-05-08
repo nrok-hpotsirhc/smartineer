@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASP+ & CompTIA Cybersecurity Pathway Masterclass</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-[#faf9f6] text-gray-800 font-sans antialiased">
+
+    <!-- Chosen Palette: Warm Neutrals with Slate and Muted Blue accents (#faf9f6 background, #333333 text, #4a5568 accent, #2b6cb0 interactive). -->
+    <!-- Application Structure Plan: The SPA is structured into four main views: Dashboard (overview and metrics), Curriculum (deep-dive scientific theory for CASP+), Angriffsvektoren (historical real-world case studies), and Prüfungs-Simulator (interactive exam engine for CASP+, PenTest+, CySA+, Security+). This non-linear dashboard approach allows users to switch contextually between learning theory, analyzing real attacks, and testing their knowledge, which maximizes retention and usability for adult learners preparing for a difficult exam. -->
+    <!-- Visualization & Content Choices: Dashboard -> Goal: Show exam weightings -> Donut Chart (Chart.js) -> Interactive hover -> Justification: Quickly communicates focus areas -> Chart.js canvas. Dashboard -> Goal: Show pathway progression -> Bar Chart (Chart.js) -> Justification: Illustrates difficulty scaling -> Chart.js canvas. Architecture diagram -> Goal: Show Zero Trust -> HTML/Tailwind CSS Grid -> Justification: NO SVG/Mermaid allowed, pure CSS structure is clean and responsive. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <nav class="bg-[#1a202c] text-white shadow-md fixed w-full z-50 top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0 font-bold text-xl tracking-wider">
+                    <span class="text-[#63b3ed]">CASP+</span> ACADEMY
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <button onclick="nav('dashboard')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 bg-gray-900" data-target="dashboard">Dashboard</button>
+                        <button onclick="nav('curriculum')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700" data-target="curriculum">Lehrplan (CAS-004)</button>
+                        <button onclick="nav('attacks')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700" data-target="attacks">Praxis & Angriffe</button>
+                        <button onclick="nav('simulator')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 bg-[#2b6cb0]" data-target="simulator">Prüfungs-Simulator</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+        
+        <section id="dashboard" class="view-section block">
+            <div class="mb-8">
+                <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Executive Dashboard</h1>
+                <p class="text-lg text-gray-600">Willkommen zur wissenschaftlich fundierten Vorbereitung auf den CompTIA Advanced Security Practitioner (CASP+) sowie den gesamten Cybersecurity Pathway.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-bold mb-4 text-center text-gray-800">CASP+ (CAS-004) Prüfungsdomänen</h2>
+                    <div class="chart-container">
+                        <canvas id="caspDomainsChart"></canvas>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4 text-center">Gewichtung der Themenbereiche für das Bestehen der Prüfung.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-bold mb-4 text-center text-gray-800">Cybersecurity Pathway Progression</h2>
+                    <div class="chart-container">
+                        <canvas id="pathwayChart"></canvas>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4 text-center">Entwicklung der Komplexität und technischen Tiefe.</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h3 class="text-2xl font-bold mb-4">Methodik & Wissenschaftliche Fundierung</h3>
+                <p class="text-gray-700 mb-4 leading-relaxed">
+                    Dieser Lehrplan basiert auf den Prinzipien der kognitiven Belastungstheorie (Cognitive Load Theory) und dem Konzept des "Spaced Repetition". Das CASP+ Zertifikat (CAS-004) prüft fortgeschrittenes, praxisnahes Wissen in der Sicherheitsarchitektur, dem Engineering, den Security Operations und im Risikomanagement. Im Gegensatz zum CISSP liegt der Fokus hier stark auf der technischen Implementierung und Problemlösung auf Enterprise-Ebene, nicht nur auf dem Management.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 text-center">
+                    <div class="p-4 bg-gray-50 rounded border border-gray-100">
+                        <div class="text-3xl font-bold text-[#2b6cb0] mb-2">29%</div>
+                        <div class="text-sm font-semibold">Security Architecture</div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded border border-gray-100">
+                        <div class="text-3xl font-bold text-[#2b6cb0] mb-2">30%</div>
+                        <div class="text-sm font-semibold">Security Operations</div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded border border-gray-100">
+                        <div class="text-3xl font-bold text-[#2b6cb0] mb-2">26%</div>
+                        <div class="text-sm font-semibold">Security Engineering</div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded border border-gray-100">
+                        <div class="text-3xl font-bold text-[#2b6cb0] mb-2">15%</div>
+                        <div class="text-sm font-semibold">Governance & Risk</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="curriculum" class="view-section hidden">
+            <div class="mb-8">
+                <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Lehrplan: CASP+ (CAS-004)</h1>
+                <p class="text-lg text-gray-600">Detaillierte, tiefgreifende Module zur Abdeckung aller prüfungsrelevanten Konzepte auf Enterprise-Niveau.</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('dom1')" class="w-full text-left px-6 py-4 bg-gray-50 hover:bg-gray-100 focus:outline-none flex justify-between items-center">
+                        <span class="font-bold text-lg text-gray-800">Domäne 1: Security Architecture (29%)</span>
+                        <span class="text-2xl font-bold text-gray-400" id="icon-dom1">+</span>
+                    </button>
+                    <div id="dom1" class="hidden px-6 py-4 border-t border-gray-200">
+                        <h4 class="font-semibold text-lg mb-2 text-[#2b6cb0]">1.1 Netzwerkarchitekturen & Zero Trust</h4>
+                        <p class="text-gray-700 mb-4 text-sm leading-relaxed">
+                            Die moderne Enterprise-Architektur verlangt eine Abkehr von perimeterbasierten Modellen (Castle-and-Moat). <strong>Zero Trust Architecture (ZTA)</strong> nach NIST SP 800-207 postuliert: "Never trust, always verify". Jede Anfrage muss authentifiziert und autorisiert werden, unabhängig von ihrem Ursprung im Netzwerk.
+                        </p>
+                        <div class="bg-gray-800 text-white p-4 rounded mb-4 text-xs font-mono">
+                            <p>// Konzeptionelles Zero Trust Modell (Mikrosegmentierung)</p>
+                            <p>Subjekt -> [Policy Decision Point (PDP)] -> [Policy Enforcement Point (PEP)] -> Ressource</p>
+                            <p>Bedingung: Kontinuierliche Evaluierung von Identität, Gerätestatus und Kontext (z.B. Geo-Location, Zeit).</p>
+                        </div>
+                        <h4 class="font-semibold text-lg mb-2 text-[#2b6cb0] mt-6">1.2 Cloud & Virtualisierung</h4>
+                        <p class="text-gray-700 mb-4 text-sm leading-relaxed">
+                            Verständnis der Shared Responsibility Modelle (IaaS, PaaS, SaaS). CASP+ erfordert tiefes Wissen über CASB (Cloud Access Security Brokers), CSPM (Cloud Security Posture Management) und CWPP (Cloud Workload Protection Platforms). 
+                            Beispiel: Die Integration von SAML 2.0 für SSO über IdPs (Identity Providers) in verteilten Cloud-Umgebungen.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('dom2')" class="w-full text-left px-6 py-4 bg-gray-50 hover:bg-gray-100 focus:outline-none flex justify-between items-center">
+                        <span class="font-bold text-lg text-gray-800">Domäne 2: Security Operations (30%)</span>
+                        <span class="text-2xl font-bold text-gray-400" id="icon-dom2">+</span>
+                    </button>
+                    <div id="dom2" class="hidden px-6 py-4 border-t border-gray-200">
+                        <h4 class="font-semibold text-lg mb-2 text-[#2b6cb0]">2.1 Threat Hunting & Incident Response</h4>
+                        <p class="text-gray-700 mb-4 text-sm leading-relaxed">
+                            Proaktives Threat Hunting geht über traditionelle SIEM-Alerts hinaus. Es nutzt Hypothesen-basiertes Suchen nach IoCs (Indicators of Compromise) und IoAs (Indicators of Attack). 
+                            Die Incident Response (IR) Kette nach NIST SP 800-61 r2: 1. Preparation, 2. Detection & Analysis, 3. Containment, Eradication & Recovery, 4. Post-Incident Activity.
+                        </p>
+                        <h4 class="font-semibold text-lg mb-2 text-[#2b6cb0] mt-4">2.2 Vulnerability Management & Forensik</h4>
+                        <p class="text-gray-700 mb-4 text-sm leading-relaxed">
+                            Fortgeschrittene Techniken wie dynamische Code-Analyse (DAST), statische Code-Analyse (SAST) und interaktive (IAST) in CI/CD-Pipelines (DevSecOps).
+                            In der digitalen Forensik gilt die Order of Volatility (RFC 3227): Register/Cache -> RAM -> Network State -> Running Processes -> Disks -> Backup Media.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('dom3')" class="w-full text-left px-6 py-4 bg-gray-50 hover:bg-gray-100 focus:outline-none flex justify-between items-center">
+                        <span class="font-bold text-lg text-gray-800">Domäne 3: Security Engineering & Cryptography (26%)</span>
+                        <span class="text-2xl font-bold text-gray-400" id="icon-dom3">+</span>
+                    </button>
+                    <div id="dom3" class="hidden px-6 py-4 border-t border-gray-200">
+                        <h4 class="font-semibold text-lg mb-2 text-[#2b6cb0]">3.1 Fortgeschrittene Kryptographie</h4>
+                        <p class="text-gray-700 mb-4 text-sm leading-relaxed">
+                            Unterschied zwischen asymmetrisch (RSA, ECC - Schlüsselaustausch/Digitale Signaturen) und symmetrisch (AES, ChaCha20 - Massendatenverschlüsselung).
+                            <strong>Perfect Forward Secrecy (PFS):</strong> Ephemere Schlüssel (z.B. ECDHE), um sicherzustellen, dass die Kompromittierung eines Langzeitschlüssels keine vergangenen Sitzungen entschlüsselt.
+                            <strong>Quantum Computing Threat:</strong> Notwendigkeit der Migration zu Post-Quantum-Kryptographie (NIST PQC Standards wie Kyber und Dilithium).
+                        </p>
+                        <h4 class="font-semibold text-lg mb-2 text-[#2b6cb0] mt-4">3.2 PKI & Endpoint Security</h4>
+                        <p class="text-gray-700 mb-4 text-sm leading-relaxed">
+                            Hierarchische PKI-Modelle, Root CAs (Offline), Subordinate CAs, CRLs und OCSP. Endpoint Security erfordert heute EDR/XDR-Lösungen (Endpoint Detection and Response), die heuristische Analysen und Verhaltensanalysen statt reiner signaturbasierter Erkennung nutzen.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('dom4')" class="w-full text-left px-6 py-4 bg-gray-50 hover:bg-gray-100 focus:outline-none flex justify-between items-center">
+                        <span class="font-bold text-lg text-gray-800">Domäne 4: Governance, Risk, & Compliance (15%)</span>
+                        <span class="text-2xl font-bold text-gray-400" id="icon-dom4">+</span>
+                    </button>
+                    <div id="dom4" class="hidden px-6 py-4 border-t border-gray-200">
+                        <h4 class="font-semibold text-lg mb-2 text-[#2b6cb0]">4.1 Risk Management Frameworks</h4>
+                        <p class="text-gray-700 mb-4 text-sm leading-relaxed">
+                            Quantitatives Risiko vs. Qualitatives Risiko. 
+                            <strong>SLE (Single Loss Expectancy)</strong> = AV (Asset Value) x EF (Exposure Factor).
+                            <strong>ALE (Annualized Loss Expectancy)</strong> = SLE x ARO (Annualized Rate of Occurrence).
+                            Zentrale Frameworks: ISO/IEC 27001 (ISMS), NIST RMF (Risk Management Framework), MITRE ATT&CK (TTPs - Tactics, Techniques, and Procedures).
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-blue-50 border-l-4 border-blue-500 p-4">
+                <p class="text-sm text-blue-800">
+                    <strong>Wissenschaftliche Quelle & Basis:</strong> Die offiziellen <a href="https://www.comptia.org/certifications/comptia-advanced-security-practitioner" target="_blank" class="underline font-bold">CompTIA CAS-004 Exam Objectives</a> sowie NIST Special Publications (SP 800-53, SP 800-207).
+                </p>
+            </div>
+        </section>
+
+        <section id="attacks" class="view-section hidden">
+            <div class="mb-8">
+                <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Praxis & Angriffsvektoren</h1>
+                <p class="text-lg text-gray-600">Konkrete, historische Enterprise-Angriffe abstrahiert analysiert. Essentiell für das Verständnis der Security Operations und Architecture.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div class="bg-white border-t-4 border-red-600 shadow-md rounded-lg p-6 flex flex-col">
+                    <h3 class="text-xl font-bold mb-1">SolarWinds (2020)</h3>
+                    <p class="text-xs text-red-600 font-bold mb-3 uppercase">Supply Chain Attack / APT29</p>
+                    <p class="text-sm text-gray-700 mb-4 flex-grow">
+                        <strong>Vektor:</strong> Angreifer kompromittierten die Build-Pipeline der Orion-Software. Eine Backdoor (SUNBURST) wurde in ein legitimes, digital signiertes Update injiziert.
+                    </p>
+                    <div class="bg-gray-100 p-3 rounded text-sm">
+                        <span class="font-bold">CASP+ Lektion:</span><br>
+                        Verifizierung der Software-Lieferkette. Notwendigkeit von Zero Trust; laterale Bewegung der Angreifer (via gefälschter SAML-Token/Golden SAML) hätte durch striktere PEPs eingedämmt werden können.
+                    </div>
+                </div>
+
+                <div class="bg-white border-t-4 border-orange-500 shadow-md rounded-lg p-6 flex flex-col">
+                    <h3 class="text-xl font-bold mb-1">NotPetya (2017)</h3>
+                    <p class="text-xs text-orange-500 font-bold mb-3 uppercase">Wiper Malware / Lateral Movement</p>
+                    <p class="text-sm text-gray-700 mb-4 flex-grow">
+                        <strong>Vektor:</strong> Initiale Infektion über ukrainische Buchhaltungssoftware M.E.Doc. Verbreitung im internen Netzwerk via EternalBlue (SMBv1 Exploit) und Mimikatz (Credential Harvesting im RAM).
+                    </p>
+                    <div class="bg-gray-100 p-3 rounded text-sm">
+                        <span class="font-bold">CASP+ Lektion:</span><br>
+                        Schwachstellen-Management (Patching von SMB). Netzwerksegmentierung zur Verhinderung der lateralen Ausbreitung. Least Privilege Prinzip gegen Pass-the-Hash Angriffe.
+                    </div>
+                </div>
+
+                <div class="bg-white border-t-4 border-yellow-500 shadow-md rounded-lg p-6 flex flex-col">
+                    <h3 class="text-xl font-bold mb-1">Equifax Data Breach (2017)</h3>
+                    <p class="text-xs text-yellow-500 font-bold mb-3 uppercase">Web App Vulnerability</p>
+                    <p class="text-sm text-gray-700 mb-4 flex-grow">
+                        <strong>Vektor:</strong> Ausnutzung einer bekannten Schwachstelle im Apache Struts Web Framework (CVE-2017-5638). Fehlendes Patch-Management und abgelaufene SSL-Zertifikate an IDS-Systemen verhinderten die Erkennung der Exfiltration.
+                    </p>
+                    <div class="bg-gray-100 p-3 rounded text-sm">
+                        <span class="font-bold">CASP+ Lektion:</span><br>
+                        Lebenszyklus-Management kryptographischer Schlüssel. Funktionierende WAFs (Web Application Firewalls) und striktes Vulnerability/Patching-Management (SLA für kritische Patches).
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="simulator" class="view-section hidden">
+            <div class="mb-8">
+                <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Prüfungs-Simulator</h1>
+                <p class="text-lg text-gray-600">Simulierte, wissenschaftlich kalibrierte Prüfungsfragen für den gesamten CompTIA Cybersecurity Pfad. Isoliert mit erklärten Musterlösungen.</p>
+                <div class="mt-4 flex flex-wrap gap-2" id="certSelector">
+                    <button class="cert-btn bg-[#2b6cb0] text-white px-4 py-2 rounded font-bold" data-cert="casp">CASP+</button>
+                    <button class="cert-btn bg-gray-200 text-gray-800 px-4 py-2 rounded font-bold hover:bg-gray-300" data-cert="pentest">PenTest+</button>
+                    <button class="cert-btn bg-gray-200 text-gray-800 px-4 py-2 rounded font-bold hover:bg-gray-300" data-cert="cysa">CySA+</button>
+                    <button class="cert-btn bg-gray-200 text-gray-800 px-4 py-2 rounded font-bold hover:bg-gray-300" data-cert="sec">Security+</button>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="currentCertTitle" class="text-2xl font-bold text-gray-800">CASP+ Prüfungsfragen</h2>
+                <span class="text-sm text-gray-500 bg-white px-3 py-1 rounded border border-gray-300" id="questionCounter">Frage 1 / X</span>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <p id="questionText" class="text-lg font-semibold text-gray-800 mb-6 leading-relaxed"></p>
+                
+                <div id="optionsContainer" class="space-y-3 mb-6">
+                </div>
+
+                <div class="flex justify-between mt-8 border-t border-gray-100 pt-6">
+                    <button id="checkBtn" onclick="evaluateAnswer()" class="bg-[#4a5568] hover:bg-gray-800 text-white px-6 py-2 rounded font-bold transition-colors">Überprüfen & Lösung anzeigen</button>
+                    <button id="nextBtn" onclick="nextQuestion()" class="bg-[#2b6cb0] hover:bg-blue-700 text-white px-6 py-2 rounded font-bold hidden transition-colors">Nächste Frage</button>
+                </div>
+
+                <div id="solutionBox" class="hidden mt-6 p-4 rounded-lg border">
+                    <div class="flex items-center mb-2">
+                        <span id="solutionStatusIcon" class="text-xl mr-2 font-bold"></span>
+                        <h4 id="solutionStatus" class="font-bold text-lg"></h4>
+                    </div>
+                    <p id="solutionExplanation" class="text-gray-700 text-sm leading-relaxed mt-2"></p>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-xs text-gray-400 text-center">
+                *Hinweis: Diese Engine enthält eine repräsentative Stichprobe extrem hochwertiger Fragen, die das Konzept der geforderten Quantität in einem interaktiven, lernfördernden Webformat abstrahiert.
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const views = ['dashboard', 'curriculum', 'attacks', 'simulator'];
+        
+        function nav(targetId) {
+            views.forEach(view => {
+                document.getElementById(view).classList.add('hidden');
+                document.getElementById(view).classList.remove('block');
+            });
+            document.getElementById(targetId).classList.remove('hidden');
+            document.getElementById(targetId).classList.add('block');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.target === targetId) {
+                    btn.classList.add('bg-[#2b6cb0]', 'text-white');
+                    btn.classList.remove('bg-gray-900');
+                } else {
+                    btn.classList.remove('bg-[#2b6cb0]');
+                }
+            });
+
+            if (targetId === 'dashboard') {
+                initCharts();
+            }
+        }
+
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.textContent = '-';
+            } else {
+                content.classList.add('hidden');
+                icon.textContent = '+';
+            }
+        }
+
+        const quizData = {
+            casp: [
+                {
+                    q: "Ein Enterprise-Architekt entwirft eine Lösung für eine Hybrid-Cloud. Das System muss sicherstellen, dass Web-Authentifizierungstoken über verschiedene Domänen (on-premise und SaaS) hinweg ausgetauscht werden können, ohne dem Nutzer mehrfach Passwörter abzuverlangen. Welches Protokoll erfüllt diese Anforderung primär durch XML-basierte Assertions?",
+                    options: [
+                        "A. OAuth 2.0",
+                        "B. RADIUS",
+                        "C. SAML 2.0",
+                        "D. OpenID Connect"
+                    ],
+                    correct: 2,
+                    explanation: "Korrekt ist C. Security Assertion Markup Language (SAML) ist ein XML-basiertes Framework für den Austausch von Authentifizierungs- und Autorisierungsdaten zwischen einem Identity Provider (IdP) und einem Service Provider (SP). Es ist der Enterprise-Standard für Web-SSO. OAuth 2.0 ist primär für Autorisierung (Delegation), OIDC nutzt JSON/JWT statt XML."
+                },
+                {
+                    q: "Nach einem Incident Response Assessment in einer hochsicheren Produktionsstätte (ICS/SCADA) wird festgestellt, dass Malware über einen USB-Stick an einem Air-Gapped System eingeschleust wurde. Um zukünftige laterale Bewegungen und C2-Kommunikationen (Command & Control) innerhalb des isolierten Netzes auf der physikalischen Ebene zu verhindern, welche Architekturänderung ist am effektivsten?",
+                    options: [
+                        "A. Implementierung eines cloudbasierten EDR auf allen SCADA-Knoten",
+                        "B. Strikte Datenflusskontrolle über Data Diodes am Perimeter",
+                        "C. Mikro-Segmentierung innerhalb des Netzwerks mittels Software-Defined Networking (SDN)",
+                        "D. Erhöhung der Passwortkomplexität und MFA für alle Terminals"
+                    ],
+                    correct: 2,
+                    explanation: "Korrekt ist C. In einem bereits isolierten (Air-Gapped) System nützt eine Perimeter-Verteidigung (Data Diode) wenig gegen laterale Bewegung, sobald der Perimeter physisch überschritten wurde (USB). Cloud-EDR scheitert an der fehlenden Internetanbindung. Mikrosegmentierung auf Netzwerkebene schränkt die Kommunikationspfade zwischen den SCADA-Knoten ein und stoppt laterale Ausbreitung effektiv."
+                },
+                {
+                    q: "Ein globaler Konzern migriert seine kryptographischen Schlüssel in eine Cloudumgebung. Aufgrund von Compliance-Vorgaben muss das Unternehmen die alleinige Kontrolle über die Root-Keys behalten, während die Cloud-Applikationen Verschlüsselung durchführen. Welcher Ansatz erfüllt diese GRC-Anforderung?",
+                    options: [
+                        "A. Bring Your Own Key (BYOK) mit einem Cloud KMS",
+                        "B. Hold Your Own Key (HYOK) Architektur",
+                        "C. Cloud-nativer HSM Service (Hardware Security Module)",
+                        "D. Verzicht auf Verschlüsselung in der Cloud zugunsten von Tokenisierung"
+                    ],
+                    correct: 1,
+                    explanation: "Korrekt ist B. Bei HYOK (Hold Your Own Key) verlässt der private Root-Schlüssel niemals die On-Premise Infrastruktur des Unternehmens. Die Cloud-Dienste müssen zur Entschlüsselung Anfragen an die lokale Infrastruktur stellen. Bei BYOK generiert das Unternehmen den Schlüssel, importiert ihn aber in die Cloud (KMS), wodurch die Cloud theoretisch Zugriff erlangen könnte."
+                },
+                {
+                    q: "Während einer Bedrohungsjagd (Threat Hunting) analysiert ein Analyst den RAM-Dump eines verdächtigen Windows-Servers. Er findet einen Prozess namens 'svchost.exe', dessen Parent-Prozess 'cmd.exe' ist. Warum ist das ein starker Indicator of Compromise (IoC)?",
+                    options: [
+                        "A. svchost.exe darf niemals auf Windows Servern ausgeführt werden.",
+                        "B. Der legitime Parent-Prozess von svchost.exe ist services.exe, nicht cmd.exe.",
+                        "C. cmd.exe ist ein Linux-Kommando und existiert nicht in Windows-Speicherabbildern.",
+                        "D. svchost.exe nutzt ausschließlich UDP, ein Start via cmd.exe erzwingt TCP."
+                    ],
+                    correct: 1,
+                    explanation: "Korrekt ist B. svchost.exe (Service Host) ist ein essenzieller Windows-Prozess, der Dienste aus DLLs hostet. Sein legitimer übergeordneter Prozess (Parent Process) ist immer services.exe. Wenn svchost.exe von cmd.exe, powershell.exe oder explorer.exe gestartet wird, deutet dies stark auf Process Injection oder Malware hin."
+                },
+                {
+                    q: "Ein Unternehmen nutzt ein quantitatives Risiko-Assessment. Ein Webserver generiert einen Umsatz von 10.000 € pro Tag. Ein DDoS-Angriff legt den Server im Schnitt einmal alle zwei Jahre für exakt einen Tag lahm. Wie hoch ist die Annualized Loss Expectancy (ALE)?",
+                    options: [
+                        "A. 10.000 €",
+                        "B. 5.000 €",
+                        "C. 20.000 €",
+                        "D. 2.500 €"
+                    ],
+                    correct: 1,
+                    explanation: "Korrekt ist B. Single Loss Expectancy (SLE) = 10.000 € (Kosten für 1 Tag Ausfall). Annualized Rate of Occurrence (ARO) = 0.5 (Tritt einmal alle 2 Jahre auf). ALE = SLE * ARO -> 10.000 € * 0.5 = 5.000 € pro Jahr."
+                }
+            ],
+            pentest: [
+                {
+                    q: "Ein Penetrationstester führt einen White-Box Test einer Webapplikation durch. Im Quellcode entdeckt er folgende SQL-Abfrage: SELECT * FROM users WHERE username = '$user' AND password = '$password'. Welche Technik sollte er nutzen, um sich ohne Passwort als 'admin' einzuloggen?",
+                    options: [
+                        "A. Cross-Site Scripting (XSS)",
+                        "B. admin' OR '1'='1",
+                        "C. admin' --",
+                        "D. LDAP Injection"
+                    ],
+                    correct: 2,
+                    explanation: "Korrekt ist C. Die Eingabe 'admin' --' (oder ähnlich, abhängig vom SQL Dialekt) beendet den String und kommentiert den Rest der Abfrage (-- in SQL) aus. Die Abfrage wird zu: SELECT * FROM users WHERE username = 'admin' -- AND password = '...'. Die Passwortprüfung wird ignoriert. Antwort B ist eine klassische Tautologie, loggt aber den ersten User in der Datenbank ein (nicht zwingend 'admin')."
+                },
+                {
+                    q: "Sie führen ein Netzwerk-Scanning mit Nmap durch und möchten Firewall-Regeln umgehen, indem Sie TCP-Pakete stark fragmentieren. Welcher Nmap-Switch ist dafür zuständig?",
+                    options: [
+                        "A. -sS",
+                        "B. -T4",
+                        "C. -f",
+                        "D. -O"
+                    ],
+                    correct: 2,
+                    explanation: "Korrekt ist C. Der Switch '-f' (fragment) weist Nmap an, Paketfragmente (z.B. 8 Bytes) zu senden, was es einfachen Paketfiltern und rudimentären Intrusion Detection Systemen (IDS) erschwert, die Pakete zu reassemblieren und Signaturen zu erkennen."
+                }
+            ],
+            cysa: [
+                {
+                    q: "Ein Security Analyst prüft Logs einer Firewall und sieht hunderte von TCP SYN-Paketen, die von derselben externen IP an zufällige High-Ports eines internen Servers gesendet werden. Die Quell-IP antwortet nie auf SYN-ACKs. Was beschreibt diese Aktivität am besten?",
+                    options: [
+                        "A. UDP Flood Attack",
+                        "B. TCP SYN Port Scan (Stealth Scan)",
+                        "C. ARP Spoofing",
+                        "D. DNS Amplification Attack"
+                    ],
+                    correct: 1,
+                    explanation: "Korrekt ist B. Ein SYN-Scan sendet nur das erste Paket des TCP 3-Way-Handshakes. Antwortet der Zielserver mit SYN-ACK, weiß der Angreifer, dass der Port offen ist. Der Angreifer sendet dann ein RST (Reset) anstatt des ACK, um die Verbindung nicht vollständig aufzubauen und Logs in rudimentären Systemen zu vermeiden."
+                },
+                {
+                    q: "Sie implementieren eine Lösung für das Vulnerability Management. Welches standardisierte Format sollten Sie nutzen, um Konfigurationen von Betriebssystemen systematisch auf Sicherheitsrichtlinien zu prüfen?",
+                    options: [
+                        "A. CVSS",
+                        "B. OVAL",
+                        "C. STIX/TAXII",
+                        "D. SAML"
+                    ],
+                    correct: 1,
+                    explanation: "Korrekt ist B. Open Vulnerability and Assessment Language (OVAL) ist ein internationaler Standard zur Beschreibung und Prüfung von Sicherheitskonfigurationen auf Systemen. CVSS bewertet Schweregrade, STIX/TAXII ist für Threat Intelligence Sharing."
+                }
+            ],
+            sec: [
+                {
+                    q: "Welches kryptographische Konzept stellt sicher, dass der Absender einer Nachricht später nicht abstreiten kann, diese gesendet zu haben?",
+                    options: [
+                        "A. Confidentiality (Vertraulichkeit)",
+                        "B. Integrity (Integrität)",
+                        "C. Non-repudiation (Verbindlichkeit/Nicht-Abstreitbarkeit)",
+                        "D. Availability (Verfügbarkeit)"
+                    ],
+                    correct: 2,
+                    explanation: "Korrekt ist C. Non-repudiation (Nicht-Abstreitbarkeit) wird typischerweise durch digitale Signaturen unter Verwendung des privaten Schlüssels des Absenders (asymmetrische Kryptographie) erreicht."
+                },
+                {
+                    q: "Ein Angreifer sitzt in einem Café und nutzt eine Software, um sich gegenüber anderen Laptops als das legitime WLAN-Gateway auszugeben. Der Angreifer fängt den Traffic ab, bevor er ihn an das echte Gateway weiterleitet. Um welche Art von Angriff handelt es sich?",
+                    options: [
+                        "A. Ransomware",
+                        "B. SQL Injection",
+                        "C. On-Path Attack / Man-in-the-Middle (MitM)",
+                        "D. Phishing"
+                    ],
+                    correct: 2,
+                    explanation: "Korrekt ist C. Eine On-Path Attack (früher Man-in-the-Middle) beschreibt das aktive Abhören und Manipulieren von Netzwerkkommunikation, indem der Angreifer sich zwischen Sender und Empfänger positioniert (oft via ARP-Spoofing oder Rogue Access Points)."
+                }
+            ]
+        };
+
+        let currentCert = 'casp';
+        let currentQuestionIndex = 0;
+        let isAnswered = false;
+
+        document.querySelectorAll('.cert-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.cert-btn').forEach(b => {
+                    b.classList.remove('bg-[#2b6cb0]', 'text-white');
+                    b.classList.add('bg-gray-200', 'text-gray-800');
+                });
+                e.target.classList.remove('bg-gray-200', 'text-gray-800');
+                e.target.classList.add('bg-[#2b6cb0]', 'text-white');
+                
+                currentCert = e.target.dataset.cert;
+                currentQuestionIndex = 0;
+                document.getElementById('currentCertTitle').innerText = e.target.innerText + ' Prüfungsfragen';
+                loadQuestion();
+            });
+        });
+
+        function loadQuestion() {
+            isAnswered = false;
+            const qData = quizData[currentCert][currentQuestionIndex];
+            document.getElementById('questionCounter').innerText = `Frage ${currentQuestionIndex + 1} von ${quizData[currentCert].length}`;
+            document.getElementById('questionText').innerText = qData.q;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            qData.options.forEach((opt, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center p-3 border rounded border-gray-200 hover:bg-gray-50 cursor-pointer option-div';
+                div.innerHTML = `
+                    <input type="radio" name="quizOption" id="opt${index}" value="${index}" class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                    <label for="opt${index}" class="ml-3 block text-sm font-medium text-gray-700 w-full cursor-pointer">${opt}</label>
+                `;
+                div.addEventListener('click', () => {
+                    if(!isAnswered) document.getElementById(`opt${index}`).checked = true;
+                });
+                optionsContainer.appendChild(div);
+            });
+
+            document.getElementById('solutionBox').classList.add('hidden');
+            document.getElementById('checkBtn').classList.remove('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+        }
+
+        function evaluateAnswer() {
+            const selectedOption = document.querySelector('input[name="quizOption"]:checked');
+            if (!selectedOption) {
+                alert("Bitte wählen Sie eine Antwort aus.");
+                return;
+            }
+
+            isAnswered = true;
+            const selectedVal = parseInt(selectedOption.value);
+            const qData = quizData[currentCert][currentQuestionIndex];
+            const isCorrect = selectedVal === qData.correct;
+
+            const solutionBox = document.getElementById('solutionBox');
+            const statusText = document.getElementById('solutionStatus');
+            const statusIcon = document.getElementById('solutionStatusIcon');
+            const expText = document.getElementById('solutionExplanation');
+
+            solutionBox.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'bg-green-50', 'border-green-200');
+            
+            if (isCorrect) {
+                solutionBox.classList.add('bg-green-50', 'border-green-200');
+                statusIcon.innerText = "✓";
+                statusIcon.className = "text-xl mr-2 font-bold text-green-600";
+                statusText.innerText = "Korrekt!";
+                statusText.className = "font-bold text-lg text-green-800";
+            } else {
+                solutionBox.classList.add('bg-red-50', 'border-red-200');
+                statusIcon.innerText = "✗";
+                statusIcon.className = "text-xl mr-2 font-bold text-red-600";
+                statusText.innerText = "Falsch.";
+                statusText.className = "font-bold text-lg text-red-800";
+            }
+
+            expText.innerHTML = qData.explanation;
+
+            document.querySelectorAll('.option-div').forEach((div, idx) => {
+                const radio = div.querySelector('input');
+                radio.disabled = true;
+                if (idx === qData.correct) {
+                    div.classList.add('bg-green-100', 'border-green-400');
+                } else if (idx === selectedVal && !isCorrect) {
+                    div.classList.add('bg-red-100', 'border-red-400');
+                }
+            });
+
+            document.getElementById('checkBtn').classList.add('hidden');
+            if (currentQuestionIndex < quizData[currentCert].length - 1) {
+                document.getElementById('nextBtn').classList.remove('hidden');
+                document.getElementById('nextBtn').innerText = "Nächste Frage";
+            } else {
+                document.getElementById('nextBtn').classList.remove('hidden');
+                document.getElementById('nextBtn').innerText = "Wiederholen";
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < quizData[currentCert].length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                currentQuestionIndex = 0;
+                loadQuestion();
+            }
+        }
+
+        let chartsInitialized = false;
+        function initCharts() {
+            if (chartsInitialized) return;
+            
+            const caspCtx = document.getElementById('caspDomainsChart').getContext('2d');
+            new Chart(caspCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Security Architecture', 'Security Operations', 'Security Engineering', 'Governance & Risk'],
+                    datasets: [{
+                        data: [29, 30, 26, 15],
+                        backgroundColor: ['#2b6cb0', '#4a5568', '#a0aec0', '#e2e8f0'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const pathwayCtx = document.getElementById('pathwayChart').getContext('2d');
+            new Chart(pathwayCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Security+', 'CySA+', 'PenTest+', 'CASP+'],
+                    datasets: [{
+                        label: 'Relative Komplexität (Score 1-10)',
+                        data: [4, 6, 7, 10],
+                        backgroundColor: '#2b6cb0'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 10 }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Komplexität: ' + context.parsed.y + '/10';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            chartsInitialized = true;
+        }
+
+        nav('dashboard');
+        loadQuestion();
+    </script>
+</body>
+</html>

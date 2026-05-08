@@ -7,6 +7,18 @@ Dieses Dokument richtet sich an **menschliche Entwickler** und **AI-Coding-Agent
 
 ---
 
+## 0. Status-Report-Pflicht (verbindlich)
+
+Am Ende **jeder** Arbeitseinheit (Commit, PR, Agent-Antwort) ist ein knapper **Status-Report** zurückzumelden. Format:
+
+- **DONE** — was in dieser Einheit fertig wurde.
+- **OFFEN / DRINGEND** — Punkte, die noch fehlen *und* den Funktionsumfang oder die wissenschaftliche Korrektheit beeinträchtigen, oder bei denen Optimierungsbedarf besteht. **Diese Punkte müssen klar hervorgehoben werden.**
+- **NICE-TO-HAVE** — optionale TODOs nur stichpunktartig.
+
+Ehrlichkeit ist Pflicht: Lücken (z.B. zu wenige Quiz-Fragen, fehlende PBQ-Simulation, ungeprüfte Quelle) **dürfen nicht verschwiegen werden**. Wer einen Block knapp unter die Mindestanforderung liefert, muss den Gap explizit benennen.
+
+---
+
 ## 1. Projekt-Mission
 
 Smartineer ist eine **statische Single-Page-Anwendung** zum Reaktivieren von Ingenieurs-Studienwissen über 11 Kategorien × 3 Schwierigkeitsstufen, ergänzt um einen Schüler-Bereich (Klassen 1–10, Mathematik aktiv für 1–4).
@@ -414,4 +426,112 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 - Multiple-Choice-Komponente einführen (nicht im Konzept).
 - Fortschritt der Schüler in `wissen_reloaded_progress_v1` schreiben.
 - Set-Größe ändern oder konfigurierbar machen (10 ist hart kodiert).
+
+---
+
+## 18. Schulungen-Bereich (Cert-Prep, Multi-Choice)
+
+Der Schulungen-Bereich (`view === 'schulungen'`) ist der dritte parallele Track neben Ingenieurs-Training und Schüler-Bereich. Er bündelt **Zertifikats-Vorbereitungskurse** (z.B. CompTIA SecurityX/CASP+, Security+, CySA+, PenTest+) als kapitelweise Lernpfade mit Quiz am Kapitelende.
+
+### 18.1 Datenstruktur (`window.SCHULUNGEN`)
+
+Pro Schulung eine Datei `js/data/schulung_<id>.js` als IIFE:
+
+```js
+(function () {
+    window.SCHULUNGEN = window.SCHULUNGEN || { list: [] };
+    window.SCHULUNGEN.list.push({
+        id: 'securityx',                 // eindeutig, snake_case, nie ändern
+        code: 'CompTIA CAS-005',         // Zertifikatsbezeichnung
+        name: 'SecurityX (CASP+)',       // Anzeige-Titel
+        short: 'SecurityX',              // Kurztitel im Reader-Header
+        desc: '1–2 Sätze für die Übersicht.',
+        chapters: [
+            {
+                id: 'grc',
+                title: 'Governance, Risk & Compliance',
+                summary: 'Kurzbeschreibung 1 Satz.',
+                pages: [
+                    { title: 'Seitentitel', html: '<p>...</p>' },
+                    // ... weitere Seiten
+                ],
+                quiz: [
+                    { q: 'Frage als HTML', options: ['A', 'B', 'C', 'D'], correct: 0,
+                      explanation: 'Quellenanker, 1–2 Sätze.' },
+                    // ... 50+ Fragen pro Kapitel (Mindestziel)
+                ]
+            }
+            // ... weitere Kapitel
+        ]
+    });
+})();
+```
+
+Pflichtfelder pro Kapitel: `id`, `title`, `summary`, `pages` (≥ 1), `quiz` (≥ 50 Soll, ≥ 10 Mindest-Bootstrap).
+
+### 18.2 UX-Vertrag (Buch-Navigation)
+
+- **Buchartiger Reader**: eine Seite pro Bildschirm, prev/next Buttons unten, fortlaufender Fortschrittsbalken.
+- **Letzte gelesene Seite** wird pro `(trainingId, chapterId)` automatisch in `localStorage` gespeichert; "Weiterlesen"-Button springt direkt dorthin.
+- **TOC-Overlay** (Icon-Button "Inhalt") öffnet das Inhaltsverzeichnis des aktuellen Kapitels.
+- **Page-Jump-Overlay** (Icon-Button "Seite…") erlaubt direktes Springen via Zahleneingabe.
+- **Quiz am Kapitelende**: auf der letzten Seite wird "Weiter →" durch "Quiz starten" ersetzt.
+- **Quiz**: 10 zufällig gezogene Fragen aus dem Pool des Kapitels; Multi-Choice mit Radio-Buttons (4 Optionen); Erläuterung pro Frage erst im Endergebnis.
+- **Quiz-Endbildschirm**: Quote, Liste aller 10 Fragen mit Auswahl + korrekter Antwort + Erläuterung.
+- **Best-Score-Tracking** pro Kapitel; auf Übersicht sichtbar.
+
+### 18.3 Persistenz
+
+- Eigener Storage-Key `smartineer_schulungen_v1`. **Niemals** an `wissen_reloaded_progress_v1` oder `smartineer_schueler_*` mischen.
+- Format: `{ [trainingId]: { [chapterId]: { lastPage: int, quizBest: { score, total, date }, quizLast: {...} } } }`.
+- Bei Schema-Änderung: Key auf `_v2` bumpen.
+- Reihenfolge der Kapitel/Seiten **nicht** nachträglich ändern (Lesestand-Drift). Lieber neue Seiten anhängen.
+
+### 18.4 Aufgabenanzahl & Wachstumsregel (HARTE Anforderung)
+
+| Kapitel-Status   | Quiz-Fragen  | Kommentar                                            |
+|------------------|--------------|------------------------------------------------------|
+| Soll (Ziel)      | **≥ 50**     | Volltext-Vorgabe vom Auftraggeber.                   |
+| Akzeptables Min. | ≥ 30         | nur für Bootstrap-Phase, im Status-Report ausweisen. |
+| Starter-Pool     | ~ 10         | nur initial, MUSS als „offen/dringend" markiert sein.|
+
+- Neue Quiz-Fragen werden an das `quiz`-Array **angehängt** — nie mittendrin einsortieren (Random-Sampling braucht keine Reihenfolge, Stabilität ist trotzdem nützlich).
+- Pro Frage genau 4 Antwortoptionen. `correct` ist der 0-basierte Index.
+- `explanation` ist Pflicht: 1–3 Sätze mit **konkretem Quellenanker** (z.B. „NIST SP 800-207 §3.1", „MITRE ATT&CK T1110", „CompTIA SY0-701 Objective 2.4", „RFC 8446 §4.1.2", „FIPS 203:2024").
+
+### 18.5 Wissenschaftliche Korrektheit (gilt §8 verschärft)
+
+- Alle Behauptungen, Frageoptionen und Erläuterungen müssen gegen **primäre, aktuelle Standards** geprüft sein:
+  - CompTIA-Objectives in der **aktuell gültigen Version** (CAS-005, SY0-701, CS0-003, PT0-002).
+  - NIST SP 800-Serie (insb. 207, 218, 61r2, 53r5, 160 Vol. 1 r1, 115, 86), FIPS 140-3, FIPS 203/204/205 (PQC, 2024).
+  - MITRE ATT&CK in jeweils aktueller Version (Versions-Tag im Text).
+  - ISO/IEC 27001:2022, 27002:2022, 27005, 31000.
+  - OWASP Top 10 2021 (bzw. neuere ASVS-Version mit Jahr).
+  - CISA KEV, FIRST CVSS v3.1/v4.0 (Version benennen).
+- **Veraltete Empfehlungen** (DES, 3DES, MD5, SHA-1, RSA < 2048, TLS < 1.2) ausschließlich als Negativbeispiel mit klarer Kennzeichnung.
+- Bei Umstrittenem Aspekt: kürzeste, herstellerneutrale, standardkonforme Antwort wählen.
+
+### 18.6 Inhaltliche Pflege (Curriculum-Pages)
+
+- Pro Kapitel **mindestens 4 Lehrseiten** (Soll ≥ 6) — eine pro Schwerpunktthema.
+- Seitenformat: `html` als sauberes Plain-HTML (keine Inline-Styles, keine Scripts, keine externen Bilder). Erlaubte Elemente: `<p>`, `<h3>`, `<h4>`, `<ul>/<ol>/<li>`, `<table>/<thead>/<tbody>/<tr>/<th>/<td>`, `<strong>`, `<em>`, `<code>`, `<blockquote>`.
+- Mathe wenn nötig via KaTeX (`$...$`, `$$...$$`, Backslashes verdoppeln).
+- Sprache: Deutsch. Fachbegriffe in Klammern auf Englisch wenn üblich (z.B. „Zero Trust Architecture (ZTA)").
+
+### 18.7 Anti-Pattern
+
+- Quiz-Pool unter 50 Fragen pro Kapitel ohne **expliziten Hinweis** im Status-Report.
+- Frage- oder Antworttext aus geschützten Trainings-Materialien wörtlich kopieren.
+- Halb-richtige Antworten als „falsch" werten oder umgekehrt — Distraktoren müssen eindeutig falsch sein.
+- Quiz-Fortschritt der Schulungen in `wissen_reloaded_progress_v1` schreiben.
+- Externe Bilder/SVGs in `pages.html`.
+- Multi-Antwort-Fragen (Checkbox) — nur Single-Choice (Radio).
+
+### 18.8 Erweiterungsregeln
+
+- **Neue Schulung**: neue Datei `js/data/schulung_<id>.js`, in `index.html` **vor** den React-UMD-Skripten als `<script>` einbinden, in `sw.js` zum `APP_SHELL` hinzufügen, `CACHE_VERSION` bumpen.
+- **Mehr Quiz-Fragen**: einfach an `quiz`-Array anhängen. UI sampelt automatisch 10 zufällige.
+- **Mehr Lehrseiten**: an `pages` anhängen. Reader nutzt `pages.length` automatisch.
+- **PBQ-Style-Aufgaben** (Drag-Drop / Sequenz-Eingabe): noch **nicht** implementiert; bei Bedarf neue Stage einführen, **nicht** Multi-Choice missbrauchen.
+
 

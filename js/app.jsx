@@ -7,6 +7,7 @@ const { useState, useEffect, useMemo, useRef, useCallback } = React;
 const STORAGE_KEY = 'wissen_reloaded_progress_v1';
 const INSTALL_DISMISS_KEY = 'smartineer_install_dismissed_v1';
 const THEME_KEY = 'smartineer_theme_v1'; // 'dark' | 'light' (Default: 'dark')
+const SCHULUNGEN_KEY = 'smartineer_schulungen_v1'; // { [trainingId]: { [chapterId]: { lastPage, quizBest } } }
 
 // ---------------------------------------------------------------- Hooks
 function useProgress() {
@@ -65,6 +66,7 @@ function Nav({ view, setView, theme, onToggleTheme }) {
         { id: 'dashboard', label: 'Dashboard' },
         { id: 'training', label: 'Training' },
         { id: 'cheatsheet', label: 'Cheatsheets' },
+        { id: 'schulungen', label: 'Schulungen' },
         { id: 'schueler', label: 'Schüler' }
     ];
     return (
@@ -714,6 +716,434 @@ function Schueler() {
     return null;
 }
 
+// ---------------------------------------------------------------- Schulungen (Cert-Tracks)
+function useSchulungenState() {
+    const [state, setState] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(SCHULUNGEN_KEY)) || {}; }
+        catch (e) { return {}; }
+    });
+    const persist = useCallback((next) => {
+        setState(next);
+        try { localStorage.setItem(SCHULUNGEN_KEY, JSON.stringify(next)); } catch (e) { /* quota */ }
+    }, []);
+    const setLastPage = useCallback((tid, cid, page) => {
+        setState(prev => {
+            const next = { ...prev };
+            next[tid] = { ...(next[tid] || {}) };
+            next[tid][cid] = { ...(next[tid][cid] || {}), lastPage: page };
+            try { localStorage.setItem(SCHULUNGEN_KEY, JSON.stringify(next)); } catch (e) {}
+            return next;
+        });
+    }, []);
+    const recordQuiz = useCallback((tid, cid, score, total) => {
+        setState(prev => {
+            const next = { ...prev };
+            next[tid] = { ...(next[tid] || {}) };
+            const ch = { ...(next[tid][cid] || {}) };
+            const best = ch.quizBest;
+            const ratio = total ? score / total : 0;
+            const bestRatio = best ? best.score / best.total : 0;
+            if (!best || ratio >= bestRatio) {
+                ch.quizBest = { score, total, date: new Date().toISOString() };
+            }
+            ch.quizLast = { score, total, date: new Date().toISOString() };
+            next[tid][cid] = ch;
+            try { localStorage.setItem(SCHULUNGEN_KEY, JSON.stringify(next)); } catch (e) {}
+            return next;
+        });
+    }, []);
+    const reset = useCallback(() => persist({}), [persist]);
+    return { state, setLastPage, recordQuiz, reset };
+}
+
+function shuffleSample(arr, n) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a.slice(0, Math.min(n, a.length));
+}
+
+function chapterProgress(chapter, chState) {
+    const totalPages = chapter.pages.length;
+    const lastPage = chState ? (chState.lastPage || 0) : 0;
+    const pagePct = totalPages ? Math.round(((lastPage + 1) / totalPages) * 100) : 0;
+    const quizBest = chState && chState.quizBest;
+    return { totalPages, lastPage, pagePct, quizBest };
+}
+
+function trainingProgress(training, tState) {
+    let pages = 0, pageDone = 0, quizSum = 0, quizCount = 0;
+    training.chapters.forEach(ch => {
+        pages += ch.pages.length;
+        const cs = tState ? tState[ch.id] : null;
+        pageDone += cs ? Math.min((cs.lastPage || 0) + 1, ch.pages.length) : 0;
+        if (cs && cs.quizBest) {
+            quizSum += cs.quizBest.score / cs.quizBest.total;
+            quizCount++;
+        }
+    });
+    const readPct = pages ? Math.round((pageDone / pages) * 100) : 0;
+    const quizPct = quizCount ? Math.round((quizSum / quizCount) * 100) : 0;
+    return { readPct, quizPct, chapterCount: training.chapters.length };
+}
+
+function Schulungen() {
+    const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
+    const { state, setLastPage, recordQuiz } = useSchulungenState();
+    const [stage, setStage] = useState('index'); // index | chapters | reader | quiz | quizResult
+    const [tid, setTid] = useState(null);
+    const [cid, setCid] = useState(null);
+    const [page, setPage] = useState(0);
+    const [tocOpen, setTocOpen] = useState(false);
+    const [jumpOpen, setJumpOpen] = useState(false);
+    const [quizSet, setQuizSet] = useState([]);
+    const [quizIdx, setQuizIdx] = useState(0);
+    const [quizAnswers, setQuizAnswers] = useState([]);
+    const [quizSelected, setQuizSelected] = useState(null);
+
+    const readerRef = useKaTeX([stage, tid, cid, page]);
+    const quizRef = useKaTeX([stage, quizIdx]);
+    const resultRef = useKaTeX([stage, quizAnswers.length]);
+
+    if (!trainings.length) {
+        return <section className="view-fade p-8 text-red-700">
+            Keine Schulungen geladen. Prüfe <code>js/data/schulung_*.js</code> in <code>index.html</code>.
+        </section>;
+    }
+
+    const training = trainings.find(t => t.id === tid);
+    const chapter = training && training.chapters.find(c => c.id === cid);
+
+    const openTraining = (trainingId) => {
+        setTid(trainingId); setCid(null); setPage(0); setStage('chapters');
+    };
+
+    const openChapter = (chapterId, resumePage) => {
+        setCid(chapterId);
+        const ch = training.chapters.find(c => c.id === chapterId);
+        const start = (typeof resumePage === 'number') ? resumePage
+            : ((state[tid] && state[tid][chapterId] && state[tid][chapterId].lastPage) || 0);
+        setPage(Math.min(Math.max(0, start), Math.max(0, ch.pages.length - 1)));
+        setStage('reader');
+    };
+
+    const goPage = (p) => {
+        const total = chapter.pages.length;
+        const np = Math.min(Math.max(0, p), total - 1);
+        setPage(np);
+        setLastPage(tid, cid, np);
+    };
+
+    const startQuiz = () => {
+        const pool = chapter.quiz || [];
+        const sample = shuffleSample(pool, Math.min(10, pool.length));
+        setQuizSet(sample); setQuizIdx(0); setQuizAnswers([]); setQuizSelected(null);
+        setStage('quiz');
+    };
+
+    const submitQuizAnswer = () => {
+        if (quizSelected === null) return;
+        const item = quizSet[quizIdx];
+        const correct = quizSelected === item.correct;
+        const next = quizAnswers.concat([{ q: item.q, options: item.options, correct: item.correct, given: quizSelected, ok: correct, explanation: item.explanation }]);
+        setQuizAnswers(next);
+        setQuizSelected(null);
+        if (quizIdx + 1 >= quizSet.length) {
+            const score = next.filter(a => a.ok).length;
+            recordQuiz(tid, cid, score, quizSet.length);
+            setStage('quizResult');
+        } else {
+            setQuizIdx(quizIdx + 1);
+        }
+    };
+
+    // ---------- Stage: Index ----------
+    if (stage === 'index') {
+        return (
+            <section className="view-fade">
+                <div className="text-center max-w-3xl mx-auto mb-8">
+                    <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schulungen — Zertifikats-Vorbereitung</h1>
+                    <p className="text-slate-600">Buchartig aufgebaute, kapitelweise Lernpfade. Fortschritt und letzte Seite werden lokal gespeichert. Am Ende jedes Kapitels wartet ein Quiz mit zufällig gezogenen Fragen.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {trainings.map((t, i) => {
+                        const tp = trainingProgress(t, state[t.id]);
+                        return (
+                            <button key={t.id} onClick={() => openTraining(t.id)}
+                                style={{ animationDelay: `${i * 70}ms` }}
+                                className="card-fade text-left bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 transition-all p-6">
+                                <div className="flex items-start justify-between gap-2 mb-3">
+                                    <div>
+                                        <div className="text-xs font-bold uppercase tracking-wider text-slate-500">{t.code}</div>
+                                        <h3 className="text-xl font-bold text-slate-800">{t.name}</h3>
+                                    </div>
+                                    <span className="text-xs font-bold px-2 py-1 rounded-full bg-blue-100 text-blue-700 whitespace-nowrap">{tp.chapterCount} Kapitel</span>
+                                </div>
+                                <p className="text-sm text-slate-600 mb-4">{t.desc}</p>
+                                <div className="space-y-2">
+                                    <div>
+                                        <div className="flex justify-between text-xs text-slate-500 mb-1">
+                                            <span>Gelesen</span><span>{tp.readPct}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                            <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-1.5 transition-all" style={{ width: `${tp.readPct}%` }}></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between text-xs text-slate-500 mb-1">
+                                            <span>Quiz-Schnitt (Best)</span><span>{tp.quizPct}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                            <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-1.5 transition-all" style={{ width: `${tp.quizPct}%` }}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            </section>
+        );
+    }
+
+    // ---------- Stage: Chapters ----------
+    if (stage === 'chapters' && training) {
+        const tState = state[training.id] || {};
+        return (
+            <section className="view-fade">
+                <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+                    <div>
+                        <button onClick={() => setStage('index')}
+                            className="text-sm text-slate-500 hover:text-slate-800 mb-2">← Alle Schulungen</button>
+                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{training.name}</h1>
+                        <p className="text-sm text-slate-500">{training.code}</p>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-4">
+                    {training.chapters.map((ch, i) => {
+                        const cs = tState[ch.id];
+                        const cp = chapterProgress(ch, cs);
+                        const hasResume = cs && typeof cs.lastPage === 'number';
+                        return (
+                            <div key={ch.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition">
+                                <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
+                                    <div className="flex-1 min-w-[260px]">
+                                        <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Kapitel {i + 1}</div>
+                                        <h3 className="text-lg font-bold text-slate-800">{ch.title}</h3>
+                                        <p className="text-sm text-slate-600 mt-1">{ch.summary}</p>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-1 text-xs">
+                                        <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-bold">{ch.pages.length} Seite{ch.pages.length === 1 ? '' : 'n'}</span>
+                                        <span className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-bold">{ch.quiz.length} Quiz-Fragen</span>
+                                    </div>
+                                </div>
+                                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden my-3">
+                                    <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-1.5 transition-all" style={{ width: `${cp.pagePct}%` }}></div>
+                                </div>
+                                <div className="flex flex-wrap gap-2 items-center justify-between">
+                                    <div className="text-xs text-slate-500">
+                                        Letzte Seite: {hasResume ? `${cp.lastPage + 1}/${cp.totalPages}` : '—'}
+                                        {cp.quizBest && <span> · Quiz-Best: <strong>{cp.quizBest.score}/{cp.quizBest.total}</strong></span>}
+                                    </div>
+                                    <div className="flex gap-2 flex-wrap">
+                                        {hasResume && cp.lastPage > 0 && (
+                                            <button onClick={() => openChapter(ch.id)}
+                                                className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold py-2 px-4 rounded-lg shadow text-sm hover:shadow-lg transition">
+                                                Weiterlesen ({cp.lastPage + 1}/{cp.totalPages})
+                                            </button>
+                                        )}
+                                        <button onClick={() => openChapter(ch.id, 0)}
+                                            className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-lg text-sm transition">
+                                            {hasResume ? 'Von vorn' : 'Lesen starten'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </section>
+        );
+    }
+
+    // ---------- Stage: Reader ----------
+    if (stage === 'reader' && training && chapter) {
+        const total = chapter.pages.length;
+        const cur = chapter.pages[page];
+        const isLast = page >= total - 1;
+        return (
+            <section className="view-fade max-w-3xl mx-auto" ref={readerRef}>
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-4">
+                    <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <button onClick={() => setStage('chapters')}
+                                title="Zur Kapitelübersicht"
+                                className="px-2 py-1 text-xs bg-white border border-slate-300 hover:bg-slate-100 rounded transition flex-shrink-0">←</button>
+                            <button onClick={() => setTocOpen(true)}
+                                title="Inhaltsverzeichnis"
+                                className="px-2 py-1 text-xs bg-white border border-slate-300 hover:bg-slate-100 rounded transition flex-shrink-0">Inhalt</button>
+                            <button onClick={() => setJumpOpen(true)}
+                                title="Zu Seite springen"
+                                className="px-2 py-1 text-xs bg-white border border-slate-300 hover:bg-slate-100 rounded transition flex-shrink-0">Seite…</button>
+                        </div>
+                        <div className="text-xs text-slate-600 font-bold">Seite {page + 1} / {total}</div>
+                    </div>
+                    <div className="px-4 py-2 text-xs text-slate-500 truncate border-b border-slate-100">
+                        <span className="font-bold">{training.short || training.name}</span> · {chapter.title}
+                    </div>
+                    <div className="w-full bg-slate-100 h-1 overflow-hidden">
+                        <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-1 transition-all" style={{ width: `${((page + 1) / total) * 100}%` }}></div>
+                    </div>
+                    <article className="p-5 md:p-7 task-fade book-page" key={`${cid}-${page}`}>
+                        <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 mb-4">{cur.title}</h2>
+                        <div className="prose-book text-slate-800" dangerouslySetInnerHTML={{ __html: cur.html }} />
+                    </article>
+                    <div className="border-t border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between gap-2 flex-wrap">
+                        <button onClick={() => goPage(page - 1)} disabled={page <= 0}
+                            className="px-3 py-1.5 text-sm bg-white border border-slate-300 hover:bg-slate-100 rounded transition disabled:opacity-40 disabled:cursor-not-allowed">← Zurück</button>
+                        {!isLast && (
+                            <button onClick={() => goPage(page + 1)}
+                                className="px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded shadow hover:shadow-lg transition">Weiter →</button>
+                        )}
+                        {isLast && (
+                            <button onClick={startQuiz}
+                                className="px-3 py-1.5 text-sm bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded shadow hover:shadow-lg transition">
+                                Quiz starten ({Math.min(10, chapter.quiz.length)} von {chapter.quiz.length})
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* TOC Overlay */}
+                {tocOpen && (
+                    <div className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 fade-in"
+                        onClick={() => setTocOpen(false)}>
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-y-auto slide-up" onClick={(e) => e.stopPropagation()}>
+                            <div className="border-b border-slate-200 px-5 py-3 flex items-center justify-between">
+                                <h3 className="font-bold text-slate-800">Inhaltsverzeichnis</h3>
+                                <button onClick={() => setTocOpen(false)} className="text-slate-400 hover:text-slate-700 text-xl leading-none w-7 h-7 rounded-full hover:bg-slate-100" aria-label="Schließen">×</button>
+                            </div>
+                            <ol className="p-3">
+                                {chapter.pages.map((p, i) => (
+                                    <li key={i}>
+                                        <button onClick={() => { goPage(i); setTocOpen(false); }}
+                                            className={`w-full text-left px-3 py-2 rounded text-sm transition ${i === page ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50'}`}>
+                                            <span className="text-xs text-slate-400 mr-2">{i + 1}.</span>{p.title}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ol>
+                        </div>
+                    </div>
+                )}
+
+                {/* Page-Jump Overlay */}
+                {jumpOpen && (
+                    <div className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in"
+                        onClick={() => setJumpOpen(false)}>
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-xs w-full p-5 slide-up" onClick={(e) => e.stopPropagation()}>
+                            <h3 className="font-bold text-slate-800 mb-3">Zu Seite springen</h3>
+                            <input type="number" min={1} max={total} defaultValue={page + 1}
+                                onKeyDown={(e) => { if (e.key === 'Enter') { const n = parseInt(e.target.value, 10); if (!isNaN(n)) { goPage(n - 1); setJumpOpen(false); } } }}
+                                className="schueler-input mb-3" autoFocus />
+                            <div className="text-xs text-slate-500 mb-3">Seite 1 bis {total}. Enter zum Springen.</div>
+                            <button onClick={() => setJumpOpen(false)} className="w-full px-3 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
+                        </div>
+                    </div>
+                )}
+            </section>
+        );
+    }
+
+    // ---------- Stage: Quiz ----------
+    if (stage === 'quiz' && training && chapter) {
+        const item = quizSet[quizIdx];
+        if (!item) { setStage('chapters'); return null; }
+        return (
+            <section className="view-fade max-w-2xl mx-auto" ref={quizRef}>
+                <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                    <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+                        Frage {quizIdx + 1} von {quizSet.length}
+                    </div>
+                    <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) setStage('chapters'); }}
+                        className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2 mb-5 overflow-hidden">
+                    <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-2 transition-all duration-500"
+                        style={{ width: `${(quizIdx / quizSet.length) * 100}%` }}></div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 task-fade" key={quizIdx}>
+                    <div className="text-base md:text-lg font-bold text-slate-900 mb-5 math-block"
+                        dangerouslySetInnerHTML={{ __html: item.q }} />
+                    <div className="flex flex-col gap-2 mb-5">
+                        {item.options.map((opt, i) => {
+                            const sel = quizSelected === i;
+                            return (
+                                <button key={i} onClick={() => setQuizSelected(i)}
+                                    className={`text-left px-4 py-3 rounded-lg border transition ${sel
+                                        ? 'border-blue-500 bg-blue-50 text-blue-900 shadow'
+                                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800'}`}>
+                                    <span className="font-bold mr-2">{String.fromCharCode(65 + i)})</span>
+                                    <span dangerouslySetInnerHTML={{ __html: opt }} />
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <button onClick={submitQuizAnswer} disabled={quizSelected === null}
+                        className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition">
+                        Antwort bestätigen
+                    </button>
+                </div>
+            </section>
+        );
+    }
+
+    // ---------- Stage: QuizResult ----------
+    if (stage === 'quizResult' && training && chapter) {
+        const score = quizAnswers.filter(a => a.ok).length;
+        const wrong = quizAnswers.length - score;
+        return (
+            <section className="view-fade max-w-3xl mx-auto" ref={resultRef}>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">Quiz-Auswertung</h2>
+                    <p className="text-slate-600 mb-6">{training.short || training.name} · {chapter.title}</p>
+                    <div className="flex justify-center gap-8 mb-2 flex-wrap">
+                        <div><div className="text-5xl font-extrabold text-emerald-600">{score}</div><div className="text-xs font-bold text-slate-500 uppercase tracking-wider">richtig</div></div>
+                        <div><div className="text-5xl font-extrabold text-rose-600">{wrong}</div><div className="text-xs font-bold text-slate-500 uppercase tracking-wider">falsch</div></div>
+                        <div><div className="text-5xl font-extrabold text-slate-700">{Math.round((score / quizAnswers.length) * 100)}%</div><div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Quote</div></div>
+                    </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+                    <h3 className="font-bold text-slate-800 mb-4">Aufgaben im Überblick</h3>
+                    <ol className="flex flex-col gap-3">
+                        {quizAnswers.map((a, i) => (
+                            <li key={i} className={`p-3 rounded-lg border-l-4 ${a.ok ? 'border-emerald-400 bg-emerald-50' : 'border-rose-400 bg-rose-50'}`}>
+                                <div className="font-bold text-slate-800 math-block" dangerouslySetInnerHTML={{ __html: `${i + 1}. ${a.q}` }} />
+                                <div className="text-sm mt-2">
+                                    Deine Antwort: <strong className={a.ok ? 'text-emerald-700' : 'text-rose-700'}>
+                                        {String.fromCharCode(65 + a.given)}) <span dangerouslySetInnerHTML={{ __html: a.options[a.given] }} />
+                                    </strong>
+                                    {!a.ok && <div className="text-slate-700 mt-1">Richtig: <strong>{String.fromCharCode(65 + a.correct)}) <span dangerouslySetInnerHTML={{ __html: a.options[a.correct] }} /></strong></div>}
+                                </div>
+                                {a.explanation && <div className="text-xs text-slate-600 mt-2 italic">{a.explanation}</div>}
+                            </li>
+                        ))}
+                    </ol>
+                </div>
+                <div className="flex flex-wrap gap-3 justify-center">
+                    <button onClick={startQuiz} className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">Quiz wiederholen</button>
+                    <button onClick={() => setStage('reader')} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Zurück zum Kapitel</button>
+                    <button onClick={() => setStage('chapters')} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Anderes Kapitel</button>
+                </div>
+            </section>
+        );
+    }
+
+    return null;
+}
+
 // ---------------------------------------------------------------- Install Prompt
 function detectPlatform() {
     const ua = navigator.userAgent || '';
@@ -884,6 +1314,9 @@ function App() {
                 )}
                 {view === 'schueler' && (
                     <Schueler />
+                )}
+                {view === 'schulungen' && (
+                    <Schulungen />
                 )}
             </main>
             <footer className="bg-slate-900 text-slate-400 py-6 text-center text-sm mt-auto">
