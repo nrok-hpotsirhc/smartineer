@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v20-paediatrie-bildgebung-reisemed';
+const CACHE_VERSION = 'smartineer-v21-medizin-syntax-fix';
 const APP_SHELL = [
     './',
     './index.html',
