@@ -2036,7 +2036,35 @@
         q('Welche Aussage zur Behandlung der akuten unkomplizierten Zystitis bei nicht-schwangeren Frauen entspricht der S3-Leitlinie 2017/Update 2024?',
             ['Ciprofloxacin 3 d', 'Fosfomycin 3 g Einmaldosis oder Nitrofurantoin 100 mg 4 ×/d für 5 d oder Pivmecillinam 400 mg 3 ×/d für 3 d als Erstlinie', 'Ampicillin 7 d', 'Cefpodoxim 7 d', 'Cotrimoxazol 14 d'],
             1,
-            'S3-Leitlinie unkomplizierte HWI: Erstlinie Fosfomycin-Trometamol 3 g Einmal, Nitrofurantoin 100 mg 4 ×/d × 5 d oder Pivmecillinam 400 mg 3 ×/d × 3 d. Reserve: Cefpodoxim, Cotrimoxazol (nur bei E.-coli-Resistenz &lt; 20 %). Fluorchinolone und Cephalosporine sollen nicht mehr als Erstlinie eingesetzt werden (Kollateralschaden, Resistenzentwicklung; BfArM 2019).')
+            'S3-Leitlinie unkomplizierte HWI: Erstlinie Fosfomycin-Trometamol 3 g Einmal, Nitrofurantoin 100 mg 4 ×/d × 5 d oder Pivmecillinam 400 mg 3 ×/d × 3 d. Reserve: Cefpodoxim, Cotrimoxazol (nur bei E.-coli-Resistenz &lt; 20 %). Fluorchinolone und Cephalosporine sollen nicht mehr als Erstlinie eingesetzt werden (Kollateralschaden, Resistenzentwicklung; BfArM 2019).'),
+        q('Ein 4 Wochen alter Säugling wird mit rektaler Temperatur 38,4 °C ohne Fokus vorgestellt. Welches Vorgehen entspricht der NICE-NG143- bzw. AWMF-S2k-027-073-Empfehlung?',
+            ['Beruhigung, Paracetamol-Saft p. o., Wiedervorstellung in 24 h', 'Sofortige stationäre Einweisung mit kompletter Sepsis-Diagnostik (BB, CRP/PCT, Urin via SPU, Blut- und Liquorkultur) und empirischer i. v.-Antibiose (Ampicillin + Gentamicin oder Cefotaxim)', 'Ibuprofen oral, ambulante Beobachtung', 'Inhalation mit NaCl 0,9 %', 'Paracetamol-Suppositorium und Termin in 48 h'],
+            1,
+            'Säuglinge ≤ 28 Tage mit Fieber gelten ungeachtet des klinischen Eindrucks als Hochrisiko-Patienten (unreife Immunabwehr, hohe Inzidenz invasiver bakterieller Infektionen). Stationäre Aufnahme mit Sepsis-Diagnostik und empirischer i. v.-Antibiose ist Standard. Ceftriaxon ist im Neugeborenenalter wegen Bilirubin-Verdrängung kontraindiziert — daher Cefotaxim oder Ampicillin + Gentamicin.'),
+        q('Eine Mutter stellt ihr 4-jähriges, geimpftes Kind mit Fieber, Halsschmerzen, sandpapierartigem Exanthem an Stamm und periorale Blässe vor. Die Zunge ist hochrot mit prominenten Papillen. Welche Diagnose und Therapie sind am wahrscheinlichsten?',
+            ['Masern; symptomatisch', 'Drei-Tage-Fieber; symptomatisch', 'Scharlach durch Streptococcus pyogenes; Penicillin V oral 7 d', 'Ringelröteln; symptomatisch', 'Hand-Mund-Fuß-Krankheit; symptomatisch'],
+            2,
+            'Klassisches Scharlach-Bild: Erdbeerzunge, periorale Blässe (Filatow-Zeichen), sandpapierartiges Exanthem (Lingua-papillen-Aspekt der Haut). Therapie der Wahl: Penicillin V oral 7 d (S2k 017-024 2020). Komplikationen: rheumatisches Fieber, akute Glomerulonephritis. Masern beginnt mit Koplik-Flecken und konfluierendem Exanthem retroaurikulär; HFM-Krankheit zeigt Bläschen an Hand/Fuß/Mundschleimhaut.'),
+        q('Welche Aussage zur RSV-Prophylaxe nach STIKO-Empfehlung 2024 trifft zu?',
+            ['Palivizumab monatlich für alle Säuglinge', 'Aktive Impfung der Säuglinge ab 2. Lebensmonat', 'Nirsevimab (langwirksamer Anti-F-Protein-Antikörper) als einmalige passive Immunisierung für alle Neugeborenen zu RSV-Saisonbeginn', 'Aciclovir prophylaktisch', 'Ribavirin oral'],
+            2,
+            'STIKO 2024 (Bulletin 26/2024): einmalige Gabe von Nirsevimab für alle Säuglinge in ihrer ersten RSV-Saison (Saisonbeginn September/Oktober). Studien (HARMONIE 2023, MELODY 2022) zeigten ~ 80 % Reduktion RSV-bedingter Hospitalisierungen. Palivizumab nur noch für ausgewählte Hochrisikogruppen (Frühgeborene mit BPD, hämodynamisch wirksamer angeb. Herzfehler).'),
+        q('Eine 70-Jährige stellt sich mit akutem Hemiparese-Beginn vor 90 min vor. Native CT zeigt keine Blutung, aber eine hyperdense MCA und aufgehobene Mark-Rinden-Differenzierung links. Welcher nächste Schritt ist leitliniengerecht (AWMF S2k 030-046 2021)?',
+            ['Konservatives Vorgehen, ASS oral', 'Lyse mit Alteplase i. v. (0,9 mg/kg) sofern keine KI plus Stroke-Unit-Aufnahme; bei Großgefäßverschluss zusätzlich CT-Angiographie und Indikationsprüfung mechanische Thrombektomie', 'Antikoagulation mit Apixaban', 'Statin hochdosiert als Erstmaßnahme', 'Heparin i. v.-Bolus'],
+            1,
+            'Akuter Apoplex &lt; 4,5 h: Alteplase 0,9 mg/kg i. v. (10 % Bolus, Rest über 60 min) ist Standard. Hyperdenses MCA-Zeichen passt zu Großgefäßverschluss → CT-Angio anschließen; bei nachgewiesenem ICA-/M1-Verschluss Thrombektomie bis 6 h Standard, bei DEFUSE-3-/DAWN-Kriterien bis 24 h möglich. Stroke-Unit-Aufnahme verbessert Outcome (Cochrane 2020).'),
+        q('Welche Aussage zur MRT-Wichtung trifft am ehesten zu?',
+            ['In T1 ist Wasser hell, Fett dunkel.', 'In T2 sind Pathologien wie Ödem oder Entzündung typischerweise hyperintens; Liquor erscheint hell.', 'DWI zeigt vor allem chronische Demyelinisierung.', 'FLAIR unterdrückt Fett, nicht Wasser.', 'STIR ist eine T1-Kontrast-Sequenz.'],
+            1,
+            'T1: Wasser dunkel, Fett hell, Anatomie. T2: Wasser hell, Pathologien (Ödem, Tumor) typisch hyperintens. FLAIR: Liquor (also „freies Wasser") unterdrückt → MS-Plaques und Hirninfarkte werden hervorgehoben. DWI: frische Ischämie hell mit korrespondierend dunkler ADC-Map. STIR: Fett-Suppressions-Sequenz (Knochenmarködem, Stressfraktur).'),
+        q('Welche Aussage zur Sicherheit jodhaltiger CT-Kontrastmittel ist korrekt?',
+            ['CT-KM ist bei Schilddrüsenüberfunktion problemlos einsetzbar.', 'Metformin muss bei eGFR &gt; 60 ml/min nicht pausiert werden; bei eGFR &lt; 60 für 48 h pausieren wegen Risiko einer Laktatazidose bei akuter Niereninsuffizienz.', 'CIN-Risiko ist bei eGFR 80 hoch.', 'KM-Allergie wird primär über IgE Typ I getriggert.', 'Eine Vorhydrierung ist generell sinnlos.'],
+            1,
+            'Bei eGFR &gt; 60 ml/min keine Metformin-Pause notwendig (ESUR 2018). Bei eGFR 30–60 für 48 h pausieren — CIN-Risiko und potenzielle akute Nierenfunktionsverschlechterung. Bei manifester Hyperthyreose (M. Basedow, autonomes Adenom) jodhaltiges KM nur bei strenger Indikation (Iodexposition kann thyreotoxische Krise auslösen). KM-Reaktionen sind überwiegend nicht-allergisch (chemotoxisch, idiosynkratisch).'),
+        q('Eine MRT der LWS zeigt eine breitbasige Vorwölbung des Nucleus pulposus mit intaktem Anulus fibrosus auf Höhe L4/L5. Welche Befundbezeichnung ist am korrektesten?',
+            ['Sequester', 'Bandscheibenextrusion', 'Bandscheibenprotrusion', 'Spondylolisthesis Grad III', 'Spondylodiscitis'],
+            2,
+            'Protrusion: breitbasige Vorwölbung, Anulus intakt. Extrusion: Anulus-Defekt, Vorfall des Nucleus pulposus über die Bandscheibengrenze hinaus. Sequester: vom Nukleus abgetrenntes Fragment. Wichtig: Protrusionen sind häufige Inzidentalbefunde (bis 30–60 % asymptomatischer Erwachsener), Korrelation mit Klinik entscheidend (NVL Kreuzschmerz 2017). Spondylodiscitis: Endplatten-Ödem mit KM-Aufnahme, Notfall.')
     ];
 
     const QUIZ_FA = [
@@ -2427,8 +2455,192 @@
         q('Welche Aussage zur arbeitsbedingten Gesundheitsstörung / Anerkennung einer Berufskrankheit (BK) trifft zu?',
             ['Eine BK wird vom Hausarzt direkt anerkannt.', 'Bei begründetem Verdacht auf eine Berufskrankheit nach BKV-Liste hat der Arzt Anzeigepflicht (§ 202 SGB VII) an Unfallversicherungsträger / Berufsgenossenschaft; Anerkennung erfolgt durch BG nach Begutachtung; haftungsausfüllender Kausalitätsnachweis erforderlich.', 'BK-Anzeige ist freiwillig.', 'BK-Verfahren läuft über die Krankenkasse.', 'BK ist gleich Arbeitsunfall.'],
             1,
-            'BK-Verfahren: Verdacht → BK-Anzeige (Formular F6000) an die zuständige Berufsgenossenschaft / Unfallversicherungsträger durch Arzt, Arbeitgeber, Patient oder Krankenkasse (§ 202 SGB VII). Anerkennung nach BKV-Liste (z. B. BK-Nr. 2108 Bandscheibenschaden bei Heben/Tragen, 4301 Allergisches Asthma, 5101 schwere Hauterkrankung). Voraussetzung: gelistete Diagnose (oder Öffnungsklausel § 9 Abs. 2 SGB VII), berufliche Exposition, Kausalität.')
+            'BK-Verfahren: Verdacht → BK-Anzeige (Formular F6000) an die zuständige Berufsgenossenschaft / Unfallversicherungsträger durch Arzt, Arbeitgeber, Patient oder Krankenkasse (§ 202 SGB VII). Anerkennung nach BKV-Liste (z. B. BK-Nr. 2108 Bandscheibenschaden bei Heben/Tragen, 4301 Allergisches Asthma, 5101 schwere Hauterkrankung). Voraussetzung: gelistete Diagnose (oder Öffnungsklausel § 9 Abs. 2 SGB VII), berufliche Exposition, Kausalität.'),
+        q('Eine 32-Jährige plant eine 3-wöchige Backpacking-Reise nach Tansania (inkl. Sansibar, Mai–Juni). Sie ist gesund, nicht schwanger, hat keine Vorerkrankungen. Welche Reise-Impf- und Prophylaxe-Empfehlung entspricht den DTG-Empfehlungen 2024 am ehesten?',
+            ['Nur Standard-STIKO-Impfungen auffrischen, keine Malariaprophylaxe nötig', 'Gelbfieberimpfung (Pflicht für Einreise nach Tansania bei vorheriger Reise in Endemiegebiet, sonst empfohlen), Hepatitis A, ggf. Typhus und Tollwut; Malaria-Chemoprophylaxe (Atovaquon/Proguanil oder Doxycyclin) plus konsequenter Mücken-Schutz', 'Nur Hepatitis A', 'Gelbfieber + Cholera-Impfung statt Malariaprophylaxe', 'Mefloquin als Erstlinie unabhängig von der psychischen Anamnese'],
+            1,
+            'Tansania ist Hochrisiko-Malaria-Gebiet (P. falciparum) → Chemoprophylaxe Pflicht (DTG 2024). Atovaquon/Proguanil ideal für ≤ 4 Wochen Reisen, Doxycyclin günstige Alternative. Mefloquin nur, wenn keine psychiatrische Anamnese (BfArM Rote-Hand-Brief 2013/2017). Gelbfieber: empfohlen für Festland-Tansania; Pflicht bei Einreise aus Endemiegebiet. Hep A nahezu obligat. Cholera-Impfung selten indiziert. Mücken-Schutz (DEET, Moskitonetz, lange Kleidung) ist immer Pflicht zusätzlich.'),
+        q('Ein 45-Jähriger kommt 10 Tage nach Rückkehr aus Nigeria mit hohem Fieber, Kopfschmerz und Myalgien in die Hausarztpraxis. Welcher Schritt ist als hausärztliche Erstmaßnahme leitliniengerecht (DTG)?',
+            ['Empirische Antibiose mit Amoxicillin', 'Sofortige Klinikeinweisung mit dringender Malariadiagnostik (Dicker Tropfen, Blutausstrich, RDT) — Verdacht auf Malaria tropica gilt bis zum Ausschluss als Notfall', 'Symptomatische Therapie und Kontrolle in 48 h', 'Doxycyclin 100 mg p. o. ambulant', 'Stuhlprobe und Wartetherapie'],
+            1,
+            'Bei Fieber bis 1 Jahr nach Rückkehr aus einem P.-falciparum-Endemiegebiet ist <em>jede</em> fieberhafte Erkrankung bis zum Beweis des Gegenteils Malaria. Diagnostik (Dicker Tropfen + Ausstrich, RDT) und Behandlungsbeginn dürfen nicht aufgeschoben werden — Malaria tropica kann binnen Stunden in zerebrale Form übergehen. Erstgabe: Artemether/Lumefantrin (Riamet) oder Atovaquon/Proguanil; bei schwerer Form Artesunat i. v. (DTG 2024).'),
+        q('Welche Aussage zur antibiotischen Therapie schwerer Reisediarrhoe (Fieber, blutiger Stuhl) bei einem Reisenden in Südostasien entspricht den aktuellen DTG-/IDSA-Empfehlungen?',
+            ['Loperamid allein bis zur Ausreise', 'Azithromycin 1000 mg einmalig oder 500 mg/d für 3 Tage als Erstlinie wegen hoher Fluorchinolon-Resistenzen bei Campylobacter in Süd-/Südostasien', 'Ciprofloxacin 500 mg 2 ×/d für 7 Tage', 'Cotrimoxazol 14 d', 'Vancomycin oral'],
+            1,
+            'Studien (Riddle 2016, IDSA 2017): in Süd-/Südostasien dominiert Campylobacter mit Fluorchinolon-Resistenzen bis &gt; 80 %. Daher Erstlinie bei schwerer Reisediarrhoe Azithromycin (1 g Einmaldosis oder 500 mg × 3 d). Ciprofloxacin nur in Regionen mit niedriger Resistenzrate (Lateinamerika, Afrika &lt; 20 %). Loperamid bei blutigem Stuhl/Fieber kontraindiziert (Toxisches Megakolon-Risiko bei invasiver Enterokolitis).'),
+        q('Welche Aussage zur Gelbfieberimpfung (17D-Lebendimpfstoff) entspricht den WHO-/DTG-Empfehlungen 2024?',
+            ['Auffrischimpfung alle 10 Jahre erforderlich für gültiges ICVP', 'Eine einzelne Gelbfieberimpfung verleiht laut WHO-Beschluss 2016 lebenslangen Schutz; das International Certificate of Vaccination (ICVP) ist auf Lebenszeit gültig — Booster nur in Sonderfällen (Immunsuppression, Schwangerschaft zum Impfzeitpunkt, HIV).', 'Lebendimpfstoffe sind in der Schwangerschaft generell unproblematisch.', 'Gelbfieberimpfung ist bei Hühnereiweiß-Allergie problemlos.', 'Auch Säuglinge unter 6 Monaten können sicher geimpft werden.'],
+            1,
+            'WHO 2016: einmalige Gelbfieberimpfung verleiht lebenslangen Schutz, ICVP gilt auf Lebenszeit (vor 2016 Booster alle 10 J. notwendig). Sonderfälle (Booster oder vorsichtigere Indikation): Immunsuppression (auch HIV), Schwangerschaft zum Erstimpfungs-Zeitpunkt. KI: Hühnereiweiß-Allergie (anaphylaktisch), Immunsuppression (z. B. unter Biologika), Säuglinge &lt; 9 Mon., Thymom/Thymektomie. Pflicht für Einreise nach mehreren Sub-Sahara-Afrika- und Amazonas-Ländern.')
     ];
+
+    // =========================================================================
+    // ERGÄNZENDE LEHRSEITEN (Pädiatrie, Bildgebung, Reisemedizin)
+    // =========================================================================
+
+    const PAGE_PAEDIATRIE = {
+        title: '2.9 Pädiatrie in der Hausarztpraxis',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie können (1) den Fieber-Algorithmus beim Säugling/Kleinkind nach NICE NG143 (2019, Update 2021) und AWMF S2k 027-073 (2024) anwenden, (2) die fünf klassischen Kinderexantheme (Masern, Scharlach, Röteln, Ringelröteln/Erythema infectiosum, Drei-Tage-Fieber) anhand von Verlauf und Effloreszenzen unterscheiden, (3) U-Untersuchungen U1–U9 mit ihren Schwerpunkten zuordnen, (4) Atemwegsinfekte (Pseudokrupp, akute Bronchiolitis durch RSV, ambulant erworbene Pneumonie im Kindesalter) leitliniengerecht behandeln und (5) Red Flags der Kinder-Notfallmedizin erkennen.</blockquote>'
+
+            + '<p>Die Pädiatrie ist in der hausärztlichen Versorgung quantitativ wie qualitativ relevant: U-Untersuchungen, Akutvorstellungen mit Fieber, Husten, Hautausschlag, Otitis media und Bauchschmerzen machen einen großen Teil der Konsultationen aus. Wer die Red Flags kennt, kann mit hoher Sicherheit zwischen banalen Infekten und behandlungsbedürftigen Notfällen unterscheiden.</p>'
+
+            + '<h4>2.9.1 Fieber-Algorithmus Säugling und Kleinkind</h4>'
+            + '<p>NICE NG143 (Stand 2021) und AWMF-S2k 027-073 (2024) folgen einem altersabhängigen Ampelsystem (Traffic-Light-System):</p>'
+            + '<ul>'
+            + '<li><strong>0–28 Tage</strong> mit Fieber ≥ 38,0 °C rektal: <strong>immer stationär</strong>; Sepsis-Diagnostik (BB, CRP, Procalcitonin, Urin via SPU, Blut- und Liquor-Kultur), empirisch Ampicillin + Gentamicin oder Cefotaxim (kein Ceftriaxon im Neugeborenenalter — Bilirubin-Verdrängung).</li>'
+            + '<li><strong>29–90 Tage</strong> mit Fieber ≥ 38,0 °C: Step-Up-Bewertung (Rochester-/PECARN-Kriterien); bei Low-Risk und unauffälliger Klinik ambulante Beobachtung möglich, sonst stationär.</li>'
+            + '<li><strong>3 Mon.–5 J.</strong>: Ampelsystem nach Hautfarbe, Aktivität, Atmung, Hydration; rote Zeichen (z. B. Petechien außerhalb des SVC-Areals, Stridor, Atemfrequenz &gt; 60/min, kapilläre Füllzeit &gt; 3 s, Bewusstseinsstörung) → unverzügliche Klinikeinweisung.</li>'
+            + '</ul>'
+            + '<p>Antipyretika: Paracetamol 15 mg/kg/Dosis alle 6 h (max. 60 mg/kg/d) ODER Ibuprofen 10 mg/kg alle 8 h (ab 3. LM, normale Hydration; Cave: nicht bei Varizellen — erhöhtes Risiko nekrotisierender Fasziitis durch Streptokokken).</p>'
+
+            + '<h4>2.9.2 Klassische Kinderexantheme</h4>'
+            + '<table><thead><tr><th>Erkrankung</th><th>Erreger</th><th>Inkubation</th><th>Leitsymptom</th><th>Komplikation</th></tr></thead><tbody>'
+            + '<tr><td>Masern</td><td>Masernvirus (Paramyxo)</td><td>10–12 d</td><td>Koplik-Flecken, dann konfluierendes makulopapulöses Exanthem retroaurikulär beginnend</td><td>Pneumonie, Otitis, akute Enzephalitis (1:1000), SSPE</td></tr>'
+            + '<tr><td>Scharlach</td><td>Strept. pyogenes</td><td>2–4 d</td><td>Erdbeerzunge, periorale Blässe, sandpapierartiges Exanthem, Schuppung</td><td>Rheumatisches Fieber, Glomerulonephritis</td></tr>'
+            + '<tr><td>Röteln</td><td>Rubellavirus</td><td>14–21 d</td><td>kleinfleckiges Exanthem, nuchale LK, mild</td><td>Konnatales Rötelnsyndrom (Gregg)</td></tr>'
+            + '<tr><td>Ringelröteln (Erythema infectiosum)</td><td>Parvovirus B19</td><td>4–14 d</td><td>„Ohrfeigen"-Wangen, girlandenförmig am Stamm</td><td>Aplastische Krise (Hb-Patho), Hydrops fetalis</td></tr>'
+            + '<tr><td>Drei-Tage-Fieber (Exanthema subitum)</td><td>HHV-6/-7</td><td>5–15 d</td><td>3 d hohes Fieber, dann Entfieberung mit Exanthem</td><td>Fieberkrampf</td></tr>'
+            + '</tbody></table>'
+            + '<p>Masern sind nach IfSG § 6/§ 7 namentlich meldepflichtig (auch Verdacht); seit 2020 Masern-Impfpflicht für Kita/Schule. Scharlach: Penicillin V oral 7 d (Mittel der Wahl, S2k 017-024 2020).</p>'
+
+            + '<h4>2.9.3 U-Untersuchungen (Auswahl)</h4>'
+            + '<ul>'
+            + '<li><strong>U1</strong> (direkt postnatal): APGAR, Reife, sichtbare Fehlbildungen, Vitamin K oral 2 mg.</li>'
+            + '<li><strong>U2</strong> (3.–10. LT): NBS-Trockenblut, Hörscreening (TEOAE/AABR), pulsoxymetrisches Screening auf kritische Herzfehler.</li>'
+            + '<li><strong>U3</strong> (4.–5. LW): <strong>Hüftsono nach Graf</strong> (Pflicht ab 2024), Reflexstatus, ggf. Vit-D-Prophylaxe ab 2. LW (400–500 IE/d bis Ende des 1. Lj.).</li>'
+            + '<li><strong>U6</strong> (10.–12. LM): Sprache (silbendoppelnde Lallphase), Stehen mit Festhalten, Eisenstatus bei Risiko.</li>'
+            + '<li><strong>U7a</strong> (3 J.): Sehprüfung, Sprache, Verhalten — Frühförderung anbahnen.</li>'
+            + '<li><strong>U9</strong> (5 J.): Schulreife, Visus, Sprache (s/sch-Differenzierung), Impfstatus aktualisieren.</li>'
+            + '</ul>'
+
+            + '<h4>2.9.4 Häufige Akutvorstellungen</h4>'
+            + '<p><strong>Pseudokrupp (akute subglottische Laryngotracheitis)</strong>: nächtlicher bellender Husten, inspiratorischer Stridor, Heiserkeit, Fieber ≤ 38,5 °C; Therapie: Beruhigen (sitzend), Kortikoid (Dexamethason 0,15–0,6 mg/kg p. o. einmalig — S2k 045-002 2024), bei mittelschwerer bis schwerer Form vernebeltes Adrenalin (Suprarenin) 4 mg in 4 ml NaCl. <em>Abgrenzung zur Epiglottitis</em> (H. influenzae b, durch Hib-Impfung selten geworden): hohes Fieber, Speicheln, kloßige Sprache, sitzend nach vorn gebeugt — Notfall, Atemwegssicherung im OP/PICU.</p>'
+            + '<p><strong>RSV-Bronchiolitis</strong>: Säuglinge &lt; 1 Jahr, Tachy-/Dyspnoe, Knisterrasseln, exspiratorisches Giemen; Therapie überwiegend supportiv (Sauerstoff, Hydration, ggf. nasal HighFlow); seit Saison 2023/24 passive Immunisierung mit Nirsevimab (Anti-F-Antikörper, einmalig zu Saisonbeginn) für alle Neugeborenen empfohlen — STIKO 2024.</p>'
+            + '<p><strong>Ambulante Pneumonie im Kindesalter</strong>: Antibiotikum nur bei klinisch eindeutiger bakterieller Pneumonie. Mittel der Wahl: Amoxicillin 50 mg/kg/d in 2–3 ED für 5 d (S3 048-013 2024). Atypische Erreger (Mycoplasma) bei Schulkindern → Makrolid.</p>'
+
+            + '<h4>2.9.5 Red Flags Kinder-Notfallmedizin</h4>'
+            + '<ul>'
+            + '<li>Petechien außerhalb des Vena-cava-superior-Areals (sofort an Meningokokken-Sepsis denken — Notarzt, Ceftriaxon 50–80 mg/kg i. v.).</li>'
+            + '<li>Bewusstseinsstörung, fokale Neurologie, neu aufgetretener Krampfanfall &gt; 5 min (Status epilepticus).</li>'
+            + '<li>Atemfrequenz &gt; 60/min Säugling oder &gt; 50/min Kleinkind, Einziehungen, Nasenflügeln, SpO₂ &lt; 92 %.</li>'
+            + '<li>Galliges Erbrechen (Volvulus, Invagination); blutiger Stuhl + Bauchschmerz mit Tannenholz-Bauch (Invagination, häufig 6.–18. LM).</li>'
+            + '<li>Hodenschmerz &lt; 6 h: Hodentorsion-Verdacht, sofortige urologische Abklärung.</li>'
+            + '</ul>'
+
+            + '<p class="quellen"><em>Quellen:</em> NICE Guideline NG143 Fever in under 5s (Update 2021); AWMF S2k 027-073 Fieber unklarer Genese im Säuglings- und Kindesalter (2024); STIKO Empfehlungen 2024 (RSV/Nirsevimab, Masern); IfSG § 6/§ 7 (Stand 2024); AWMF S2k 045-002 Akuter Pseudokrupp (2024); AWMF S2k 017-024 Streptokokken-A-Tonsillopharyngitis (2020); Kinder- und Jugendrichtlinie G-BA (Stand 2024).</p>'
+    };
+
+    const PAGE_BILDGEBUNG = {
+        title: '2.10 Bildgebung in der Hausarztpraxis: Befundbeschreibung CT und MRT',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie können (1) die Indikationen für CT vs. MRT entlang der Orientierungshilfe Radiologie der Bundesärztekammer (2019, Update 2024) korrekt zuordnen, (2) typische CT-Charakteristika häufiger Notfälle (Apoplex-Algorithmus, Lungenembolie, akute Pankreatitis, Subarachnoidalblutung) lesen und einordnen, (3) MRT-Wichtungen (T1, T2, FLAIR, DWI/ADC) und ihre klinischen Aussagen verstehen, (4) Kontrastmittel-Risiken (jodhaltig vs. gadoliniumhaltig) bei Niereninsuffizienz und in der Schwangerschaft bewerten und (5) typische degenerative Wirbelsäulen-MRT-Befunde (Bandscheibenprotrusion, Spinalkanalstenose, Modic-Veränderungen) klinisch einordnen.</blockquote>'
+
+            + '<p>Hausärztinnen und Hausärzte ordnen täglich Bildgebung an und interpretieren Befunde im Patientengespräch. Das Verständnis der Modalitäten und ihrer Ausgaben ist deshalb prüfungs- und versorgungsrelevant.</p>'
+
+            + '<h4>2.10.1 CT vs. MRT — Auswahlkriterien</h4>'
+            + '<table><thead><tr><th>Indikation</th><th>Erstmodalität</th><th>Begründung</th></tr></thead><tbody>'
+            + '<tr><td>Akuter Apoplex (&lt; 4,5 h)</td><td>nativ-CT, dann CT-Angio + Perfusion</td><td>Blutung sicher ausschließen, schnell verfügbar</td></tr>'
+            + '<tr><td>Apoplex-DD nach 24 h, Lakunärsyndrom</td><td>MRT mit DWI</td><td>Frühischämie sensitiver als CT</td></tr>'
+            + '<tr><td>Lungenembolie</td><td>CT-Pulmonalisangiographie</td><td>ESC 2019, hohe Sensitivität</td></tr>'
+            + '<tr><td>Akutes Abdomen</td><td>CT mit i. v. KM</td><td>Schnell, OP-Planungs-tauglich</td></tr>'
+            + '<tr><td>Bandscheibenvorfall, Rückenschmerz mit Red Flags</td><td>MRT LWS/HWS</td><td>Weichteil-Auflösung, keine Strahlung</td></tr>'
+            + '<tr><td>MS-Verdacht</td><td>MRT mit FLAIR + KM</td><td>McDonald-Kriterien 2017</td></tr>'
+            + '<tr><td>Knochenfraktur, Polytrauma</td><td>CT</td><td>Knochen-Detail, schnell</td></tr>'
+            + '<tr><td>Akute Cholezystitis</td><td>Sonographie</td><td>Erstlinie nach S3 021-008; CT/MRT erst bei unklarer Sono</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>2.10.2 CT-Befundbeschreibung</h4>'
+            + '<p>Dichten in <em>Hounsfield-Einheiten</em> (HE): Luft −1000, Fett −100 bis −50, Wasser 0, Weichteil ≈ 30–80, Blut frisch 60–80, Blut alt 30–50, Knochen 200–1000. Daher:</p>'
+            + '<ul>'
+            + '<li><strong>Akute intrazerebrale Blutung</strong>: <em>hyperdens</em> (60–80 HE), ohne KM-Aufnahme; ältere Blutung wird isodens, dann hypodens.</li>'
+            + '<li><strong>Akuter Apoplex (&lt; 6 h, ischämisch)</strong>: native CT meist unauffällig; frühe Zeichen: hyperdense MCA, aufgehobene Mark-Rinden-Differenzierung im ASPECTS-Score, verstrichene Sulci. CTP zeigt Mismatch (Penumbra) für Thrombektomie-Indikation (DEFUSE-3, DAWN bis 24 h erweiterbar).</li>'
+            + '<li><strong>SAB</strong>: blutige Liquorräume (basale Zisternen, Sylvische Fissur) hyperdens; CT hat innerhalb 6 h Sensitivität ~ 100 %, danach LP empfohlen (Xanthochromie nach 12 h).</li>'
+            + '<li><strong>Lungenembolie (CTPA)</strong>: KM-Aussparung in den Pulmonalarterien; Rechtsherzbelastung mit RV/LV-Quotient &gt; 1,0.</li>'
+            + '<li><strong>Akute Pankreatitis (CT-Severity-Index, Balthazar)</strong>: Drüsen-Schwellung, peripankreatische Flüssigkeit, Nekrosen (kein KM-Enhancement) — KM-CT idealerweise erst nach 72–96 h zur Nekrose-Beurteilung.</li>'
+            + '</ul>'
+
+            + '<h4>2.10.3 MRT-Wichtungen</h4>'
+            + '<table><thead><tr><th>Sequenz</th><th>Wasser</th><th>Fett</th><th>Klinische Aussage</th></tr></thead><tbody>'
+            + '<tr><td>T1</td><td>dunkel</td><td>hell</td><td>Anatomie; Met-Hb hyperintens; KM-Aufnahme dargestellt</td></tr>'
+            + '<tr><td>T2</td><td>hell</td><td>mittel</td><td>Pathologien (Ödem, Entzündung) hell; Liquor weiß</td></tr>'
+            + '<tr><td>FLAIR</td><td>Liquor unterdrückt, Ödem hell</td><td>—</td><td>MS-Plaques, Hirninfarkt, Subarachnoidalsignale</td></tr>'
+            + '<tr><td>DWI / ADC</td><td>frisch ischämisches Gewebe DWI hell, ADC dunkel</td><td>—</td><td>Schlaganfall &lt; 6 h sensitiv; Cholesteatom, Abszess</td></tr>'
+            + '<tr><td>STIR / Fett-Sat</td><td>Ödem hell</td><td>unterdrückt</td><td>Knochenmark-Ödem, Stressfraktur, Spondylitis</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>2.10.4 Kontrastmittel-Sicherheit</h4>'
+            + '<p><strong>Jodhaltige CT-KM</strong>: Risiko kontrastinduzierter Nephropathie (CIN) — bei eGFR &lt; 30 nur bei vitaler Indikation; eGFR 30–60 vorhydrieren (NaCl 0,9 % 1 ml/kg/h 6 h vor und nach). Schilddrüsen-Vorsicht bei Hyperthyreose (Plummer, M. Basedow): TSH/fT4 vor Untersuchung. Metformin pausieren bei eGFR &lt; 60 für 48 h (Laktatazidose-Risiko bei akuter Niereninsuffizienz).</p>'
+            + '<p><strong>Gadolinium-haltige MR-KM</strong>: Risiko nephrogener systemischer Fibrose (NSF) bei eGFR &lt; 30 — heute durch Verwendung makrocyclischer KM (Gadoteridol, Gadobutrol) und Vermeidung linearer Substanzen praktisch eliminiert (EMA-Beschluss 2017). Schwangerschaft: nur bei strenger Indikation (Plazenta-Passage, Tierdaten heterogen).</p>'
+
+            + '<h4>2.10.5 Wirbelsäulen-MRT — typische Befunde</h4>'
+            + '<ul>'
+            + '<li><strong>Bandscheibenprotrusion</strong>: breitbasige Vorwölbung des Anulus, ohne Anulus-Riss; meist asymptomatisch, häufiger Inzidentalbefund auch bei jungen Erwachsenen.</li>'
+            + '<li><strong>Bandscheibenextrusion / Sequester</strong>: Anulus-Defekt, Vorfall des Nucleus pulposus, oft sequestriert; korreliert besser mit klinischer Radikulopathie.</li>'
+            + '<li><strong>Spinalkanalstenose lumbal</strong>: AP-Durchmesser &lt; 10 mm absolut, &lt; 12 mm relativ; klinisch Claudicatio spinalis (besser im Sitzen, schlechter im Gehen).</li>'
+            + '<li><strong>Modic-Veränderungen</strong> der Endplatten: Typ I (Ödem, T1 dunkel, T2 hell — entzündlich), Typ II (Fettmark, T1 hell, T2 hell), Typ III (Sklerose, beide dunkel).</li>'
+            + '<li><strong>Spondylodiscitis</strong>: Endplatten-Erosion, Bandscheibensignal-Anstieg in T2/STIR mit KM-Anreicherung; klinisch Fieber + lokaler Klopfschmerz → Notfall, Antibiotika empirisch nach Punktion.</li>'
+            + '</ul>'
+
+            + '<p class="quellen"><em>Quellen:</em> Bundesärztekammer Orientierungshilfe Radiologie 2019 (Aktualisierung 2024); ESR Iodinated Contrast Media Guidelines v10 (2018); ACR Manual on Contrast Media v2024; AWMF S2k LL Akuter Schlaganfall 030-046 (2021); ESC LL Lungenembolie 2019; AWMF S3 048-001 Spezifischer Kreuzschmerz (2017); McDonald-Kriterien 2017 für MS.</p>'
+    };
+
+    const PAGE_REISEMEDIZIN = {
+        title: '3.6 Reise- und Tropenmedizin in der Hausarztpraxis',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie können (1) eine reisemedizinische Beratung strukturiert nach Reiseziel, Reisedauer, Reisestil und Patientenfaktoren durchführen, (2) Pflicht- und Empfehlungs-Impfungen nach DTG (Stand 2024) und WHO (Gelbfieber, Meningokokken ACWY für Hadj) korrekt zuordnen, (3) Malaria-Chemoprophylaxe und Stand-by-Therapie regional differenzieren, (4) Reisediarrhoe nach Schweregrad behandeln und Antibiotika-Resistenzen (insb. ESBL-Akquisition in Süd-/Südostasien) berücksichtigen und (5) klassische Tropenkrankheiten (Malaria tropica, Dengue, Typhus, Schistosomiasis) bei Rückkehrern frühzeitig erkennen.</blockquote>'
+
+            + '<p>Reisemedizin ist eine klassische hausärztliche IGeL-Leistung mit hoher Sicherheitsrelevanz: ein vergessener Gelbfieberimpfstempel kann Einreise verweigern, eine vergessene Malariaprophylaxe einen ungeschützten Pat. binnen Tagen lebensbedrohlich krank machen.</p>'
+
+            + '<h4>3.6.1 Reiseberatung — strukturiertes Vorgehen</h4>'
+            + '<ul>'
+            + '<li><strong>Reisedaten</strong>: Ziel (Land, Region, Höhe), Saison (Trocken-/Regenzeit), Dauer, Reisestil (Hotel vs. Backpacking, Land vs. Stadt).</li>'
+            + '<li><strong>Patientenfaktoren</strong>: Alter, Schwangerschaft, Immunsuppression, chronische Erkrankungen, Allergien, Medikation (CYP-Interaktionen mit Antimalarika).</li>'
+            + '<li><strong>Aktuelle Empfehlungen</strong>: Auswärtiges Amt (Sicherheits-/Gesundheitslage), DTG-Empfehlungen 2024, RKI für seltene Erreger, WHO für Pflicht-Impfungen (z. B. Gelbfieber für Sub-Sahara-Afrika und Teile Südamerikas, Polio-Boost für Pakistan/Afghanistan/Nigeria).</li>'
+            + '</ul>'
+
+            + '<h4>3.6.2 Reiseimpfungen</h4>'
+            + '<table><thead><tr><th>Impfstoff</th><th>Indikation</th><th>Schema</th></tr></thead><tbody>'
+            + '<tr><td>Gelbfieber (17D-Lebendimpfstoff)</td><td>Pflicht für Sub-Sahara-Afrika und Amazonasregion; Nachweis im International Certificate of Vaccination (ICVP)</td><td>Einmalimpfung lebenslang gültig (WHO 2016); KI: Immunsuppression, Hühnereiweiß-Allergie, Säuglinge &lt; 9 Mon.</td></tr>'
+            + '<tr><td>Hepatitis A</td><td>nahezu alle tropischen Reisen</td><td>1 Dosis = Kurzzeitschutz, 2. Dosis nach 6–18 Mon. = lebenslang</td></tr>'
+            + '<tr><td>Typhus (oraler Ty21a oder Vi-Polysaccharid)</td><td>Süd-/Südostasien, Subsahara, abenteuerliche Reisen</td><td>Schutz ca. 60–70 %, daher zusätzlich Hygiene-Maßnahmen</td></tr>'
+            + '<tr><td>Tollwut (HDCV)</td><td>Reisen mit Tierkontakt, abgelegene Regionen ohne Postexpositions-Versorgung</td><td>Präexpositions-Schema 0/7/21 d, Auffrischung nach 1 J./5 J./10 J.</td></tr>'
+            + '<tr><td>Meningokokken ACWY (konj.)</td><td>Sahel-Gürtel, Hadj/Umrah verpflichtend (saudischer Visa-Erlass)</td><td>1 Dosis</td></tr>'
+            + '<tr><td>Japanische Enzephalitis</td><td>Längere Aufenthalte ländliche Süd-/Südostasien</td><td>2 Dosen Tag 0, 28</td></tr>'
+            + '<tr><td>FSME</td><td>Endemiegebiete Mitteleuropa, Risiko-Aktivität Wald</td><td>0/1–3/9–12 Mon., Auffrischung 3–5 J.</td></tr>'
+            + '<tr><td>Cholera (oral, Dukoral)</td><td>Eingeschränkte Indikation; ggf. Schutz vor ETEC-bedingter Reisediarrhoe</td><td>2 Dosen, 7 d Abstand</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>3.6.3 Malaria — Chemoprophylaxe und Stand-by</h4>'
+            + '<p>Risikoabschätzung nach DTG-Karte 2024: Hochrisikogebiete (Sub-Sahara-Afrika, Papua-Neuguinea) → Chemoprophylaxe; mittleres/saisonales Risiko → Stand-by-Notfalltherapie. Niedriges/sehr niedriges Risiko → ggf. nur Mücken-Schutz.</p>'
+            + '<ul>'
+            + '<li><strong>Atovaquon/Proguanil (Malarone)</strong>: 1 d vor bis 7 d nach Aufenthalt; gut verträglich, Reisen ≤ 4 Wochen wirtschaftlich.</li>'
+            + '<li><strong>Doxycyclin 100 mg/d</strong>: 1–2 d vor bis 4 Wochen nach Rückkehr; günstig, fototoxisch, antibakterielle Co-Wirkung; KI: Schwangerschaft, Kinder &lt; 8 J.</li>'
+            + '<li><strong>Mefloquin (Lariam)</strong>: 1 Wo vor bis 4 Wochen nach Rückkehr; günstig, KI: Psychiatrische Vorerkrankung (Depression, Psychose, Krampfanfall) — BfArM-Warnhinweis.</li>'
+            + '<li><strong>Stand-by</strong>: Atovaquon/Proguanil oder Artemether/Lumefantrin (Riamet) — Einnahme nur bei fieberhafter Erkrankung &gt; 7 d nach Einreise und Unmöglichkeit zeitnaher Diagnostik.</li>'
+            + '</ul>'
+            + '<p>Mücken-Schutz (DEET 30–50 % oder Icaridin 20 %, imprägnierte Kleidung, Moskitonetz) ist immer zusätzlich Pflicht.</p>'
+
+            + '<h4>3.6.4 Reisediarrhoe</h4>'
+            + '<p>Häufigste Erreger: ETEC (40–70 %), Campylobacter (Süd-/Südostasien zunehmend), Shigella, Salmonella, Norovirus. Therapie:</p>'
+            + '<ul>'
+            + '<li>Leicht: Rehydratation (orale Rehydratationslösung WHO-ORS), keine AB.</li>'
+            + '<li>Mittelschwer (Aktivitätseinschränkung, &gt; 4 wässrige Stühle/d): Loperamid (Erwachsene, ohne Fieber/blutigen Stuhl) ± Einmalgabe Azithromycin 1000 mg p. o. (Erstlinie auch in Asien wegen hoher Fluorchinolon-Resistenz Campylobacter).</li>'
+            + '<li>Schwer (Fieber, blutiger Stuhl, &gt; 6 Stühle/d): Azithromycin 1000 mg einmalig oder 500 mg/d × 3 d; in Resistenz-armen Regionen alternativ Ciprofloxacin 500 mg 2 ×/d × 3 d.</li>'
+            + '</ul>'
+            + '<p><strong>ESBL-Akquisition</strong>: ca. 30–50 % der Süd-/Südostasien-Reisenden tragen nach Rückkehr ESBL-bildende Enterobakterien (transient, Median ~ 1–6 Mon.). Bei nosokomialer Aufnahme nach Rückkehr Screening und ggf. Isolierung.</p>'
+
+            + '<h4>3.6.5 Tropenkrankheiten bei Rückkehrern</h4>'
+            + '<table><thead><tr><th>Erkrankung</th><th>Inkubation</th><th>Leitsymptom</th><th>Diagnostik</th></tr></thead><tbody>'
+            + '<tr><td>Malaria tropica (P. falciparum)</td><td>7–30 d, max. ~ 1 J.</td><td>Fieber, Kopfschmerz, Hämolyse</td><td>Dicker Tropfen + Ausstrich, RDT; jede Stunde verloren = Letalitätsrisiko ↑</td></tr>'
+            + '<tr><td>Dengue</td><td>4–14 d</td><td>Hohes Fieber, Kopfschmerz, retroorbitaler Schmerz, Myalgien, Petechien; Warnsignale Tag 4–7</td><td>NS1-Antigen früh, IgM/IgG; PCR; Thrombopenie, Hk-Anstieg</td></tr>'
+            + '<tr><td>Typhus abdominalis</td><td>7–21 d</td><td>kontinuierliches Fieber, Roseolen, relative Bradykardie, Splenomegalie</td><td>Blutkultur (Wo 1), Stuhl/Urin später; Ceftriaxon i. v.</td></tr>'
+            + '<tr><td>Schistosomiasis (Bilharziose)</td><td>4–8 Wo (Katayama)</td><td>Fieber, Eosinophilie, Hepato-/Splenomegalie nach Süßwasserkontakt (Bilharzia-See, Malawisee, Nil)</td><td>Eier in Stuhl/Urin, Serologie; Praziquantel 40 mg/kg</td></tr>'
+            + '<tr><td>Amöbenruhr</td><td>2–4 Wo</td><td>Blutig-schleimige Diarrhoe, ggf. Leberabszess</td><td>Stuhl-PCR, Mikroskopie, Sono Leber; Metronidazol + Diloxanid/Paromomycin</td></tr>'
+            + '</tbody></table>'
+
+            + '<p class="quellen"><em>Quellen:</em> Deutsche Gesellschaft für Tropenmedizin (DTG) Empfehlungen 2024; STIKO Empfehlungen 2024; WHO International Travel and Health 2024; CDC Yellow Book 2024; AWMF S1 Reisediarrhoe 042-001 (2018, in Überarbeitung); BfArM Rote-Hand-Brief Mefloquin 2013/aktualisiert 2017.</p>'
+    };
 
     // =========================================================================
     // SCHULUNG REGISTRIEREN
@@ -2451,15 +2663,15 @@
             {
                 id: 'klinik_m2',
                 title: 'Kapitel 2 — Klinik (M2): Pathophysiologie und Therapie',
-                summary: 'Kardiologie (HFrEF Fantastic Four, ACS, Vorhofflimmern mit CHA₂DS₂-VASc), Pneumologie (GINA 2024, GOLD 2024, CRB-65), Pharmakologie (DOAK-Interaktionen, Antibiotic Stewardship), Lyme-Borreliose nach AWMF 013-080 sowie Endokrinologie & Hypertonie (NVL Diabetes 2023, ESH 2023/ESC 2024 RR-Ziele, Schilddrüse Hashimoto/Basedow, Cushing/Addison).',
-                pages: [PAGE_KARDIO, PAGE_PNEUMO, PAGE_PHARMA_INFEKT, PAGE_ENDOKRIN_HTN, PAGE_GASTRO_HEPATO, PAGE_NEPHRO_URO, PAGE_NEURO_PSYCH, PAGE_HAEMA_RHEUMA_DERMA],
+                summary: 'Kardiologie (HFrEF Fantastic Four, ACS, Vorhofflimmern mit CHA₂DS₂-VASc), Pneumologie (GINA 2024, GOLD 2024, CRB-65), Pharmakologie (DOAK-Interaktionen, Antibiotic Stewardship), Lyme-Borreliose nach AWMF 013-080 sowie Endokrinologie & Hypertonie (NVL Diabetes 2023, ESH 2023/ESC 2024 RR-Ziele, Schilddrüse Hashimoto/Basedow, Cushing/Addison). Pädiatrie (Fieber-Algorithmus NICE/AWMF, klassische Exantheme, U-Untersuchungen) und Bildgebung (CT-/MRT-Wahl, Höhenwerte, KM-Sicherheit, Wirbelsäulen-Befunde).',
+                pages: [PAGE_KARDIO, PAGE_PNEUMO, PAGE_PHARMA_INFEKT, PAGE_ENDOKRIN_HTN, PAGE_GASTRO_HEPATO, PAGE_NEPHRO_URO, PAGE_NEURO_PSYCH, PAGE_HAEMA_RHEUMA_DERMA, PAGE_PAEDIATRIE, PAGE_BILDGEBUNG],
                 quiz: QUIZ_M2
             },
             {
                 id: 'pj_facharzt',
                 title: 'Kapitel 3 — PJ und Facharzt Allgemeinmedizin',
-                summary: 'Multimorbidität und Polypharmazie (PRISCUS 2.0, STOPP/START V3, FORTA), Prävention (Check-up 35, Screening-Programme, STIKO 2024 inkl. RSV-Empfehlung), Geriatrie (Frailty nach Fried, Demenz-Screening), Palliativmedizin (AAPV/SAPV), juristische Grundlagen (BGB § 1827) sowie Notfallmedizin und Schmerztherapie (ABCDE, Anaphylaxie, Hypoglykämie, hypertensiver Notfall, WHO-Stufenschema, Opioid-Rotation, BLS/ALS).',
-                pages: [PAGE_POLYPHARMA, PAGE_PRAEVENTION, PAGE_RECHT_GERIATRIE, PAGE_NOTFALL_SCHMERZ, PAGE_PRAXIS_VERWALTUNG],
+                summary: 'Multimorbidität und Polypharmazie (PRISCUS 2.0, STOPP/START V3, FORTA), Prävention (Check-up 35, Screening-Programme, STIKO 2024 inkl. RSV-Empfehlung), Geriatrie (Frailty nach Fried, Demenz-Screening), Palliativmedizin (AAPV/SAPV), juristische Grundlagen (BGB § 1827) sowie Notfallmedizin und Schmerztherapie (ABCDE, Anaphylaxie, Hypoglykämie, hypertensiver Notfall, WHO-Stufenschema, Opioid-Rotation, BLS/ALS). Reisemedizin nach DTG 2024 (Gelbfieber, Malariaprophylaxe, Reisediarrhoe-AB-Strategie, Tropenerkrankungen bei Rückkehrern).',
+                pages: [PAGE_POLYPHARMA, PAGE_PRAEVENTION, PAGE_RECHT_GERIATRIE, PAGE_NOTFALL_SCHMERZ, PAGE_PRAXIS_VERWALTUNG, PAGE_REISEMEDIZIN],
                 quiz: QUIZ_FA
             }
         ]
@@ -2483,9 +2695,9 @@
 
     function quizToTask(item) {
         const letters = ['A', 'B', 'C', 'D', 'E'];
-        let opts = '<ol class="impp-options" style="list-style:none;padding-left:0;margin-top:0.5em;">';
+        let opts = '<ol class="impp-options">';
         for (let i = 0; i < item.options.length; i++) {
-            opts += '<li style="margin:0.25em 0;"><strong>' + letters[i] + ')</strong> ' + item.options[i] + '</li>';
+            opts += '<li><strong>' + letters[i] + ')</strong> ' + item.options[i] + '</li>';
         }
         opts += '</ol>';
         const correctLetter = letters[item.correct];

@@ -70,6 +70,16 @@ pre {
 /* Bilder/SVGs respektieren Container */
 img, svg { max-width: 100%; height: auto; }
 
+/* ---------- IMPP-Quiz-Optionen (Schulung Allgemeinmedizin, Trainings-Mirror) ---------- */
+.impp-options {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0.5em;
+}
+.impp-options li {
+    margin: 0.25em 0;
+}
+
 /* ---------- Chart-Container ---------- */
 .chart-container {
     position: relative;
