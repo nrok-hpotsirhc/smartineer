@@ -946,6 +946,65 @@ function shuffleSample(arr, n) {
     return a.slice(0, Math.min(n, a.length));
 }
 
+// ---------- Quiz-Item-Typen (PBQ) ----------
+// MCQ:      { q, options, correct, explanation }                            (kein type)
+// SEQUENCE: { type:'sequence', q, items:[...], correct:[idxOrder], explanation }
+// CLOZE:    { type:'cloze',    q, blanks:[{label, accept:[...]}], explanation }
+function quizItemType(item) { return (item && item.type) || 'mcq'; }
+
+function normalizeAnswer(s) {
+    return String(s == null ? '' : s)
+        .trim().toLowerCase()
+        .replace(/\s+/g, ' ')
+        .replace(/[.,;:!?]+$/, '');
+}
+
+function defaultInputForItem(item) {
+    const t = quizItemType(item);
+    if (t === 'sequence') {
+        // Shuffle initial order (sonst trivial)
+        const idxs = item.items.map((_, i) => i);
+        for (let i = idxs.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [idxs[i], idxs[j]] = [idxs[j], idxs[i]];
+        }
+        // Wenn (zufällig) bereits korrekt: rotiere 1, sonst zu einfach
+        if (item.correct && idxs.every((v, i) => v === item.correct[i]) && idxs.length > 1) {
+            idxs.push(idxs.shift());
+        }
+        return idxs;
+    }
+    if (t === 'cloze') {
+        return item.blanks.map(() => '');
+    }
+    return null; // mcq
+}
+
+function isInputComplete(item, input) {
+    const t = quizItemType(item);
+    if (t === 'sequence') return Array.isArray(input) && input.length === item.items.length;
+    if (t === 'cloze') return Array.isArray(input) && input.every(s => normalizeAnswer(s).length > 0);
+    return input !== null && input !== undefined;
+}
+
+function gradeQuizItem(item, input) {
+    const t = quizItemType(item);
+    if (t === 'sequence') {
+        return Array.isArray(input)
+            && Array.isArray(item.correct)
+            && input.length === item.correct.length
+            && input.every((v, i) => v === item.correct[i]);
+    }
+    if (t === 'cloze') {
+        if (!Array.isArray(input) || input.length !== item.blanks.length) return false;
+        return item.blanks.every((b, i) => {
+            const got = normalizeAnswer(input[i]);
+            return (b.accept || []).some(a => normalizeAnswer(a) === got);
+        });
+    }
+    return input === item.correct;
+}
+
 function chapterProgress(chapter, chState) {
     const totalPages = chapter.pages.length;
     const lastPage = chState ? (chState.lastPage || 0) : 0;
@@ -982,7 +1041,7 @@ function Schulungen() {
     const [quizSet, setQuizSet] = useState([]);
     const [quizIdx, setQuizIdx] = useState(0);
     const [quizAnswers, setQuizAnswers] = useState([]);
-    const [quizSelected, setQuizSelected] = useState(null);
+    const [quizInput, setQuizInput] = useState(null);
 
     const readerRef = useKaTeX([stage, tid, cid, page]);
     const quizRef = useKaTeX([stage, quizIdx]);
@@ -1020,23 +1079,32 @@ function Schulungen() {
     const startQuiz = () => {
         const pool = chapter.quiz || [];
         const sample = shuffleSample(pool, Math.min(10, pool.length));
-        setQuizSet(sample); setQuizIdx(0); setQuizAnswers([]); setQuizSelected(null);
+        setQuizSet(sample); setQuizIdx(0); setQuizAnswers([]);
+        setQuizInput(sample.length ? defaultInputForItem(sample[0]) : null);
         setStage('quiz');
     };
 
     const submitQuizAnswer = () => {
-        if (quizSelected === null) return;
         const item = quizSet[quizIdx];
-        const correct = quizSelected === item.correct;
-        const next = quizAnswers.concat([{ q: item.q, options: item.options, correct: item.correct, given: quizSelected, ok: correct, explanation: item.explanation }]);
+        if (!item) return;
+        if (!isInputComplete(item, quizInput)) return;
+        const ok = gradeQuizItem(item, quizInput);
+        const next = quizAnswers.concat([{
+            item,
+            given: quizInput,
+            ok,
+            explanation: item.explanation
+        }]);
         setQuizAnswers(next);
-        setQuizSelected(null);
         if (quizIdx + 1 >= quizSet.length) {
             const score = next.filter(a => a.ok).length;
             recordQuiz(tid, cid, score, quizSet.length);
+            setQuizInput(null);
             setStage('quizResult');
         } else {
+            const nextItem = quizSet[quizIdx + 1];
             setQuizIdx(quizIdx + 1);
+            setQuizInput(defaultInputForItem(nextItem));
         }
     };
 
@@ -1247,11 +1315,33 @@ function Schulungen() {
     if (stage === 'quiz' && training && chapter) {
         const item = quizSet[quizIdx];
         if (!item) { setStage('chapters'); return null; }
+        const itype = quizItemType(item);
+        const canSubmit = isInputComplete(item, quizInput);
+
+        const moveSeq = (from, to) => {
+            if (!Array.isArray(quizInput)) return;
+            if (to < 0 || to >= quizInput.length) return;
+            const next = quizInput.slice();
+            [next[from], next[to]] = [next[to], next[from]];
+            setQuizInput(next);
+        };
+        const setBlank = (i, v) => {
+            if (!Array.isArray(quizInput)) return;
+            const next = quizInput.slice();
+            next[i] = v;
+            setQuizInput(next);
+        };
+
         return (
             <section className="view-fade max-w-2xl mx-auto" ref={quizRef}>
                 <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
                     <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
                         Frage {quizIdx + 1} von {quizSet.length}
+                        {itype !== 'mcq' && (
+                            <span className="ml-2 px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-[10px]">
+                                {itype === 'sequence' ? 'Reihenfolge' : 'Lückentext'}
+                            </span>
+                        )}
                     </div>
                     <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) setStage('chapters'); }}
                         className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
@@ -1263,21 +1353,57 @@ function Schulungen() {
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 task-fade" key={quizIdx}>
                     <div className="text-base md:text-lg font-bold text-slate-900 mb-5 math-block"
                         dangerouslySetInnerHTML={{ __html: item.q }} />
-                    <div className="flex flex-col gap-2 mb-5">
-                        {item.options.map((opt, i) => {
-                            const sel = quizSelected === i;
-                            return (
-                                <button key={i} onClick={() => setQuizSelected(i)}
-                                    className={`text-left px-4 py-3 rounded-lg border transition ${sel
-                                        ? 'border-blue-500 bg-blue-50 text-blue-900 shadow'
-                                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800'}`}>
-                                    <span className="font-bold mr-2">{String.fromCharCode(65 + i)})</span>
-                                    <span dangerouslySetInnerHTML={{ __html: opt }} />
-                                </button>
-                            );
-                        })}
-                    </div>
-                    <button onClick={submitQuizAnswer} disabled={quizSelected === null}
+
+                    {itype === 'mcq' && (
+                        <div className="flex flex-col gap-2 mb-5">
+                            {item.options.map((opt, i) => {
+                                const sel = quizInput === i;
+                                return (
+                                    <button key={i} onClick={() => setQuizInput(i)}
+                                        className={`text-left px-4 py-3 rounded-lg border transition ${sel
+                                            ? 'border-blue-500 bg-blue-50 text-blue-900 shadow'
+                                            : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800'}`}>
+                                        <span className="font-bold mr-2">{String.fromCharCode(65 + i)})</span>
+                                        <span dangerouslySetInnerHTML={{ __html: opt }} />
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {itype === 'sequence' && Array.isArray(quizInput) && (
+                        <div className="flex flex-col gap-2 mb-5">
+                            <p className="text-xs text-slate-500 mb-1">Bringe die Schritte in die korrekte Reihenfolge (oben = zuerst).</p>
+                            {quizInput.map((origIdx, pos) => (
+                                <div key={pos} className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white">
+                                    <span className="font-bold text-slate-500 w-6 text-right">{pos + 1}.</span>
+                                    <span className="flex-1 text-slate-800" dangerouslySetInnerHTML={{ __html: item.items[origIdx] }} />
+                                    <button onClick={() => moveSeq(pos, pos - 1)} disabled={pos === 0}
+                                        className="px-2 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded disabled:opacity-30" aria-label="Hoch">↑</button>
+                                    <button onClick={() => moveSeq(pos, pos + 1)} disabled={pos === quizInput.length - 1}
+                                        className="px-2 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded disabled:opacity-30" aria-label="Runter">↓</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {itype === 'cloze' && Array.isArray(quizInput) && (
+                        <div className="flex flex-col gap-3 mb-5">
+                            <p className="text-xs text-slate-500">Trage die fehlenden Begriffe ein. Groß-/Kleinschreibung egal.</p>
+                            {item.blanks.map((b, i) => (
+                                <label key={i} className="flex flex-col gap-1">
+                                    <span className="text-sm font-bold text-slate-700">{i + 1}. {b.label}</span>
+                                    <input type="text" value={quizInput[i] || ''}
+                                        onChange={(e) => setBlank(i, e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter' && canSubmit) submitQuizAnswer(); }}
+                                        className="px-3 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white text-slate-800"
+                                        autoFocus={i === 0} />
+                                </label>
+                            ))}
+                        </div>
+                    )}
+
+                    <button onClick={submitQuizAnswer} disabled={!canSubmit}
                         className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition">
                         Antwort bestätigen
                     </button>
@@ -1304,18 +1430,54 @@ function Schulungen() {
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
                     <h3 className="font-bold text-slate-800 mb-4">Aufgaben im Überblick</h3>
                     <ol className="flex flex-col gap-3">
-                        {quizAnswers.map((a, i) => (
-                            <li key={i} className={`p-3 rounded-lg border-l-4 ${a.ok ? 'border-emerald-400 bg-emerald-50' : 'border-rose-400 bg-rose-50'}`}>
-                                <div className="font-bold text-slate-800 math-block" dangerouslySetInnerHTML={{ __html: `${i + 1}. ${a.q}` }} />
-                                <div className="text-sm mt-2">
-                                    Deine Antwort: <strong className={a.ok ? 'text-emerald-700' : 'text-rose-700'}>
-                                        {String.fromCharCode(65 + a.given)}) <span dangerouslySetInnerHTML={{ __html: a.options[a.given] }} />
-                                    </strong>
-                                    {!a.ok && <div className="text-slate-700 mt-1">Richtig: <strong>{String.fromCharCode(65 + a.correct)}) <span dangerouslySetInnerHTML={{ __html: a.options[a.correct] }} /></strong></div>}
-                                </div>
-                                {a.explanation && <div className="text-xs text-slate-600 mt-2 italic">{a.explanation}</div>}
-                            </li>
-                        ))}
+                        {quizAnswers.map((a, i) => {
+                            const it = a.item;
+                            const itype = quizItemType(it);
+                            return (
+                                <li key={i} className={`p-3 rounded-lg border-l-4 ${a.ok ? 'border-emerald-400 bg-emerald-50' : 'border-rose-400 bg-rose-50'}`}>
+                                    <div className="font-bold text-slate-800 math-block" dangerouslySetInnerHTML={{ __html: `${i + 1}. ${it.q}` }} />
+                                    {itype === 'mcq' && (
+                                        <div className="text-sm mt-2">
+                                            Deine Antwort: <strong className={a.ok ? 'text-emerald-700' : 'text-rose-700'}>
+                                                {String.fromCharCode(65 + a.given)}) <span dangerouslySetInnerHTML={{ __html: it.options[a.given] }} />
+                                            </strong>
+                                            {!a.ok && <div className="text-slate-700 mt-1">Richtig: <strong>{String.fromCharCode(65 + it.correct)}) <span dangerouslySetInnerHTML={{ __html: it.options[it.correct] }} /></strong></div>}
+                                        </div>
+                                    )}
+                                    {itype === 'sequence' && (
+                                        <div className="text-sm mt-2 space-y-1">
+                                            <div>Deine Reihenfolge: <strong className={a.ok ? 'text-emerald-700' : 'text-rose-700'}>
+                                                {a.given.map((idx, k) => (k > 0 ? ' → ' : '') + String.fromCharCode(65 + idx)).join('')}
+                                            </strong></div>
+                                            {!a.ok && (
+                                                <div className="text-slate-700">Korrekt: <strong>{it.correct.map((idx, k) => (k > 0 ? ' → ' : '') + String.fromCharCode(65 + idx)).join('')}</strong></div>
+                                            )}
+                                            <ol className="text-xs text-slate-600 list-none pl-0 mt-1">
+                                                {it.items.map((s, k) => (
+                                                    <li key={k}><span className="font-bold mr-1">{String.fromCharCode(65 + k)})</span><span dangerouslySetInnerHTML={{ __html: s }} /></li>
+                                                ))}
+                                            </ol>
+                                        </div>
+                                    )}
+                                    {itype === 'cloze' && (
+                                        <div className="text-sm mt-2 space-y-1">
+                                            {it.blanks.map((b, k) => {
+                                                const got = (a.given && a.given[k]) || '';
+                                                const okBlank = (b.accept || []).some(x => normalizeAnswer(x) === normalizeAnswer(got));
+                                                return (
+                                                    <div key={k}>
+                                                        <span className="text-slate-600">{b.label}:</span>{' '}
+                                                        <strong className={okBlank ? 'text-emerald-700' : 'text-rose-700'}>{got || '—'}</strong>
+                                                        {!okBlank && <span className="text-slate-700"> · richtig: <strong>{(b.accept || [])[0]}</strong></span>}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                    {a.explanation && <div className="text-xs text-slate-600 mt-2 italic">{a.explanation}</div>}
+                                </li>
+                            );
+                        })}
                     </ol>
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center">

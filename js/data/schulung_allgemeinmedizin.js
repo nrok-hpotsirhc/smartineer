@@ -2064,7 +2064,50 @@
         q('Eine MRT der LWS zeigt eine breitbasige Vorwölbung des Nucleus pulposus mit intaktem Anulus fibrosus auf Höhe L4/L5. Welche Befundbezeichnung ist am korrektesten?',
             ['Sequester', 'Bandscheibenextrusion', 'Bandscheibenprotrusion', 'Spondylolisthesis Grad III', 'Spondylodiscitis'],
             2,
-            'Protrusion: breitbasige Vorwölbung, Anulus intakt. Extrusion: Anulus-Defekt, Vorfall des Nucleus pulposus über die Bandscheibengrenze hinaus. Sequester: vom Nukleus abgetrenntes Fragment. Wichtig: Protrusionen sind häufige Inzidentalbefunde (bis 30–60 % asymptomatischer Erwachsener), Korrelation mit Klinik entscheidend (NVL Kreuzschmerz 2017). Spondylodiscitis: Endplatten-Ödem mit KM-Aufnahme, Notfall.')
+            'Protrusion: breitbasige Vorwölbung, Anulus intakt. Extrusion: Anulus-Defekt, Vorfall des Nucleus pulposus über die Bandscheibengrenze hinaus. Sequester: vom Nukleus abgetrenntes Fragment. Wichtig: Protrusionen sind häufige Inzidentalbefunde (bis 30–60 % asymptomatischer Erwachsener), Korrelation mit Klinik entscheidend (NVL Kreuzschmerz 2017). Spondylodiscitis: Endplatten-Ödem mit KM-Aufnahme, Notfall.'),
+        // ----- EKG-Lesetraining (Page 2.11) -----
+        q('Ein 62-Jähriger mit akutem retrosternalem Druckschmerz zeigt im 12-Kanal-EKG ST-Hebung in II, III und aVF mit reziproker ST-Senkung in I und aVL. Welche Diagnose und welcher Versorgungstyp sind am wahrscheinlichsten?',
+            ['Vorderwand-STEMI, LAD', 'Inferiorer STEMI, RCA-Verschluss', 'Lateral-STEMI, RCX', 'Perikarditis (PR-Senkung in mehreren Ableitungen)', 'Brugada-Syndrom Typ 1'],
+            1,
+            'ST-Hebung in II/III/aVF = inferiorer STEMI. In ca. 80–90 % ist die rechte Koronararterie (RCA) verschlossen, in 10–20 % der RCX. Reziproke ST-Senkung in I/aVL stützt die Diagnose. Bei inferiorem STEMI rechtspräkordiale Ableitungen V3R/V4R erwägen (RV-Beteiligung). (ESC STEMI 2017, 4. UDMI 2018)'),
+        q('Welcher AV-Block ist unabhängig von der Symptomatik eine Schrittmacher-Indikation?',
+            ['AV-Block I°', 'AV-Block II° Typ Wenckebach (Mobitz I)', 'AV-Block II° Typ Mobitz II', 'Sinusbradykardie 50/min im Schlaf', 'AV-Dissoziation bei Sportlern'],
+            2,
+            'Mobitz II (PQ konstant, plötzliche Blockierung) signalisiert eine infranodale Leitungsstörung mit Risiko des Übergangs in totalen AV-Block. Klasse-I-Indikation für permanenten Schrittmacher unabhängig von Symptomen. Wenckebach (PQ progredient zunehmend) ist meist nodal, gutartig, nur bei Symptomatik schrittmacherpflichtig. (ESC Pacing 2021)'),
+        q('Welche EKG-Konstellation ist klassisch für ein WPW-Syndrom im Sinusrhythmus?',
+            ['Verlängertes PQ &gt; 200 ms und schmaler QRS', 'Kurzes PQ (&lt; 120 ms), Delta-Welle, verbreiterter QRS &gt; 110 ms', 'Sägezahn-Flatterwellen mit 2:1-Überleitung', 'Coved-type ST-Hebung in V1–V2 ≥ 2 mm', 'Negative T in V1–V3'],
+            1,
+            'Wolff-Parkinson-White: akzessorische Leitungsbahn (Kent-Bündel) → Vorzeitige ventrikuläre Erregung. Trias: kurzes PQ, Delta-Welle, breiter QRS. Risiko: bei vorhofflimmernder Überleitung über akzessorische Bahn ventrikuläre Tachyarrhythmie/Kammerflimmern. Therapie: Katheterablation (Erfolgsrate &gt; 95 %).'),
+        q('Welche Substanz ist bei präexzitiertem Vorhofflimmern (WPW + VHF) absolut kontraindiziert?',
+            ['Ajmalin', 'Amiodaron i. v.', 'Verapamil oder Adenosin', 'Procainamid', 'Elektrische Kardioversion'],
+            2,
+            'Verapamil und Adenosin blockieren den AV-Knoten und können bei WPW + VHF die Überleitung über die akzessorische Bahn beschleunigen → Risiko für Kammerflimmern. Mittel der Wahl: elektrische Kardioversion (instabil) oder Ajmalin/Procainamid (stabil), die die akzessorische Bahn blockieren. (ESC SVT 2019)'),
+        q('Welches EKG-Muster ist diagnostisch für ein Brugada-Syndrom Typ 1?',
+            ['ST-Senkung in I/aVL', 'Coved-type ST-Hebung ≥ 2 mm in V1–V2 mit negativer T-Welle, spontan oder nach Ajmalin-Provokation', 'Sokolow-Lyon-Index &gt; 3,5 mV', 'QTc &gt; 500 ms', 'Epsilon-Welle in V1'],
+            1,
+            'Brugada Typ 1 (coved-type): zeltförmige ST-Hebung ≥ 2 mm in mind. einer rechtspräkordialen Ableitung (V1, V2 ggf. ein Interkostalraum höher), gefolgt von negativer T-Welle. Genetisch häufig SCN5A-Mutation. Trigger: Fieber, Vagotonie, bestimmte Medikamente. Bei symptomatischen Patienten oder Synkopen-Anamnese ICD indiziert. (ESC SCD 2022)'),
+        {
+            type: 'sequence',
+            q: 'Bringen Sie die initialen Maßnahmen bei einem STEMI-Patienten in der Praxis (Tür-bis-Ballon-Zeit &lt; 90 min) in die korrekte Reihenfolge.',
+            items: [
+                'Notruf 112, kontinuierliches EKG-Monitoring',
+                'ASS 150–300 mg p. o. (Loading)',
+                'P2Y12-Hemmer (Ticagrelor 180 mg oder Prasugrel 60 mg) p. o.',
+                'Heparin i. v. (UFH 70–100 IE/kg) durch Notarzt/Klinik',
+                'Direkte Übergabe ins Herzkatheterlabor zur primären PCI'
+            ],
+            correct: [0, 1, 2, 3, 4],
+            explanation: 'ESC STEMI 2017 / 2023-Update: Notruf zuerst (Verlustzeit minimieren), dann duale Plättchenhemmung (ASS + P2Y12) bereits präklinisch, gefolgt von Antikoagulation und sofortigem Transport ins PCI-Zentrum. Ziel: First-medical-contact-to-balloon &lt; 90 min.'
+        },
+        {
+            type: 'cloze',
+            q: 'Vervollständigen Sie die AV-Block-II°-Klassifikation: AV-Block II° Typ ___ (Synonym Wenckebach) zeigt progredient zunehmende PQ-Zeit bis zum Ausfall einer Überleitung; AV-Block II° Typ ___ (Synonym Mobitz II) zeigt konstantes PQ mit plötzlichem Ausfall einer Überleitung.',
+            blanks: [
+                { label: 'Wenckebach-Typ', accept: ['mobitz i', 'mobitz 1', 'typ i', 'typ 1', 'i', '1', 'wenckebach'] },
+                { label: 'Mobitz-II-Typ', accept: ['mobitz ii', 'mobitz 2', 'typ ii', 'typ 2', 'ii', '2'] }
+            ],
+            explanation: 'Mobitz I (Wenckebach): meist nodale Leitungsstörung, gutartig, häufig vagal getriggert. Mobitz II: infranodal (His-Purkinje), Risiko des Übergangs in totalen AV-Block, schrittmacherpflichtig unabhängig von Symptomen. (ESC Pacing 2021)'
+        }
     ];
 
     const QUIZ_FA = [
@@ -2471,7 +2514,50 @@
         q('Welche Aussage zur Gelbfieberimpfung (17D-Lebendimpfstoff) entspricht den WHO-/DTG-Empfehlungen 2024?',
             ['Auffrischimpfung alle 10 Jahre erforderlich für gültiges ICVP', 'Eine einzelne Gelbfieberimpfung verleiht laut WHO-Beschluss 2016 lebenslangen Schutz; das International Certificate of Vaccination (ICVP) ist auf Lebenszeit gültig — Booster nur in Sonderfällen (Immunsuppression, Schwangerschaft zum Impfzeitpunkt, HIV).', 'Lebendimpfstoffe sind in der Schwangerschaft generell unproblematisch.', 'Gelbfieberimpfung ist bei Hühnereiweiß-Allergie problemlos.', 'Auch Säuglinge unter 6 Monaten können sicher geimpft werden.'],
             1,
-            'WHO 2016: einmalige Gelbfieberimpfung verleiht lebenslangen Schutz, ICVP gilt auf Lebenszeit (vor 2016 Booster alle 10 J. notwendig). Sonderfälle (Booster oder vorsichtigere Indikation): Immunsuppression (auch HIV), Schwangerschaft zum Erstimpfungs-Zeitpunkt. KI: Hühnereiweiß-Allergie (anaphylaktisch), Immunsuppression (z. B. unter Biologika), Säuglinge &lt; 9 Mon., Thymom/Thymektomie. Pflicht für Einreise nach mehreren Sub-Sahara-Afrika- und Amazonas-Ländern.')
+            'WHO 2016: einmalige Gelbfieberimpfung verleiht lebenslangen Schutz, ICVP gilt auf Lebenszeit (vor 2016 Booster alle 10 J. notwendig). Sonderfälle (Booster oder vorsichtigere Indikation): Immunsuppression (auch HIV), Schwangerschaft zum Erstimpfungs-Zeitpunkt. KI: Hühnereiweiß-Allergie (anaphylaktisch), Immunsuppression (z. B. unter Biologika), Säuglinge &lt; 9 Mon., Thymom/Thymektomie. Pflicht für Einreise nach mehreren Sub-Sahara-Afrika- und Amazonas-Ländern.'),
+        // ----- POCUS in der Hausarztpraxis (Page 3.7) -----
+        q('Ab welchem Querdurchmesser der infrarenalen Aorta spricht man definitionsgemäß von einem Bauchaortenaneurysma (BAA)?',
+            ['≥ 25 mm', '≥ 30 mm', '≥ 40 mm', '≥ 50 mm', '≥ 55 mm'],
+            1,
+            'Bauchaortenaneurysma: infrarenaler Aortendurchmesser ≥ 30 mm (außenkonturbezogen). G-BA-Screening seit 2018 als einmalige Sonographie für Männer ab 65 J. (ESVS 2024, S3 004-014).'),
+        q('Bei welchem Querdurchmesser ist nach ESVS 2024 die elektive operative Versorgung eines Bauchaortenaneurysmas bei einer Frau indiziert?',
+            ['≥ 35 mm', '≥ 45 mm', '≥ 50 mm', '≥ 55 mm', '≥ 60 mm'],
+            2,
+            'OP-Schwellen ESVS 2024: Männer ≥ 55 mm, Frauen ≥ 50 mm (oder schnelle Progression &gt; 10 mm/J., symptomatisch, gedeckte Ruptur). Verfahren: EVAR (endovaskulär) oder offene Ausschaltung — Entscheidung nach Anatomie und Komorbidität.'),
+        q('Eine Schilddrüsen-Sonographie zeigt einen 12 mm großen, soliden, echoarmen, höher als breiten Knoten mit randständigen Mikrokalzifikationen. Welche EU-TIRADS-Kategorie und welche Konsequenz nach Russ 2017 sind am wahrscheinlichsten?',
+            ['EU-TIRADS 2, keine FNAC', 'EU-TIRADS 3, FNAC ab 20 mm', 'EU-TIRADS 4, FNAC ab 15 mm', 'EU-TIRADS 5, FNAC ab 10 mm', 'EU-TIRADS 5, keine FNAC nötig'],
+            3,
+            'EU-TIRADS 5 (hochsuspekt): mind. 1 von 4 Hochrisiko-Zeichen (echoarm bis sehr echoarm, höher als breit, irregulärer Rand, Mikrokalzifikationen). FNAC-Schwelle: ≥ 10 mm. EU-TIRADS 4: 15 mm; EU-TIRADS 3: 20 mm; EU-TIRADS 2 (zystisch/spongiform): keine FNAC. (Russ et al., Eur Thyroid J 2017)'),
+        q('Bei welcher PSV-Schwelle in der A. carotis interna ist nach NASCET-/SRU-Konsenskriterien eine ≥ 70 %-Stenose anzunehmen?',
+            ['&gt; 100 cm/s', '&gt; 125 cm/s', '&gt; 180 cm/s', '&gt; 230 cm/s', '&gt; 350 cm/s'],
+            3,
+            'SRU-Konsenskriterien (Society of Radiologists in Ultrasound, Grant 2003): PSV &gt; 230 cm/s + EDV &gt; 100 cm/s + ICA/CCA-Ratio &gt; 4 → ≥ 70 %-Stenose nach NASCET. PSV 125–230 cm/s: 50–69 %-Stenose. (AWMF S3 004-028)'),
+        q('Ein dyspnoeischer Patient zeigt im BLUE-Protokoll fehlendes lung sliding und ausschließliche A-Linien rechts anterior, das Zeichen eines „Lungenpunkts" ist nachweisbar. Welche Diagnose ist am wahrscheinlichsten?',
+            ['Lungenödem', 'Pleuraerguss', 'Pneumonie mit Konsolidierung', 'Pneumothorax', 'Lungenembolie'],
+            3,
+            'BLUE-Protokoll (Lichtenstein 2008): fehlendes lung sliding + nur A-Linien + Lungenpunkt (Übergang gleitende/nicht-gleitende Pleura) ist hochspezifisch (nahezu 100 %) für Pneumothorax. B-Linien (multiple, vertikale Reverberationen) sprechen für interstitielles Ödem oder Pneumonie, nicht für PTX.'),
+        {
+            type: 'sequence',
+            q: 'Bringen Sie die 5 Standardpunkte des eFAST-Protokolls in die übliche Untersuchungsreihenfolge.',
+            items: [
+                'Rechter oberer Quadrant (Morison-Pouch, Hepatorenalrezessus)',
+                'Linker oberer Quadrant (perisplenisch)',
+                'Suprapubisch (Douglas-Raum / vesicorektale Tasche)',
+                'Subxiphoidal (Perikardraum)',
+                'Bilateraler Thorax (Pleuraergüsse / Pneumothorax)'
+            ],
+            correct: [0, 1, 2, 3, 4],
+            explanation: 'eFAST = extended Focused Assessment with Sonography for Trauma. Reihenfolge nach ATLS/ERC 2021: RUQ → LUQ → suprapubisch → subxiphoidal (Perikardtamponade) → bilateral Thorax (Pleuraerguss, PTX). Gesucht: freie Flüssigkeit ≥ 200–500 ml und Pneumothorax-Zeichen.'
+        },
+        {
+            type: 'cloze',
+            q: 'Vervollständigen Sie das Aortenscreening: Der G-BA hat das einmalige Sonographie-Screening für ein Bauchaortenaneurysma im Jahr ___ (vier Ziffern) für Männer ab dem ___. (zwei Ziffern) Lebensjahr eingeführt.',
+            blanks: [
+                { label: 'Einführungsjahr', accept: ['2018'] },
+                { label: 'Mindestalter', accept: ['65', '65.'] }
+            ],
+            explanation: 'G-BA-Beschluss vom 19.10.2017, Inkrafttreten 2018: einmaliges Ultraschall-Screening auf Bauchaortenaneurysma als GKV-Leistung für Männer ab 65 Jahren. Frauen: kein Routine-Screening (niedrigere Prävalenz). (Mortalitätssenkung in Multicenterstudien MASS, Chichester, Viborg.)'
+        }
     ];
 
     // =========================================================================
@@ -2643,6 +2729,143 @@
     };
 
     // =========================================================================
+    // PAGE 2.11 — EKG-LESETRAINING (Klinik M2)
+    // =========================================================================
+    const PAGE_EKG = {
+        title: '2.11 EKG-Lesetraining: STEMI/NSTEMI, Blockbilder, Vorhofflimmern, Brugada, WPW',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie können (1) ein 12-Kanal-EKG strukturiert befunden (Rhythmus, Frequenz, Lage, Zeiten, Endstrecke), (2) STEMI von NSTEMI von unspezifischen ST-Veränderungen abgrenzen und die Lokalisation versorgungsbezogen zuordnen, (3) AV-Blockierungen graduieren (I, IIa Wenckebach, IIb Mobitz, III), (4) Vorhofflimmern, AVNRT und VT erkennen, (5) Brugada- und WPW-Syndrom an typischen Mustern identifizieren.</blockquote>'
+
+            + '<h4>2.11.1 Strukturierte EKG-Befundung in 7 Schritten</h4>'
+            + '<ol>'
+            + '<li><strong>Rhythmus:</strong> regelmäßig vs. unregelmäßig; P-Welle vor jedem QRS, gleicher Abstand?</li>'
+            + '<li><strong>Frequenz:</strong> bei 50 mm/s: 600 / RR-Abstände in mm; bei 25 mm/s: 300 / RR-Großquadrate; alternativ 1500/RR-Kleinquadrate.</li>'
+            + '<li><strong>Lagetyp:</strong> Linkstyp (I+, II+, III- ↔ Cabrera-Schema), Indifferenztyp, Steiltyp, Rechtstyp, überdrehter Linkstyp (LAFB), überdrehter Rechtstyp.</li>'
+            + '<li><strong>Zeiten:</strong> P &lt; 120 ms; PQ 120–200 ms; QRS &lt; 110 ms (≥ 120 ms = Schenkelblock); QTc Bazett $QTc = QT/\\sqrt{RR}$ (♂ &lt; 450, ♀ &lt; 460 ms).</li>'
+            + '<li><strong>Hypertrophie:</strong> Sokolow-Lyon-Index für LVH: $S_{V1}+R_{V5/V6} > 35\\,mm$; RVH: $R_{V1}+S_{V5/V6} > 10{,}5\\,mm$.</li>'
+            + '<li><strong>Erregungsausbreitung:</strong> R-Zacken-Progression V1–V6, Q-Zacken in V1–V3 immer pathologisch (außer III, aVR, V1 isoliert).</li>'
+            + '<li><strong>Erregungsrückbildung:</strong> ST-Strecke (J-Punkt + 60–80 ms), T-Welle, U-Welle.</li>'
+            + '</ol>'
+
+            + '<h4>2.11.2 STEMI vs. NSTEMI vs. unspezifische ST-Veränderung</h4>'
+            + '<p><strong>STEMI-Kriterien</strong> (4. Universal Definition of MI 2018, ESC NSTE-ACS 2023): ST-Hebung am J-Punkt in 2 anatomisch zusammenhängenden Ableitungen:</p>'
+            + '<ul>'
+            + '<li>≥ 2,5 mm in V2–V3 bei Männern &lt; 40 J.; ≥ 2 mm bei ≥ 40 J.; ≥ 1,5 mm bei Frauen.</li>'
+            + '<li>≥ 1 mm in allen anderen Ableitungen.</li>'
+            + '<li><strong>Neuer Linksschenkelblock</strong> mit klinischem Verdacht zählt wie STEMI (Sgarbossa-Kriterien zur Abgrenzung).</li>'
+            + '</ul>'
+            + '<table><thead><tr><th>Lokalisation</th><th>ST-Hebung in</th><th>Reziproke Senkung</th><th>Versorgungs-Gefäß</th></tr></thead><tbody>'
+            + '<tr><td>Anteroseptal</td><td>V1–V3</td><td>II, III, aVF</td><td>LAD proximal</td></tr>'
+            + '<tr><td>Anterolateral</td><td>V3–V6, I, aVL</td><td>II, III, aVF</td><td>LAD/RCX</td></tr>'
+            + '<tr><td>Inferior</td><td>II, III, aVF</td><td>I, aVL, V1–V3</td><td>RCA (90 %) oder RCX</td></tr>'
+            + '<tr><td>Strikt posterior</td><td>V7–V9 (oft nur reziprok als ST-Senkung in V1–V3 mit hohen R)</td><td>—</td><td>RCX, RCA-PLA</td></tr>'
+            + '<tr><td>Rechtsventrikulär</td><td>V4R</td><td>—</td><td>RCA proximal</td></tr>'
+            + '</tbody></table>'
+            + '<p><strong>NSTEMI:</strong> Troponin-Anstieg/-Abfall ohne ST-Hebung; meist horizontale ST-Senkung ≥ 0,5 mm und/oder T-Negativierung. <strong>De-Winter-T-Welle</strong> (hohe symmetrische T mit aufsteigender ST-Senkung in V1–V6) = LAD-Verschluss-Äquivalent. <strong>Wellens</strong> (biphasische/tief-negative T in V2–V3 nach Schmerzepisode) = kritische LAD-Stenose.</p>'
+
+            + '<h4>2.11.3 AV-Blockierungen</h4>'
+            + '<table><thead><tr><th>Grad</th><th>EKG-Muster</th><th>Klinik / Therapie</th></tr></thead><tbody>'
+            + '<tr><td>I</td><td>PQ &gt; 200 ms, jede P leitet</td><td>Meist asymptomatisch; selten interventionspflichtig.</td></tr>'
+            + '<tr><td>II Typ Mobitz I (Wenckebach)</td><td>PQ verlängert sich progredient bis zum Ausfall eines QRS, dann Reset</td><td>Meist AV-Knoten, vagal getriggert; oft benigne. Atropin bei Symptomen.</td></tr>'
+            + '<tr><td>II Typ Mobitz II</td><td>PQ konstant, plötzlicher QRS-Ausfall (z. B. 2:1, 3:1)</td><td>Infranodal (His-Purkinje); Indikation Schrittmacher unabhängig von Symptomen.</td></tr>'
+            + '<tr><td>III (komplett)</td><td>P und QRS dissoziiert; Ersatzrhythmus schmal (junktional, ~ 40–50/min) oder breit (ventrikulär, ~ 20–40/min)</td><td>Schrittmacher; akut Atropin/Adrenalin/transkutaner Pacer.</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>2.11.4 Vorhofflimmern und Schmalkomplex-Tachykardien</h4>'
+            + '<p><strong>Vorhofflimmern:</strong> absolute Arrhythmie, keine P-Wellen, Flimmerwellen (350–600/min) mit unregelmäßiger Überleitung. Antikoagulation nach CHA₂DS₂-VASc (s. 2.4); Frequenzkontrolle (Beta-Blocker, Verapamil/Diltiazem) vs. Rhythmuskontrolle (Flecainid bei strukturell gesundem Herzen, Amiodaron, Katheterablation als Klasse-I-Indikation in EAST-AFNET-4-Selektion).</p>'
+            + '<p><strong>Vorhofflattern:</strong> sägezahnartige Flatterwellen v. a. in II, III, aVF (typisch: cavo-trikuspidaler Isthmus, Kreislauf 250–350/min, oft 2:1-Überleitung mit ~ 150/min Kammer). Ablation der erste Wahl.</p>'
+            + '<p><strong>AVNRT:</strong> regelmäßige Schmalkomplex-Tachykardie 150–220/min, P meist nicht sichtbar oder Pseudo-r in V1, Pseudo-S in II/III/aVF. Akut Vagusmanöver, Adenosin 6 mg → 12 mg, dann Beta-Blocker/Verapamil.</p>'
+            + '<p><strong>VT:</strong> breit (QRS ≥ 120 ms), regelmäßig, AV-Dissoziation oder Capture/Fusion-Beats; bei Hämodynamik-Instabilität sofort Kardioversion. <strong>Brugada-Algorithmus</strong> hilft VT vs. SVT-mit-Aberranz zu differenzieren.</p>'
+
+            + '<h4>2.11.5 Brugada- und WPW-Syndrom</h4>'
+            + '<p><strong>Brugada-Syndrom:</strong> Natriumkanal-Mutation (SCN5A), autosomal-dominant. Typ-1-Muster (diagnostisch): in V1–V2 coved-type ST-Hebung ≥ 2 mm mit negativer T-Welle. Typ-2/3-Muster (saddle-back) sind Verdachtsmuster, Provokation mit Ajmalin/Flecainid. Risiko: VT/Kammerflimmern, plötzlicher Herztod (oft im Schlaf bei jungen Männern). Therapie: ICD bei symptomatischen Patienten oder spontanem Typ-1 mit Synkope/VT-Anamnese; Fieber als Trigger meiden (frühe Antipyrese).</p>'
+            + '<p><strong>WPW-Syndrom:</strong> akzessorische Leitungsbahn (Kent-Bündel) zwischen Vorhof und Kammer. EKG-Trias: kurzes PQ (&lt; 120 ms), Delta-Welle (träger Anstieg von QRS), QRS-Verbreiterung. Komplikationen: AVRT (orthodrom = schmal, antidrom = breit), präexzitiertes Vorhofflimmern (Pseudo-VT mit irregulärer Breitkomplex-Tachykardie und Kammerfrequenz &gt; 200/min) — <strong>kein Adenosin / Verapamil / Digitalis</strong> wegen Risiko Kammerflimmerns; primär elektrische Kardioversion oder Ajmalin/Flecainid. Definitive Therapie: Katheterablation der akzessorischen Bahn (&gt; 95 % Erfolg).</p>'
+
+            + '<h4>2.11.6 Klinische Algorithmen für STEMI und Bradykardie</h4>'
+            + '<p><strong>STEMI-Versorgung</strong> (ESC STEMI 2017, NVL Chronische KHK 2022): primäre PCI &lt; 90 min „door-to-balloon" (oder &lt; 120 min „first-medical-contact-to-balloon" im Transport). Wenn PCI in 120 min nicht erreichbar: Lyse mit Tenecteplase (gewichtsadaptiert) und sofortige Verlegung in PCI-Zentrum. Begleitend: ASS 150–300 mg p. o., P2Y12-Hemmer (Prasugrel/Ticagrelor präferiert vor Clopidogrel), unfraktioniertes Heparin, ggf. Morphin (vorsichtig — verzögert Resorption oraler P2Y12-Hemmer).</p>'
+            + '<p><strong>Bradykardie-Algorithmus (instabil):</strong> Atropin 0,5 mg i. v. alle 3–5 min (max. 3 mg) → bei Versagen Adrenalin 2–10 µg/min oder Dopamin 5–20 µg/kg/min als Brücke → transkutaner Pacer → transvenöser Schrittmacher.</p>'
+
+            + '<p class="quellen"><em>Quellen:</em> ESC NSTE-ACS 2023; ESC STEMI 2017; 4th Universal Definition of MI (2018); ESC AF 2020 + EHRA Update 2024; ESC SCD/Brugada 2022; AWMF S2k Vorhofflimmern 053-049; Hampton „The ECG Made Easy" 9. Aufl.; Trappe/Schuster „EKG-Kurs für Isabel" 7. Aufl.; ERC Resuscitation Guidelines 2021.</p>'
+    };
+
+    // =========================================================================
+    // PAGE 3.7 — POCUS (Point-of-Care-Sonographie) für die Hausarztpraxis (FA)
+    // =========================================================================
+    const PAGE_POCUS = {
+        title: '3.7 POCUS — Sonographie in der Hausarztpraxis: Aorta, Schilddrüse, Abdomen, Karotis, Lunge',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie kennen (1) die DEGUM-Stufenlogik und Hausarzt-relevante Indikationen für POCUS, (2) das eFAST-Schema im Notfall, (3) Schwellenwerte und Befundkriterien für Aorten-Screening, Schilddrüsen-TIRADS, abdominelle Standardpunkte (Galle, Leber, Milz, Niere, Harnblase), Karotis-Duplex und Lungensonographie (BLUE-Protokoll, A-/B-Linien, Lungenpunkt), (4) Limitationen und Indikationen zur Weiterweisung.</blockquote>'
+
+            + '<h4>3.7.1 Grundlagen und Geräte</h4>'
+            + '<p>Schallkopf-Wahl: <strong>Konvex (3,5–5 MHz)</strong> für Abdomen/Aorta/Niere/Lunge; <strong>Linear (7,5–12 MHz)</strong> für Schilddrüse, Karotis, Pleura, oberflächliche Strukturen; <strong>Sektorscanner/Phased-Array (1–5 MHz)</strong> für Echokardiographie und Lunge zwischen den Rippen. Anlot-Konvention: Marker-Punkt zeigt nach Patient-rechts (axial) bzw. kranial (longitudinal). Ausbildung in Deutschland nach <strong>DEGUM-Stufen I/II/III</strong>; POCUS-Kompetenz für Hausärzte typischerweise auf Stufe-I-Niveau zertifizierbar nach Fokus-Curriculum.</p>'
+
+            + '<h4>3.7.2 Aorten-Screening (Bauchaortenaneurysma, BAA)</h4>'
+            + '<ul>'
+            + '<li><strong>G-BA-Screening (seit 2018):</strong> einmalig sonographisch für Männer ≥ 65 Jahre als IGeL → GKV-Leistung; Frauen nur bei Risikofaktoren (Rauchen, familiäre Häufung).</li>'
+            + '<li><strong>Schwellen:</strong> normale infrarenale Aorta &lt; 25 mm. <strong>Aneurysma ab ≥ 30 mm</strong> (außenwandiger Querdurchmesser, OD-OD).</li>'
+            + '<li><strong>OP-Schwelle:</strong> ≥ 55 mm (♂) bzw. ≥ 50 mm (♀) oder Wachstum &gt; 10 mm/Jahr; symptomatisches BAA = Notfall (offen oder EVAR).</li>'
+            + '<li><strong>Kontroll-Intervalle (S2k 004-014):</strong> 30–39 mm jährlich; 40–44 mm 6 Monate; 45–49 mm 3 Monate; ≥ 50 mm gefäßchirurgische Konsultation.</li>'
+            + '<li><strong>Technik:</strong> Konvex-Sonde, Patient flach, transversale Schnitte alle 5 cm Aorta-Verlauf vom Zwerchfell bis Bifurkation; Außendurchmesser anterior-posterior und transversal messen.</li>'
+            + '</ul>'
+
+            + '<h4>3.7.3 Schilddrüse — Volumen und TIRADS</h4>'
+            + '<p>Lineare Sonde 7,5–12 MHz, Patient mit Reklination des Halses. Volumen je Lappen: $V = L \\cdot B \\cdot T \\cdot 0{,}5$ (Ellipsoid-Formel). Normvolumen Erwachsene: ♂ &lt; 25 ml, ♀ &lt; 18 ml. <strong>TIRADS</strong> (EU-TIRADS 2017 oder ACR-TIRADS 2017) klassifiziert Knoten anhand Echogenität, Form (taller-than-wide), Rand, Kalzifikationen:</p>'
+            + '<table><thead><tr><th>EU-TIRADS</th><th>Befund</th><th>Punktion (FNAC)</th></tr></thead><tbody>'
+            + '<tr><td>1</td><td>keine Knoten</td><td>—</td></tr>'
+            + '<tr><td>2 (benigne)</td><td>rein zystisch, „spongiform"</td><td>nicht erforderlich</td></tr>'
+            + '<tr><td>3 (low risk)</td><td>iso-/hyperechogen, oval, glatte Begrenzung</td><td>≥ 20 mm erwägen</td></tr>'
+            + '<tr><td>4 (intermediate risk)</td><td>mild hypoechogen, oval, glatte Begrenzung</td><td>≥ 15 mm</td></tr>'
+            + '<tr><td>5 (high risk)</td><td>≥ 1 hochsuspektes Merkmal: deutlich hypoechogen, taller-than-wide, irreguläre Ränder, Mikrokalzifikationen</td><td>≥ 10 mm</td></tr>'
+            + '</tbody></table>'
+            + '<p>Risikofaktoren für Malignität (zusätzlich): Bestrahlung im Hals (Kindheit), familiäre Häufung MEN2/familiäres Schilddrüsenkarzinom, schnelles Wachstum, Heiserkeit, fixierte Knoten, Lymphknoten suspekt.</p>'
+
+            + '<h4>3.7.4 Abdomen — sieben Standardpunkte (DEGUM)</h4>'
+            + '<table><thead><tr><th>Region</th><th>Standard-Schnitte</th><th>Hausarzt-relevante Befunde</th></tr></thead><tbody>'
+            + '<tr><td>Leber</td><td>subkostal rechts, longitudinal/transversal</td><td>Steatose (echoreich, Gefäßzeichnung verwaschen), Zirrhose (höckerige Oberfläche, Lobulus-caudatus-Hypertrophie), fokale Läsionen (Hämangiom typisch echoreich-homogen, FNH zentrale Narbe, HCC heterogen)</td></tr>'
+            + '<tr><td>Gallenblase</td><td>subkostal/interkostal, nüchtern</td><td>Steine (echoreich + dorsaler Schallschatten), Cholezystitis (Wandverdickung &gt; 4 mm, Murphy-Sono-Zeichen, perivesikale Flüssigkeit)</td></tr>'
+            + '<tr><td>Pankreas</td><td>Oberbauch transversal (V. lienalis als Leitstruktur)</td><td>akute Pankreatitis (vergrößert, ödematös), Pankreaskopf-Raumforderung; oft durch Luft überlagert</td></tr>'
+            + '<tr><td>Milz</td><td>flank links, interkostal</td><td>Splenomegalie &gt; 12 cm Längsdurchmesser; bei Trauma freie Flüssigkeit</td></tr>'
+            + '<tr><td>Nieren</td><td>flank bds., longitudinal/transversal</td><td>Hydronephrose (Pyelektasie), Konkremente, Schrumpfniere, Zysten Bosniak</td></tr>'
+            + '<tr><td>Harnblase</td><td>suprapubisch</td><td>Restharn $V = L \\cdot B \\cdot T \\cdot 0{,}52$; pathologisch &gt; 100 ml; Wandverdickung bei Obstruktion</td></tr>'
+            + '<tr><td>Aorta/Vena cava</td><td>median-longitudinal/transversal</td><td>BAA s. 3.7.2; VCI-Atemkollaps als Volumen-Marker</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>3.7.5 Karotis-Duplex</h4>'
+            + '<p>Lineare Sonde, Patient mit überstrecktem Hals, Kopf weg vom Untersucher. <strong>Intima-Media-Dicke (IMD)</strong> in der A. carotis communis 1 cm proximal der Bulbus-Aufweitung: pathologisch ≥ 0,9 mm (kardiovaskulärer Risikomarker). <strong>Plaque-Charakterisierung</strong>: echoreich-stabil (kalzifiziert) vs. echoarm-vulnerabel (lipidreich); ulzerierte Plaques mit Spülgrube. <strong>Stenose-Graduierung</strong> nach NASCET-Kriterien mittels PSV (peak systolic velocity) in der ICA:</p>'
+            + '<ul>'
+            + '<li>&lt; 50 % Stenose: PSV &lt; 125 cm/s</li>'
+            + '<li>50–69 %: PSV 125–230 cm/s</li>'
+            + '<li>≥ 70 %: PSV &gt; 230 cm/s, ICA/CCA-Ratio &gt; 4</li>'
+            + '<li>Verschluss: kein Fluss in ICA</li>'
+            + '</ul>'
+            + '<p>Therapieindikation (AWMF S3 004-028, 2020): symptomatische Stenose ≥ 50 % → CEA/CAS innerhalb 14 Tagen nach Indexereignis; asymptomatische Stenose ≥ 60 % nur bei guter Gefäßlebenserwartung und niedrigem perioperativem Risiko.</p>'
+
+            + '<h4>3.7.6 Lungensonographie — BLUE-Protokoll</h4>'
+            + '<p>Sonographie ist der Röntgenthorax bei Pneumothorax und Pleuraerguss <strong>überlegen</strong>. Sektorsonde oder Linear, je nach Fragestellung. Schlüsselzeichen:</p>'
+            + '<ul>'
+            + '<li><strong>Pleura-Gleiten („lung sliding"):</strong> Bewegung der parietalen gegen viszerale Pleura im Atemzyklus → schließt Pneumothorax am untersuchten Punkt aus.</li>'
+            + '<li><strong>A-Linien:</strong> horizontale Wiederholungsartefakte der Pleura → physiologisch belüftete Lunge (oder bei fehlendem Pleura-Gleiten: PTX).</li>'
+            + '<li><strong>B-Linien („lung rockets"):</strong> vertikale Kometenschweif-Artefakte vom Pleura-Niveau bis zum Schirmboden, mit Atembewegung. ≥ 3 B-Linien je Interkostalraum = pathologisch (interstitielles Lungenödem, ARDS, Pneumonie, Lungenfibrose).</li>'
+            + '<li><strong>Konsolidierung („shred sign"):</strong> hepatisierte Lunge mit Luft-Bronchogramm → Pneumonie, Atelektase.</li>'
+            + '<li><strong>Pleuraerguss:</strong> echofreier Saum zwischen viszeraler und parietaler Pleura, „Quad sign" und „Sinusoid sign"; Volumenabschätzung: Erguss-Tiefe (mm) × 20 ≈ Volumen (ml).</li>'
+            + '<li><strong>Lungenpunkt:</strong> Übergangspunkt von Gleiten zu kein-Gleiten → spezifisch für Pneumothorax.</li>'
+            + '</ul>'
+
+            + '<h4>3.7.7 eFAST im Notfall</h4>'
+            + '<p>Extended Focused Assessment with Sonography in Trauma — 5 Punkte zur Detektion freier Flüssigkeit/Luft:</p>'
+            + '<ol>'
+            + '<li>RUQ — Morison-Pouch (hepato-renal): freie Flüssigkeit perihepatisch.</li>'
+            + '<li>LUQ — perispleneal/Koller-Pouch: freie Flüssigkeit perisplenisch.</li>'
+            + '<li>Suprapubisch (Douglas/retro-vesikal): freie Flüssigkeit im kleinen Becken.</li>'
+            + '<li>Subxiphoidal (Perikard): Perikarderguss/Tamponade.</li>'
+            + '<li>Bilateral Thorax (anterior und lateral): Pneumothorax (kein lung sliding) und Hämatothorax.</li>'
+            + '</ol>'
+            + '<p>eFAST hat hohe Spezifität für freie Flüssigkeit (&gt; 95 %) bei moderater Sensitivität (~ 80 %); ein negatives eFAST schließt eine intraabdominelle Verletzung <strong>nicht</strong> aus — bei Trauma weiterhin CT als Goldstandard.</p>'
+
+            + '<p class="quellen"><em>Quellen:</em> DEGUM-Curricula Stufe I; G-BA Aortenscreening-Richtlinie 2018; AWMF S2k 004-014 BAA (2018, in Überarbeitung); EU-TIRADS Russ et al. Eur Thyroid J 2017; ACR-TIRADS Tessler et al. JACR 2017; AWMF S3 Karotisstenose 004-028 (2020); Lichtenstein „BLUE Protocol" Chest 2008; Volpicelli et al. Intens Care Med 2012 (International evidence-based recommendations); ERC Resuscitation Guidelines 2021 (eFAST).</p>'
+    };
+
+    // =========================================================================
     // SCHULUNG REGISTRIEREN
     // =========================================================================
 
@@ -2663,15 +2886,15 @@
             {
                 id: 'klinik_m2',
                 title: 'Kapitel 2 — Klinik (M2): Pathophysiologie und Therapie',
-                summary: 'Kardiologie (HFrEF Fantastic Four, ACS, Vorhofflimmern mit CHA₂DS₂-VASc), Pneumologie (GINA 2024, GOLD 2024, CRB-65), Pharmakologie (DOAK-Interaktionen, Antibiotic Stewardship), Lyme-Borreliose nach AWMF 013-080 sowie Endokrinologie & Hypertonie (NVL Diabetes 2023, ESH 2023/ESC 2024 RR-Ziele, Schilddrüse Hashimoto/Basedow, Cushing/Addison). Pädiatrie (Fieber-Algorithmus NICE/AWMF, klassische Exantheme, U-Untersuchungen) und Bildgebung (CT-/MRT-Wahl, Höhenwerte, KM-Sicherheit, Wirbelsäulen-Befunde).',
-                pages: [PAGE_KARDIO, PAGE_PNEUMO, PAGE_PHARMA_INFEKT, PAGE_ENDOKRIN_HTN, PAGE_GASTRO_HEPATO, PAGE_NEPHRO_URO, PAGE_NEURO_PSYCH, PAGE_HAEMA_RHEUMA_DERMA, PAGE_PAEDIATRIE, PAGE_BILDGEBUNG],
+                summary: 'Kardiologie (HFrEF Fantastic Four, ACS, Vorhofflimmern mit CHA₂DS₂-VASc), Pneumologie (GINA 2024, GOLD 2024, CRB-65), Pharmakologie (DOAK-Interaktionen, Antibiotic Stewardship), Lyme-Borreliose nach AWMF 013-080 sowie Endokrinologie & Hypertonie (NVL Diabetes 2023, ESH 2023/ESC 2024 RR-Ziele, Schilddrüse Hashimoto/Basedow, Cushing/Addison). Pädiatrie (Fieber-Algorithmus NICE/AWMF, klassische Exantheme, U-Untersuchungen), Bildgebung (CT-/MRT-Wahl, Höhenwerte, KM-Sicherheit, Wirbelsäulen-Befunde) und EKG-Lesetraining (STEMI-Lokalisation, AV-Block-Graduierung, VHF, Brugada, WPW).',
+                pages: [PAGE_KARDIO, PAGE_PNEUMO, PAGE_PHARMA_INFEKT, PAGE_ENDOKRIN_HTN, PAGE_GASTRO_HEPATO, PAGE_NEPHRO_URO, PAGE_NEURO_PSYCH, PAGE_HAEMA_RHEUMA_DERMA, PAGE_PAEDIATRIE, PAGE_BILDGEBUNG, PAGE_EKG],
                 quiz: QUIZ_M2
             },
             {
                 id: 'pj_facharzt',
                 title: 'Kapitel 3 — PJ und Facharzt Allgemeinmedizin',
-                summary: 'Multimorbidität und Polypharmazie (PRISCUS 2.0, STOPP/START V3, FORTA), Prävention (Check-up 35, Screening-Programme, STIKO 2024 inkl. RSV-Empfehlung), Geriatrie (Frailty nach Fried, Demenz-Screening), Palliativmedizin (AAPV/SAPV), juristische Grundlagen (BGB § 1827) sowie Notfallmedizin und Schmerztherapie (ABCDE, Anaphylaxie, Hypoglykämie, hypertensiver Notfall, WHO-Stufenschema, Opioid-Rotation, BLS/ALS). Reisemedizin nach DTG 2024 (Gelbfieber, Malariaprophylaxe, Reisediarrhoe-AB-Strategie, Tropenerkrankungen bei Rückkehrern).',
-                pages: [PAGE_POLYPHARMA, PAGE_PRAEVENTION, PAGE_RECHT_GERIATRIE, PAGE_NOTFALL_SCHMERZ, PAGE_PRAXIS_VERWALTUNG, PAGE_REISEMEDIZIN],
+                summary: 'Multimorbidität und Polypharmazie (PRISCUS 2.0, STOPP/START V3, FORTA), Prävention (Check-up 35, Screening-Programme, STIKO 2024 inkl. RSV-Empfehlung), Geriatrie (Frailty nach Fried, Demenz-Screening), Palliativmedizin (AAPV/SAPV), juristische Grundlagen (BGB § 1827) sowie Notfallmedizin und Schmerztherapie (ABCDE, Anaphylaxie, Hypoglykämie, hypertensiver Notfall, WHO-Stufenschema, Opioid-Rotation, BLS/ALS). Reisemedizin nach DTG 2024 (Gelbfieber, Malariaprophylaxe, Reisediarrhoe-AB-Strategie, Tropenerkrankungen bei Rückkehrern) und POCUS (Aorta-Screening, TIRADS, eFAST, BLUE-Protokoll).',
+                pages: [PAGE_POLYPHARMA, PAGE_PRAEVENTION, PAGE_RECHT_GERIATRIE, PAGE_NOTFALL_SCHMERZ, PAGE_PRAXIS_VERWALTUNG, PAGE_REISEMEDIZIN, PAGE_POCUS],
                 quiz: QUIZ_FA
             }
         ]
@@ -2708,6 +2931,11 @@
         };
     }
 
+    // Nur klassische MCQ-Items werden in die Trainings-Schiene gespiegelt.
+    // PBQ-Typen (sequence, cloze) sind UI-spezifisch und gehören in die Schulungs-Schiene.
+    function isMcq(item) { return !item.type || item.type === 'mcq'; }
+    function mcqOnly(arr) { return arr.filter(isMcq); }
+
     window.APP_DATA[MED_ID] = {
         id: MED_ID,
         name: 'Medizin (Allgemeinmedizin)',
@@ -2740,9 +2968,9 @@
             + '<h3>Quellen</h3>'
             + '<p>Schmidt/Lang Physiologie 32; Rassow Biochemie 5; Herold Innere 2024; Aktories Pharmakologie 13; Kochen Allgemeinmedizin 5; KDIGO 2024; ESC HF 2023; ESC ACS 2023; GINA 2024; GOLD 2024; NVL Diabetes 2023; NVL Depression 2022; STIKO Epid. Bull. 4/2024; PRISCUS 2.0; STOPP/START V3; DGN-S2k Schlaganfall 2024; ACR/EULAR RA 2010; NAMS 2022.</p>',
         levels: [
-            QUIZ_M1.map(quizToTask),
-            QUIZ_M2.map(quizToTask),
-            QUIZ_FA.map(quizToTask)
+            mcqOnly(QUIZ_M1).map(quizToTask),
+            mcqOnly(QUIZ_M2).map(quizToTask),
+            mcqOnly(QUIZ_FA).map(quizToTask)
         ]
     };
 })();
