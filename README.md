@@ -1,6 +1,6 @@
 # Smartineer — Engineering Knowledge Reloaded
 
-Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 11 Kategorien, 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie (~330 gesamt) und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–4 (Klassen 5–10 und Englisch in Vorbereitung).
+Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 12 Kategorien (inkl. Allgemeinmedizin als Spiegelung der gleichnamigen Schulung), 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–4 (Klassen 5–10 und Englisch in Vorbereitung) und ein **Schulungen-Bereich** mit Cert-Prep-Kursen (CompTIA SecurityX/Security+/CySA+/PenTest+) sowie einer Allgemeinmedizin-Schulung (M1/M2/Facharzt).
 
 > **Stack**: React 18 (CDN, JSX via Babel-standalone) · Tailwind CSS (CDN) · Chart.js · KaTeX  
 > **Auslieferung**: Klassische Website **und** installierbare PWA (Desktop, Android, iOS)  
@@ -26,7 +26,7 @@ Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein e
 
 ## Features
 
-- **11 Kategorien**: Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3), Cyber Security
+- **12 Kategorien**: Allgemeinmedizin (Spiegelung der Schulung), Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3), Cyber Security
 - **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **10 Aufgaben** = ~**270 Aufgaben** insgesamt
 - **KaTeX-gerenderte Formeln** in Aufgaben, Hinweisen und Lösungen
 - **React-UI** (Hooks, Functional Components) mit weichen Übergangs-Animationen, Gradient-Hero, animierten Fortschrittsbalken und Hover-Effekten
@@ -155,6 +155,7 @@ Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht
 
 | Kategorie | Themen (Auszug) |
 |---|---|
+| Allgemeinmedizin | M1-/M2-/Facharzt-IMPP-Quiz aus der Allgemeinmedizin-Schulung, gespiegelt als Trainings-Kategorie (Quiz-Bestwerte werden dadurch nicht beeinflusst) |
 | Höhere Mathematik | Komplexe Zahlen, Integration, ODEs, Laplace, Fourier, Eigenwerte, Vektoranalysis, Residuensatz |
 | Regelungstechnik | PID, Stabilität, Hurwitz/Routh, Bode/Nyquist, Wurzelortskurve, Zustandsraum, Optimumeinstellungen |
 | Digitale Regelungstechnik | Z-Transform, Tustin, Stabilität in der z-Ebene, Dead-Beat, Jury, ZOH, Aliasing |
