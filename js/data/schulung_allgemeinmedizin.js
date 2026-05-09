@@ -932,6 +932,389 @@
             + '<p class="quellen"><em>Quellen:</em> ERC Resuscitation Guidelines 2021; AWMF S2k Anaphylaxie 061-025 (2021); ESC ACS 2023; AWMF S3 LONTS Langzeit-Opioidtherapie nicht-tumorbedingter Schmerzen; WHO Cancer Pain Ladder; Deutsche Gesellschaft für Schmerzmedizin Äquivalenztabellen 2023.</p>'
     };
 
+    const PAGE_SAEURE_NIERE = {
+        title: '1.5 Säure-Basen-Haushalt, Niere und RAAS',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie können (1) die Henderson-Hasselbalch-Gleichung anwenden und Säure-Basen-Störungen anhand pH, pCO₂ und HCO₃⁻ klassifizieren, (2) die Anionenlücke berechnen und MUDPILES als DD-Werkzeug einsetzen, (3) das RAAS-System mit pharmakologischen Eingriffspunkten skizzieren, (4) GFR nach CKD-EPI 2021 schätzen und CKD-Stadien G1–G5 / A1–A3 zuordnen, (5) die wichtigsten Tubulusfunktionen (proximaler/distaler Tubulus, Henle-Schleife, Sammelrohr) den passenden Diuretika-Klassen zuordnen.</blockquote>'
+
+            + '<p>Säure-Basen-Diagnostik und Nierenfunktion sind im IMPP-Stil hochfrequent geprüft, weil sie sich in präzise Algorithmen übersetzen lassen. Wer pH-Verschiebung, Kompensation und Anionenlücke beherrscht, löst die meisten Fragen in &lt; 30 s.</p>'
+
+            + '<h4>1.5.1 Henderson-Hasselbalch und physiologischer Puffer</h4>'
+            + '<p>Bicarbonatpuffer dominiert die extrazelluläre pH-Regulation:</p>'
+            + '<p>$$pH = pK_a + \\log\\frac{[HCO_3^-]}{0{,}03 \\cdot pCO_2}\\quad (pK_a \\approx 6{,}1)$$</p>'
+            + '<p>Normbereiche arteriell: pH 7,35–7,45; pCO₂ 35–45 mmHg; HCO₃⁻ 22–26 mmol/l; BE −2 bis +2. Lunge reguliert pCO₂ binnen Minuten, Niere reguliert HCO₃⁻ binnen Stunden bis Tagen.</p>'
+
+            + '<h4>1.5.2 Vier-Klassen-Schema der Säure-Basen-Störungen</h4>'
+            + '<table><thead><tr><th>Störung</th><th>pH</th><th>Primär ↓/↑</th><th>Kompensation</th></tr></thead><tbody>'
+            + '<tr><td>Metabolische Azidose</td><td>↓</td><td>HCO₃⁻ ↓</td><td>pCO₂ ↓ (Hyperventilation, Kußmaul)</td></tr>'
+            + '<tr><td>Metabolische Alkalose</td><td>↑</td><td>HCO₃⁻ ↑</td><td>pCO₂ ↑ (Hypoventilation)</td></tr>'
+            + '<tr><td>Respiratorische Azidose</td><td>↓</td><td>pCO₂ ↑</td><td>HCO₃⁻ ↑ (renal, langsam)</td></tr>'
+            + '<tr><td>Respiratorische Alkalose</td><td>↑</td><td>pCO₂ ↓</td><td>HCO₃⁻ ↓ (renal, langsam)</td></tr>'
+            + '</tbody></table>'
+            + '<p>Erwartete Kompensation (Winters-Formel für metabol. Azidose): $pCO_2 = 1{,}5 \\cdot [HCO_3^-] + 8 \\pm 2$. Abweichungen → kombinierte Störung.</p>'
+
+            + '<h4>1.5.3 Anionenlücke und MUDPILES</h4>'
+            + '<p>$AG = [Na^+] - ([Cl^-] + [HCO_3^-])$, Norm 8–12 mmol/l (ohne K⁺-Berücksichtigung). Bei Hypoalbuminämie korrigieren: $AG_{korr} = AG + 2{,}5 \\cdot (4{,}0 - [\\text{Albumin in g/dl}])$.</p>'
+            + '<p><strong>Hohe Anionenlücke</strong> = Akkumulation organischer Anionen. Mnemonic <em>MUDPILES</em>: <strong>M</strong>ethanol, <strong>U</strong>rämie, <strong>D</strong>iabetische/alkohol. Ketoazidose, <strong>P</strong>ropylenglykol, <strong>I</strong>NH/Eisen, <strong>L</strong>aktat (Sepsis, Schock, Metformin), <strong>E</strong>thylenglykol, <strong>S</strong>alicylate. Normale Anionenlücke (hyperchlorämische Azidose): Diarrhoe, renal-tubuläre Azidose, Ureterosigmoidostomie.</p>'
+
+            + '<h4>1.5.4 Renin-Angiotensin-Aldosteron-System</h4>'
+            + '<p>Stimuli für Renin-Sekretion (juxtaglomeruläre Zellen): Hypovolämie, Sympathikus (β1), Hyponatriämie an der Macula densa. Kaskade: <strong>Renin</strong> spaltet Angiotensinogen → Angiotensin I; <strong>ACE</strong> (Lunge, Endothel) konvertiert AT-I → AT-II. AT-II wirkt über <strong>AT1-Rezeptor</strong>: Vasokonstriktion, Aldosteron-Freisetzung (NNR Zona glomerulosa), ADH-Freisetzung, proximaler Na⁺-Reabsorption, Durstgefühl.</p>'
+            + '<p><strong>Aldosteron</strong> bindet Mineralocorticoid-Rezeptor im Sammelrohr → ENaC-Aktivierung (Na⁺-Reabsorption, K⁺-Sekretion, H⁺-Sekretion). Pharmakologische Eingriffspunkte:</p>'
+            + '<ul>'
+            + '<li><strong>β1-Blocker</strong> (Bisoprolol, Metoprolol) → Renin ↓.</li>'
+            + '<li><strong>Direkter Reninhemmer</strong> Aliskiren (selten klinisch).</li>'
+            + '<li><strong>ACE-Hemmer</strong> (z. B. Ramipril): AT-II ↓, Bradykinin ↑ (Husten in 5–20 %).</li>'
+            + '<li><strong>AT1-Blocker / ARB</strong> (Sartane): selektive Rezeptorblockade ohne Bradykinin-Effekt.</li>'
+            + '<li><strong>Mineralocorticoid-Rezeptor-Antagonisten</strong>: Spironolacton (auch Anti-Androgen → Gynäkomastie), Eplerenon (selektiver), Finerenon (nicht-steroidal, FIDELIO/FIGARO bei diab. CKD).</li>'
+            + '</ul>'
+
+            + '<h4>1.5.5 GFR-Schätzung CKD-EPI 2021</h4>'
+            + '<p>Aktuelle Leitlinien (KDIGO 2024) empfehlen die <strong>CKD-EPI-2021-Formel</strong> ohne Race-Faktor — gegenüber der älteren Version präziser. Eingang: Serum-Kreatinin, Alter, Geschlecht. Bei Diskrepanz oder Grenzbefund: Cystatin-C-basiertes eGFR (eGFRcr-cys).</p>'
+            + '<p><strong>CKD-Klassifikation</strong> nach KDIGO: GFR-Stadium G1 ≥ 90 / G2 60–89 / G3a 45–59 / G3b 30–44 / G4 15–29 / G5 &lt; 15 (mL/min/1,73 m²); Albuminurie A1 &lt; 30 / A2 30–300 / A3 &gt; 300 mg/g Krea. CKD ist definiert ab ≥ 3 Monaten G3+ oder strukturelle/A2+-Schäden.</p>'
+
+            + '<h4>1.5.6 Tubulus-Funktion und Diuretika-Wirkorte</h4>'
+            + '<table><thead><tr><th>Tubulusabschnitt</th><th>Hauptfunktion</th><th>Diuretikum</th></tr></thead><tbody>'
+            + '<tr><td>Proximaler Tubulus</td><td>~ 65 % Na⁺/H₂O, Bicarbonat, Glukose, Aminosäuren</td><td>Carboanhydrase-Hemmer (Acetazolamid); SGLT2-Hemmer</td></tr>'
+            + '<tr><td>Aufsteigender Henle-Schenkel</td><td>~ 25 % Na⁺ via NKCC2-Cotransporter</td><td>Schleifendiuretika (Furosemid, Torasemid)</td></tr>'
+            + '<tr><td>Distaler Tubulus</td><td>~ 5 % Na⁺ via NCC-Cotransporter</td><td>Thiazide (HCT, Indapamid)</td></tr>'
+            + '<tr><td>Sammelrohr</td><td>Aldosteron-gesteuert, ENaC + ROMK</td><td>K⁺-sparende Diuretika (Spironolacton, Amilorid)</td></tr>'
+            + '</tbody></table>'
+            + '<p>Klinisch: Schleifendiuretika sind die einzigen Diuretika, die bei eGFR &lt; 30 noch wirksam sind; Thiazide verlieren Wirksamkeit bei eGFR &lt; 30 (Ausnahme: Indapamid, Chlortalidon — länger wirksam).</p>'
+
+            + '<h4>1.5.7 ADH und Wasserhaushalt</h4>'
+            + '<p>ADH (Vasopressin, AVP) wird im Hypothalamus gebildet, in der Neurohypophyse gespeichert; Stimuli: Hyperosmolalität (Osmorezeptoren ab 280 mosm/kg), Hypovolämie. Wirkung am V2-Rezeptor des Sammelrohrs: Aquaporin-2-Einbau → freie Wasser-Reabsorption.</p>'
+            + '<p>Pathologien: <strong>SIADH</strong> (Schwartz-Bartter): hypotone Hyponatriämie, niedrig-normales Volumen, hohe Urin-Osmolalität (&gt; 100 mosm/kg). Therapie: Flüssigkeitsrestriktion, ggf. Tolvaptan (V2-Antagonist) oder hypertone NaCl 3 % bei akut symptomatischer Hyponatriämie (Anstieg max. 8–10 mmol/l/24 h — sonst zentrale pontine Myelinolyse).</p>'
+            + '<p><strong>Diabetes insipidus</strong>: zentral (ADH-Mangel, z. B. nach Hypophysen-OP) → DDAVP s. c. wirksam; renal (V2-Resistenz) → Salzrestriktion, Thiazid (paradox), evtl. Indomethacin.</p>'
+
+            + '<p class="quellen"><em>Quellen:</em> Schmidt/Lang/Heckmann Physiologie 32. Aufl.; Boron Medical Physiology 3. Aufl.; KDIGO 2024 CKD Update; Inker LA et al. CKD-EPI 2021, NEJM 2021; FIDELIO-DKD/FIGARO-DKD Pitt B et al. NEJM 2020/2021.</p>'
+    };
+
+    const PAGE_GASTRO_HEPATO = {
+        title: '2.5 Gastroenterologie und Hepatologie',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie können (1) GERD nach Lyon-Konsensus diagnostisch einordnen und PPI-Therapie risikoadjustiert einsetzen, (2) chronisch-entzündliche Darmerkrankungen (CED) klinisch und histologisch differenzieren, (3) akute Gastroenteritis nach Erreger und Dehydratationsgrad behandeln und C.-difficile-Therapie nach S2k umsetzen, (4) Hepatitis A–E serologisch einordnen, (5) Leberzirrhose nach Child-Pugh und MELD klassifizieren und Komplikationen (Aszites, SBP, Varizen, hepatische Enzephalopathie) leitliniengerecht versorgen.</blockquote>'
+
+            + '<h4>2.5.1 GERD und PPI-Therapie</h4>'
+            + '<p>Gastroösophageale Refluxkrankheit: Sodbrennen, Regurgitation, retrosternaler Schmerz; atypisch auch Husten, Heiserkeit, Asthma-Exazerbation, Erosionen Zähne. Diagnose nach <strong>Lyon-Konsensus 2018/2024</strong> klinisch + bei Refraktärität pH-Metrie/Impedanz. ÖGD bei Alarmzeichen (Dysphagie, Anämie, Gewichtsverlust, Hämatemesis, Alter &gt; 50 J. mit neuer Symptomatik) oder ausbleibendem PPI-Ansprechen.</p>'
+            + '<p>Therapie: PPI 4–8 Wochen (Omeprazol/Pantoprazol 20–40 mg morgens 30 min vor Frühstück), dann Step-down. Langzeit-Risiken: Magnesium-/B12-Mangel, Osteoporose-Frakturen (geringfügig), C.-difficile-Risiko ↑, möglicherweise PPI-induzierte interstitielle Nephritis. Deprescribing prüfen, wenn Indikation unklar.</p>'
+
+            + '<h4>2.5.2 Helicobacter pylori und Ulkuskrankheit</h4>'
+            + '<p>Detail s. 2.3.7. Ulcus ventriculi 70 % H.-p.-assoziiert, Ulcus duodeni &gt; 90 %; NSAR/ASS-Ulkus zweite Säule. Gastroduodenale Blutung — Forrest-Klassifikation Ia–III; endoskopische Therapie + i. v.-PPI 80 mg Bolus + 8 mg/h für 72 h bei Hochrisiko.</p>'
+
+            + '<h4>2.5.3 Chronisch-entzündliche Darmerkrankungen</h4>'
+            + '<table><thead><tr><th></th><th>Morbus Crohn</th><th>Colitis ulcerosa</th></tr></thead><tbody>'
+            + '<tr><td>Lokalisation</td><td>gesamter GI-Trakt, segmental, oft term. Ileum</td><td>kontinuierlich vom Rektum aufsteigend</td></tr>'
+            + '<tr><td>Wandbeteiligung</td><td>transmural, Fistel/Abszess</td><td>mukosal/submukosal</td></tr>'
+            + '<tr><td>Histologie</td><td>nicht-verkäsende Granulome</td><td>Kryptenabszesse, becherzellarm</td></tr>'
+            + '<tr><td>Klassik</td><td>Bauchschmerz, nicht-blutige Durchfälle, Gewichtsverlust</td><td>blutig-schleimige Durchfälle, Tenesmen</td></tr>'
+            + '<tr><td>Therapie akut</td><td>Steroide systemisch oder topisch (Budesonid bei Ileozökal-Befall)</td><td>5-ASA topisch + oral (Mesalazin), Steroide</td></tr>'
+            + '<tr><td>Erhalt</td><td>Azathioprin/6-MP, Anti-TNF (Adalimumab/Infliximab), Vedolizumab, Ustekinumab, JAK-Inhibitoren</td><td>5-ASA, Azathioprin, Biologika analog</td></tr>'
+            + '<tr><td>OP</td><td>häufig nötig (Stenosen, Fisteln); nicht kurativ</td><td>Proktokolektomie kurativ</td></tr>'
+            + '</tbody></table>'
+            + '<p>Surveillance: Koloskopie 8–10 J. nach Erstdiagnose CU, dann je nach Ausdehnung/Schwere alle 1–4 J. (CRC-Risiko ↑).</p>'
+
+            + '<h4>2.5.4 Akute Gastroenteritis und C. difficile</h4>'
+            + '<p>Erregerspektrum nach Klinik:</p>'
+            + '<ul>'
+            + '<li><strong>Viral</strong> (Noro-, Rotavirus): wässrig, kein Blut, kurzer Verlauf 24–72 h. Hochansteckend (Hospitalismus). Hand-Desinfektion mit <em>viruzidem</em> Mittel (alkoholische Standarddesinfektion unzureichend bei unbehüllten Viren).</li>'
+            + '<li><strong>Bakteriell-invasiv</strong> (Campylobacter, Salmonella, Shigella, EHEC): Fieber, blutige Stühle. EHEC: <em>keine Antibiotika</em> (HUS-Risiko ↑).</li>'
+            + '<li><strong>Toxinvermittelt</strong> (Staph aureus, Bacillus cereus): Erbrechen 1–6 h post Mahlzeit.</li>'
+            + '</ul>'
+            + '<p>Therapie überwiegend symptomatisch: orale Rehydratation (WHO-ORS), bei Erwachsenen Loperamid bei nicht-blutiger Diarrhö. Antibiotika nur bei schwerem invasiven Verlauf, Immunsuppression oder Reisediarrhoe (Azithromycin Erstlinie).</p>'
+            + '<p><strong>C. difficile</strong> (DGVS-S2k 2024): Leitsymptom blutig-wässrige Diarrhoe nach Antibiotika-Exposition. Diagnose: GDH-Antigen + Toxin-A/B-EIA + ggf. PCR. Therapie:</p>'
+            + '<ul>'
+            + '<li>Erstepisode mild/moderat: <strong>Fidaxomicin</strong> 2 × 200 mg p. o. 10 d (1. Wahl) oder Vancomycin 4 × 125 mg p. o. 10 d.</li>'
+            + '<li>Schwer: Fidaxomicin oder Vancomycin oral; <em>kein</em> Metronidazol mehr Erstlinie.</li>'
+            + '<li>Rezidiv: Fidaxomicin in extended pulsed regimen oder fäkaler Mikrobiom-Transfer (FMT).</li>'
+            + '</ul>'
+
+            + '<h4>2.5.5 Hepatitis A–E (Übersicht)</h4>'
+            + '<table><thead><tr><th>Typ</th><th>Übertragung</th><th>Verlauf</th><th>Schutz</th></tr></thead><tbody>'
+            + '<tr><td>HAV</td><td>fäkal-oral (Reise, Muscheln)</td><td>akut, nie chronisch</td><td>Impfung Tot (≥ 25 J. Schutz)</td></tr>'
+            + '<tr><td>HBV</td><td>parenteral, sexuell, vertikal</td><td>5–10 % chronisch (Erw.); &gt; 90 % bei perinataler Infektion</td><td>Impfung rekombinant; Therapie Tenofovir/Entecavir</td></tr>'
+            + '<tr><td>HCV</td><td>parenteral (i. v.-Drogen, Tätowierung, vor 1992 Bluttransfusion)</td><td>50–80 % chronisch</td><td>direkte antivirale Therapie (DAA, &gt; 95 % SVR; Sofosbuvir/Velpatasvir)</td></tr>'
+            + '<tr><td>HDV</td><td>nur mit HBV (Co-/Superinfektion)</td><td>schwere Verläufe</td><td>HBV-Impfung; Bulevirtid neu zugelassen</td></tr>'
+            + '<tr><td>HEV</td><td>fäkal-oral; in DE Zoonose über Schwein/Wild</td><td>akut; chronisch bei Immunsuppression</td><td>kein Impfstoff in EU; meist selbstlimitierend</td></tr>'
+            + '</tbody></table>'
+            + '<p><strong>HBV-Serologie</strong> Kurzfassung: HBs-Ag positiv = aktuelle Infektion; Anti-HBc-IgM = akut; Anti-HBc-IgG ohne HBs-Ag = abgelaufene Infektion; nur Anti-HBs (ohne Anti-HBc) = Impfung. Anti-HBs ≥ 100 IU/l = Impfschutz langfristig.</p>'
+            + '<p>Hep-B/C-Screening Check-up 35 einmalig (G-BA seit 2021).</p>'
+
+            + '<h4>2.5.6 Leberzirrhose</h4>'
+            + '<p>Häufigste Ursachen in DE: Alkohol, MASH (metabolic dysfunction-associated steatohepatitis, früher NASH), chronische Hep B/C, autoimmun, hereditär (Hämochromatose, M. Wilson, α1-Antitrypsin). Klinik: Spider-Nävi, Palmar-Erythem, Caput medusae, Aszites, Splenomegalie, Gynäkomastie.</p>'
+            + '<p><strong>Child-Pugh</strong>-Score: Bilirubin, Albumin, INR/Quick, Aszites, Enzephalopathie — A 5–6 / B 7–9 / C 10–15. <strong>MELD</strong> für TX-Listung: Bili, INR, Krea, Na (+ Geschlecht ab MELD-3.0 2023).</p>'
+            + '<p>Komplikationen:</p>'
+            + '<ul>'
+            + '<li><strong>Ösophagusvarizen</strong>: Screening-ÖGD bei Diagnose; Primärprophylaxe Propranolol oder Bandligatur. Akut: Terlipressin + Somatostatin-Analoga + endoskopische Bandligatur + Antibiotika-Prophylaxe (Ceftriaxon 1 g/d 7 d).</li>'
+            + '<li><strong>Aszites</strong>: SAAG-Diagnostik (&gt; 1,1 = portal-hypertensiv). Stufe 1 Spironolacton, +Furosemid. Refraktär → TIPS oder LTX. Salzrestriktion 5–6 g/d.</li>'
+            + '<li><strong>SBP</strong> (spontan-bakterielle Peritonitis): Aszites-PMN ≥ 250/µl. Cefotaxim/Ceftriaxon i. v. + Albumin 1,5 g/kg Tag 1, 1 g/kg Tag 3 (HRS-Prävention).</li>'
+            + '<li><strong>Hepatorenales Syndrom (HRS-AKI)</strong>: Terlipressin + Albumin; LTX kurativ.</li>'
+            + '<li><strong>Hepatische Enzephalopathie</strong>: Lactulose Stufe 1 (3 × 30 ml, Ziel 2–3 weiche Stühle), Rifaximin Stufe 2.</li>'
+            + '</ul>'
+
+            + '<p class="quellen"><em>Quellen:</em> AWMF S2k Helicobacter 021-001; AWMF S3 GERD 021-013; ECCO/ESGE CED-Guidelines 2024; AWMF S2k C.-difficile DGVS 021-024 (2024); EASL Cirrhosis Guidelines 2018/2024-Update; STIKO Hepatitis-Impfung 2024.</p>'
+    };
+
+    const PAGE_NEPHRO_URO = {
+        title: '2.6 Nephrologie und Urologie',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie können (1) AKI nach KDIGO 2012 stadieren und prä-/intrarenale/postrenale Genese unterscheiden, (2) CKD-Stadien G1–G5/A1–A3 zuordnen und Progressions-Hebel benennen, (3) die häufigsten Glomerulonephritiden klinisch zuordnen, (4) Nephrolithiasis nach Stein-Typ behandeln und sekundärpräventiv beraten, (5) BPH und Prostatakarzinom-Screening differenziert besprechen, (6) Hodentorsion zeitkritisch erkennen.</blockquote>'
+
+            + '<h4>2.6.1 Akute Nierenschädigung (AKI)</h4>'
+            + '<p>KDIGO-Definition: Krea-Anstieg ≥ 0,3 mg/dl in 48 h <em>oder</em> ≥ 1,5 × Baseline in 7 d <em>oder</em> Diurese &lt; 0,5 ml/kg/h für ≥ 6 h.</p>'
+            + '<table><thead><tr><th>Stadium</th><th>Krea</th><th>Diurese</th></tr></thead><tbody>'
+            + '<tr><td>1</td><td>1,5–1,9 × Baseline / +0,3 mg/dl</td><td>&lt; 0,5 ml/kg/h für 6–12 h</td></tr>'
+            + '<tr><td>2</td><td>2,0–2,9 × Baseline</td><td>&lt; 0,5 ml/kg/h ≥ 12 h</td></tr>'
+            + '<tr><td>3</td><td>≥ 3,0 × / Krea ≥ 4,0 mg/dl / Nierenersatz</td><td>&lt; 0,3 ml/kg/h ≥ 24 h oder Anurie ≥ 12 h</td></tr>'
+            + '</tbody></table>'
+            + '<p>DD prärenal vs. intrarenal: <strong>FE-Na</strong> = ([U-Na] · [P-Krea]) / ([P-Na] · [U-Krea]) · 100. Prärenal &lt; 1 %; ATN &gt; 2 %. Bei Diuretika-Therapie FE-Harnstoff &lt; 35 % prärenal-typisch.</p>'
+            + '<p>Häufige Ursachen: prärenal — Volumenmangel, Sepsis, HRS, NSAR/ACE-Hemmer-Kombination; intrarenal — ATN (ischämisch/toxisch: Aminoglykoside, Cisplatin, Kontrastmittel), Glomerulonephritis, akute interstitielle Nephritis (β-Laktame, NSAR, PPI); postrenal — Steine, BPH, Tumor.</p>'
+
+            + '<h4>2.6.2 Chronische Nierenerkrankung (CKD)</h4>'
+            + '<p>Stadien G1–G5 (s. 1.5.5) × A1–A3 Albuminurie. Progressions-Bremsen (KDIGO 2024):</p>'
+            + '<ul>'
+            + '<li>RR &lt; 130/80 mit ACE/ARB; Salz &lt; 5 g/d; Eiweiß ~ 0,8 g/kg/d.</li>'
+            + '<li><strong>SGLT2-Hemmer</strong> bei eGFR ≥ 20 ml/min — diabetische und nicht-diabetische CKD (DAPA-CKD, EMPA-KIDNEY).</li>'
+            + '<li><strong>Finerenon</strong> bei diabetischer CKD mit Albuminurie (FIDELIO-DKD).</li>'
+            + '<li>Anämie-Therapie ESA + Eisen ab Hb &lt; 10 g/dl, Ziel 10–11,5; Phosphatbinder; Vit-D-Analoga.</li>'
+            + '<li>Vorbereitung Nierenersatz ab eGFR &lt; 20: Shunt-Anlage, Aufklärung HD/PD/TX.</li>'
+            + '</ul>'
+
+            + '<h4>2.6.3 Glomerulonephritiden — klinische Zuordnung</h4>'
+            + '<table><thead><tr><th>Klinik</th><th>Häufige GN</th></tr></thead><tbody>'
+            + '<tr><td>Nephrotisches Syndrom (Proteinurie ≥ 3,5 g/d, Hypoalbumin, Ödeme, Hyperlipid.)</td><td>Minimal-Change (Kinder); membranöse GN (PLA2R-AK); FSGS; diabetische Nephropathie</td></tr>'
+            + '<tr><td>Nephritisches Syndrom (Hämaturie + Akantozyten, Proteinurie &lt; 3,5 g/d, RR ↑, Krea ↑)</td><td>IgA-Nephritis, Postinfektiöse GN, ANCA-assoziierte Vaskulitis (Wegener/MPA), Anti-GBM (Goodpasture), Lupus-Nephritis</td></tr>'
+            + '</tbody></table>'
+            + '<p>Diagnostik: Urin-Sedi (Akantozyten/Erythrozytenzylinder bei nephritisch), Spot-Albumin/Krea-Quotient, ANA, ANCA, Anti-GBM, Komplement, ggf. Nierenbiopsie. Therapie GN-spezifisch — Steroide ± Immunsuppressiva (Cyclophosphamid, Rituximab, Mycophenolat).</p>'
+
+            + '<h4>2.6.4 Nephrolithiasis</h4>'
+            + '<p>Klinik: kolikartiger Flankenschmerz mit Ausstrahlung, Mikrohämaturie. Steintypen:</p>'
+            + '<ul>'
+            + '<li><strong>Calciumoxalat</strong> 70–80 % (häufigster Typ); Risiko: Hyperkalziurie, Hyperoxalurie, niedrige Diurese.</li>'
+            + '<li><strong>Calciumphosphat</strong> 5–10 %; bei renal-tubulärer Azidose und alkalischem Urin.</li>'
+            + '<li><strong>Harnsäure</strong> 5–10 %; röntgennegativ; saurer Urin, Hyperurikämie. Therapie: Alkalisierung Urin pH 6,8–7,2 (Citrat).</li>'
+            + '<li><strong>Struvit (Mg-Ammonium-Phosphat)</strong> 5–10 %; Infektsteine (Urease-positive Erreger Proteus, Klebsiella). Korallen-Konfiguration.</li>'
+            + '<li><strong>Cystin</strong> &lt; 1 %; autosomal-rezessiv.</li>'
+            + '</ul>'
+            + '<p>Akut: Analgesie (Metamizol/Diclofenac, Opioid bei Bedarf), α-Blocker (Tamsulosin) bei distalem Uretersteinen ≤ 10 mm zur Spontanabgangs-Förderung. Steine &gt; 6 mm oder mit Komplikation (Fieber, Hydronephrose, Anurie): Notfall — DJ-Schiene, ESWL, URS oder PCNL.</p>'
+            + '<p>Sekundärprävention: Trinkmenge ≥ 2,5 l/d (Diurese ≥ 2 l), salzarm, Calcium-Aufnahme nicht reduzieren (paradox erhöht Steinrisiko), Citrat-Substitution, gezielte Stein-Analyse.</p>'
+
+            + '<h4>2.6.5 Benignes Prostatasyndrom (BPS) und Prostatakarzinom</h4>'
+            + '<p>BPS: irritative + obstruktive Symptome (LUTS), IPSS-Score. Therapie:</p>'
+            + '<ul>'
+            + '<li>α1-Blocker (<strong>Tamsulosin</strong>) — symptomatisch, schneller Wirkungseintritt.</li>'
+            + '<li>5α-Reduktase-Hemmer (<strong>Finasterid, Dutasterid</strong>) — bei größerem Volumen (&gt; 30–40 ml), Wirkung erst nach 3–6 Mo., Volumen ↓ ~ 25 %. Cave: PSA-Wert halbiert sich, bei Surveillance verdoppeln.</li>'
+            + '<li>Operativ: TUR-P, HoLEP, Aquablation, einfache Prostatektomie.</li>'
+            + '</ul>'
+            + '<p><strong>Prostatakarzinom-Screening</strong>: PSA + DRU. PSA-Test ist Kassenleistung erst bei Verdacht; im IGeL-Bereich ab 45 J. Diskussion. Aufklärung über Überdiagnose-Risiko (quartäre Prävention!): Anteil indolenter Tumoren hoch. Bei Verdacht: mpMRT + ggf. MRT-fusionierte Biopsie. Risikoadaptierte Therapie: Active Surveillance bei niedrig-Risiko, OP/Strahlentherapie bei intermediär/hoch.</p>'
+
+            + '<h4>2.6.6 Hodentorsion vs. Epididymitis</h4>'
+            + '<p>Hodentorsion ist Notfall — Rettungsfenster &lt; 6 h. Klassisch: junger Mann, akut einsetzender heftiger Hodenschmerz, hochstehender, querliegender Hoden, Cremaster-Reflex ↓, kein Fieber. Diagnose: <em>klinisch + Doppler-Sonographie</em> (Perfusion ↓). Therapie: <strong>sofortige operative Exploration und Detorquierung mit Orchidopexie</strong>; bei Zweifel manuelle Detorsion in OP-Bereitschaft.</p>'
+            + '<p>Epididymitis: schleichend, Fieber, Pyurie/Bakteriurie, Prehn-Zeichen positiv (Schmerz bessert sich beim Hochlagern). Therapie: bei jungen Männern STI-Erreger (Chlamydien, Gonokokken) — Ceftriaxon 1 g i. m. + Doxycyclin 2 × 100 mg/d 10 d; bei älteren Männern E. coli — Fluorchinolon-Alternative (BfArM 2019), z. B. Cotrimoxazol oder Cephalosporin nach Antibiogramm.</p>'
+
+            + '<p class="quellen"><em>Quellen:</em> KDIGO AKI 2012, KDIGO CKD 2024 Update; EAU Guidelines on Urolithiasis 2024; EAU Prostate Cancer 2024; AWMF S3 Prostatakarzinom 043-022OL; FIDELIO-DKD/FIGARO-DKD; DAPA-CKD; EMPA-KIDNEY; AWMF S1 Hodentorsion 006-023.</p>'
+    };
+
+    const PAGE_NEURO_PSYCH = {
+        title: '2.7 Neurologie und Psychiatrie',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie können (1) ischämischen vs. hämorrhagischen Apoplex differenzieren und Lyse-/Thrombektomie-Fenster anwenden, (2) Parkinson-Krankheit nach MDS-Kriterien diagnostizieren und stadiengerecht behandeln, (3) Status epilepticus algorithmisch versorgen, (4) PHQ-9-basiertes Depressions-Screening und SSRI-Erstlinie korrekt einsetzen, (5) Alkoholentzug nach CIWA-Ar führen, (6) Schwindel-DD klinisch trennen.</blockquote>'
+
+            + '<h4>2.7.1 Schlaganfall (DGN-Leitlinie 2022/2024)</h4>'
+            + '<p>Akutsymptome BE-FAST: <em>Balance, Eyes, Face, Arm, Speech, Time</em>. Notarzt 112; Stroke-Unit. Initial: Glukose, EKG, NIHSS, CCT/CT-Angio + Perfusion oder MRT. Differenzierung:</p>'
+            + '<ul>'
+            + '<li><strong>Ischämischer Apoplex</strong> (~ 85 %): Thrombolyse mit <strong>Alteplase</strong> oder <strong>Tenecteplase</strong> bis 4,5 h nach Symptombeginn (selektiv bis 9 h bei DWI/FLAIR-Mismatch). Mechanische Thrombektomie bei großem Gefäßverschluss bis 6 h, im erweiterten Fenster bis 24 h nach DAWN-/DEFUSE-3-Kriterien (Mismatch).</li>'
+            + '<li><strong>Hämorrhagischer Apoplex</strong> (~ 15 %): RR-Senkung sys &lt; 140 mmHg innerhalb 1 h; Antikoagulation antagonisieren (PPSB für VKA, Idarucizumab für Dabigatran, Andexanet für F-Xa-Hemmer); neurochirurgische Konsultation bei großem Hämatom oder Liquorabflussstörung.</li>'
+            + '</ul>'
+            + '<p>Sekundärprävention: <strong>ASS</strong> 100 mg/d (oder Clopidogrel 75 mg, DAPT für 21 d nach minorem Stroke/TIA: CHANCE/POINT); Statin hochintensiv; RR &lt; 130/80; Karotis-OP/CAS bei Stenose ≥ 70 % symptomatisch; bei AF: DOAK ab Tag 4–14 (je nach Infarktgröße).</p>'
+            + '<p><strong>TIA</strong>: ABCD²-Score schätzt Schlaganfall-Risiko in 48 h (≥ 4: Hochrisiko, sofortige stationäre Abklärung).</p>'
+
+            + '<h4>2.7.2 Morbus Parkinson</h4>'
+            + '<p>Diagnose nach <strong>MDS-Kriterien 2015</strong>: Bradykinesie + (Rigor oder Ruhetremor 4–6 Hz). Stützkriterien: einseitiger Beginn, L-Dopa-Ansprechen, olfaktorische Defizite. Bildgebung MRT zum Ausschluss atypischer Parkinson-Syndrome (PSP, MSA, CBD); DAT-SPECT bei Unsicherheit.</p>'
+            + '<p>Therapie altersabhängig:</p>'
+            + '<ul>'
+            + '<li><strong>L-Dopa</strong> + Decarboxylasehemmer (Carbidopa, Benserazid) — Goldstandard, bei Älteren Erstlinie (DGN-Leitlinie 2023).</li>'
+            + '<li>Dopaminagonisten (Pramipexol, Ropinirol, Rotigotin-Pflaster) — bei Jüngeren initial; Cave: Impulskontrollstörungen.</li>'
+            + '<li>MAO-B-Hemmer (Rasagilin, Selegilin) — symptomatisch; serotonerge Interaktionen.</li>'
+            + '<li>COMT-Hemmer (Entacapon, Opicapon) — Wirkungs-fluctuationen reduzieren.</li>'
+            + '<li>Tiefe Hirnstimulation (DBS): bei jüngeren Patienten mit motorischen Fluktuationen und gutem L-Dopa-Ansprechen.</li>'
+            + '</ul>'
+
+            + '<h4>2.7.3 Epilepsie und Status epilepticus</h4>'
+            + '<p>Status epilepticus: anhaltender Anfall &gt; 5 min oder mehrere Anfälle ohne Erholung dazwischen. Stufentherapie:</p>'
+            + '<ol>'
+            + '<li><strong>Stufe 1 (0–10 min):</strong> Lorazepam 0,1 mg/kg i. v. (max. 4 mg, ggf. wiederholen), alternativ Midazolam i. m./bukkal/nasal.</li>'
+            + '<li><strong>Stufe 2 (10–30 min):</strong> Levetiracetam 60 mg/kg i. v. (max. 4,5 g) oder Valproat 40 mg/kg oder Phenytoin/Fosphenytoin 20 mg/kg.</li>'
+            + '<li><strong>Stufe 3 (refraktär):</strong> Intubation + Propofol oder Midazolam-Dauerinfusion auf Intensivstation.</li>'
+            + '</ol>'
+            + '<p>Erstlinien-Antikonvulsiva nach Anfallstyp: fokal — Lamotrigin, Levetiracetam; generalisiert tonisch-klonisch — Lamotrigin, Valproat (nicht bei gebärfähigen Frauen ohne Schwangerschaftsverhütung wegen teratogenen Risikos), Levetiracetam; Absencen — Ethosuximid, Valproat.</p>'
+
+            + '<h4>2.7.4 Schwindel — DD-Algorithmus</h4>'
+            + '<table><thead><tr><th>Typ</th><th>Klinik</th><th>Therapie</th></tr></thead><tbody>'
+            + '<tr><td>Benigner paroxysmaler Lagerungsschwindel (BPLS)</td><td>Sekunden, lageabhängig, Dix-Hallpike positiv</td><td>Epley-Manöver</td></tr>'
+            + '<tr><td>Vestibulärer Neuritis</td><td>Tage, Drehschwindel, einseitiger Spontannystagmus, kein Hörverlust</td><td>Glucocorticoide (Methylprednisolon)</td></tr>'
+            + '<tr><td>M. Menière</td><td>Stunden, Tinnitus + Hörminderung + Drehschwindel-Trias</td><td>Salzrestriktion, Betahistin, im Verlauf Gentamicin intratympanal</td></tr>'
+            + '<tr><td>Zentraler Schwindel (Hirnstamm/Kleinhirn)</td><td>Begleitsymptome (Doppelbild, Dysarthrie, Ataxie); HINTS-Test "central"</td><td>Akut-Schlaganfall-Pfad</td></tr>'
+            + '<tr><td>Vestibuläre Migräne</td><td>Stunden bis Tage, Migränesymptome, oft Anamnese</td><td>Migräne-Prophylaxe</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>2.7.5 Depression (S3 NVL Unipolare Depression 2022)</h4>'
+            + '<p>Screening 2-Fragen-Test: in den letzten 2 Wochen häufig niedergeschlagen / Freudlosigkeit? Bestätigung mit <strong>PHQ-9</strong>. Suizidalität aktiv erfragen — kein Suizidrisiko-Anstieg durch direkte Frage.</p>'
+            + '<p>Therapie nach Schweregrad:</p>'
+            + '<ul>'
+            + '<li><strong>Leicht</strong>: Aktives Abwarten 14 Tage, niedrigschwellige Psychotherapie, Bewegung.</li>'
+            + '<li><strong>Mittelschwer</strong>: Psychotherapie ODER Pharmakotherapie.</li>'
+            + '<li><strong>Schwer</strong>: Kombination Psychotherapie + Pharmakotherapie.</li>'
+            + '</ul>'
+            + '<p>Pharmaka-Erstlinie: <strong>SSRI</strong> (Sertralin, Citalopram/Escitalopram — QT-Zeit beachten); Alternativen Mirtazapin (Schlaf, Appetit), Venlafaxin/Duloxetin (SNRI), Bupropion. TZA (Amitriptylin) <em>nicht</em> Erstlinie (anticholinerg, kardiotoxisch). Wirkungseintritt 2–4 Wochen, Erhaltungstherapie nach Erstmanifestation 6–12 Mo., bei Rezidiv ≥ 2 Jahre.</p>'
+            + '<p>Refraktär: Augmentation mit Lithium, Quetiapin, T3; Esketamin nasal; <strong>EKT</strong> (Elektrokrampftherapie) als sehr effektive Option bei schwerer therapierefraktärer Depression.</p>'
+
+            + '<h4>2.7.6 Alkoholabhängigkeit und Entzug</h4>'
+            + '<p>Screening: <strong>AUDIT-C</strong> (3 Fragen, Cut-off ♂ ≥ 5, ♀ ≥ 4) oder CAGE. Diagnose-Kriterien (ICD-10 F10.2): &gt; 3 von 6 Kriterien (Toleranz, Entzug, Kontrollverlust, etc.) über 12 Mo.</p>'
+            + '<p><strong>Alkoholentzug</strong>: Symptom-getriggert mit <strong>CIWA-Ar-Score</strong>; ab Score &gt; 8 medikamentös. Erstlinie Benzodiazepine (Diazepam, Lorazepam — Lorazepam bevorzugt bei Leberschaden) + Thiamin 100 mg i. v. <em>vor</em> Glukose (Wernicke-Prophylaxe!) + Magnesium-/Kalium-Substitution. Cave: Delirium tremens — vegetative Entgleisung, Mortalität bis 5 % unbehandelt.</p>'
+            + '<p>Rückfallprophylaxe medikamentös: Acamprosat (NMDA-Modulation), Naltrexon (μ-Opioidrezeptor-Antagonist), Nalmefen (bei Reduktionsstrategie). Disulfiram nur bei strenger Indikation (Aversionstherapie).</p>'
+
+            + '<h4>2.7.7 Polyneuropathie-DD</h4>'
+            + '<p>Distal-symmetrisch: Diabetes (häufigster Grund in DE), Alkohol, Vit B12, Urämie, Hypothyreose, Medikamenten-induziert (Cisplatin, Vincristin, Isoniazid, Amiodaron). Asymmetrisch / Mononeuritis multiplex: Vaskulitiden (PAN, EGPA), Diabetes-mononeuropathie, Borreliose. Diagnostik: Labor (HbA1c, B12, TSH, BB, Krea, Eiweißelektrophorese), Elektroneurographie (axonal vs. demyelinisierend), ggf. Liquor (CIDP, GBS).</p>'
+
+            + '<p class="quellen"><em>Quellen:</em> DGN S2k Akuttherapie ischämischer Schlaganfall 030-046 (2022/2024); DGN S3 Parkinson 030-010 (2023); DGN S2k Status epilepticus 030-079 (2020); NVL Unipolare Depression 2022 (3. Aufl.); AWMF S3 Alkoholbezogene Störungen 076-001 (2021).</p>'
+    };
+
+    const PAGE_HAEMA_RHEUMA_DERMA = {
+        title: '2.8 Hämatologie, Rheumatologie und Dermatologie',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie können (1) Anämien anhand MCV mikro-/normo-/makrozytär trennen und Eisen-, B12-, Folat-Mangel diagnostizieren, (2) RA nach ACR/EULAR 2010 klassifizieren und MTX-Therapie einsetzen, (3) Polymyalgia rheumatica und Riesenzellarteriitis trennen und steroidpflichtig therapieren, (4) Melanom nach ABCDE-Regel screenen, BCC/SCC differenzieren, (5) Erysipel von tiefer Phlegmone abgrenzen.</blockquote>'
+
+            + '<h4>2.8.1 Anämie-Diagnostik nach MCV</h4>'
+            + '<table><thead><tr><th>MCV</th><th>Typische Ursache</th><th>Schlüssellabor</th></tr></thead><tbody>'
+            + '<tr><td>&lt; 80 fl mikrozytär</td><td>Eisenmangel (häufigster Grund); Thalassämie; chronische Erkrankung (ACD); Sideroblastenanämie</td><td>Ferritin ↓ (&lt; 30 ng/ml); Transferrin ↑, TfS &lt; 20 %; bei ACD Ferritin n/↑, Transferrin ↓</td></tr>'
+            + '<tr><td>80–100 fl normozytär</td><td>akute Blutung; Hämolyse; Niereninsuffizienz (EPO ↓); Knochenmarksinsuffizienz</td><td>Retikulozyten, LDH, Haptoglobin, Coombs, Krea</td></tr>'
+            + '<tr><td>&gt; 100 fl makrozytär</td><td>Vit B12-/Folat-Mangel; Alkohol; Hypothyreose; Medikamente (MTX, Hydroxyurea); MDS</td><td>B12, Holo-TC, Folat, TSH; Knochenmark bei MDS-Verdacht</td></tr>'
+            + '</tbody></table>'
+            + '<p><strong>Eisenmangel</strong>: Therapie oral Fe²⁺ 50–100 mg/d (Eisensulfat/-glycinat) jeden zweiten Tag — bessere Resorption als tägliche Hochdosis (Hepcidin-Effekt, Stoffwechsel-Studien Moretti 2015). Kontrolle Retis nach 2 Wo., Hb nach 4 Wo., Ferritin nach 3 Mo. Bei Unverträglichkeit, Malabsorption, schwerem Mangel oder CKD: i. v.-Eisen (Eisencarboxymaltose, Eisenisomaltosid).</p>'
+            + '<p><strong>Vit-B12-Mangel</strong>: Ursachen — perniziöse Anämie (Anti-IF, Anti-PZ-AK), atrophische Gastritis, terminale Ileumresektion, M. Crohn, Veganer, PPI/Metformin-Langzeit. Klinik: makrozytäre Anämie, funikuläre Myelose (Hinterstrang-Symptome, Parästhesien, Ataxie), Glossitis. Therapie initial 1000 µg i. m./Wo. für 1 Wo., dann monatlich; oral 1000 µg/d ist auch bei perniziöser Anämie wirksam (1 % passiv resorbiert).</p>'
+
+            + '<h4>2.8.2 Rheumatoide Arthritis</h4>'
+            + '<p>ACR/EULAR-2010-Score (Gelenkbefall, Serologie [RF, ACPA], Akutphase, Dauer ≥ 6 Wochen) — ≥ 6 / 10 = RA. ACPA hochspezifisch &gt; 95 %. Klinik: symmetrische Polyarthritis MCP/PIP, Morgensteifigkeit &gt; 60 min, später Erosionen.</p>'
+            + '<p><strong>Treat-to-Target</strong>-Prinzip (EULAR 2023): Remission oder niedrige Krankheitsaktivität (DAS28 &lt; 2,6 / 3,2). Erstlinie konventionelle DMARDs:</p>'
+            + '<ul>'
+            + '<li><strong>Methotrexat</strong> 15–25 mg/Woche s. c./p. o. + Folsäure 5 mg/Woche 24 h später. Cave: Hepatotoxizität, Pneumonitis, Knochenmarksuppression. KI: Schwangerschaft, schwere Niereninsuffizienz.</li>'
+            + '<li>Bei Unverträglichkeit Leflunomid, Sulfasalazin, Hydroxychloroquin (HCQ).</li>'
+            + '</ul>'
+            + '<p>Bei unzureichendem Ansprechen nach 3–6 Mo.: Biologika (TNF-Inhibitoren, IL-6 Tocilizumab, Abatacept, Rituximab) oder JAK-Inhibitoren (Tofacitinib, Baricitinib, Upadacitinib — Cave kardiovaskuläres und Malignom-Signal nach ORAL-Surveillance, vorsichtige Patientenauswahl).</p>'
+            + '<p>Akutschub-Begleitung: Glucocorticoid niedrig dosiert kurzfristig; NSAR symptomatisch.</p>'
+
+            + '<h4>2.8.3 Polymyalgia rheumatica und Riesenzellarteriitis (Arteriitis temporalis)</h4>'
+            + '<p><strong>PMR</strong>: bilateraler Schulter-/Beckengürtelschmerz, Morgensteifigkeit &gt; 45 min, Alter &gt; 50 J., BSG &gt; 40 mm/h, CRP ↑. Therapie: Prednisolon 12,5–25 mg/d, langsames Tapern über 1–2 Jahre.</p>'
+            + '<p><strong>RZA</strong> (GCA): neue Kopfschmerzen schläfennah, Druckdolenz A. temporalis, Kieferclaudicatio, Visusstörung (drohender Visusverlust!), polymyalgieformer Begleitsymptomatik in 40–50 %. Diagnose: BSG/CRP ↑↑, Sonographie A. temp./Achsel (Halo-Zeichen), MRT/MR-Angio, ggf. Biopsie A. temporalis (Goldstandard, falsch-negativ möglich).</p>'
+            + '<p>Therapie <em>sofort</em> bei Verdacht: <strong>Prednisolon 1 mg/kg/d</strong> (mind. 60 mg, bei Visusbedrohung 500–1000 mg i. v. für 3 d), nicht auf Biopsie warten. Tapern langsam über 1–2 Jahre; Tocilizumab (IL-6) als steroidsparende Erstlinie zugelassen.</p>'
+
+            + '<h4>2.8.4 Hautkrebs-Screening und Diagnostik</h4>'
+            + '<p><strong>Melanom (ABCDE-Regel)</strong>:</p>'
+            + '<ul>'
+            + '<li><strong>A</strong>symmetrie</li>'
+            + '<li><strong>B</strong>egrenzung unregelmäßig</li>'
+            + '<li><strong>C</strong>olor (mehrfarbig)</li>'
+            + '<li><strong>D</strong>urchmesser &gt; 5–6 mm</li>'
+            + '<li><strong>E</strong>volution (Veränderung über Wochen/Monate)</li>'
+            + '</ul>'
+            + '<p>Tumordicke nach Breslow (vertikale Tumordicke in mm) bestimmt Prognose und Sicherheitsabstand bei Exzision (1 cm bis 2 mm Tumordicke; 2 cm bei dickeren Tumoren). Sentinel-Lymphknoten ab Tumordicke ≥ 1,0 mm (oder &gt; 0,8 mm mit Risikofaktoren). Adjuvant ab Stadium III: Anti-PD1 (Nivolumab, Pembrolizumab) oder BRAF/MEK-Hemmer (bei BRAF-V600-Mutation).</p>'
+            + '<p><strong>Basalzellkarzinom (BCC)</strong>: häufigster Hauttumor, langsam wachsend, lokal destruktiv, kaum metastasiert. Klassisch: perlmuttartiger Tumor mit Teleangiektasien, zentrale Ulzeration (Ulcus rodens). Therapie: Exzision, alternativ topisch Imiquimod/5-FU bei superfizieller Form.</p>'
+            + '<p><strong>Plattenepithelkarzinom (SCC)</strong>: Vorstufe aktinische Keratose; Risiko: chronischer UV-Schaden, Immunsuppression. Metastasierung möglich (~ 5 %). Therapie: Exzision; bei Vorstufen Kryotherapie / 5-FU / Imiquimod.</p>'
+
+            + '<h4>2.8.5 Erysipel und tiefe Weichteilinfektionen</h4>'
+            + '<p><strong>Erysipel</strong>: scharf begrenzte, flammend-rote, schmerzhafte Erythem auf Unterschenkel/Gesicht, Fieber. Erreger meist β-hämolysierende Streptokokken (Gruppe A). Therapie: <strong>Penicillin V/G</strong> 5–7 Tage; bei Penicillin-Allergie Clindamycin oder Cefuroxim.</p>'
+            + '<p>Differenzialdiagnose:</p>'
+            + '<ul>'
+            + '<li><strong>Phlegmone</strong>: unscharf begrenzt, tiefer (Subkutis), oft nach Trauma; Erregerspektrum erweitert (Strep + Staph). Antibiose Cefazolin/Flucloxacillin.</li>'
+            + '<li><strong>Nekrotisierende Fasziitis</strong>: rasche Progression, Schmerz disproportional zum Befund, Krepitation, Schock. Notfall — chirurgisches Débridement + Breitspektrumantibiose (Piperacillin/Tazobactam + Clindamycin gegen Toxinbildung) ± Vancomycin.</li>'
+            + '<li><strong>Stauungsdermatitis / Hypodermitis</strong>: chronische CVI, beidseitig, kein akutes Fieber — kein Antibiotikum nötig.</li>'
+            + '</ul>'
+            + '<p>Sekundärprävention rezidivierendes Erysipel: Lymphdrainage, Hautpflege, ggf. Penicillin-Dauerprophylaxe.</p>'
+
+            + '<p class="quellen"><em>Quellen:</em> DGHO Onkopedia Eisenmangel/B12 2024; ACR/EULAR Classification Criteria RA 2010; EULAR RA-Recommendations 2023; EULAR PMR/GCA 2023; AWMF S3 Melanom 032-024OL (2024); AWMF S2k Bakterielle Hautinfektionen 013-038; Moretti D et al. Blood 2015 (Eisen-Resorption).</p>'
+    };
+
+    const PAGE_PRAXIS_VERWALTUNG = {
+        title: '3.5 Hausärztliche Praxisführung und Verwaltung',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie können (1) AU-Bescheinigungen formal korrekt ausstellen (eAU seit 2023), (2) DMP-Programme indikationsgerecht einschreiben, (3) Heilmittel- und Hilfsmittelverordnungen rechtssicher ausfüllen, (4) Pflegegrade nach NBA-Modulen einordnen und Pflegeantrag begleiten, (5) Mutterschaftsvorsorge und U-Untersuchungen U1–U9 zuordnen, (6) Klimakterium-Beschwerden mit aktualisierter HRT-Empfehlung beraten.</blockquote>'
+
+            + '<h4>3.5.1 Arbeitsunfähigkeit (AU) — eAU seit 2023</h4>'
+            + '<p>Seit 01.01.2023 ist die elektronische AU (eAU) Pflicht für gesetzlich Versicherte. Übermittlung von Praxis-VS direkt an Krankenkasse; Patient bekommt nur noch Ausdruck für eigene Unterlagen. Ausstellung max. <strong>3 Tage rückwirkend</strong> (in Ausnahmefällen mehr; Bescheinigung mit Begründung). Erstbescheinigung bis zu 14 Tage; danach Folgebescheinigung. Bei AU &gt; 6 Wochen Gesamtdauer: Übergang in Krankengeld der GKV.</p>'
+            + '<p>Telefonische Krankschreibung: seit 12/2023 dauerhaft möglich für leichte Erkrankungen ohne objektive Befundung, max. 5 Tage, nur bei bekannten Patienten und ohne Verdacht auf schwere Erkrankung.</p>'
+
+            + '<h4>3.5.2 Disease-Management-Programme (DMP)</h4>'
+            + '<p>Strukturierte Behandlungsprogramme nach § 137f SGB V. Aktuell zugelassen für:</p>'
+            + '<ul>'
+            + '<li>Diabetes mellitus Typ 1 und Typ 2</li>'
+            + '<li>Koronare Herzkrankheit (KHK)</li>'
+            + '<li>Asthma bronchiale</li>'
+            + '<li>COPD</li>'
+            + '<li>Brustkrebs</li>'
+            + '<li>Chronische Herzinsuffizienz (DMP HI seit 2018)</li>'
+            + '<li>Osteoporose, Rückenschmerz, Depression (Roll-out 2023–2025)</li>'
+            + '</ul>'
+            + '<p>DMP-Vorteile: standardisierte Quartalsdokumentation, evidenzbasiertes Patient Empowerment, höhere Adhärenz. Vergütung über Pauschalen; Pflicht-Schulungen für Hausarzt-Team.</p>'
+
+            + '<h4>3.5.3 Heilmittel-Verordnung (Muster 13)</h4>'
+            + '<p>Heilmittel = nicht-ärztliche Therapieleistungen: Physiotherapie, Ergotherapie, Logopädie, Ernährungstherapie, Podologie. Verordnung nach <strong>Heilmittelkatalog</strong> mit Diagnosegruppe (z. B. WS2 Wirbelsäule chronisch, ZN1 ZNS bis 18 Mo. nach Akut-Ereignis).</p>'
+            + '<p>Seit 2021 (Heilmittel-Richtlinie-Reform): Erstverordnung 1–6 Einheiten, Folgeverordnungen flexibel; orientierende Behandlungsmenge je Diagnosegruppe; <em>besonderer Verordnungsbedarf</em> und <em>langfristiger Heilmittelbedarf</em> sind separat geregelt und budgetneutral.</p>'
+
+            + '<h4>3.5.4 Hilfsmittel-Verordnung (Muster 16, GKV-Hilfsmittelverzeichnis)</h4>'
+            + '<p>Hilfsmittel = sächliche Mittel zur Sicherung des Behandlungserfolgs, Vorbeugung von Behinderung oder Ausgleich einer Behinderung (§ 33 SGB V). Beispiele: Gehhilfen, Rollator, Hörgeräte, Inkontinenzhilfen, Sehhilfen (eingeschränkt), Kompressionsstrümpfe, Insulinpumpen, CPAP. Verordnung mit 7-stelliger Hilfsmittel-Positionsnummer; Festbeträge der GKV.</p>'
+
+            + '<h4>3.5.5 Häusliche Krankenpflege (Muster 12)</h4>'
+            + '<p>Verordnung nach § 37 SGB V: Behandlungspflege (Medikamentengabe, Verbandwechsel, Injektionen) und/oder Grundpflege (zeitlich begrenzt nach KH-Entlassung). Maximal 4 Wochen ohne Anschluss-Verordnung; Verlängerung nach Begründung möglich. Abgrenzung zur Pflegeversicherung (s. 3.5.6) — SGB-V-HKP ist <em>nicht</em> Pflege im Sinne der Pflegeversicherung.</p>'
+
+            + '<h4>3.5.6 Pflegegrade und NBA</h4>'
+            + '<p>Seit 2017 fünf Pflegegrade nach <strong>NBA</strong> (Neues Begutachtungsassessment) auf Basis von 6 Modulen mit Gewichtung:</p>'
+            + '<ol>'
+            + '<li>Mobilität (10 %)</li>'
+            + '<li>Kognitive und kommunikative Fähigkeiten (15 % gemeinsam mit 3)</li>'
+            + '<li>Verhaltensweisen und psychische Problemlagen (15 % gemeinsam mit 2 — höherer Wert zählt)</li>'
+            + '<li>Selbstversorgung (40 %)</li>'
+            + '<li>Bewältigung von krankheits-/therapiebedingten Anforderungen (20 %)</li>'
+            + '<li>Gestaltung des Alltagslebens und sozialer Kontakte (15 %)</li>'
+            + '</ol>'
+            + '<p>Punkteschwellen (gewichtet): <strong>PG 1</strong> 12,5–&lt; 27 (geringe Beeinträchtigung); <strong>PG 2</strong> 27–&lt; 47,5; <strong>PG 3</strong> 47,5–&lt; 70; <strong>PG 4</strong> 70–&lt; 90; <strong>PG 5</strong> ≥ 90 (schwerste Beeinträchtigung mit besonderen Anforderungen).</p>'
+            + '<p>Antrag bei Pflegekasse → MD-Begutachtung. Hausarzt-Rolle: ärztliche Stellungnahme, klinische Befund-Zusammenfassung, häufig auch Erstantrags-Trigger. Pflegeumlage-Beträge 2024: PG 2 ambulant 332 €/Mo. Geld bzw. 761 € Sachleistung; PG 5 ambulant 947 €/Mo. Geld bzw. 2200 € Sachleistung; stationär PG 5 2005 €/Mo. (vereinfacht).</p>'
+
+            + '<h4>3.5.7 Mutterschaftsvorsorge (Mutterpass)</h4>'
+            + '<p>Mutterschaftsrichtlinien G-BA: Untersuchungen alle 4 Wochen, ab 32. SSW alle 2 Wochen. Standard-Labor: Blutgruppe, Rh, AK-Suchtest, Lues, Röteln, HBs-Ag (32. SSW), HIV-Beratung, ggf. Toxoplasmose. <strong>Drei Standard-Sonographien</strong> (10., 20., 30. SSW; auf Wunsch der Schwangeren ggf. nur eine US-Untersuchung gemäß Reform 2021).</p>'
+            + '<p>Pertussis-Tdap-Impfung im 3. Trimenon (s. 3.2.3); Influenza ab 2. Trimenon, RSV-Säuglingsschutz seit 2024 (Nirsevimab beim Neugeborenen).</p>'
+
+            + '<h4>3.5.8 Vorsorgen U1–U9 und J1</h4>'
+            + '<table><thead><tr><th>Untersuchung</th><th>Zeitpunkt</th><th>Schwerpunkt</th></tr></thead><tbody>'
+            + '<tr><td>U1</td><td>direkt nach Geburt</td><td>APGAR, Reifezeichen</td></tr>'
+            + '<tr><td>U2</td><td>3.–10. LT</td><td>Hüft-Sono, Stoffwechsel-Screening, Hör-Screening</td></tr>'
+            + '<tr><td>U3</td><td>4.–5. LWo.</td><td>Hüft-Sono, Trinkverhalten, Vit K</td></tr>'
+            + '<tr><td>U4</td><td>3.–4. LMo.</td><td>Impfungen 6-fach + Pneumokokken + Rotavirus</td></tr>'
+            + '<tr><td>U5</td><td>6.–7. LMo.</td><td>Motorik, Hör-/Sehscreening</td></tr>'
+            + '<tr><td>U6</td><td>10.–12. LMo.</td><td>Sprachentwicklung, MMR-Impfung</td></tr>'
+            + '<tr><td>U7</td><td>21.–24. LMo.</td><td>Sprachverständnis, Sozialkontakt</td></tr>'
+            + '<tr><td>U7a</td><td>34.–36. LMo.</td><td>frühe Sprach-/Verhaltensstörung</td></tr>'
+            + '<tr><td>U8</td><td>46.–48. LMo.</td><td>Schulreife-Aspekte, Sehtest</td></tr>'
+            + '<tr><td>U9</td><td>60.–64. LMo.</td><td>Einschulungsuntersuchung Vorbereitung</td></tr>'
+            + '<tr><td>J1</td><td>12.–14. LJ.</td><td>Pubertät, Impfstatus, HPV, Sucht/Soziales</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>3.5.9 Klimakterium und HRT</h4>'
+            + '<p>Wechseljahresbeschwerden (vasomotorisch, urogenital, Stimmung, Schlaf): bei moderater bis schwerer Symptomatik <strong>HRT</strong> erwägen. Aktuelle Evidenzlage (NAMS 2022 Position Statement, ESHRE/EMAS 2024):</p>'
+            + '<ul>'
+            + '<li>Bei nicht-hysterektomierten Frauen kombinierte Östrogen-Gestagen-Therapie (Schutz vor Endometriumkarzinom).</li>'
+            + '<li>Transdermale Östrogene (Pflaster, Gel) gegenüber oral bevorzugt: niedrigeres VTE- und Apoplex-Risiko.</li>'
+            + '<li>Zeitfenster: Beginn idealerweise &lt; 60 J. oder &lt; 10 J. nach Menopause (Timing-Hypothese, WHI-Reanalyse).</li>'
+            + '<li>Dauer: individualisiert; jährliche Re-Evaluation; Symptomatik und Risiken (Mammakarzinom, VTE, KHK) abwägen.</li>'
+            + '<li>Lokale Östrogen-Therapie (Vaginalcreme, -ring) bei urogenitaler Atrophie ohne systemisches Risiko.</li>'
+            + '<li>Nicht-hormonelle Alternativen für Hitzewallungen: SSRI (Paroxetin niedrig dosiert ist in den USA zugelassen), Gabapentin, Fezolinetant (Neurokinin-3-Antagonist, EU-Zulassung 2023).</li>'
+            + '</ul>'
+
+            + '<h4>3.5.10 Hausbesuch und Notfall in der Praxis</h4>'
+            + '<p>Hausbesuch indiziert bei Immobilität, Pflegebedürftigkeit, Sterbephase. Standard-Hausbesuchstasche: Otoskop, Pulsoxymeter, BZ-Messgerät, EKG-Mobilgerät optional, Notfall-Medikamente (Adrenalin, Glukose, Furosemid, Morphin, Midazolam s. c.). Zentrale Praxisnotfall-Algorithmen sind regelmäßig zu üben (Reanimation, Anaphylaxie, Hypoglykämie, Insult-Verdacht — s. 3.4).</p>'
+
+            + '<p class="quellen"><em>Quellen:</em> SGB V §§ 33, 37, 92, 137f; Heilmittel-Richtlinie G-BA 2021; Mutterschaftsrichtlinien G-BA 2021; SGB XI Pflegeversicherung; Pflege-Begutachtungs-Richtlinien BMG 2024; NAMS Position Statement 2022; EMAS/IMS Klimakterium-Empfehlungen 2024; KBV-Praxisinfos eAU 2023; G-BA U-Untersuchungen.</p>'
+    };
+
     // =========================================================================
     // QUIZ-POOL
     // =========================================================================
@@ -1794,21 +2177,21 @@
                 id: 'vorklinik_m1',
                 title: 'Kapitel 1 — Vorklinik (M1): Basiswissen des Lebens',
                 summary: 'Wissenschaftliche Prinzipien der Allgemeinmedizin, Anatomie mit klinischem Bezug (Recurrens, vegetatives NS, LWS-Radikulopathien), Physiologie und Biochemie (Bohr-Effekt, 2,3-BPG, Glykolyse, Purinabbau, CYP-System) sowie pharmakologische Grundlagen (LADME, t₁/₂, therapeutischer Index, Pharmakogenetik CYP2D6/CYP2C9/VKORC1/TPMT/DPYD, Dosis-Anpassung bei Niereninsuffizienz).',
-                pages: [PAGE_PRINZIPIEN, PAGE_ANATOMIE, PAGE_PHYSIO_BIOCHEM, PAGE_PHARMAKO_GRUNDLAGEN],
+                pages: [PAGE_PRINZIPIEN, PAGE_ANATOMIE, PAGE_PHYSIO_BIOCHEM, PAGE_PHARMAKO_GRUNDLAGEN, PAGE_SAEURE_NIERE],
                 quiz: QUIZ_M1
             },
             {
                 id: 'klinik_m2',
                 title: 'Kapitel 2 — Klinik (M2): Pathophysiologie und Therapie',
                 summary: 'Kardiologie (HFrEF Fantastic Four, ACS, Vorhofflimmern mit CHA₂DS₂-VASc), Pneumologie (GINA 2024, GOLD 2024, CRB-65), Pharmakologie (DOAK-Interaktionen, Antibiotic Stewardship), Lyme-Borreliose nach AWMF 013-080 sowie Endokrinologie & Hypertonie (NVL Diabetes 2023, ESH 2023/ESC 2024 RR-Ziele, Schilddrüse Hashimoto/Basedow, Cushing/Addison).',
-                pages: [PAGE_KARDIO, PAGE_PNEUMO, PAGE_PHARMA_INFEKT, PAGE_ENDOKRIN_HTN],
+                pages: [PAGE_KARDIO, PAGE_PNEUMO, PAGE_PHARMA_INFEKT, PAGE_ENDOKRIN_HTN, PAGE_GASTRO_HEPATO, PAGE_NEPHRO_URO, PAGE_NEURO_PSYCH, PAGE_HAEMA_RHEUMA_DERMA],
                 quiz: QUIZ_M2
             },
             {
                 id: 'pj_facharzt',
                 title: 'Kapitel 3 — PJ und Facharzt Allgemeinmedizin',
                 summary: 'Multimorbidität und Polypharmazie (PRISCUS 2.0, STOPP/START V3, FORTA), Prävention (Check-up 35, Screening-Programme, STIKO 2024 inkl. RSV-Empfehlung), Geriatrie (Frailty nach Fried, Demenz-Screening), Palliativmedizin (AAPV/SAPV), juristische Grundlagen (BGB § 1827) sowie Notfallmedizin und Schmerztherapie (ABCDE, Anaphylaxie, Hypoglykämie, hypertensiver Notfall, WHO-Stufenschema, Opioid-Rotation, BLS/ALS).',
-                pages: [PAGE_POLYPHARMA, PAGE_PRAEVENTION, PAGE_RECHT_GERIATRIE, PAGE_NOTFALL_SCHMERZ],
+                pages: [PAGE_POLYPHARMA, PAGE_PRAEVENTION, PAGE_RECHT_GERIATRIE, PAGE_NOTFALL_SCHMERZ, PAGE_PRAXIS_VERWALTUNG],
                 quiz: QUIZ_FA
             }
         ]
