@@ -1603,7 +1603,35 @@
         q('Welche Aussage zur Verteilung von Arzneistoffen im Körper trifft zu?',
             ['Das Verteilungsvolumen V_d ist immer gleich dem Plasmavolumen.', 'V_d &gt; Gesamtkörperwasser bedeutet starke Gewebebindung (z. B. Amiodaron, Digoxin).', 'Stark plasmaeiweißgebundene Substanzen haben ein hohes V_d.', 'V_d ist unabhängig von Lipophilie.', 'V_d hat keinen Einfluss auf die Loading-Dose.'],
             1,
-            'V_d = Dosis / Plasmakonzentration. Substanzen mit starker Gewebebindung (Amiodaron V_d ≈ 60 l/kg, Digoxin V_d ≈ 7 l/kg) haben ein V_d weit über dem Gesamtkörperwasser. Stark plasmaeiweißgebundene Stoffe (z. B. Warfarin) haben dagegen ein niedriges V_d. Loading-Dose = V_d × Ziel-C, d. h. V_d bestimmt die Aufsättigung. (Aktories)')
+            'V_d = Dosis / Plasmakonzentration. Substanzen mit starker Gewebebindung (Amiodaron V_d ≈ 60 l/kg, Digoxin V_d ≈ 7 l/kg) haben ein V_d weit über dem Gesamtkörperwasser. Stark plasmaeiweißgebundene Stoffe (z. B. Warfarin) haben dagegen ein niedriges V_d. Loading-Dose = V_d × Ziel-C, d. h. V_d bestimmt die Aufsättigung. (Aktories)'),
+        q('Eine 28-Jährige mit Diabetes Typ 1 hat pH 7,18, pCO₂ 22 mmHg, HCO₃⁻ 8 mmol/l, Na 140, Cl 100. Wie ist die Säure-Basen-Lage zu klassifizieren?',
+            ['Reine respiratorische Alkalose', 'Metabolische Alkalose mit respiratorischer Kompensation', 'Metabolische Azidose mit hoher Anionenlücke und adäquater respiratorischer Kompensation', 'Metabolische Azidose mit normaler Anionenlücke', 'Gemischte respiratorisch-metabolische Azidose'],
+            2,
+            'pH ↓, HCO₃⁻ ↓, pCO₂ ↓ → metabolische Azidose mit respiratorischer Kompensation. Anionenlücke = 140 − (100 + 8) = 32 mmol/l (deutlich erhöht). Winters-Erwartung: pCO₂ = 1,5 · 8 + 8 ± 2 = 18–22 mmHg → adäquat kompensiert. Klinisch passend zur diabetischen Ketoazidose.'),
+        q('Eine 75-jährige Patientin (Krea 1,3 mg/dl) hat bei Albuminurie 200 mg/g Krea einen eGFR (CKD-EPI 2021) von 48 ml/min/1,73 m². Welche KDIGO-Stadien-Einordnung ist korrekt?',
+            ['G2 A1', 'G3a A2', 'G3b A2', 'G3a A3', 'G4 A2'],
+            1,
+            'eGFR 48 → G3a (45–59); Albuminurie 30–300 mg/g → A2. KDIGO 2024 verwendet die CKD-EPI-2021-Formel ohne Race-Faktor. G3a A2 bedeutet erhöhtes Progressions- und kardiovaskuläres Risiko — Indikation für ACE/ARB plus SGLT2-Hemmer.'),
+        q('Welcher Wirkmechanismus trifft auf Spironolacton zu?',
+            ['Hemmung des Na⁺/K⁺/2Cl⁻-Cotransporters im aufsteigenden Henle-Schenkel', 'Antagonisierung des Mineralocorticoid-Rezeptors im Sammelrohr', 'Blockade des NCC-Cotransporters im distalen Tubulus', 'Hemmung der Carboanhydrase im proximalen Tubulus', 'Direkte ENaC-Blockade im Sammelrohr'],
+            1,
+            'Spironolacton ist steroidaler MR-Antagonist im Sammelrohr → ENaC ↓, K⁺-Sekretion ↓ → kaliumsparendes Diuretikum. Schleifendiuretika hemmen NKCC2; Thiazide hemmen NCC; Acetazolamid hemmt CA; Amilorid blockiert ENaC direkt. Spironolacton hat zusätzlich anti-androgene Wirkung (Gynäkomastie); Eplerenon ist selektiver.'),
+        q('Bei welcher Konstellation findet sich typischerweise eine metabolische Azidose mit normaler Anionenlücke?',
+            ['Diabetische Ketoazidose', 'Laktatazidose im septischen Schock', 'Salicylat-Intoxikation', 'Schwere Diarrhoe mit Bicarbonat-Verlust', 'Methanol-Intoxikation'],
+            3,
+            'Schwere Diarrhoe verursacht hyperchlorämische metabolische Azidose mit normaler Anionenlücke (HCO₃⁻-Verlust enteral, Cl⁻-Reabsorption ↑). Die anderen Optionen sind klassische Ursachen einer Azidose mit hoher Anionenlücke (MUDPILES). Weitere Ursachen mit normaler AG: renal-tubuläre Azidose, Acetazolamid.'),
+        q('Welche Konstellation ist bei einem 70-Jährigen mit HFrEF und CKD G3b zu vermeiden?',
+            ['Gleichzeitige Gabe von ACE-Hemmer und ARNI (Sacubitril/Valsartan) wegen additivem Bradykinin-Effekt und Angioödem-Risiko', 'Spironolacton bei eGFR 35 ml/min mit engem Kalium-Monitoring', 'Sacubitril/Valsartan bei HFrEF NYHA II', 'ACE-Hemmer bei nicht-diabetischer CKD', 'Niedrig dosiertes Spironolacton bei NYHA III HFrEF'],
+            0,
+            'ACE-Hemmer und ARNI dürfen NICHT zeitgleich verabreicht werden — additive Bradykinin-Akkumulation mit Angioödem-Risiko. Vor Umstellung auf Sacubitril/Valsartan muss der ACE-Hemmer mind. 36 h pausiert werden (PARADIGM-HF-Protokoll). Spironolacton bei eGFR &lt; 30 nur sehr vorsichtig; bei eGFR 35 möglich.'),
+        q('Welche Aussage zur Therapie der hypotonen Hyponatriämie bei SIADH ist korrekt?',
+            ['Schnellstmöglicher Na⁺-Anstieg auf &gt; 140 mmol/l innerhalb von 24 h', 'Kochsalz isoton i. v. als Dauerinfusion ist Erstlinie', 'Flüssigkeitsrestriktion 800–1000 ml/d Erstlinie; bei akut symptomatischer Hyponatriämie hypertone NaCl 3 % Bolus, Anstieg max. 8–10 mmol/l/24 h', 'Akute Korrektur durch Schleifendiuretika', 'Vasopressin (DDAVP) zur Stabilisierung'],
+            2,
+            'SIADH-Therapie: Flüssigkeitsrestriktion ist Erstlinie; bei symptomatischer akuter Hyponatriämie (Krampfanfälle, Bewusstseinsstörung) hypertone NaCl 3 % als Bolus (100–150 ml). Korrekturlimit max. 8–10 mmol/l/24 h, sonst Risiko der zentralen pontinen Myelinolyse. Tolvaptan (V2-Antagonist) ist Reserveoption.'),
+        q('Welcher Mechanismus erklärt den nephroprotektiven Effekt der SGLT2-Hemmer (Empagliflozin, Dapagliflozin)?',
+            ['Direkte ACE-Inhibition', 'Hemmung des SGLT2 im proximalen Tubulus → Na⁺ erreicht in höherer Konzentration die Macula densa → tubuloglomeruläres Feedback aktiviert → afferente Vasokonstriktion → intraglomerulärer Druck ↓', 'Antagonisierung des AT1-Rezeptors', 'Hemmung der Aldosteronsynthase', 'Direkte Vasodilatation der efferenten Arteriole'],
+            1,
+            'SGLT2-Hemmer reduzieren proximal-tubuläre Na⁺-Reabsorption → Na⁺-Anstieg an der Macula densa → tubuloglomeruläres Feedback → afferente Vasokonstriktion → intraglomerulärer Druck ↓ → langfristig weniger Hyperfiltration und Albuminurie (DAPA-CKD, EMPA-KIDNEY). Effekt unabhängig von glykämischer Kontrolle, daher auch bei nicht-diabetischer CKD wirksam.')
     ];
 
     const QUIZ_M2 = [
@@ -1884,7 +1912,67 @@
         q('Welche Aussage zur Akuttherapie der dekompensierten HFrEF (akutes Lungenödem) trifft zu?',
             ['Hochdosis-Beta-Blocker i. v. zur RR-Senkung', 'Sauerstoff bei SpO₂ &lt; 90 %, Furosemid 20–40 mg i. v., Nitroglycerin bei RR sys &gt; 110, ggf. NIV; ACE-Hemmer / SGLT2i / MRA / BB — Dauertherapie nicht akut absetzen', 'Heparin Vollantikoagulation bei jedem Lungenödem', 'Lyse mit Alteplase ist 1. Wahl', 'Dobutamin ist 1. Wahl bei jedem Patienten'],
             1,
-            'Akute HFrEF-Dekompensation: Sauerstoff bei SpO₂ &lt; 90 %, Furosemid 20–40 mg i. v. (oder doppelte orale Tagesdosis), Nitrate bei adäquatem RR. NIV (CPAP) bei Lungenödem. Inotropika (Dobutamin) nur bei kardiogenem Schock / Hypotonie. Bestehende prognoseverbessernde Medikation (ARNI/ACE, BB, MRA, SGLT2i) möglichst nicht pausieren — nur kurzfristige Dosisreduktion bei Hypotonie. (ESC HF 2023)')
+            'Akute HFrEF-Dekompensation: Sauerstoff bei SpO₂ &lt; 90 %, Furosemid 20–40 mg i. v. (oder doppelte orale Tagesdosis), Nitrate bei adäquatem RR. NIV (CPAP) bei Lungenödem. Inotropika (Dobutamin) nur bei kardiogenem Schock / Hypotonie. Bestehende prognoseverbessernde Medikation (ARNI/ACE, BB, MRA, SGLT2i) möglichst nicht pausieren — nur kurzfristige Dosisreduktion bei Hypotonie. (ESC HF 2023)'),
+        q('Welche Therapie ist bei Erstinfektion mit Helicobacter pylori (DGVS-S2k 2022) Erstlinie in Deutschland?',
+            ['Amoxicillin + Clarithromycin + PPI für 7 Tage (Triple-Therapie)', 'Bismut-haltige Quadrupeltherapie (PPI + Bismut + Tetracyclin + Metronidazol) für 10 Tage', 'PPI-Monotherapie 4 Wochen', 'Levofloxacin + Amoxicillin + PPI für 14 Tage', 'Spontane Eradikation abwarten'],
+            1,
+            'Wegen steigender Clarithromycin-Resistenz (&gt; 15 % in Deutschland) ist die klassische Triple-Therapie nicht mehr Erstlinie. Die DGVS-S2k-Leitlinie 2022 empfiehlt die Bismut-haltige Quadrupeltherapie (Pylera®) für 10 Tage als Erstlinie. Eradikationskontrolle frühestens 4 Wochen nach Therapieende mittels ¹³C-Atemtest oder Stuhlantigen.'),
+        q('Bei welchem Befund ist die endoskopische Diagnose Morbus Crohn am wahrscheinlichsten (vs. Colitis ulcerosa)?',
+            ['Kontinuierlicher Befall vom Rektum aufsteigend ohne Aussparungen', 'Pflastersteinrelief mit segmentalen Aphthen und Befall des terminalen Ileums', 'Diffuse Granularität der gesamten Schleimhaut nur im Kolon', 'Pseudomembranen mit gelblichen Plaques', 'Punktförmige Erosionen ausschließlich im Magen'],
+            1,
+            'Pflastersteinrelief, segmentale Aphthen und Beteiligung des terminalen Ileums sind klassisch für Morbus Crohn (transmuraler, segmentaler Befall im gesamten GI-Trakt). Histologie: nicht-verkäsende Granulome. Colitis ulcerosa hingegen kontinuierlich vom Rektum aufsteigend, ausschließlich kolisch, mukosal/submukosal mit Kryptenabszessen.'),
+        q('Eine 75-Jährige entwickelt 5 Tage nach Ceftriaxon blutige Diarrhoe; C.-difficile-Toxin-EIA und GDH-Antigen positiv. Welche Therapie ist nach DGVS-S2k 2024 Erstlinie?',
+            ['Metronidazol 3 × 500 mg p. o. für 14 Tage', 'Vancomycin 4 × 500 mg i. v. für 10 Tage', 'Fidaxomicin 2 × 200 mg p. o. für 10 Tage', 'Ceftriaxon-Dosis verdoppeln', 'Probiotikum allein als Monotherapie'],
+            2,
+            'Aktuelle DGVS-/ESCMID-Empfehlungen: Fidaxomicin ist Erstlinie bei C.-difficile-Erstepisode (geringere Rezidivrate als Vancomycin); Vancomycin oral 4 × 125 mg ist gleichwertige Alternative. Metronidazol wird nicht mehr als Erstlinie empfohlen. Vancomycin i. v. ist unwirksam (keine intestinale Wirkung). Bei Rezidiven: Fidaxomicin extended pulsed regimen oder fäkaler Mikrobiom-Transfer (FMT).'),
+        q('Welche Hepatitis-B-Serologie spricht für eine durchgemachte, ausgeheilte Infektion?',
+            ['HBs-Ag positiv, Anti-HBc-IgM positiv', 'HBs-Ag negativ, Anti-HBs positiv, Anti-HBc positiv', 'HBs-Ag negativ, Anti-HBs positiv, Anti-HBc negativ', 'HBs-Ag positiv, HBV-DNA hoch, HBe-Ag positiv', 'Anti-HBs negativ, Anti-HBc negativ, Anti-HBe positiv'],
+            1,
+            'Durchgemachte Infektion: HBs-Ag negativ + Anti-HBs positiv + Anti-HBc positiv. Reine Impfung: nur Anti-HBs ohne Anti-HBc. Akute Infektion: HBs-Ag positiv + Anti-HBc-IgM. Hochreplikative chronische Infektion: HBs-Ag positiv + HBV-DNA hoch + HBe-Ag positiv. Anti-HBc ist der „immunologische Fingerabdruck" jeder durchgemachten oder bestehenden HBV-Infektion.'),
+        q('Welcher Befund sichert eine spontan-bakterielle Peritonitis (SBP) bei Leberzirrhose mit Aszites?',
+            ['Aszites-PMN-Zellzahl ≥ 250/µl', 'CRP &gt; 50 mg/l', 'Blutkultur positiv', 'Albumin im Aszites &gt; 2,5 g/dl', 'SAAG &gt; 1,1'],
+            0,
+            'SBP-Diagnose: Aszites-PMN ≥ 250/µl (mit oder ohne positive Kultur). Therapie: Cefotaxim/Ceftriaxon i. v. + Albumin 1,5 g/kg an Tag 1 und 1 g/kg an Tag 3 (HRS-Prävention). Sekundärprophylaxe nach SBP: Norfloxacin oder Ciprofloxacin oral langfristig. Die SAAG (≥ 1,1) klärt nur, ob der Aszites portal-hypertensiv ist.'),
+        q('Eine 82-Jährige hat nach Sturz einen Krea-Anstieg von 0,9 auf 2,1 mg/dl in 36 h und eine Diurese von 0,3 ml/kg/h für 8 h. Welches AKI-Stadium nach KDIGO?',
+            ['Stadium 1 — sowohl Krea- als auch Diurese-Kriterium', 'Stadium 2 — Krea ≥ 2,0 × Baseline + Oligurie ≥ 6 h', 'Stadium 3 — Krea ≥ 4,0 mg/dl', 'Kein AKI, da nur 36 h', 'Chronische Niereninsuffizienz G2'],
+            1,
+            'Krea 2,1 / 0,9 = 2,3 × Baseline → Stadium 2 (2,0–2,9 ×); zusätzlich Diurese &lt; 0,5 ml/kg/h für ≥ 6 h erfüllt Diurese-Kriterium von Stadium 1. Die höhere Klassifikation gilt → Stadium 2. Akutmaßnahmen: Volumenstatus, Medikamenten-Review (Nephrotoxine pausieren), Sonografie zum Ausschluss postrenaler Genese.'),
+        q('Ein 52-Jähriger hat seit 6 h schmerzhafte rechte Flanke mit Ausstrahlung in den Hoden, Mikrohämaturie. CT zeigt einen 4-mm-Ureterstein im distalen Ureter. Welche Therapie ist Erstlinie?',
+            ['Sofortige PCNL', 'Konservativ mit Analgesie (NSAR / Metamizol) + Tamsulosin (medikamentöse Expulsionstherapie)', 'Sofort offene Ureterotomie', 'Antibiotikum als Erstlinie', 'Reine Bettruhe ohne Therapie'],
+            1,
+            'Steine ≤ 10 mm im distalen Ureter haben hohe spontane Abgangsrate. Konservativ: NSAR (bessere Wirksamkeit als Opioide bei Steinkolik), Tamsulosin als medikamentöse Expulsionstherapie (α1-Blocker → Relaxation distaler Ureter). Trinkmenge nicht forciert erhöhen während Kolik. Notfall-Indikation für Intervention: Fieber, Anurie, Sepsis, refraktärer Schmerz, Einzelniere.'),
+        q('Ein 62-Jähriger mit BPS und IPSS 18 wird mit Tamsulosin behandelt. Wie verändert sich der PSA-Wert unter zusätzlicher Finasterid-Therapie?',
+            ['PSA bleibt unverändert', 'PSA verdoppelt sich', 'PSA halbiert sich nach 6–12 Monaten — bei der Beurteilung gegenüber dem Vor-Wert verdoppeln', 'PSA ist nicht mehr verwertbar', 'PSA steigt um den Faktor 1,5'],
+            2,
+            'Finasterid (5α-Reduktase-Hemmer) reduziert PSA um etwa 50 % nach 6–12 Monaten Therapie. Zur Surveillance den unter Finasterid gemessenen Wert verdoppeln, um ihn mit dem Vor-Wert zu vergleichen. Sonst Risiko, ein Prostatakarzinom zu übersehen. Ein klinisch signifikanter PSA-Anstieg trotz Finasterid (relativ &gt; Verdopplung) ist abklärungsbedürftig.'),
+        q('Ein 19-Jähriger kommt mit akut einsetzendem heftigem Hodenschmerz seit 4 h. Cremaster-Reflex aufgehoben, Hoden hochstehend. Welches Vorgehen ist korrekt?',
+            ['Sofort Antibiose und ambulante Wiedervorstellung', 'Stationäre Beobachtung über Nacht', 'Sofortige operative Exploration und Detorquierung mit beidseitiger Orchidopexie', 'Hochlagerung und Eis, dann morgen Doppler-Sono', 'Sofortige Antibiose mit Ceftriaxon i. m.'],
+            2,
+            'Hodentorsion ist chirurgischer Notfall mit Rettungsfenster &lt; 6 h (danach Hodennekrose). Klinik (akuter Schmerz, hochstehender Hoden, fehlender Cremaster-Reflex) reicht für die Indikation; Doppler-Sono nur ergänzend, wenn dadurch keine Verzögerung. Beidseitige Orchidopexie wegen Disposition zur kontralateralen Torsion.'),
+        q('Ein 68-Jähriger mit Vorhofflimmern unter Apixaban kommt 1 h nach plötzlicher Hemiparese rechts und Aphasie. NIHSS 14, CT ohne Blutung. Apixaban-Einnahme vor 6 h. Welche Akutmaßnahme ist primär indiziert?',
+            ['Sofortige Lyse mit Alteplase', 'ASS 250 mg i. v.', 'Mechanische Thrombektomie nach Bildgebung mit Großgefäßverschluss; Antagonisierung des Apixaban (Andexanet alfa) erwägen', 'Heparin Vollheparinisierung', 'Abwarten 24 h, dann erneute Bildgebung'],
+            2,
+            'Alteplase-Lyse ist bei Apixaban-Einnahme innerhalb von 24 h kontraindiziert (es sei denn Faktor-Xa-Aktivität sicher &lt; 0,1 U/ml). Bei Großgefäßverschluss (NIHSS 14 spricht dafür) ist mechanische Thrombektomie unabhängig von der Antikoagulation indiziert. Andexanet alfa kann zur Antagonisierung erwogen werden. Idarucizumab dagegen ist spezifisch für Dabigatran.'),
+        q('Welche Aussage zur Stufentherapie der unipolaren Depression nach NVL 2022 trifft zu?',
+            ['Bei leichter Depression sollte sofort eine Pharmakotherapie eingeleitet werden.', 'Bei mittelschwerer Depression ist Psychotherapie ODER Pharmakotherapie indiziert; bei schwerer Depression Kombination empfohlen.', 'TZA wie Amitriptylin sind Erstlinie bei jüngeren Patienten.', 'Wirksamkeit der SSRI ist innerhalb von 24 h zu erwarten.', 'EKT ist obsolet bei therapierefraktärer Depression.'],
+            1,
+            'NVL Unipolare Depression 2022: Leichte Depression — aktives Abwarten 14 Tage, niederschwellige Verfahren. Mittelschwer — Psychotherapie ODER Pharmakotherapie. Schwer — Kombination. SSRI Erstlinie (Sertralin, Citalopram/Escitalopram), Wirkungseintritt 2–4 Wochen. TZA wegen anticholinerger und kardiotoxischer NW nicht Erstlinie. EKT ist sehr wirksam bei therapierefraktärer und psychotischer Depression.'),
+        q('Welche Aussage zum Status epilepticus ist korrekt?',
+            ['Status definiert sich erst ab 30 min Anfallsdauer.', 'Erstlinie i. v.: Phenytoin Hochdosis.', 'Stufe 1 (0–10 min): Lorazepam 0,1 mg/kg i. v. bzw. Midazolam i. m./bukkal/nasal; Stufe 2 (10–30 min): Levetiracetam, Valproat oder Phenytoin/Fosphenytoin.', 'Diazepam ist beim Status epilepticus kontraindiziert.', 'Status epilepticus erfordert immer Intubation als ersten Schritt.'],
+            2,
+            'Operative Definition: anhaltender Anfall &gt; 5 min oder rezidivierende Anfälle ohne Erholung. Stufe 1 Benzodiazepine (Lorazepam wegen längerer Wirkdauer bevorzugt; Midazolam i. m./nasal/bukkal als außerklinische Alternative). Stufe 2: Levetiracetam, Valproat oder Phenytoin/Fosphenytoin (ESETT-Studie 2019: Wirksamkeit aller drei vergleichbar). Stufe 3 (refraktär): Intubation + Propofol/Midazolam-Dauerinfusion.'),
+        q('Eine 73-Jährige berichtet seit 3 Wochen über bilaterale Schulter-/Beckengürtelsteifigkeit, BSG 65 mm/h, CRP 45 mg/l. Plötzlich klagt sie über einseitigen Visusverlust. Welche Maßnahme ist sofort erforderlich?',
+            ['Abwarten bis zum Ergebnis der A.-temporalis-Biopsie', 'Methylprednisolon 500–1000 mg i. v. für 3 Tage, Diagnostik parallel', 'Niedrig dosierte Glucocorticoide (Prednisolon 12,5 mg) ambulant', 'Tocilizumab als Monotherapie', 'NSAR und Wiedervorstellung bei Verschlechterung'],
+            1,
+            'Riesenzellarteriitis (GCA) mit Visusbedrohung ist Notfall — irreversibler Visusverlust droht innerhalb Stunden bis Tagen. Sofort hochdosiertes Methylprednisolon 500–1000 mg i. v. für 3 Tage, danach Prednisolon 1 mg/kg/d oral, langsames Tapern über 1–2 Jahre. Tocilizumab (IL-6) ist als steroidsparende Erhaltungstherapie zugelassen, nicht als initiale Monotherapie. Diagnostik (Sono A. temp., Biopsie) parallel — Therapiebeginn nicht verzögern.'),
+        q('Welche Aussage zur Eisenmangelanämie-Therapie entspricht der aktuellen Evidenzlage?',
+            ['Tägliche Hochdosis Eisensulfat 200 mg/d 3 ×', 'Eisensulfat 50–100 mg jeden zweiten Tag (Hepcidin-Effekt umgangen) zeigt bessere Resorption als tägliche Mehrfachgabe', 'Eisen i. v. ist immer Erstlinie', 'Vit C ist obsolet', 'Eisen sollte mit Tee oder Milch eingenommen werden'],
+            1,
+            'Studie Moretti et al. (Blood 2015) und Folgearbeiten: tägliche Hochdosis-Eisengabe induziert Hepcidin-Anstieg, der Resorption am Folgetag blockiert. Gabe jeden zweiten Tag oder einmal täglich (statt 2–3 × täglich) verbessert Netto-Resorption und reduziert GI-NW. Vit C verbessert Resorption (saurer pH, Reduktion Fe³⁺ → Fe²⁺). Tee/Milch hemmen Resorption (Tannine, Calcium). I. v.-Eisen bei Malabsorption, schwerer Anämie, Unverträglichkeit oder CKD.'),
+        q('Welcher Befund spricht am ehesten für ein malignes Melanom nach ABCDE-Regel?',
+            ['Symmetrischer 3-mm-Nävus mit gleichmäßiger Pigmentierung', 'Asymmetrische 8-mm-Läsion mit unregelmäßiger Begrenzung, mehreren Brauntönen und seit 4 Monaten progredienter Vergrößerung', 'Hellrosa, perlmuttartiger Tumor mit zentraler Ulzeration', 'Hyperkeratotische, schuppende Läsion bei einem 80-Jährigen auf der Glatze', 'Stabiler Café-au-lait-Fleck seit Geburt'],
+            1,
+            'ABCDE: Asymmetrie, Begrenzung unregelmäßig, Color (mehrfarbig), Durchmesser &gt; 5–6 mm, Evolution. Antwort 2 erfüllt alle Kriterien. Antwort 3 beschreibt klassisches Basaliom (BCC), Antwort 4 aktinische Keratose / SCC. Verdacht auf Melanom → Exzisionsbiopsie mit Sicherheitsabstand und Histologie inkl. Breslow-Tumordicke.')
     ];
 
     const QUIZ_FA = [
@@ -2159,7 +2247,43 @@
         q('Welche Aussage zur Demenzdiagnostik in der Hausarztpraxis (S3-Demenz 038-013) ist richtig?',
             ['Eine Bildgebung ist obsolet.', 'Stufendiagnostik: Anamnese inkl. Fremdanamnese, Mini-Mental-Status (MMSE) oder Montreal Cognitive Assessment (MoCA) als Screening, Labor zum Ausschluss reversibler Ursachen (TSH, B12, Folat), zerebrale Bildgebung (MRT bevorzugt) zur Differenzialdiagnostik.', 'L-Thyroxin ist Standardtherapie der Demenz.', 'Donepezil 10 mg ist 1. Wahl bei jeder Demenzform unabhängig von der Ursache.', 'Eine Liquor-Diagnostik ist routinemäßig erforderlich.'],
             1,
-            'S3 Demenz 038-013: Stufendiagnostik. Screening MMSE/MoCA (MoCA sensitiver für leichte kognitive Störung). Labor: TSH, B12, Folat (reversible Ursachen). Bildgebung MRT (oder CT): Atrophiemuster, Gefäßänderungen, Tumor. Liquor (Aβ42/Tau) bei differenzialdiagnostischer Unsicherheit. Therapie: Cholinesterasehemmer (Donepezil, Rivastigmin, Galantamin) bei AD leicht–mittel; Memantin (NMDA-Antagonist) bei mittel–schwer.')
+            'S3 Demenz 038-013: Stufendiagnostik. Screening MMSE/MoCA (MoCA sensitiver für leichte kognitive Störung). Labor: TSH, B12, Folat (reversible Ursachen). Bildgebung MRT (oder CT): Atrophiemuster, Gefäßänderungen, Tumor. Liquor (Aβ42/Tau) bei differenzialdiagnostischer Unsicherheit. Therapie: Cholinesterasehemmer (Donepezil, Rivastigmin, Galantamin) bei AD leicht–mittel; Memantin (NMDA-Antagonist) bei mittel–schwer.'),
+        q('Seit dem 01.01.2023 ist die elektronische AU (eAU) Pflicht für gesetzlich Versicherte. Welche Aussage ist korrekt?',
+            ['Der Patient muss die AU weiterhin per Post an die Krankenkasse senden.', 'Die Praxis übermittelt die eAU direkt an die Krankenkasse; der Patient erhält nur einen Ausdruck für die eigenen Unterlagen.', 'Privatversicherte erhalten ebenfalls eine eAU.', 'Eine rückwirkende AU ist seit 2023 nicht mehr möglich.', 'Die telefonische Krankschreibung ist seit 2023 vollständig abgeschafft.'],
+            1,
+            'eAU (seit 01.01.2023 Pflicht für GKV): Praxis → KV → Krankenkasse digital; Patient bekommt Ausdruck nur für eigene Unterlagen, der Arbeitgeber wird seit 2023 ebenfalls digital informiert. Privatversicherte erhalten weiterhin Papier-AU. Rückwirkende AU bis 3 Tage zulässig (Ausnahmen mit Begründung). Telefonische Krankschreibung bei leichten Erkrankungen seit 12/2023 dauerhaft erlaubt (max. 5 Tage, nur bei bekannten Patienten).'),
+        q('Welche der folgenden Indikationen ist KEIN aktuell zugelassenes DMP nach § 137f SGB V?',
+            ['Diabetes mellitus Typ 2', 'KHK', 'Asthma bronchiale', 'Chronische Niereninsuffizienz', 'Brustkrebs'],
+            3,
+            'Aktuell zugelassene DMPs (Stand 2024/2025): Diabetes Typ 1 + 2, KHK, Asthma, COPD, Brustkrebs, chronische Herzinsuffizienz; im Roll-out Osteoporose, Rückenschmerz, Depression. CKD-DMP existiert bislang nicht (nur in Pilotprojekten/Selektivverträgen einzelner Kassen). Hausärzte sollten DMP-Einschreibung aktiv anbieten — strukturierte Quartalsdoku, evidenzbasiertes Patient Empowerment, höhere Pauschalvergütung.'),
+        q('Welche Punkteschwelle entspricht im NBA-System dem Pflegegrad 2?',
+            ['12,5 bis &lt; 27 Punkte', '27 bis &lt; 47,5 Punkte', '47,5 bis &lt; 70 Punkte', '70 bis &lt; 90 Punkte', '≥ 90 Punkte'],
+            1,
+            'Neues Begutachtungs-Assessment (NBA, seit 2017): 6 gewichtete Module. Punkteschwellen: PG 1 12,5–&lt; 27; PG 2 27–&lt; 47,5; PG 3 47,5–&lt; 70; PG 4 70–&lt; 90; PG 5 ≥ 90 mit besonderen Anforderungen. Modul 4 Selbstversorgung (40 %) ist am stärksten gewichtet, gefolgt von Modul 5 (Bewältigung therapiebedingter Anforderungen, 20 %). Module 2 und 3 (kognitiv vs. psychisch) werden gemeinsam mit 15 % gewichtet — der höhere Wert zählt.'),
+        q('Eine 56-Jährige in der Postmenopause klagt seit 8 Monaten über stark belastende Hitzewallungen und Schlafstörungen. Sie hat keine Mamma-Karzinom-Anamnese und keine VTE in der Familie. Welche Empfehlung entspricht dem aktuellen NAMS-Position-Statement 2022?',
+            ['Hormone sind in jedem Alter kontraindiziert.', 'Transdermale Östrogen-Therapie kombiniert mit Gestagen ist eine evidenzbasierte Option (Timing-Hypothese: Beginn &lt; 60 J. oder &lt; 10 J. nach Menopause).', 'Phytoöstrogene allein sind in allen Fällen ausreichend.', 'Orale Östrogen-Monotherapie ist auch bei nicht-hysterektomierten Frauen sicher.', 'Eine HRT muss zwingend &gt; 10 Jahre dauern, um wirksam zu sein.'],
+            1,
+            'NAMS 2022, EMAS 2024: Bei moderater bis schwerer vasomotorischer Symptomatik HRT erwägen, wenn keine Kontraindikationen (Mamma-CA, VTE, KHK, ungeklärte Vaginalblutung) vorliegen. Transdermal &gt; oral wegen niedrigerem VTE-/Apoplex-Risiko. Bei intaktem Uterus immer kombiniert mit Gestagen (Endometriumschutz). Timing-Hypothese: Beginn idealerweise &lt; 60 Jahre oder &lt; 10 Jahre nach Menopause. Nicht-hormonelle Alternativen: SSRI (Paroxetin), Gabapentin, Fezolinetant (NK3-Antagonist, EU-Zulassung 2023).'),
+        q('Bei welcher U-Untersuchung steht die Hüftsonographie nach Graf zur Erkennung einer Hüftdysplasie standardmäßig auf dem Programm?',
+            ['U1', 'U2', 'U3', 'U6', 'U9'],
+            2,
+            'Hüftsonographie nach Graf ist standardmäßig bei der U3 (4.–5. Lebenswoche) vorgesehen. U2 (3.–10. Lebenstag) kann eine Sonografie bei klinischem Verdacht (Familienanamnese, Beckenendlage, Knack-/Schnappphänomen) bereits beinhalten. Frühe Erkennung erlaubt konservative Therapie mit Pavlik-Bandage / Spreizhose; je später die Diagnose, desto invasiver die Therapie.'),
+        q('Welche Aussage zur Hilfsmittel-Verordnung nach § 33 SGB V ist korrekt?',
+            ['Hilfsmittel sind sächliche Mittel zur Sicherung des Behandlungserfolgs, Vorbeugung von Behinderung oder Ausgleich einer Behinderung; Verordnung über das GKV-Hilfsmittelverzeichnis mit 7-stelliger Positionsnummer.', 'Hilfsmittel werden grundsätzlich vom Patienten selbst bezahlt.', 'Hörgeräte zählen nicht zu den Hilfsmitteln nach § 33 SGB V.', 'Eine Verordnung ohne Diagnose ist zulässig.', 'Inkontinenzhilfen werden niemals von der GKV erstattet.'],
+            0,
+            '§ 33 SGB V: Hilfsmittel = sächliche Mittel zur Sicherung des Behandlungserfolgs, Vorbeugung von Behinderung oder Ausgleich einer Behinderung. GKV-Hilfsmittelverzeichnis mit 7-stelliger Positionsnummer; Festbeträge der GKV; Patientenzuzahlung 10 %, mind. 5 €, max. 10 € pro Hilfsmittel (Belastungsgrenze beachten). Hörgeräte, Sehhilfen (eingeschränkt bei Kindern und Sehbehinderten), Rollatoren, Inkontinenzhilfen, CPAP, Insulinpumpen — alle Hilfsmittel.'),
+        q('Eine Hausärztin verordnet Physiotherapie bei chronischem Rückenschmerz (Diagnosegruppe WS2). Welche Aussage zur Heilmittel-Richtlinie 2021 trifft zu?',
+            ['Eine Heilmittel-Verordnung darf nicht für mehr als 2 Behandlungseinheiten ausgestellt werden.', 'Erstverordnung 1–6 Einheiten; Folgeverordnungen sind flexibel im Rahmen der orientierenden Behandlungsmenge je Diagnosegruppe.', 'Die Diagnosegruppe ist optional und muss nicht eingetragen werden.', 'Heilmittel werden grundsätzlich budgetneutral abgerechnet.', 'Logopädie ist kein Heilmittel.'],
+            1,
+            'Heilmittel-Richtlinie-Reform 2021: Erstverordnung 1–6 Einheiten (Therapiebeginn binnen 14 Tagen), danach Folgeverordnungen flexibel. Die orientierende Behandlungsmenge gibt den Rahmen je Diagnosegruppe (z. B. WS2 chronische Wirbelsäulenproblematik). „Besonderer Verordnungsbedarf" und „langfristiger Heilmittelbedarf" sind separat geregelt und dann budgetneutral. Logopädie, Ergotherapie, Physiotherapie, Ernährungstherapie, Podologie sind Heilmittel.'),
+        q('Welche Schutzimpfung empfiehlt die STIKO im 3. Trimenon der Schwangerschaft?',
+            ['MMR-Auffrischimpfung', 'Tdap (Pertussis als Kombi mit Tetanus-Diphtherie) zwischen 28. und 36. SSW', 'BCG (Tuberkulose)', 'Gelbfieber', 'HPV-Erstimpfung'],
+            1,
+            'STIKO 2020 (Empfehlung weiterhin gültig 2024): Tdap-Impfung im 3. Trimenon (idealerweise 28.–36. SSW) — schützt Neugeborene über mütterliche IgG-Antikörper vor Pertussis in den ersten Lebenswochen, bevor die eigene aktive Immunisierung greift. MMR und Gelbfieber sind als Lebendimpfstoffe in der Schwangerschaft kontraindiziert. RSV-Schutz für Säuglinge erfolgt seit 2024 über Nirsevimab beim Neugeborenen (passive Immunisierung).'),
+        q('Welche der folgenden Maßnahmen entspricht der quartären Prävention nach Marc Jamoulle?',
+            ['Bevölkerungsweites Screening auf alle bekannten Erkrankungen', 'Vermeidung unnötiger Medikalisierung und Schutz des Patienten vor Übertherapie und ihren Folgen', 'Postakute Rehabilitation nach Apoplex', 'Tertiärprävention nach Myokardinfarkt', 'Behandlung manifester Erkrankungen mit Höchstdosen'],
+            1,
+            'Quartärprävention (Jamoulle): Schutz des Patienten vor Über- und Fehlmedikalisierung — also vor Schäden durch das Versorgungssystem selbst (Überdiagnose, Übertherapie, Polypharmazie). Beispiele: gezielte Deprescribing-Visiten, Verzicht auf PSA-Screening ohne klare Indikation, kritische Bewertung der DMP-Einschreibung bei multimorbiden Hochbetagten, Schutz vor Kaskaden-Effekten ungezielter Diagnostik.')
     ];
 
     // =========================================================================
@@ -2196,4 +2320,73 @@
             }
         ]
     });
+
+    // =========================================================================
+    // SPIEGELUNG ALS TRAININGS-KATEGORIE (Storage-Key getrennt vom Quiz!)
+    // =========================================================================
+    // Die IMPP-Fragen werden zusätzlich vorne im Trainings-Bereich als Kategorie
+    // 'medizin' bereitgestellt. Persistenz-Schlüssel sind getrennt:
+    //   - Schulungs-Quiz: smartineer_schulungen_v1 (Best-Score je Kapitel)
+    //   - Training:       wissen_reloaded_progress_v1 (gelöst-Flag je Aufgabe)
+    // Lösen im Training nimmt daher KEINEN Einfluss auf den Quiz-Status.
+
+    window.APP_DATA = window.APP_DATA || {};
+    window.APP_ORDER = window.APP_ORDER || [];
+    const MED_ID = 'medizin';
+    if (!window.APP_ORDER.includes(MED_ID)) {
+        window.APP_ORDER.unshift(MED_ID); // 'vorne' im Training
+    }
+
+    function quizToTask(item) {
+        const letters = ['A', 'B', 'C', 'D', 'E'];
+        let opts = '<ol class="impp-options" style="list-style:none;padding-left:0;margin-top:0.5em;">';
+        for (let i = 0; i < item.options.length; i++) {
+            opts += '<li style="margin:0.25em 0;"><strong>' + letters[i] + ')</strong> ' + item.options[i] + '</li>';
+        }
+        opts += '</ol>';
+        const correctLetter = letters[item.correct];
+        return {
+            q: '<p>' + item.q + '</p>' + opts,
+            h: '<p>Es ist genau eine Antwort korrekt (IMPP-Stil, A–' + letters[item.options.length - 1] + '). Schließe zunächst die offensichtlich falschen Distraktoren aus und suche nach Schlüsselwörtern (Leitlinien-Zitate, Dosierungsangaben, Mechanismen).</p>',
+            s: '<p><strong>Korrekte Antwort: ' + correctLetter + ')</strong> ' + item.options[item.correct] + '</p><p>' + item.explanation + '</p>'
+        };
+    }
+
+    window.APP_DATA[MED_ID] = {
+        id: MED_ID,
+        name: 'Medizin (Allgemeinmedizin)',
+        desc: 'Spiegelung der IMPP-Fragen aus der Schulung „Allgemeinmedizin" als Trainings-Kategorie. Drei Stufen: Vorklinik (M1), Klinik (M2), PJ/Facharzt. Lösen hier hat keinen Einfluss auf die Quiz-Bestwerte in der Schulung — separate Persistenz.',
+        formulas: ''
+            + '<h3>Säure-Basen, Niere, Kreislauf</h3>'
+            + '<p>Henderson-Hasselbalch: $pH = 6{,}1 + \\log_{10}\\frac{[HCO_3^-]}{0{,}03 \\cdot pCO_2}$</p>'
+            + '<p>Anionenlücke: $AG = [Na^+] - ([Cl^-] + [HCO_3^-])$ (Norm 8–12 mmol/l)</p>'
+            + '<p>Winters-Erwartung (metabol. Azidose): $pCO_2 = 1{,}5 \\cdot [HCO_3^-] + 8 \\pm 2$</p>'
+            + '<p>Fraktionelle Na-Exkretion: $FE_{Na} = \\frac{[U_{Na}] \\cdot [P_{Krea}]}{[P_{Na}] \\cdot [U_{Krea}]} \\cdot 100$ (prärenal &lt; 1 %, ATN &gt; 2 %)</p>'
+            + '<p>Loading-Dose Pharmakokinetik: $D_{load} = V_d \\cdot C_{Ziel}$; Erhaltungsdosis $D_{maint} = Cl \\cdot C_{Ziel} \\cdot \\tau$</p>'
+            + '<h3>Scores und Schwellen</h3>'
+            + '<ul>'
+            + '<li><strong>CHA₂DS₂-VASc</strong>: Antikoagulation bei VHF ab ♂ ≥ 2 / ♀ ≥ 3.</li>'
+            + '<li><strong>HAS-BLED</strong>: Blutungsrisiko unter Antikoagulation; Score ≥ 3 = hoch.</li>'
+            + '<li><strong>CRB-65</strong>: ambulant bei 0 Punkten; stationär ab 1; Intensiv ab 2.</li>'
+            + '<li><strong>NIHSS</strong>: Schlaganfallschwere 0–42; ≥ 6 spricht für Großgefäßverschluss-Verdacht.</li>'
+            + '<li><strong>Child-Pugh</strong>: A 5–6 / B 7–9 / C 10–15.</li>'
+            + '<li><strong>KDIGO CKD</strong>: G1 ≥ 90, G2 60–89, G3a 45–59, G3b 30–44, G4 15–29, G5 &lt; 15 ml/min/1,73 m².</li>'
+            + '<li><strong>NBA-Pflegegrade</strong>: PG 1 12,5–&lt; 27; PG 2 27–&lt; 47,5; PG 3 47,5–&lt; 70; PG 4 70–&lt; 90; PG 5 ≥ 90.</li>'
+            + '</ul>'
+            + '<h3>Akut-Algorithmen</h3>'
+            + '<ul>'
+            + '<li><strong>Schlaganfall ischämisch</strong>: Lyse Alteplase/Tenecteplase &lt; 4,5 h; Thrombektomie &lt; 6 h (erweiterbar bis 24 h nach DAWN/DEFUSE-3).</li>'
+            + '<li><strong>Status epilepticus</strong>: Lorazepam 0,1 mg/kg → Levetiracetam 60 mg/kg / Valproat 40 mg/kg → Intubation + Propofol.</li>'
+            + '<li><strong>Anaphylaxie</strong>: Adrenalin 0,3–0,5 mg i. m. (Oberschenkel lateral); ggf. wiederholen alle 5–15 min.</li>'
+            + '<li><strong>Hyperkaliämie &gt; 6,5 mmol/l</strong>: Calciumgluconat 10 % 10 ml → Glukose-Insulin → Salbutamol → Furosemid / Dialyse.</li>'
+            + '<li><strong>HFrEF Fantastic Four</strong>: ARNI/ACE + Beta-Blocker + MRA + SGLT2-Hemmer.</li>'
+            + '</ul>'
+            + '<h3>Quellen</h3>'
+            + '<p>Schmidt/Lang Physiologie 32; Rassow Biochemie 5; Herold Innere 2024; Aktories Pharmakologie 13; Kochen Allgemeinmedizin 5; KDIGO 2024; ESC HF 2023; ESC ACS 2023; GINA 2024; GOLD 2024; NVL Diabetes 2023; NVL Depression 2022; STIKO Epid. Bull. 4/2024; PRISCUS 2.0; STOPP/START V3; DGN-S2k Schlaganfall 2024; ACR/EULAR RA 2010; NAMS 2022.</p>',
+        levels: [
+            QUIZ_M1.map(quizToTask),
+            QUIZ_M2.map(quizToTask),
+            QUIZ_FA.map(quizToTask)
+        ]
+    };
 })();
