@@ -2387,7 +2387,7 @@
         q('Ein 78-Jähriger mit Polypharmazie (12 Medikamente) und Sturzanamnese. Welcher Score eignet sich am besten zur Identifikation potenziell inadäquater Medikation?',
             ['Karnofsky-Index', 'STOPP/START-Kriterien (V3 2023) und PRISCUS-2.0-Liste (2023) als komplementäre Instrumente', 'GCS', 'NYHA-Klassifikation', 'CHA₂DS₂-VASc'],
             1,
-            'STOPP (potenziell inadäquate Medikation) und START (potenziell vermeidbare Unterversorgung) — V3 2023, O\\'Mahony et al. PRISCUS-2.0 (2023, deutsche Version) ergänzt mit Substanzen, die im Alter problematisch sind (z. B. Benzodiazepine, anticholinerge Substanzen, NSAR). Beide werden in der hausärztlichen Medikationsprüfung kombiniert eingesetzt (S2e-LL Multimedikation 2024).'),
+            'STOPP (potenziell inadäquate Medikation) und START (potenziell vermeidbare Unterversorgung) — V3 2023, O\'Mahony et al. PRISCUS-2.0 (2023, deutsche Version) ergänzt mit Substanzen, die im Alter problematisch sind (z. B. Benzodiazepine, anticholinerge Substanzen, NSAR). Beide werden in der hausärztlichen Medikationsprüfung kombiniert eingesetzt (S2e-LL Multimedikation 2024).'),
         q('Eine 64-Jährige mit Hitzewallungen und Schlafstörungen 18 Monate postmenopausal. Welche Aussage zur Hormonersatztherapie (HRT) entspricht NAMS/IMS 2022?',
             ['HRT ist generell kontraindiziert ab 50 J.', 'HRT ist die wirksamste Therapie vasomotorischer Symptome; bei Frauen &lt; 60 J. oder &lt; 10 J. nach Menopause überwiegt der Nutzen, transdermale Applikation reduziert das VTE-Risiko.', 'Orale Konjugierte Estrogene sind Standard.', 'HRT senkt das Brustkrebs-Risiko.', 'HRT ist nur in Form von Phytoestrogenen erlaubt.'],
             1,
