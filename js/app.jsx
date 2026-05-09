@@ -8,6 +8,12 @@ const STORAGE_KEY = 'wissen_reloaded_progress_v1';
 const INSTALL_DISMISS_KEY = 'smartineer_install_dismissed_v1';
 const THEME_KEY = 'smartineer_theme_v1'; // 'dark' | 'light' (Default: 'dark')
 const SCHULUNGEN_KEY = 'smartineer_schulungen_v1'; // { [trainingId]: { [chapterId]: { lastPage, quizBest } } }
+// Spaced Repetition (SM-2 lite): pro Quiz-Item Karteikarte mit Faelligkeit.
+// Schema: { [trainingId]: { [chapterId]: { [quizIndex]: { ease, interval, due, reps, lapses, last } } } }
+// Kein PII. Item-Identitaet ueber den 0-basierten Index in chapter.quiz — bei Umsortierung
+// werden Karten implizit verschoben (siehe AGENTS.md §11). Daher Quiz-Items immer anhaengen.
+const SRS_KEY = 'smartineer_srs_v1';
+const SRS_INTERVALS_DAYS = [1, 3, 7, 16, 35, 70, 140]; // SM-2 lite, gestaffelt
 
 // ---------------------------------------------------------------- Export / Import
 // Plattform-portables JSON-Format zur Synchronisation des Lernfortschritts
@@ -16,7 +22,7 @@ const SCHULUNGEN_KEY = 'smartineer_schulungen_v1'; // { [trainingId]: { [chapter
 // gerätespezifisch und werden NICHT exportiert.
 const EXPORT_FORMAT = 'smartineer-progress';
 const EXPORT_VERSION = 1;
-const EXPORT_KEYS = [STORAGE_KEY, SCHULUNGEN_KEY];
+const EXPORT_KEYS = [STORAGE_KEY, SCHULUNGEN_KEY, SRS_KEY];
 
 function buildExportPayload() {
     const data = {};
@@ -98,6 +104,33 @@ function mergeProgressKey(key, current, incoming) {
                 };
             });
             out[tid] = merged;
+        });
+        return out;
+    }
+    if (key === SRS_KEY) {
+        // { trainingId: { chapterId: { quizIdx: card } } }
+        // Merge pro Karte: jeweils der spaetere "last"-Stempel gewinnt — das spiegelt
+        // den juengsten Lernstand wider, ohne Faelligkeiten zu verkuerzen.
+        const out = { ...current };
+        Object.keys(incoming || {}).forEach((tid) => {
+            const curT = out[tid] || {};
+            const incT = incoming[tid] || {};
+            const mergedT = { ...curT };
+            Object.keys(incT).forEach((cid) => {
+                const curC = curT[cid] || {};
+                const incC = incT[cid] || {};
+                const mergedC = { ...curC };
+                Object.keys(incC).forEach((idx) => {
+                    const a = curC[idx];
+                    const b = incC[idx];
+                    if (!a) { mergedC[idx] = b; return; }
+                    if (!b) { mergedC[idx] = a; return; }
+                    const la = a.last || ''; const lb = b.last || '';
+                    mergedC[idx] = (lb >= la) ? b : a;
+                });
+                mergedT[cid] = mergedC;
+            });
+            out[tid] = mergedT;
         });
         return out;
     }
@@ -937,6 +970,116 @@ function useSchulungenState() {
     return { state, setLastPage, recordQuiz, reset };
 }
 
+// ---------- Spaced Repetition (SM-2 lite) ----------
+function srsTodayISO() { return new Date().toISOString().slice(0, 10); }
+function srsAddDaysISO(days) {
+    const d = new Date(); d.setUTCHours(0, 0, 0, 0);
+    d.setUTCDate(d.getUTCDate() + (days | 0));
+    return d.toISOString().slice(0, 10);
+}
+// Aktualisiert eine Karteikarte nach beantworteter Frage. Konventionen:
+// - Erste richtige Antwort → 1 Tag faellig.
+// - Folgerichtige Antworten → naechstes Intervall aus SRS_INTERVALS_DAYS.
+// - Falsche Antwort → reps zurueck auf 0, Intervall 1 Tag, ease leicht abgesenkt.
+function srsScheduleAfterAnswer(prev, ok) {
+    const today = srsTodayISO();
+    const easePrev = (prev && typeof prev.ease === 'number') ? prev.ease : 2.5;
+    const repsPrev = (prev && prev.reps) || 0;
+    const lapsesPrev = (prev && prev.lapses) || 0;
+    if (!ok) {
+        return {
+            ease: Math.max(1.3, easePrev - 0.2),
+            interval: 1,
+            reps: 0,
+            lapses: lapsesPrev + 1,
+            due: srsAddDaysISO(1),
+            last: today
+        };
+    }
+    const repsNext = repsPrev + 1;
+    const intervalIdx = Math.min(repsNext - 1, SRS_INTERVALS_DAYS.length - 1);
+    const interval = SRS_INTERVALS_DAYS[intervalIdx];
+    return {
+        ease: Math.min(2.8, easePrev + 0.05),
+        interval,
+        reps: repsNext,
+        lapses: lapsesPrev,
+        due: srsAddDaysISO(interval),
+        last: today
+    };
+}
+// Liefert alle Karten, die heute oder frueher faellig sind, plus alle, fuer die
+// noch nie eine Karte angelegt wurde (`new`). Reihenfolge: ueberfaellige zuerst,
+// dann neue. Nuetzlich fuer den Wiederholen-Pool ueber alle Kapitel hinweg.
+function srsDueItems(training, srsState, includeNew) {
+    const today = srsTodayISO();
+    const tState = (srsState && srsState[training.id]) || {};
+    const due = [];
+    const fresh = [];
+    training.chapters.forEach((ch) => {
+        const cState = tState[ch.id] || {};
+        ch.quiz.forEach((item, idx) => {
+            const card = cState[idx];
+            if (!card) {
+                if (includeNew) fresh.push({ item, trainingId: training.id, chapterId: ch.id, idx, status: 'new' });
+                return;
+            }
+            if (card.due && card.due <= today) {
+                due.push({ item, trainingId: training.id, chapterId: ch.id, idx, status: 'due', card });
+            }
+        });
+    });
+    // Aelteste Faelligkeit zuerst.
+    due.sort((a, b) => (a.card.due || '').localeCompare(b.card.due || ''));
+    return due.concat(fresh);
+}
+function srsTrainingStats(training, srsState) {
+    const today = srsTodayISO();
+    const tState = (srsState && srsState[training.id]) || {};
+    let total = 0, learned = 0, due = 0, lapsed = 0;
+    training.chapters.forEach((ch) => {
+        const cState = tState[ch.id] || {};
+        ch.quiz.forEach((_, idx) => {
+            total++;
+            const card = cState[idx];
+            if (!card) return;
+            learned++;
+            if (card.due && card.due <= today) due++;
+            if ((card.lapses || 0) > 0) lapsed++;
+        });
+    });
+    return { total, learned, due, fresh: total - learned, lapsed };
+}
+
+function useSRSState() {
+    const [state, setState] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(SRS_KEY)) || {}; }
+        catch (e) { return {}; }
+    });
+    // Nimmt eine Liste von { ref:{tid,cid,idx}, ok:boolean } und schreibt alle
+    // Karten in einem Rutsch — ein localStorage-Write pro Quiz-Lauf.
+    const gradeMany = useCallback((updates) => {
+        if (!Array.isArray(updates) || !updates.length) return;
+        setState((prev) => {
+            const next = { ...prev };
+            updates.forEach(({ ref, ok }) => {
+                if (!ref || ref.idx == null) return;
+                next[ref.tid] = { ...(next[ref.tid] || {}) };
+                next[ref.tid][ref.cid] = { ...(next[ref.tid][ref.cid] || {}) };
+                const prevCard = next[ref.tid][ref.cid][ref.idx];
+                next[ref.tid][ref.cid][ref.idx] = srsScheduleAfterAnswer(prevCard, ok);
+            });
+            try { localStorage.setItem(SRS_KEY, JSON.stringify(next)); } catch (e) { /* quota */ }
+            return next;
+        });
+    }, []);
+    const reset = useCallback(() => {
+        setState({});
+        try { localStorage.removeItem(SRS_KEY); } catch (e) {}
+    }, []);
+    return { state, gradeMany, reset };
+}
+
 function shuffleSample(arr, n) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -1032,6 +1175,7 @@ function trainingProgress(training, tState) {
 function Schulungen() {
     const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
     const { state, setLastPage, recordQuiz } = useSchulungenState();
+    const { state: srsState, gradeMany: srsGradeMany } = useSRSState();
     const [stage, setStage] = useState('index'); // index | chapters | reader | quiz | quizResult
     const [tid, setTid] = useState(null);
     const [cid, setCid] = useState(null);
@@ -1039,9 +1183,11 @@ function Schulungen() {
     const [tocOpen, setTocOpen] = useState(false);
     const [jumpOpen, setJumpOpen] = useState(false);
     const [quizSet, setQuizSet] = useState([]);
+    const [quizRefs, setQuizRefs] = useState([]); // parallel zu quizSet: {tid,cid,idx} pro Item
     const [quizIdx, setQuizIdx] = useState(0);
     const [quizAnswers, setQuizAnswers] = useState([]);
     const [quizInput, setQuizInput] = useState(null);
+    const [reviewMode, setReviewMode] = useState(false);
 
     const readerRef = useKaTeX([stage, tid, cid, page]);
     const quizRef = useKaTeX([stage, quizIdx]);
@@ -1078,9 +1224,45 @@ function Schulungen() {
 
     const startQuiz = () => {
         const pool = chapter.quiz || [];
-        const sample = shuffleSample(pool, Math.min(10, pool.length));
-        setQuizSet(sample); setQuizIdx(0); setQuizAnswers([]);
+        // Gleicher Sampling-Effekt wie shuffleSample, aber wir behalten die
+        // Original-Indizes — die brauchen wir, um danach SRS-Karten zu schreiben.
+        const indices = pool.map((_, i) => i);
+        for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        const picked = indices.slice(0, Math.min(10, indices.length));
+        const sample = picked.map(i => pool[i]);
+        const refs = picked.map(i => ({ tid, cid, idx: i }));
+        setReviewMode(false);
+        setQuizSet(sample); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]);
         setQuizInput(sample.length ? defaultInputForItem(sample[0]) : null);
+        setStage('quiz');
+    };
+
+    // Wiederholungs-Modus: zieht ueber alle Kapitel der Schulung hinweg
+    // faellige Karten (heute due) und ergaenzt mit neuen Karten, falls
+    // weniger als 20 zusammenkommen. Spaced Repetition lebt davon, dass
+    // jeden Tag ein paar Karten beruehrt werden — kein Cramming.
+    const startReview = () => {
+        if (!training) return;
+        const dueAll = srsDueItems(training, srsState, true);
+        if (!dueAll.length) {
+            window.alert('Keine Karteikarten zum Wiederholen vorhanden. Beantworte zuerst ein Kapitel-Quiz.');
+            return;
+        }
+        // Maximal 20 Karten pro Sitzung, ueberfaellige zuerst (srsDueItems sortiert bereits).
+        const sample = dueAll.slice(0, Math.min(20, dueAll.length));
+        // Innerhalb der Auswahl mischen, damit nicht immer Kapitel 1 zuerst kommt.
+        for (let i = sample.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [sample[i], sample[j]] = [sample[j], sample[i]];
+        }
+        const items = sample.map(s => s.item);
+        const refs = sample.map(s => ({ tid: s.trainingId, cid: s.chapterId, idx: s.idx }));
+        setReviewMode(true);
+        setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]);
+        setQuizInput(items.length ? defaultInputForItem(items[0]) : null);
         setStage('quiz');
     };
 
@@ -1093,12 +1275,18 @@ function Schulungen() {
             item,
             given: quizInput,
             ok,
-            explanation: item.explanation
+            explanation: item.explanation,
+            ref: quizRefs[quizIdx] || null
         }]);
         setQuizAnswers(next);
         if (quizIdx + 1 >= quizSet.length) {
             const score = next.filter(a => a.ok).length;
-            recordQuiz(tid, cid, score, quizSet.length);
+            // Karteikarten aktualisieren — auch im Wiederholungs-Modus.
+            srsGradeMany(next.map(a => ({ ref: a.ref, ok: a.ok })).filter(u => u.ref));
+            // Quiz-Best/Last nur fuer regulaere Kapitel-Quizze: im Review-Modus
+            // wuerde ein Score, der Karten aus mehreren Kapiteln mischt, die
+            // Kapitel-Statistiken verfaelschen.
+            if (!reviewMode) recordQuiz(tid, cid, score, quizSet.length);
             setQuizInput(null);
             setStage('quizResult');
         } else {
@@ -1165,6 +1353,7 @@ function Schulungen() {
     // ---------- Stage: Chapters ----------
     if (stage === 'chapters' && training) {
         const tState = state[training.id] || {};
+        const srsStats = srsTrainingStats(training, srsState);
         return (
             <section className="view-fade">
                 <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
@@ -1175,6 +1364,30 @@ function Schulungen() {
                         <p className="text-sm text-slate-500">{training.code}</p>
                     </div>
                 </div>
+                {srsStats.total > 0 && (
+                    <div className="mb-5 bg-gradient-to-r from-violet-50 to-blue-50 border border-violet-200 rounded-2xl p-4 md:p-5">
+                        <div className="flex flex-wrap items-center justify-between gap-4">
+                            <div className="flex-1 min-w-[200px]">
+                                <div className="text-xs font-bold uppercase tracking-wider text-violet-700 mb-1">Spaced Repetition</div>
+                                <h3 className="text-base md:text-lg font-bold text-slate-900">
+                                    {srsStats.due > 0
+                                        ? `${srsStats.due} Karteikarte${srsStats.due === 1 ? '' : 'n'} heute fällig`
+                                        : srsStats.learned > 0
+                                            ? 'Heute alle Karten erledigt'
+                                            : 'Noch keine Karteikarten'}
+                                </h3>
+                                <p className="text-xs text-slate-600 mt-0.5">
+                                    {srsStats.learned}/{srsStats.total} Karten gelernt
+                                    {srsStats.lapsed > 0 && ` · ${srsStats.lapsed} mit Fehlerhistorie`}
+                                </p>
+                            </div>
+                            <button onClick={startReview} disabled={srsStats.due === 0 && srsStats.fresh === 0}
+                                className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2 px-5 rounded-lg shadow text-sm transition">
+                                {srsStats.due > 0 ? 'Wiederholen starten' : srsStats.fresh > 0 ? 'Neue Karten lernen' : 'Nichts fällig'}
+                            </button>
+                        </div>
+                    </div>
+                )}
                 <div className="flex flex-col gap-4">
                     {training.chapters.map((ch, i) => {
                         const cs = tState[ch.id];
@@ -1312,7 +1525,9 @@ function Schulungen() {
     }
 
     // ---------- Stage: Quiz ----------
-    if (stage === 'quiz' && training && chapter) {
+    // Im Wiederholungs-Modus (reviewMode) ist `chapter` null — die Karten kommen
+    // aus mehreren Kapiteln. Wir akzeptieren stattdessen `training` allein.
+    if (stage === 'quiz' && training && (chapter || reviewMode)) {
         const item = quizSet[quizIdx];
         if (!item) { setStage('chapters'); return null; }
         const itype = quizItemType(item);
@@ -1343,7 +1558,7 @@ function Schulungen() {
                             </span>
                         )}
                     </div>
-                    <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) setStage('chapters'); }}
+                    <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) { setReviewMode(false); setStage('chapters'); } }}
                         className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-2 mb-5 overflow-hidden">
@@ -1413,19 +1628,26 @@ function Schulungen() {
     }
 
     // ---------- Stage: QuizResult ----------
-    if (stage === 'quizResult' && training && chapter) {
+    if (stage === 'quizResult' && training && (chapter || reviewMode)) {
         const score = quizAnswers.filter(a => a.ok).length;
         const wrong = quizAnswers.length - score;
         return (
             <section className="view-fade max-w-3xl mx-auto" ref={resultRef}>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">Quiz-Auswertung</h2>
-                    <p className="text-slate-600 mb-6">{training.short || training.name} · {chapter.title}</p>
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">{reviewMode ? 'Wiederholung — Auswertung' : 'Quiz-Auswertung'}</h2>
+                    <p className="text-slate-600 mb-6">
+                        {training.short || training.name}
+                        {!reviewMode && chapter ? ` · ${chapter.title}` : ''}
+                        {reviewMode ? ` · ${quizAnswers.length} Karteikarte${quizAnswers.length === 1 ? '' : 'n'}` : ''}
+                    </p>
                     <div className="flex justify-center gap-8 mb-2 flex-wrap">
                         <div><div className="text-5xl font-extrabold text-emerald-600">{score}</div><div className="text-xs font-bold text-slate-500 uppercase tracking-wider">richtig</div></div>
                         <div><div className="text-5xl font-extrabold text-rose-600">{wrong}</div><div className="text-xs font-bold text-slate-500 uppercase tracking-wider">falsch</div></div>
                         <div><div className="text-5xl font-extrabold text-slate-700">{Math.round((score / quizAnswers.length) * 100)}%</div><div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Quote</div></div>
                     </div>
+                    {reviewMode && (
+                        <p className="text-xs text-slate-500 mt-4">Karteikarten wurden aktualisiert. Falsche Antworten kommen morgen wieder, richtige nach gestaffelten Intervallen (Spaced Repetition).</p>
+                    )}
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
                     <h3 className="font-bold text-slate-800 mb-4">Aufgaben im Überblick</h3>
@@ -1481,9 +1703,18 @@ function Schulungen() {
                     </ol>
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center">
-                    <button onClick={startQuiz} className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">Quiz wiederholen</button>
-                    <button onClick={() => setStage('reader')} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Zurück zum Kapitel</button>
-                    <button onClick={() => setStage('chapters')} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Anderes Kapitel</button>
+                    {reviewMode ? (
+                        <>
+                            <button onClick={startReview} className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">Weiter wiederholen</button>
+                            <button onClick={() => { setReviewMode(false); setStage('chapters'); }} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Zur Kapitelübersicht</button>
+                        </>
+                    ) : (
+                        <>
+                            <button onClick={startQuiz} className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">Quiz wiederholen</button>
+                            <button onClick={() => setStage('reader')} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Zurück zum Kapitel</button>
+                            <button onClick={() => setStage('chapters')} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Anderes Kapitel</button>
+                        </>
+                    )}
                 </div>
             </section>
         );
