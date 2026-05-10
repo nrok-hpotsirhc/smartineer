@@ -1,6 +1,6 @@
 # Smartineer — Engineering Knowledge Reloaded
 
-Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 12 Kategorien (inkl. Allgemeinmedizin als Spiegelung der gleichnamigen Schulung), 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–4 (Klassen 5–10 und Englisch in Vorbereitung) und ein **Schulungen-Bereich** mit Cert-Prep-Kursen (CompTIA SecurityX/Security+/CySA+/PenTest+) sowie einer Allgemeinmedizin-Schulung (M1/M2/Facharzt).
+Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 15 Kategorien (inkl. Allgemeinmedizin als Spiegelung der gleichnamigen Schulung sowie KRL, Fügetechniken und Agentic AI), 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–4 (Klassen 5–10 und Englisch in Vorbereitung), ein **Schulungen-Bereich** mit Cert-Prep-Kursen (CompTIA SecurityX/Security+/CySA+/PenTest+) sowie zwei Master-ET-Schulungen in Vorbereitung, und ein **Optionen-Menü** mit Auth-Gate, Kategorie-Sichtbarkeit, Import/Export und PWA-Install.
 
 > **Stack**: React 18 (CDN, JSX via Babel-standalone) · Tailwind CSS (CDN) · Chart.js · KaTeX  
 > **Auslieferung**: Klassische Website **und** installierbare PWA (Desktop, Android, iOS)  
@@ -17,6 +17,7 @@ Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein e
 - [Projektstruktur](#projektstruktur)
 - [Kategorien-Übersicht](#kategorien-übersicht)
 - [Aufgaben hinzufügen / bearbeiten](#aufgaben-hinzufügen--bearbeiten)
+- [Optionen & Schulungen](#optionen--schulungen)
 - [Datenformat (Schema)](#datenformat-schema)
 - [Wissenschaftliche Korrektheit](#wissenschaftliche-korrektheit)
 - [Roadmap](#roadmap)
@@ -26,11 +27,13 @@ Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein e
 
 ## Features
 
-- **12 Kategorien**: Allgemeinmedizin (Spiegelung der Schulung), Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3), Cyber Security
+- **15 Kategorien**: Allgemeinmedizin (Spiegelung der Schulung), Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3), Cyber Security, KUKA Robot Language (KRL), Fügetechniken, Agentic AI
 - **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **10 Aufgaben** = ~**270 Aufgaben** insgesamt
 - **KaTeX-gerenderte Formeln** in Aufgaben, Hinweisen und Lösungen
 - **React-UI** (Hooks, Functional Components) mit weichen Übergangs-Animationen, Gradient-Hero, animierten Fortschrittsbalken und Hover-Effekten
 - **PWA**: voll installierbar auf Desktop / Android / iOS, **offline-fähig** durch Service-Worker-Caching
+- **Optionen-Menü** mit Konto-Login für Schulungen, Kategorie-Toggle, Import/Export, Reset und Install-Prompt
+- **Frontend-Only Schulungen-Gate** mit lokaler Session für Cert-Prep und Master-ET-Vorbereitungen
 - **Cheatsheets** je Kategorie mit zwei Reitern:
   1. **Formeln** (kompakte Übersicht)
   2. **Musterlösungen** (vollständig isoliert mit Rechenweg und Kommentaren)
@@ -134,6 +137,7 @@ smartineer/
 ├── css/
 │   └── styles.css              # Pills, Animationen, Safe-Area, Scrollbars
 └── js/
+  ├── auth-credentials.example.js  # Vorlage für Schulungen-Login
     ├── app.jsx                 # React-App (Hooks, Komponenten, Install-Prompt)
     └── data/
         ├── math.js             # Höhere Mathematik
@@ -144,7 +148,13 @@ smartineer/
         ├── physics.js          # Physik
         ├── crypto.js           # Kryptographie
         ├── blockchain.js       # Blockchain
-        └── neural_nets.js      # Neuronale Netze
+        ├── neural_nets.js      # Neuronale Netze
+        ├── krl.js              # KUKA Robot Language
+        ├── fuegetechniken.js   # Fügetechniken
+        ├── agentic_ai.js       # Agentic AI
+        ├── schulung_master_et_cybersec.js
+        ├── schulung_master_et_automation.js
+        └── schueler.js         # Schüler-Bereich
 ```
 
 Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht ihre `id` in `window.APP_ORDER`. Reihenfolge in der UI = Reihenfolge der `<script>`-Tags in `index.html`. React liest beim Mount aus diesen Globals — **keine** `import`-Statements nötig.
@@ -166,6 +176,10 @@ Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht
 | Blockchain | Hash-Ketten, Merkle-Trees, PoW/PoS, Difficulty, Smart Contracts, Layer-2, Rollups |
 | Neuronale Netze | Aktivierungen, Backprop, SGD/Adam, Regularisierung, CNN, Batch-Norm, Universal Approximation |
 | PLC-Programmierung | IEC 61131-3 (ST/KOP/FUP/AWL), Datentypen, Selbsthaltung, TON/CTU/R_TRIG, Scan-Zyklus, Hysterese, PI mit Anti-Windup, Race-Conditions |
+| Cyber Security | Kryptographie, IEC 62443, Secure Boot, Threat Modeling, Supply-Chain-Security, Risikomanagement |
+| KUKA Robot Language | PTP/LIN/CIRC, $BASE/$TOOL, Frames, Singularitäten, Zyklen, Interrupts, RSI |
+| Fügetechniken | DIN 8593, Schweißen, Löten, Kleben, Pressverbände, Streckenenergie, Qualitätssicherung |
+| Agentic AI | ReAct, RAG, Planning, Reflexion, MCP, LLM-Sicherheit, EU AI Act, NIST AI 600-1 |
 
 ---
 
@@ -184,6 +198,13 @@ Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht
 3. Die Datei zusätzlich in der `APP_SHELL`-Liste in `sw.js` ergänzen (sonst kein Offline-Cache).
 4. `CACHE_VERSION` in `sw.js` hochzählen, damit Bestandsuser den neuen Stand beziehen.
 5. Die UI (Sidebar, Dashboard, Radarchart) übernimmt die Kategorie automatisch.
+
+## Optionen & Schulungen
+
+- Der Tab **Optionen** bündelt Kategorie-Sichtbarkeit, Fortschritts-Export/-Import, Reset und den PWA-Installations-Flow.
+- Der Bereich **Schulungen** ist mit einem lokalen Login geschützt. Die Zugangsdaten werden optional über `js/auth-credentials.js` eingebunden; die mitgelieferte Vorlage ist [js/auth-credentials.example.js](js/auth-credentials.example.js).
+- Die Anmeldung ist eine reine UX-Hilfe ohne echten Sicherheitsanspruch. Der Quellcode und der Browser-Storage bleiben einsehbar.
+- Die beiden Master-ET-Schulungen sind derzeit als `status: 'preparation'` angelegt; jeweils ein Kapitel ist produktiv ausgearbeitet, die übrigen Kapitel sind bewusst als Platzhalter markiert.
 
 ---
 
