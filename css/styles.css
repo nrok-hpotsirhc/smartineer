@@ -214,6 +214,19 @@ html.theme-dark, body.theme-dark {
 .theme-dark .bg-teal-50 { background-color: rgba(20,184,166,0.12); }
 .theme-dark .border-teal-200 { border-color: rgba(20,184,166,0.4); }
 .theme-dark .text-teal-700 { color: #5eead4; }
+/* Rose-/Rot-Akzente (falsche Antworten, Reset-Button, Fehler-Hinweise):
+   Hellrosa Tailwind-Defaults sind im Dark-Mode unlesbar in Kombination mit gemappter
+   slate-800-Schrift. Daher analog zu Emerald/Amber halbtransparent dunkel-rosa
+   einfaerben + helle Schrift. */
+.theme-dark .bg-rose-50 { background-color: rgba(244,63,94,0.12); }
+.theme-dark .bg-rose-100 { background-color: rgba(244,63,94,0.22); }
+.theme-dark .hover\:bg-rose-100:hover { background-color: rgba(244,63,94,0.3); }
+.theme-dark .border-rose-200 { border-color: rgba(244,63,94,0.45); }
+.theme-dark .border-rose-300 { border-color: rgba(244,63,94,0.55); }
+.theme-dark .border-rose-400 { border-color: #fb7185; }
+.theme-dark .text-rose-600,
+.theme-dark .text-rose-700 { color: #fda4af; }
+.theme-dark .text-red-700 { color: #fca5a5; }
 /* Blau-Akzente (Login-Hinweis, Badges): dunkel-blau-Hintergrund + helle Schrift */
 .theme-dark .border-blue-200 { border-color: rgba(59,130,246,0.45); }
 .theme-dark .text-blue-800,
