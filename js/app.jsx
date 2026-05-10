@@ -20,6 +20,7 @@ const SRS_INTERVALS_DAYS = [1, 3, 7, 16, 35, 70, 140]; // SM-2 lite, gestaffelt
 // DevTools sichtbar. Geeignet nur fuer leichten Zugang-Schutz im Bereich der
 // Schulungen, nicht fuer regulatorisch sensible Inhalte.
 const AUTH_KEY = 'smartineer_auth_v1'; // { user, role, since (ISO), expires (ISO) }
+const AUTH_TEMPORARILY_DISABLED = true; // TODO: P-UI-LOGIN-REACTIVATE — Auth-Gate wieder aktivieren.
 const VISIBLE_CATS_KEY = 'smartineer_visible_categories_v1'; // { [catId]: false } — Default: alle sichtbar
 const ADMIN_GLOBAL_KEY = 'smartineer_admin_global_v1'; // reserviert fuer kuenftige globale Settings
 
@@ -208,6 +209,7 @@ function useAuth() {
     });
     const cfg = (typeof window !== 'undefined') ? window.SMARTINEER_AUTH : null;
     const login = useCallback((user, pass) => {
+        if (AUTH_TEMPORARILY_DISABLED) return { ok: false, disabled: true, error: 'Login ist temporaer deaktiviert.' };
         if (!cfg || !cfg.users) return { ok: false, error: 'Auth-Konfiguration fehlt (js/auth-credentials.js).' };
         const u = cfg.users[user];
         if (!u || u.pass !== pass) return { ok: false, error: 'Benutzername oder Passwort falsch.' };
@@ -222,8 +224,15 @@ function useAuth() {
         try { localStorage.removeItem(AUTH_KEY); } catch (e) { /* ignore */ }
         setSession(null);
     }, []);
-    const isAdmin = !!(session && session.role === 'admin');
-    return { session, login, logout, isAdmin, configured: !!cfg };
+    const isAdmin = !AUTH_TEMPORARILY_DISABLED && !!(session && session.role === 'admin');
+    return {
+        session: AUTH_TEMPORARILY_DISABLED ? null : session,
+        login,
+        logout,
+        isAdmin,
+        configured: !AUTH_TEMPORARILY_DISABLED && !!cfg,
+        disabled: AUTH_TEMPORARILY_DISABLED
+    };
 }
 
 // Sichtbare Kategorien: Default alle sichtbar. Speichert nur die deaktivierten
@@ -1292,7 +1301,8 @@ function Schulungen({ auth, onGoToOptionen }) {
 
     // Auth-Gate: nur sichtbar fuer eingeloggte Nutzer. Sehr leichter Schutz —
     // siehe Disclaimer in js/auth-credentials.js (Frontend-only).
-    if (auth && !auth.session) {
+    // Temporaer deaktiviert: siehe P-UI-LOGIN-REACTIVATE in WORKPACKAGES.md.
+    if (auth && !auth.disabled && !auth.session) {
         return (
             <section className="view-fade max-w-xl mx-auto">
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
@@ -1958,6 +1968,15 @@ function OptionenKonto({ auth }) {
         if (r.ok) { setUser(''); setPass(''); setErr(null); }
         else setErr(r.error || 'Anmeldung fehlgeschlagen.');
     };
+    if (auth.disabled) {
+        return (
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 className="text-lg font-bold text-slate-800 mb-2">Login temporaer deaktiviert</h3>
+                <p className="text-sm text-slate-600 mb-3">Der Schulungen-Bereich ist voruebergehend ohne Anmeldung nutzbar. Die Reaktivierung ist als Arbeitspaket <code>P-UI-LOGIN-REACTIVATE</code> in <code>WORKPACKAGES.md</code> vermerkt.</p>
+                <p className="text-xs text-slate-400">Hinweis: Auch nach Reaktivierung bleibt diese Frontend-Only-Anmeldung nur eine UX-Hilfe und kein echter Schutz.</p>
+            </div>
+        );
+    }
     if (auth.session) {
         return (
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
@@ -2067,7 +2086,7 @@ function OptionenStore({ auth }) {
                 className="inline-block mt-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold py-2 px-5 rounded-lg shadow text-sm hover:shadow-lg transition">
                 Vorschlag per E-Mail senden
             </a>
-            {!auth.session && (
+            {!auth.disabled && !auth.session && (
                 <p className="text-xs text-slate-400 mt-4">Hinweis: Spaeter wird der Store an dein Konto gekoppelt sein.</p>
             )}
         </div>
