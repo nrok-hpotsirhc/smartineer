@@ -533,6 +533,186 @@
             'IEC 61499-1:2012 §6.1: WITH ordnet einer Datenleitung den Event zu, der die Gueltigkeit signalisiert — ohne WITH ist der Datenwert beim Event nicht zwingend frisch.')
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 3 — Feldbus / Industrial Ethernet / TSN — PRODUKTIV
+    // Quellen: IEC 61158/61784 Feldbusprofile; IEC 61784-2:2019; IEC 62541
+    // (OPC UA) Parts 1/4/6/14; IEEE 802.1Q-2022, IEEE 802.1AS-2020,
+    // IEEE 802.1CB-2017; ETG.1000 EtherCAT; CiA 301; Modbus AP V1.1b3;
+    // IEC 62443-3-2:2020 / -3-3:2013; OPC Foundation OPC UA FX 1.00.
+    // ----------------------------------------------------------------------
+    const PAGE_FIELD_REALTIME = {
+        title: '3.1 Industrial Ethernet und Echtzeitklassen',
+        html: '<blockquote><strong>Lernziele.</strong> Sie koennen (1) klassische Feldbusse gegen Industrial Ethernet abgrenzen, (2) harte von weicher Echtzeit unterscheiden, (3) Latenz und Jitter fuer Steuerungsaufgaben bewerten, (4) PROFINET, EtherCAT, EtherNet/IP, Modbus-TCP und CANopen grob einordnen.</blockquote><h4>3.1.1 Von Feldbus zu Industrial Ethernet</h4><p>Klassische Feldbusse wie PROFIBUS DP/PA, CANopen oder DeviceNet wurden fuer zyklische Prozessdaten mit begrenzter Bandbreite und deterministischem Zugriff entworfen. Industrial Ethernet nutzt dagegen IEEE-802.3-Physik und Switches, kombiniert aber zyklische Echtzeit-Kommunikation mit TCP/IP-Diagnose, Engineering und vertikaler Integration.</p><p><strong>Wichtig:</strong> Ethernet allein ist nicht automatisch echtzeitfaehig. Determinismus entsteht erst durch Kommunikationsprofil, Scheduling, Priorisierung, Zeit-Synchronisation und begrenzte Netztopologie.</p><h4>3.1.2 Echtzeitbegriffe</h4><ul><li><strong>Latenz:</strong> Zeit vom Senden bis zur nutzbaren Ankunft eines Prozessdatums.</li><li><strong>Jitter:</strong> Schwankung dieser Latenz bzw. des Zyklusstarts.</li><li><strong>Isochron:</strong> feste, synchronisierte Zykluslage fuer Antriebe und Motion-Control.</li><li><strong>Deterministisch:</strong> obere Schranke fuer Latenz/Jitter ist bekannt und im Engineering eingehalten.</li></ul><p>Fuer diskrete SPS-Logik reichen oft Zyklen von 4-20 ms. Mehrachs-Motion verlangt haeufig 250 us bis 1 ms und sehr kleinen Jitter, weil Sollwerte phasengleich an allen Achsen ankommen muessen.</p><h4>3.1.3 Protokollfamilien</h4><table><thead><tr><th>Technik</th><th>Prinzip</th><th>Typische Staerke</th></tr></thead><tbody><tr><td>PROFINET RT/IRT</td><td>RT priorisiert Ethernet-Frames; IRT nutzt geplante Zeitfenster</td><td>Breite SPS-/Antriebs-Integration</td></tr><tr><td>EtherCAT</td><td>Telegramm wird im Durchlauf verarbeitet (processing on the fly)</td><td>Sehr kurze Zyklen, Motion-Control</td></tr><tr><td>EtherNet/IP</td><td>CIP ueber TCP/UDP, implizite zyklische I/O-Verbindungen</td><td>Rockwell-/ODVA-Oekosystem</td></tr><tr><td>Modbus-TCP</td><td>Einfaches Registermodell ueber TCP</td><td>Gateway, einfache Geraete, Diagnose</td></tr><tr><td>CANopen</td><td>CAN-basierte Objektverzeichnisse und PDO/SDO</td><td>Kompakte Maschinenmodule, Embedded-Antriebe</td></tr></tbody></table><p class="text-xs text-slate-500"><em>Quellen: IEC 61158/61784 Feldbusprofile; IEC 61784-2:2019 Industrial-Communication-Profiles; Popp, Industrial Communication with Fieldbus and Ethernet, 2010; ODVA EtherNet/IP Specification Vol. 1; CiA 301 CANopen Application Layer.</em></p>'
+    };
+
+    const PAGE_FIELD_PROTOCOLS = {
+        title: '3.2 PROFINET, EtherCAT, Modbus, CANopen',
+        html: '<blockquote><strong>Lernziele.</strong> Sie koennen (1) PROFINET RT und IRT unterscheiden, (2) das EtherCAT-Durchlaufprinzip erklaeren, (3) Modbus-TCP als nicht-hart-echtzeitfaehig einordnen, (4) CANopen-Objektverzeichnis und PDO/SDO beschreiben.</blockquote><h4>3.2.1 PROFINET</h4><p>PROFINET ist in IEC 61158/61784 als Industrial-Ethernet-Profil (CPF 3) beschrieben. <strong>PROFINET RT</strong> nutzt Ethernet-Frames mit Priorisierung fuer zyklische Prozessdaten und laeuft ueber Standard-Switches. <strong>PROFINET IRT</strong> reserviert geplante Zeitfenster im Zyklus und benoetigt Engineering von Topologie, Kommunikationsbeziehungen und Geraetezeiten.</p><p>Redundanz kann u.a. ueber MRP-Ringe realisiert werden; Diagnose, Geraeteidentifikation und Profile (z.B. PROFIdrive, PROFIsafe) sind zentrale Staerken im Maschinenbau.</p><h4>3.2.2 EtherCAT</h4><p>EtherCAT (IEC 61158/61784, ETG.1000) sendet ein oder wenige Summen-Telegramme durch die Linie. Jedes Slave-Geraet liest und schreibt seine Daten <em>on the fly</em>, waehrend das Telegramm vorbeilaeuft. Die <strong>FMMU</strong> (Fieldbus Memory Management Unit) mappt logische Prozessabbild-Adressen auf lokale Slave-Speicherbereiche; <strong>Distributed Clocks</strong> synchronisieren Geraetezeiten fuer isochrone Achsen.</p><h4>3.2.3 Modbus-TCP und CANopen</h4><p>Modbus-TCP kapselt das einfache Modbus-Registermodell in TCP. Es ist leicht zu implementieren und fuer Gateways beliebt, liefert aber wegen TCP, Request/Response-Modell und fehlendem globalen Zyklus keine harte Echtzeitgarantie.</p><p>CANopen (CiA 301) baut auf CAN-Arbitration auf: niedrigere Identifier haben hoehere Prioritaet. Das <strong>Object Dictionary</strong> strukturiert Parameter; PDOs transportieren Prozessdaten, SDOs dienen Parametrierung und Diagnose.</p><p class="text-xs text-slate-500"><em>Quellen: IEC 61784-2:2019 CPF 3 (PROFINET), ETG.1000 EtherCAT Specification, Modbus Application Protocol Specification V1.1b3, CiA 301 CANopen Application Layer and Communication Profile.</em></p>'
+    };
+
+    const PAGE_FIELD_OPCUA = {
+        title: '3.3 OPC UA — Architektur, Pub/Sub und Security',
+        html: '<blockquote><strong>Lernziele.</strong> Sie koennen (1) OPC-UA-Client/Server und Pub/Sub unterscheiden, (2) Information-Modeling mit Nodes und References einordnen, (3) Security-Policies und Zertifikate erklaeren, (4) OPC UA FX als Bruecke zur Feldebene beschreiben.</blockquote><h4>3.3.1 Architektur und Informationsmodell</h4><p>OPC UA ist in IEC 62541 standardisiert. Der Kern ist ein typisierter Adressraum aus <strong>Nodes</strong> und <strong>References</strong>. Namespaces trennen Hersteller-, Companion-Spec- und Anlagenmodelle. Dadurch uebertraegt OPC UA nicht nur Bytes, sondern Bedeutung: Einheit, Datentyp, Methode, Alarm, Zustand und Beziehungen koennen maschinenlesbar beschrieben werden.</p><p><strong>Client/Server</strong> ist zustandsbehaftet: Sessions, Subscriptions, Monitored Items und Services fuer Lesen, Schreiben, Browsen und Methodenaufruf. Es passt gut fuer SCADA, MES, Engineering und Diagnose.</p><h4>3.3.2 Pub/Sub und OPC UA FX</h4><p><strong>OPC UA Pub/Sub</strong> (IEC 62541 Part 14) entkoppelt Publisher und Subscriber. Nachrichten koennen als UADP ueber UDP oder ueber Broker-Transporte wie MQTT laufen. Fuer Feldkommunikation wird Pub/Sub mit TSN kombiniert, damit zyklische Daten zeitlich geplant uebertragen werden koennen.</p><p><strong>OPC UA FX</strong> (Field eXchange) erweitert OPC UA um Controller-to-Controller- und Controller-to-Device-Kommunikation, Profile, Deskriptoren und Konformitaetsklassen fuer die Feldebene. Ziel ist semantische Interoperabilitaet plus deterministischer Transport ueber Ethernet/TSN.</p><h4>3.3.3 Security</h4><p>OPC UA verwendet Application-Instance-Zertifikate, Security-Policies, Message-Signing und Verschluesselung. User-Authentication (z.B. Username/Password, Zertifikat, Token) ist von der Secure-Channel-Absicherung zu unterscheiden. In OT-Netzen gehoeren Zertifikats-Lifecycle, Trust-Lists und Rollenmodell zum Engineering — sonst scheitert Interoperabilitaet oft an falsch gepflegten Trust Stores.</p><p class="text-xs text-slate-500"><em>Quellen: IEC 62541-1:2020 Overview and Concepts; IEC 62541-4:2020 Services; IEC 62541-6:2020 Mappings; IEC 62541-14:2020 PubSub; OPC Foundation OPC UA FX Release 1.00; IEC 62443-3-3:2013 Security Requirements.</em></p>'
+    };
+
+    const PAGE_FIELD_TSN = {
+        title: '3.4 Time-Sensitive Networking, Auslegung und Migration',
+        html: '<blockquote><strong>Lernziele.</strong> Sie koennen (1) TSN als IEEE-802.1-Werkzeugkasten erklaeren, (2) Qbv, Qbu/802.3br, 802.1AS und 802.1CB einordnen, (3) Netz-Auslegung fuer deterministische OT-Kommunikation strukturieren, (4) Migrationsrisiken von Legacy-Bussen benennen.</blockquote><h4>3.4.1 TSN-Bausteine</h4><p>Time-Sensitive Networking ist kein einzelnes Protokoll, sondern eine Familie von IEEE-802.1-Erweiterungen. <strong>IEEE 802.1AS-2020</strong> liefert gPTP-Zeitsynchronisation. <strong>IEEE 802.1Qbv</strong> definiert Time-Aware Shaping: Ausgangsqueues werden per Gate-Control-List in geplanten Zeitfenstern geoeffnet oder gesperrt. <strong>IEEE 802.1Qbu / IEEE 802.3br</strong> erlauben Frame Preemption, damit kurze Echtzeitframes grosse Best-Effort-Frames unterbrechen koennen. <strong>IEEE 802.1CB</strong> repliziert und eliminiert Frames fuer hoehere Verfuegbarkeit.</p><h4>3.4.2 Engineering-Prinzipien</h4><p>Deterministische Netze entstehen durch Engineering: Zykluszeit, Datenmenge, Topologie, Switch-Latenzen, Queue-Prioritaeten, Zeitsynchronisation und Stoerreserven muessen zusammenpassen. VLAN-PCP nach IEEE 802.1Q priorisiert Traffic, garantiert aber allein keine harte Schranke; dafuer braucht es geplante Fenster oder per-stream Reservierung.</p><p>Ein typischer Entwurf trennt Traffic-Klassen: Safety und Motion mit kurzen Zyklen, zyklische I/O-Daten, azyklische Diagnose, Engineering/IT. Fuer Security wird das Kommunikationsmodell in IEC-62443-Zonen und -Conduits ueberfuehrt, statt ein flaches Produktionsnetz zu betreiben.</p><h4>3.4.3 Migration</h4><p>Legacy-Feldbusse werden selten in einem Schritt ersetzt. Gateways koennen Prozessdaten uebersetzen, verlieren aber oft Semantik, Diagnose-Tiefe oder Echtzeitgarantien. Darum zuerst Kommunikationsanforderungen erfassen: Zykluszeit, Jitterbudget, Safety-Profil, Diagnose, Hersteller-Oekosystem, Kabelwege, Redundanz und Lifecycle.</p><p>Bei Brownfield-Anlagen ist eine hybride Architektur ueblich: bestehende Bussegmente bleiben lokal, neue Zellen nutzen Industrial Ethernet/TSN, und OPC UA stellt semantische Daten an SCADA/MES/Cloud bereit.</p><p class="text-xs text-slate-500"><em>Quellen: IEEE 802.1Q-2022 (Bridge/VLAN, Qbv, Qbu), IEEE 802.1AS-2020 gPTP, IEEE 802.1CB-2017 FRER, IEC/IEEE 60802 TSN Profile for Industrial Automation (Draft/Profiles), IEC 62443-3-2:2020 Zones and Conduits.</em></p>'
+    };
+
+    const QUIZ_FIELD = [
+        q('Was unterscheidet PROFINET IRT am deutlichsten von PROFINET RT?',
+            ['IRT nutzt nur TCP und ist daher langsamer', 'IRT verwendet geplante/reservierte Zeitfenster fuer isochrone Kommunikation', 'IRT ist ausschliesslich fuer Modbus-Gateways gedacht', 'IRT verzichtet auf Ethernet-Switches'], 1,
+            'IEC 61784-2 CPF 3: PROFINET IRT reserviert deterministische Kommunikationsphasen; RT priorisiert Frames, plant aber keine isochronen Fenster.'),
+        q('Was ist das zentrale EtherCAT-Prinzip fuer kurze Zykluszeiten?',
+            ['Slaves verarbeiten das Telegramm im Durchlauf (processing on the fly)', 'Jeder Slave baut eine TCP-Session auf', 'Alle Nutzdaten werden per MQTT brokerbasiert verteilt', 'Nur azyklische Registerzugriffe sind erlaubt'], 0,
+            'ETG.1000 EtherCAT: Prozessdaten werden waehrend des Telegrammdurchlaufs gelesen/geschrieben, statt pro Geraet separate Frames zu senden.'),
+        q('Welche Aufgabe hat die FMMU in EtherCAT-Slaves?',
+            ['Verschluesselung des Prozessabbilds', 'Vergabe von IPv6-Adressen', 'Mapping logischer Prozessabbild-Adressen auf lokale Slave-Speicherbereiche', 'Berechnung von Safety-CRC fuer PROFIsafe'], 2,
+            'ETG.1000 beschreibt die Fieldbus Memory Management Unit als Mechanismus fuer logische Adressierung des Prozessdatenabbilds.'),
+        q('Wofuer werden EtherCAT Distributed Clocks primaer genutzt?',
+            ['Nutzerverwaltung im Engineering-Tool', 'Automatische IP-Vergabe', 'Konvertierung von CANopen-Objekten', 'Synchronisation verteilter Geraetezeiten fuer isochrone Achsen'], 3,
+            'EtherCAT Distributed Clocks synchronisieren lokale Uhren, damit Achsen und I/O zeitgleich abtasten bzw. ausgeben koennen.'),
+        q('Warum gilt Modbus-TCP nicht als harte Echtzeit-Kommunikation?',
+            ['Weil es nur auf seriellen Leitungen laeuft', 'Wegen TCP/Request-Response-Modell ohne deterministisch geplanten globalen Zyklus', 'Weil es keine Register kennt', 'Weil es Verschluesselung zwingend erfordert'], 1,
+            'Modbus Application Protocol V1.1b3: Modbus-TCP nutzt ein einfaches Request/Response-Modell ueber TCP; deterministische Zeitfenster gehoeren nicht zum Protokoll.'),
+        q('Wie funktioniert CAN-Arbitration qualitativ?',
+            ['Niedrigere Identifier gewinnen die bitweise Arbitration und haben hoehere Prioritaet', 'Hoehere Nutzdatenlaenge gewinnt immer', 'Alle Teilnehmer senden strikt reihum', 'Arbitration erfolgt nur durch einen zentralen Master'], 0,
+            'CAN nutzt nicht-destruktive bitweise Arbitration; dominante Bits niedriger Identifier setzen sich durch, siehe ISO 11898/CAN-Grundprinzip.'),
+        q('Was ist das CANopen Object Dictionary?',
+            ['Ein verschluesseltes Passwort-Verzeichnis', 'Eine Liste aller Ethernet-Switches', 'Strukturierter Parameter- und Datenraum eines CANopen-Geraets', 'Ein OPC-UA-Namespace fuer Cloud-Daten'], 2,
+            'CiA 301 definiert das Object Dictionary als zentrales Modell fuer Kommunikations- und Applikationsobjekte.'),
+        q('Was modelliert der OPC-UA-Adressraum?',
+            ['Nur lineare Register ab Adresse 40001', 'Ausschliesslich MQTT-Topics', 'Nur Rohbytes ohne Typinformationen', 'Nodes und References mit Typen, Methoden, Ereignissen und semantischen Beziehungen'], 3,
+            'IEC 62541-3 beschreibt Nodes, References, NodeClasses und Typinformationen als Kern des OPC-UA-Informationsmodells.'),
+        q('Was ist der Hauptzweck von OPC UA Pub/Sub nach Part 14?',
+            ['Entkopplung von Publishern und Subscribern fuer verteilte Datenverteilung', 'Ersetzen aller SPS-Tasks durch JavaScript', 'Ausschliesslich Dateiuebertragung', 'Nur Benutzer-Login fuer SCADA'], 1,
+            'IEC 62541-14: PubSub entkoppelt Datenquelle und Empfaenger; UADP/UDP oder Broker-Transporte sind moeglich.'),
+        q('Welche Aussage zu OPC-UA-Security ist korrekt?',
+            ['Application-Instance-Zertifikate, Security-Policies, Signieren und Verschluesselung sichern den Secure Channel', 'OPC UA verbietet Zertifikate', 'Security besteht nur aus VLAN-Prioritaet', 'Passwort im Klartext ist die empfohlene Standardloesung'], 0,
+            'IEC 62541-2/4/6: Secure Channel nutzt Zertifikate und Security-Policies mit Sign/Encrypt; User-Authentication ist davon getrennt.'),
+        q('Wofuer steht OPC UA FX?',
+            ['Ein Ersatz fuer HTML in HMIs', 'Eine Feldbusvariante ohne Informationsmodell', 'Field eXchange: OPC-UA-Profile fuer Controller/Device-Kommunikation in der Feldebene', 'Ein reiner Cloud-Broker ohne Echtzeitbezug'], 2,
+            'OPC Foundation OPC UA FX Release 1.00 zielt auf Field eXchange mit Profilen fuer Controller-to-Controller und Controller-to-Device.'),
+        q('Was leistet IEEE 802.1Qbv?',
+            ['Zufaellige Backoff-Steuerung wie altes Halbduplex-Ethernet', 'Automatische Passwortrotation', 'Ersetzen von TCP durch CAN', 'Time-Aware Shaping mit Gate-Control-Listen fuer Ausgangsqueues'], 3,
+            'IEEE 802.1Q-2022 enthaelt Qbv Time-Aware Shaper: Queues werden in geplanten Zeitfenstern freigegeben oder gesperrt.'),
+        q('Welche Rolle hat IEEE 802.1AS-2020 in TSN-Netzen?',
+            ['gPTP-Zeitsynchronisation fuer Bridges und Endstationen', 'Definition von Modbus-Funktionscodes', 'Spezifikation von PROFIsafe', 'Kompression von OPC-UA-Nodes'], 1,
+            'IEEE 802.1AS-2020 definiert generalized Precision Time Protocol (gPTP) fuer zeitbewusste Ethernet-Systeme.'),
+        q('Was ist der Zweck von Frame Preemption nach IEEE 802.1Qbu/802.3br?',
+            ['Kurze Express-Frames koennen lange preemptable Frames unterbrechen', 'Alle Frames werden absichtlich verzoegert', 'Zertifikate werden automatisch signiert', 'CAN-Identifier werden in VLANs uebersetzt'], 0,
+            'IEEE 802.1Qbu und IEEE 802.3br definieren Frame Preemption, um Blocking durch lange Best-Effort-Frames zu reduzieren.'),
+        q('Welche Aussage beschreibt TSN am besten?',
+            ['Ein einzelnes proprietaeres Feldbusprotokoll', 'Ein Ersatz fuer jede Applikationsschicht', 'Ein IEEE-802.1-Werkzeugkasten fuer deterministische Ethernet-Kommunikation', 'Nur ein Security-Standard fuer Passwoerter'], 2,
+            'TSN besteht aus mehreren IEEE-802.1-Mechanismen wie 802.1AS, Qbv, Qbu und 802.1CB; es ist kein einzelnes Applikationsprotokoll.'),
+        q('Was erfordert PROFINET IRT typischerweise im Engineering?',
+            ['Keine Topologiekenntnis', 'Nur manuelle Registerlisten', 'Ausschliesslich WLAN', 'Planung von Topologie, Kommunikationsbeziehungen und reservierten Zyklusphasen'], 3,
+            'PROFINET IRT erreicht Determinismus durch geplante Kommunikationsphasen; Topologie und Geraeterollen sind deshalb Engineering-relevant.'),
+        q('Worauf basiert EtherNet/IP technisch?',
+            ['CIP ueber TCP/UDP/IP mit impliziten und expliziten Verbindungen', 'Nur I2C auf Backplane', 'Ausschliesslich OPC-UA-PubSub', 'CANopen-SDO ohne Ethernet'], 1,
+            'ODVA EtherNet/IP: Common Industrial Protocol (CIP) wird ueber TCP/UDP/IP transportiert; zyklische I/O nutzt implizite Messaging-Verbindungen.'),
+        q('Welche Zeitbasis nutzt CIP Sync?',
+            ['IEEE 1588 Precision Time Protocol', 'NTP ohne Hardware-Zeitstempel', 'Manuelle Uhrzeit aus HMI', 'Nur CAN-Bus-Arbitration'], 0,
+            'ODVA CIP Sync basiert auf IEEE 1588/PTP fuer Zeitsynchronisation in EtherNet/IP-Systemen.'),
+        q('Was kennzeichnet OPC UA Client/Server?',
+            ['Zustandslose Broadcast-Telegramme ohne Sessions', 'Ausschliesslich deterministische Motion-Zyklen', 'Services, Sessions, Subscriptions und Monitored Items fuer Lesen/Schreiben/Browsen', 'Nur Register 0 bis 9999'], 2,
+            'IEC 62541-4 definiert OPC-UA-Services; Client/Server nutzt Sessions, Subscriptions und Monitored Items.'),
+        q('Welcher Transport ist fuer OPC UA Pub/Sub mit UADP typisch?',
+            ['Nur RS-232', 'Nur PROFIBUS-PA', 'Ausschliesslich SMS', 'UDP-Multicast bzw. UDP-basierte Verteilung, alternativ Broker-Transporte'], 3,
+            'IEC 62541-14 beschreibt UADP ueber UDP sowie Broker-basierte Mappings, z.B. MQTT.'),
+        q('Was ist bei OPC-UA-Zertifikaten besonders wichtig?',
+            ['Trust-Lists und Zertifikats-Lifecycle muessen gepflegt werden', 'Zertifikate sind nur optische UI-Elemente', 'Sie ersetzen jede Netzwerksegmentierung', 'Sie duplizieren VLAN-PCP'], 1,
+            'IEC 62541 Security-Modell: Application Instance Certificates und Trust Lists sind Betriebsobjekte; abgelaufene oder nicht vertraute Zertifikate verhindern Verbindungen.'),
+        q('Welche IEC-62443-Konzepte helfen bei OT-Netzsegmentierung?',
+            ['Zones und Conduits', 'Nur Passwortlaenge', 'Nur Display-Aufloesung', 'Nur CAN-Identifier'], 0,
+            'IEC 62443-3-2:2020 strukturiert industrielle Systeme in Zonen und Conduits fuer Risikoanalyse und Security-Anforderungen.'),
+        q('Was ist ein typisches Gateway-Risiko bei Legacy-Bus-Migration?',
+            ['Gateways erhoehen automatisch jede Echtzeitgarantie', 'Gateways entfernen alle Diagnosefunktionen immer vollstaendig', 'Semantik, Diagnose-Tiefe oder Echtzeitverhalten gehen bei Protokolluebersetzung teilweise verloren', 'Gateways machen Safety-Zertifizierung ueberfluessig'], 2,
+            'Gateway-Architekturen koennen Prozesswerte uebersetzen, aber nicht zwingend alle Diagnoseobjekte, Profile und Zeitgarantien erhalten.'),
+        q('Warum ist Topologie fuer Industrial Ethernet relevant?',
+            ['Sie bestimmt nie Latenzen', 'Sie ersetzt das Safety-Konzept', 'Sie ist nur fuer WLAN wichtig', 'Switch-Hops, Ringe, Linien und Redundanzpfade beeinflussen Latenz, Jitter und Ausfallverhalten'], 3,
+            'IEC 61784-2-Profile und TSN-Engineering betrachten Topologie, Switch-Latenzen und Redundanz als zentrale Auslegungsparameter.'),
+        q('Was bewirkt Cut-Through-Switching gegenueber Store-and-Forward?',
+            ['Es kann Weiterleitungsverzoegerung reduzieren, weil nicht der ganze Frame gepuffert werden muss', 'Es verschluesselt automatisch Nutzdaten', 'Es macht Zeitsynchronisation unnoetig', 'Es ersetzt OPC-UA-Informationsmodelle'], 1,
+            'Ethernet-Switching-Grundlagen: Cut-through beginnt Weiterleitung nach Header-Auswertung; store-and-forward wartet auf den kompletten Frame und FCS-Pruefung.'),
+        q('Warum gibt es in voll-duplex switched Ethernet keine klassischen Kollisionen?',
+            ['Weil CSMA/CD in Punkt-zu-Punkt-Full-Duplex-Links nicht verwendet wird', 'Weil alle Frames UDP sein muessen', 'Weil nur ein Teilnehmer existiert', 'Weil Switches immer WLAN nutzen'], 0,
+            'IEEE 802.3 Full-Duplex Punkt-zu-Punkt-Links trennen Senden/Empfangen; CSMA/CD ist fuer moderne switched Industrial-Ethernet-Netze nicht relevant.'),
+        q('Wofuer wird VLAN PCP nach IEEE 802.1Q genutzt?',
+            ['Als Ersatz fuer PTP-Uhren', 'Zur Vergabe von Modbus-Registern', 'Zur Priorisierung von Ethernet-Frames in Traffic-Klassen', 'Zur Verschluesselung von OPC-UA-Nachrichten'], 2,
+            'IEEE 802.1Q definiert Priority Code Point (PCP) im VLAN-Tag fuer Traffic-Klassen und Queue-Auswahl.'),
+        q('Warum reicht QoS-Priorisierung allein nicht immer fuer harte Echtzeit?',
+            ['Priorisierung deaktiviert alle Switches', 'Priorisierung ist nur fuer serielle Busse erlaubt', 'Priorisierung verhindert Semantik in OPC UA', 'Ohne Scheduling/Reservierung koennen Blocking und Lastspitzen weiterhin Jitter verursachen'], 3,
+            'TSN fuehrt Time-Aware Shaping und weitere Mechanismen ein, weil reine Priorisierung keine strikte obere Schranke fuer alle Lastsituationen garantiert.'),
+        q('Was unterscheidet MQTT grundsaetzlich von OPC UA Pub/Sub mit Informationsmodell?',
+            ['MQTT ist brokerbasiert und transportiert Topics/Payloads, aber liefert allein kein standardisiertes industrielles Typ-/Objektmodell', 'MQTT garantiert immer Sub-Mikrosekunden-Jitter', 'MQTT ist identisch mit PROFINET IRT', 'MQTT benoetigt zwingend CAN-Arbitration'], 1,
+            'MQTT ist ein leichtgewichtiges Broker-Protokoll; Semantik muss ueber Payload-Konventionen ergaenzt werden. OPC UA bringt ein standardisiertes Informationsmodell mit.'),
+        q('Welche Aussage beschreibt DDS passend?',
+            ['Datenzentrierter Pub/Sub-Middleware-Standard mit QoS-Policies', 'Ein Registersatz fuer Modbus', 'Ein Safety-Profil fuer PROFIBUS', 'Ein Ersatz fuer VLAN-PCP'], 0,
+            'OMG DDS ist datenorientierte Pub/Sub-Middleware mit QoS-Policies; in Industrie/Robotik relevant, aber nicht identisch mit OPC UA.'),
+        q('In welchem Normkontext ist PROFINET als Industrial-Ethernet-Profil eingeordnet?',
+            ['Nur in HTML5', 'Nur in ISO 9001', 'IEC 61784-2, Communication Profile Family CPF 3', 'Ausschliesslich in IEEE 802.11'], 2,
+            'IEC 61784-2 ordnet Real-Time-Ethernet-Profile ein; PROFINET gehoert zu CPF 3.'),
+        q('Wie ist EtherCAT normativ eingeordnet?',
+            ['Nur als proprietaeres HMI-Dateiformat', 'Nur als WLAN-Profil', 'Ausschliesslich als MQTT-Topic', 'IEC 61158/61784, Communication Profile Family CPF 12'], 3,
+            'EtherCAT ist in IEC 61158/61784 als CPF 12 standardisiert; ETG.1000 beschreibt die technische Spezifikation.'),
+        q('Welche Spezifikation ist der Kern der CANopen-Applikationsschicht?',
+            ['OPC UA Part 14', 'CiA 301', 'IEEE 802.1Qbv', 'IEC 61508-2 Tabelle 2'], 1,
+            'CiA 301 definiert CANopen Application Layer and Communication Profile inklusive Object Dictionary, PDO, SDO und NMT.'),
+        q('Was sind Modbus Function Codes?',
+            ['Operationen wie Read Holding Registers oder Write Multiple Registers', 'TSN-Gate-Zeitplaene', 'OPC-UA-Namespaces', 'EtherCAT-Distributed-Clocks'], 0,
+            'Modbus Application Protocol V1.1b3 definiert Funktionscodes fuer Lese-/Schreiboperationen auf Coils und Register.'),
+        q('Wovon haengt die erreichbare Zykluszeit eines Industrial-Ethernet-Systems wesentlich ab?',
+            ['Nur von der Farbe des Kabels', 'Nur vom HMI-Theme', 'Datenmenge, Geraetezahl, Topologie, Switch-/Slave-Latenzen und Kommunikationsprofil', 'Nur vom Namen des SPS-Programms'], 2,
+            'IEC 61784-2 und TSN-Engineering: Zykluszeit ergibt sich aus Nutzdaten, Teilnehmerzahl, Topologie, Scheduling und Geraetelatenzen.'),
+        q('Was bedeutet Jitter in zyklischer Kommunikation?',
+            ['Maximale Nutzdatenlaenge', 'Anzahl der OPC-UA-Nodes', 'Name des Safety-Profils', 'Zeitliche Schwankung von Zyklusstart, Ankunft oder Latenz'], 3,
+            'Echtzeitdefinition: Jitter ist die Abweichung von idealen periodischen Zeitpunkten; fuer Motion-Control oft kritischer als mittlere Latenz.'),
+        q('Wie unterscheiden sich Latenz und Jitter?',
+            ['Latenz ist absolute Uebertragungsverzoegerung, Jitter deren Schwankung', 'Beides bedeutet VLAN-ID', 'Jitter ist immer groesser als Bandbreite', 'Latenz ist ein Passworttyp'], 1,
+            'Latenz misst Verzoegerung; Jitter misst Variation der Verzoegerung oder Zykluszeit.'),
+        q('Was meint das Black-Channel-Prinzip bei Safety-over-Fieldbus?',
+            ['Das Safety-Protokoll erkennt Kommunikationsfehler ende-zu-ende, der darunterliegende Kanal muss nicht sicherheitszertifiziert sein', 'Der Bus darf keinerlei Diagnose haben', 'Alle Nutzdaten werden schwarz eingefärbt', 'Safety wird durch hoehere Bandbreite ersetzt'], 0,
+            'IEC 61784-3 Safety Communication Profiles nutzen Ende-zu-Ende-Mechanismen wie Sequenz, Timeout und CRC ueber einem nicht-sicheren Kommunikationskanal.'),
+        q('Welches Safety-Profil ist typisch fuer EtherCAT?',
+            ['PROFIsafe', 'CIP Safety', 'FSoE (Fail Safe over EtherCAT)', 'OPC UA Alarms'], 2,
+            'ETG.5100 spezifiziert FSoE als Safety-over-EtherCAT-Profil nach Black-Channel-Prinzip.'),
+        q('Welches Safety-Profil wird mit PROFIBUS/PROFINET assoziiert?',
+            ['FSoE', 'CANopen Safety only', 'MQTT Safety', 'PROFIsafe'], 3,
+            'PROFIsafe ist das Safety-Communication-Profil der PROFIBUS/PROFINET-Welt, standardisiert im Kontext IEC 61784-3.'),
+        q('Was definieren OPC-UA-Companion-Spezifikationen?',
+            ['Domänenspezifische Informationsmodelle, z.B. fuer Maschinen, Robotik oder PLCopen', 'Nur Ethernet-Kabeltypen', 'CAN-Arbitrationspegel', 'TSN-Gate-Hardware'], 1,
+            'OPC Foundation Companion Specs standardisieren branchenspezifische Nodes, Typen und Semantik auf Basis von IEC 62541.'),
+        q('Warum sind stabile Namespace-URIs in OPC UA wichtig?',
+            ['Sie identifizieren semantische Modelle eindeutig ueber Server und Versionen hinweg', 'Sie ersetzen alle Zertifikate', 'Sie definieren die CAN-Bitrate', 'Sie aktivieren automatisch Frame Preemption'], 0,
+            'IEC 62541 Namespace-Konzept: Namespace-URIs vermeiden Namenskollisionen und erlauben eindeutige Interpretation von Typen und BrowseNames.'),
+        q('Welche Datenart sollte fuer harte zyklische Regelung bevorzugt werden?',
+            ['Ausschliesslich HMI-Screenshots', 'Nur E-Mail-Anhaenge', 'Zyklische Prozessdaten mit geplantem Timing statt ungebundener azyklischer Diagnose', 'Beliebige Cloud-REST-Calls im Steuerungszyklus'], 2,
+            'Echtzeit-Kommunikation trennt zyklische Prozessdaten von azyklischer Diagnose; ungebundene Diagnose darf den Regelzyklus nicht dominieren.'),
+        q('Was ist eine gute Security-Grundregel fuer IT/OT-Konvergenz?',
+            ['Produktionsnetz flach mit Office-Netz koppeln', 'Alle Firewalls entfernen', 'Nur Default-Passwoerter verwenden', 'Zonen, Conduits und OT-DMZ statt direkter ungefilterter Kopplung nutzen'], 3,
+            'IEC 62443-3-2 und Purdue/DMZ-Architekturen empfehlen Segmentierung in Zonen und kontrollierte Conduits zwischen IT und OT.'),
+        q('Warum ist NTP fuer sub-millisekundengenaue Motion-Synchronisation meist ungeeignet?',
+            ['NTP ersetzt keine hardwaregestuetzte PTP/gPTP-Synchronisation mit geringer Unsicherheit', 'NTP ist ein Safety-Profil', 'NTP definiert Modbus-Register', 'NTP ist nur fuer CAN-Identifier'], 1,
+            'Motion/TSN-Systeme verwenden IEEE 1588/PTP bzw. IEEE 802.1AS gPTP mit Hardware-Zeitstempeln; NTP ist fuer solche Jitterbudgets typischerweise zu ungenau.'),
+        q('Was leistet IEEE 802.1CB?',
+            ['Frame Replication and Elimination for Reliability (FRER)', 'Passwortspeicherung in SPS', 'Definition von Modbus Function Codes', 'Ersetzen von OPC UA Namespaces'], 0,
+            'IEEE 802.1CB-2017 definiert FRER: Frames werden ueber redundante Pfade repliziert und Duplikate am Ziel eliminiert.'),
+        q('Welche Voraussetzung ist fuer TSN-Scheduling wesentlich?',
+            ['Nur ein schneller Internetzugang', 'Ausschliesslich TCP-Verkehr', 'Zeitbewusste Endstationen/Switches und ein konsistenter, engineerter Zeitplan', 'Keine Topologiedokumentation'], 2,
+            'IEEE 802.1Qbv/802.1AS-basierte Netze brauchen synchronisierte Teilnehmer und Gate-Zeitplaene, sonst entsteht kein deterministisches Verhalten.'),
+        q('Wovon haengt Store-and-Forward-Switch-Latenz ab?',
+            ['Nur von der OPC-UA-Rolle', 'Nur von der CAN-ID', 'Nur vom HMI-Benutzer', 'Frame-Laenge und Link-Geschwindigkeit, weil der ganze Frame vor Weiterleitung empfangen wird'], 3,
+            'Store-and-forward prueft den kompletten Frame inklusive FCS; Serialisierungszeit skaliert mit Frame-Laenge und Bitrate.'),
+        q('Wofuer steht MRP im PROFINET-Umfeld?',
+            ['MQTT Register Profile', 'Media Redundancy Protocol fuer Ringredundanz', 'Motion Runtime Password', 'Modbus Routing Procedure'], 1,
+            'PROFINET nutzt u.a. MRP fuer Medienredundanz in Ringtopologien; es reduziert Ausfallfolgen bei Leitungsunterbrechung.'),
+        q('Welche Kriterien sind fuer die Protokollauswahl am sinnvollsten?',
+            ['Latenz/Jitter, Safety, Diagnose, Semantik, Hersteller-Oekosystem, Lifecycle und Migrationsaufwand', 'Nur maximale Bruttobandbreite', 'Nur Farbe der Switches', 'Nur die Laenge des Schulungsnamens'], 0,
+            'Industrielle Kommunikationsauswahl ist Multi-Kriterien-Engineering; Bandbreite allein sagt wenig ueber Determinismus, Diagnose, Safety und Wartbarkeit aus.')
+    ];
+
     const QUIZ_CTRL = [
         q('Wie lautet die Uebertragungsfunktion eines LTI-Zustandsraummodells?',
             ['$G(s)=B(sI-A)^{-1}C+D$', '$G(s)=C(sI-A)^{-1}B+D$', '$G(s)=(sI-A)^{-1}BC$', '$G(s)=A(sI-B)^{-1}C$'], 1,
@@ -652,29 +832,8 @@
                 id: 'fieldbus',
                 title: 'Kapitel 3 — Feldbusse und OPC UA',
                 summary: 'PROFINET, EtherCAT, Modbus, CANopen; OPC UA Pub/Sub und Sicherheitsmodell; Time-Sensitive Networking (TSN); industrielle Kommunikationsanforderungen.',
-                pages: [
-                    placeholderPage('Klassische und Echtzeit-Feldbusse', [
-                        'PROFIBUS DP/PA, Modbus RTU/TCP',
-                        'CANopen, DeviceNet, EtherNet/IP',
-                        'PROFINET RT/IRT, EtherCAT — Latenz und Jitter'
-                    ]),
-                    placeholderPage('OPC UA — Architektur', [
-                        'Adressraum, Information Modeling, Companion Specs',
-                        'Client/Server vs. Pub/Sub',
-                        'Security: User-Authentication, Message-Signing, Encryption'
-                    ]),
-                    placeholderPage('Time-Sensitive Networking (TSN)', [
-                        'IEEE 802.1Q-2022 — Time-Aware Shaping',
-                        'gPTP (IEEE 802.1AS), Frame Preemption',
-                        'Konvergenz IT/OT, Industrial Ethernet 2.0'
-                    ]),
-                    placeholderPage('Auswahl und Migration', [
-                        'Anforderungen: Latenz, Jitter, Topologie, Diagnose',
-                        'Bruecken-/Gateway-Architekturen',
-                        'Migration Legacy-Bus zu Industrial Ethernet'
-                    ])
-                ],
-                quiz: placeholderQuiz('Feldbusse und OPC UA')
+                pages: [PAGE_FIELD_REALTIME, PAGE_FIELD_PROTOCOLS, PAGE_FIELD_OPCUA, PAGE_FIELD_TSN],
+                quiz: QUIZ_FIELD
             },
             {
                 id: 'drives',

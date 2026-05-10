@@ -39,7 +39,7 @@ Pro Paket: ≥4 Lehrseiten (AGENTS §18.6) + ≥50 quellenbelegte MCQ (AGENTS §
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
 
 ### P-AUTO-03 — Master-ET Automation Kap. 3 "Feldbus / Industrial Ethernet / TSN"
-- **Status:** in-progress
+- **Status:** done (v34, Sitzung 2026-05-10)
 - **Datei:** `js/data/schulung_master_et_automation.js`
 - **Schwerpunkte:** PROFINET RT/IRT, EtherCAT (DC, FMMU), OPC UA Part 14 Pub/Sub, OPC UA FX (2022), IEEE 802.1Q-2022 TSN (Qbv, Qbu, ASc; gPTP IEEE 802.1AS-2020), CC-Link IE TSN, MODBUS-TCP, CAN/CANopen, Determinismus-Klassen.
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
@@ -130,8 +130,8 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Vorschlag (vom Agent gesetzt):** **P-AUTO-03** (Master-ET Automation Kap. 3 "Feldbus / Industrial Ethernet / TSN").
-> Begruendung: Der UI-Bug P-UI-DARKMODE-ROSE wurde in dieser Sitzung erledigt (v32). Damit ist die naechste produktive Master-ET-Erweiterung wieder dran. Kap. 3 schliesst inhaltlich direkt an Kap. 2 (SPS / IEC 61131-3, v31) an und ist Voraussetzung fuer Kap. 6 (Industrie 4.0 — RAMI/AAS/OPC UA bauen auf TSN/OPC-UA-Pub-Sub auf).
+> **Naechster Vorschlag (vom Agent gesetzt):** **P-AUTO-04** (Master-ET Automation Kap. 4 "Antriebstechnik / FOC / DTC").
+> Begruendung: P-AUTO-03 wurde erledigt (v34); Kap. 4 ist das naechste offene Master-ET-Automation-Kapitel in Reihenfolge und bildet die Grundlage fuer Servoachsen und Robotik in Kap. 5.
 
 ---
 
@@ -144,3 +144,5 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 - 2026-05-10: P-UI-DARKMODE-ROSE erledigt — Dark-Mode-Mapping fuer die komplette Rose-/Rot-Familie in `css/styles.css` ergaenzt (`bg-rose-50/100`, `hover:bg-rose-100`, `border-rose-200/300/400`, `text-rose-600/700`, `text-red-700`), analog zu Emerald/Amber. Bug-Symptom: Wrong-answer Review-Tiles im Schulungs- und Schueler-Quiz, der Reset-Button und Login-Fehler-Hinweise rendern Inhalt mit (gemappter) slate-800-Schrift `#e2e8f0` auf nicht gemapptem hellrosa Tailwind-Default `#fff1f2` — Text quasi unsichtbar. Fix mappt rosa Backgrounds halbtransparent dunkel und hebt rose-Texte auf helle Tints (`#fda4af` / `#fca5a5`). CACHE_VERSION v31 → v32. Naechster Vorschlag: P-AUTO-03.
 - 2026-05-10: P-AUTO-02 erledigt — Master-ET Automation Kap. 2 "SPS / IEC 61131-3 / 61499" produktiv ausgepflegt: 4 Lehrseiten (2.1 IEC 61131-3 Sprachen+Datenmodell+Software-Modell, 2.2 POU+Standard-FB+Tasking+Echtzeit, 2.3 Funktionale Sicherheit IEC 61508 / 62061:2021 / ISO 13849-1:2023 + PLCopen Safety v2.01, 2.4 IEC 61499:2012 verteilte ereignisgetriebene Steuerung + 4DIAC + EcoStruxure). 50 quellenbelegte MCQ mit Quellenanker pro `explanation` (IEC 61131-3:2013 inkl. Annex F+G, IEC 61499-1:2012, IEC 61508-2:2010 Tabellen 2/3 + SFF-Formel, IEC 62061:2021, ISO 13849-1:2023, PLCopen Safety TS Part 1 v2.01:2018, John/Tiegelkamp 2010, Vyatkin 2020, Heinrich 2021). `correct`-Verteilung balanciert auf [13,13,12,12] ueber A/B/C/D. CACHE_VERSION v30 → v31. Naechster Vorschlag: P-AUTO-03.
 - 2026-05-10: P-UI-LOGIN-TEMP-DISABLE erledigt — Login-Feature temporaer ueber `AUTH_TEMPORARILY_DISABLED` deaktiviert; Schulungen-Gate laesst Inhalte ohne Session durch, Konto-Tab zeigt Hinweis statt Login-Formular, README markiert den temporären Status. Reaktivierung als P-UI-LOGIN-REACTIVATE aufgenommen. CACHE_VERSION v32 → v33. Naechster Vorschlag bleibt P-AUTO-03.
+
+- 2026-05-10: P-AUTO-03 erledigt — Master-ET Automation Kap. 3 "Feldbusse und OPC UA" produktiv ausgepflegt: 4 Lehrseiten (Industrial Ethernet und Echtzeitklassen; PROFINET/EtherCAT/Modbus/CANopen; OPC UA Architektur/PubSub/Security/FX; TSN-Auslegung und Migration) und 50 quellenbelegte MCQ mit Quellenankern (IEC 61158/61784, IEC 61784-2:2019, IEC 62541 Parts 1/4/6/14, IEEE 802.1Q-2022, IEEE 802.1AS-2020, IEEE 802.1CB-2017, ETG.1000, CiA 301, Modbus AP V1.1b3, IEC 62443-3-2/-3-3, OPC UA FX 1.00). `correct`-Verteilung balanciert auf [13,13,12,12]. CACHE_VERSION v33 → v34. Naechster Vorschlag: P-AUTO-04.
