@@ -24,6 +24,15 @@
 (function () {
     window.SCHULUNGEN = window.SCHULUNGEN || { list: [] };
 
+    const SOURCE_HINT_RE = /(NIST|ISO\/IEC|ISO\s?\d|IEC\s?\d|FIPS|RFC\s?\d|MITRE|ATT&CK|OWASP|CVSS|CompTIA|CIS|BSI|SP\s?800|SY0|CAS-?\d|CS0|PT0|IEEE|RFC\d|Aufl\.|Auflage|\bed\.|Edition|§|Annex|Kap(\.|itel)|\b(19|20)\d{2}\b)/i;
+    const CYBERSEC_SOURCE_ANCHOR = 'Quelle: Eckert IT-Sicherheit 11. Aufl. 2023; Anderson Security Engineering 3rd ed. 2020; ISO/IEC 27001:2022; NIST SP 800-Serie; BSI IT-Grundschutz-Kompendium 2024; MITRE ATT&CK Enterprise v16 (2024).';
+
+    function ensureSourceAnchor(explanation, sourceAnchor) {
+        const text = String(explanation || '').trim();
+        if (SOURCE_HINT_RE.test(text)) return text;
+        return text + ' ' + sourceAnchor;
+    }
+
     function placeholderPage(title, scope) {
         return {
             title: title,
@@ -40,13 +49,13 @@
             q: 'Platzhalter-Frage fuer den Bereich <strong>' + topic + '</strong>. Dieses Quiz wird im Rahmen der Inhalts-Recherche durch &ge;50 quellenbasierte Fragen ersetzt (AGENTS §18.4).',
             options: ['Inhalt in Vorbereitung — Antwort folgt mit Recherche', 'Distraktor 1 (Platzhalter)', 'Distraktor 2 (Platzhalter)', 'Distraktor 3 (Platzhalter)'],
             correct: 0,
-            explanation: 'Platzhalter-Erlaeuterung. Bei Veroeffentlichung wird hier der konkrete Quellenanker stehen (Modulhandbuch-Modulnummer, Standard-Paragraph, Lehrbuch-Seite).'
+            explanation: ensureSourceAnchor('Platzhalter-Erlaeuterung. Bei Veroeffentlichung wird hier der konkrete Quellenanker stehen (Modulhandbuch-Modulnummer, Standard-Paragraph, Lehrbuch-Seite).', CYBERSEC_SOURCE_ANCHOR)
         }];
     }
 
     // Quiz-Helper fuer produktiv ausgepflegte Kapitel.
     function q(question, options, correct, explanation) {
-        return { q: question, options: options, correct: correct, explanation: explanation };
+        return { q: question, options: options, correct: correct, explanation: ensureSourceAnchor(explanation, CYBERSEC_SOURCE_ANCHOR) };
     }
 
     // ----------------------------------------------------------------------
@@ -3445,7 +3454,7 @@
                 'Rekor ersetzt OCI-Registries und speichert die Image-Layer'
             ],
             correct: 0,
-            explanation: 'Sigstore Cosign Keyless: ephemerales Zertifikat von Fulcio (OIDC-CA), Privatschluessel nie gespeichert, Eintrag in Rekor-Transparency-Log; verifiziert wird Identitaet (z.B. GitHub-Workflow) gegen das Tamper-Evident-Log.',
+            explanation: 'Sigstore Cosign Keyless: ephemerales Zertifikat von Fulcio (OIDC-CA), Privatschluessel nie gespeichert, Eintrag in Rekor-Transparency-Log; verifiziert wird Identitaet (z.B. GitHub-Workflow) gegen das Tamper-Evident-Log. Quelle: Sigstore Cosign/Fulcio/Rekor Doku 2024; SLSA v1.0.',
             lo: 'arch.supplychain.sigstore-keyless',
             bloom: 'understand',
             difficulty: 'medium',
@@ -4519,7 +4528,7 @@
             explanation: 'A08:2021 Software/Data Integrity: sichere Formate (JSON-Schema, Protobuf), Klassen-/Type-Whitelisting; native Object Streams meiden. Java-spezifisch: Look-Ahead-Deserialisierung / JEP 290 (jdk.serialFilter).' },
         { q: 'Welche Vorschrift fordert in der EU bei sensiblen Anwendungen „Stand der Technik" inkl. regelmaessiger Sicherheitsbewertungen?',
             options: ['eIDAS 1.0', 'DSGVO Art. 32', 'CRA Art. 5', 'GDPR Art. 17'], correct: 1,
-            explanation: 'DSGVO Art. 32 verpflichtet Verantwortliche und Auftragsverarbeiter zu „Verfahren zur regelmaessigen Ueberpruefung, Bewertung und Evaluierung der Wirksamkeit" — i.d.R. interpretiert inkl. Pentests.' },
+            explanation: 'Verordnung (EU) 2016/679 (DSGVO) Art. 32 verpflichtet Verantwortliche und Auftragsverarbeiter zu „Verfahren zur regelmaessigen Ueberpruefung, Bewertung und Evaluierung der Wirksamkeit" — i.d.R. interpretiert inkl. Pentests.' },
 
         // --- Pool 3: Active Directory / Kerberos / AD CS (12) ---
         { q: 'Welche ATT&amp;CK-Technique-ID beschreibt Kerberoasting?',
@@ -4527,13 +4536,13 @@
             explanation: 'MITRE ATT&amp;CK Enterprise v16 (2024) T1558.003 „Steal or Forge Kerberos Tickets: Kerberoasting".' },
         { q: 'Welche Voraussetzung ist fuer AS-REP-Roasting noetig?',
             options: ['Service-Account mit SPN', 'Konto mit „Do not require Kerberos preauthentication" gesetzt', 'lokale Admin-Rechte auf dem DC', 'Kerberos-Trust zwischen Forests'], correct: 1,
-            explanation: 'AS-REP-Roasting (T1558.004) funktioniert nur, wenn Pre-Authentication fuer das Konto deaktiviert ist (UF_DONT_REQUIRE_PREAUTH).' },
+            explanation: 'AS-REP-Roasting (MITRE ATT&CK Enterprise v16, 2024, T1558.004) funktioniert nur, wenn Pre-Authentication fuer das Konto deaktiviert ist (UF_DONT_REQUIRE_PREAUTH).' },
         { q: 'Welcher Schluessel macht ein Golden Ticket moeglich?',
             options: ['NT-Hash des Domain-Admin-Kontos', 'KRBTGT-Account-Hash', 'Computer-Account-Hash des DCs', 'Backup-Operator-Hash'], correct: 1,
-            explanation: 'Golden Ticket (T1558.001) faelscht TGTs mithilfe des KRBTGT-Hashes; Mimikatz „kerberos::golden". Bereinigung erfordert KRBTGT-Doppel-Reset binnen 10 h.' },
+            explanation: 'Golden Ticket (MITRE ATT&CK Enterprise v16, 2024, T1558.001) faelscht TGTs mithilfe des KRBTGT-Hashes; Mimikatz „kerberos::golden". Bereinigung erfordert KRBTGT-Doppel-Reset binnen 10 h (Microsoft KRBTGT-Reset-Empfehlung 2018/2024).' },
         { q: 'Was ist „DCSync"?',
             options: ['Replikation zwischen DCs ueber DNS', 'Missbrauch des „Replicating Directory Changes"-Rechts via MS-DRSR-Protokoll zum Hash-Dump', 'Backup-Mechanismus', 'PAM-Funktion'], correct: 1,
-            explanation: 'T1003.006 „OS Credential Dumping: DCSync" — DRSGetNCChanges ueber MS-DRSR; protokolliert mit Event ID 4662 mit dem entsprechenden GUID.' },
+            explanation: 'MITRE ATT&CK Enterprise v16 (2024) T1003.006 „OS Credential Dumping: DCSync" — DRSGetNCChanges ueber MS-DRSR; protokolliert mit Event ID 4662 mit dem entsprechenden GUID.' },
         { q: 'Welche Mitigation verhindert Pass-the-Hash am wirksamsten auf Workstations?',
             options: ['regelmaessiger Passwort-Reset', 'LAPS (Local Administrator Password Solution) + Restricted Admin / Credential Guard', 'BitLocker', 'AppLocker'], correct: 1,
             explanation: 'LAPS (Microsoft, integriert ab Windows 11/Server 2019 R2) randomisiert lokale Admin-Passwoerter; Credential Guard (VBS) schuetzt LSASS gegen Mimikatz-aehnliche Auslese.' },
@@ -4551,10 +4560,10 @@
             explanation: 'Event ID 4769 (Kerberos Service Ticket Operations) mit Ticket Encryption Type 0x17 (RC4-HMAC) ist klassischer Kerberoasting-Indikator (Sigma-Regel <code>win_kerberoasting</code>, SigmaHQ 2024).' },
         { q: 'Welche Detection-Quelle ist fuer DCSync charakteristisch?',
             options: ['Event ID 4624', 'Event ID 4776', 'Event ID 4662 mit Permissions GUID „Replicating Directory Changes" auf einem nicht-DC-Konto', 'Event ID 4768'], correct: 2,
-            explanation: 'Event ID 4662 protokolliert DS-Object-Access; das DRS-Replikations-GUID auf einem Konto ohne DC-Charakter (Entity ist kein DC) ist klassischer DCSync-IOC.' },
+            explanation: 'Event ID 4662 protokolliert DS-Object-Access; das DRS-Replikations-GUID auf einem Konto ohne DC-Charakter (Entity ist kein DC) ist klassischer DCSync-IOC (MITRE ATT&CK Enterprise v16, 2024, T1003.006; Microsoft Security Auditing 2024).' },
         { q: 'Was bewirkt die AD-Gruppe „Protected Users" fuer Mitglieder?',
             options: ['hoehere RDP-Performance', 'Erzwingt nur Kerberos AES, kein NTLM, kein Constrained Delegation, kein Cached-Credential', 'Lokale Admin-Rechte', 'MFA-Erzwingung'], correct: 1,
-            explanation: 'Microsoft Doku „Protected Users Security Group": kein NTLM, kein Digest, kein CredSSP-Default, kein Unconstrained/Constrained-Delegation, AES-only Kerberos, kein langlebiger Cache.' },
+            explanation: 'Microsoft Learn „Protected Users Security Group" (2024): kein NTLM, kein Digest, kein CredSSP-Default, kein Unconstrained/Constrained-Delegation, AES-only Kerberos, kein langlebiger Cache.' },
         { q: 'Welche zwei Aktionen sind fuer Bereinigung eines Golden-Ticket-Vorfalls noetig?',
             options: ['Einmaliger KRBTGT-Reset', 'Zweimaliger KRBTGT-Reset binnen ~10 Stunden, plus Tier-0-Audit aller Adjacent-Hosts', 'Domain-Rebuild', 'KRBTGT-Reset reicht nicht, nur Forest-Recovery'], correct: 1,
             explanation: 'Microsoft „How to use the krbtgt account password reset script" (2018, weiterhin gueltig): zweimaliger Reset >10 h, anschliessend Adjacent-Tier-0-Audit; ein einzelner Reset laesst aktive Tickets gueltig.' },
@@ -4571,7 +4580,7 @@
             explanation: 'MITRE D3FEND v1.0 (Mai 2023) liefert defensive Techniken als Counter-Mapping zu ATT&amp;CK-Tactics.' },
         { q: 'Welche Detection-Sprache ist 2024 De-facto-Standard fuer SIEM-uebergreifende Detection-Engineering?',
             options: ['YARA', 'Sigma (SigmaHQ)', 'Snort', 'Suricata'], correct: 1,
-            explanation: 'Sigma (SigmaHQ, fortlaufend gepflegt) ist log-quellenuebergreifend und konvertiert mittels „sigmac"/„pySigma" auf SIEM-spezifische Queries.' },
+            explanation: 'Sigma (SigmaHQ 2024, fortlaufend gepflegt) ist log-quellenuebergreifend und konvertiert mittels „sigmac"/„pySigma" auf SIEM-spezifische Queries.' },
         { q: 'Welches Pentest-Framework rueckte 2020/2021 als Open-Source-Alternative zu Cobalt Strike auf?',
             options: ['BloodHound', 'Sliver (Bishop Fox)', 'Nmap', 'Nessus'], correct: 1,
             explanation: 'Sliver (Bishop Fox, seit 2020, weiterentwickelt 2024) ist ein modernes Open-Source-C2-Framework in Go; alternative zu Cobalt Strike, mit mTLS / WireGuard / Mythic-Kompatibilitaet.' },
@@ -4592,7 +4601,7 @@
             explanation: 'Verordnung (EU) 2024/2847 (Cyber Resilience Act) trat am 10.12.2024 in Kraft; Hauptanwendungsbeginn 11.12.2027 (Art. 71); Reporting-Pflichten ab 11.09.2026.' },
         { q: 'Welche Detection-Source ist fuer LSASS-Credential-Dumping (T1003.001) charakteristisch?',
             options: ['Event ID 4624', 'EDR-Telemetrie auf „Process accessed lsass.exe with PROCESS_VM_READ"', 'Sysmon Event 1 nur', 'Event ID 4732'], correct: 1,
-            explanation: 'EDR-Detection ueber Process-Access-Telemetrie auf lsass.exe mit Speicherlese-Rechten ist Standard (Sysmon Event 10 mit GrantedAccess 0x1010/0x1410, Sigma <code>proc_access_win_lsass_dump.yml</code>).' },
+            explanation: 'EDR-Detection ueber Process-Access-Telemetrie auf lsass.exe mit Speicherlese-Rechten ist Standard (Sysmon Event ID 10 mit GrantedAccess 0x1010/0x1410, SigmaHQ 2024 <code>proc_access_win_lsass_dump.yml</code>; MITRE ATT&CK Enterprise v16 T1003.001).' },
         { q: 'Welcher Begriff beschreibt Dokumentation und reversiblen Abbau aller Pentest-Spuren am Ende des Engagements?',
             options: ['Cleanup', 'Decommissioning', 'Aftercare', 'Tear-down'], correct: 0,
             explanation: 'NIST SP 800-115 §6 / BSI-Leitfaden: „Cleanup" — alle Persistenzen, Konten, Test-Dateien, RBCD-Eintraege werden dokumentiert und reversibel zurueckgebaut.' },

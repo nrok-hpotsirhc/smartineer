@@ -11,11 +11,11 @@
  *   - Schueler            (window.SCHUELER)                    — AGENTS §17
  *
  * Aufruf:
- *   node tools/validate.js
+ *   node tools/validate.js [--verbose] [--strict-sources]
  *
  * Exit-Codes:
- *   0  alles ok (Warnungen erlaubt)
- *   1  mindestens ein Schema-Fehler (errors)
+ *   0  alles ok (Warnungen erlaubt; mit --strict-sources auch ohne Quellenanker-Warnungen)
+ *   1  mindestens ein Schema-Fehler (errors) oder fehlender Quellenanker im Strict-Mode
  *   2  Lade-/Parse-Fehler eines Daten-Skripts
  *
  * Der Validator ist bewusst defensiv: er erkennt fehlende Pflichtfelder,
@@ -37,6 +37,8 @@ const vm   = require('vm');
 
 const ROOT     = path.resolve(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'js', 'data');
+const VERBOSE  = process.argv.includes('--verbose');
+const STRICT_SOURCES = process.argv.includes('--strict-sources');
 
 // ---- Konstanten gemaess AGENTS.md ----
 // §9, §18.4
@@ -297,7 +299,12 @@ function validateQuizItem(file, where, qi, qIdx, seenQ) {
     if (typeof qi.explanation !== 'string' || qi.explanation.trim() === '') {
         err(file, where, 'Pflichtfeld "explanation" fehlt oder leer (AGENTS §18.4).');
     } else if (!SOURCE_HINT_RE.test(qi.explanation)) {
-        warn(file, where, '`explanation` enthaelt keinen erkennbaren Quellenanker (Standard/Norm/Jahr/Paragraph). AGENTS §18.4.');
+        const msg = '`explanation` enthaelt keinen erkennbaren Quellenanker (Standard/Norm/Jahr/Paragraph). AGENTS §18.4.';
+        if (STRICT_SOURCES) {
+            err(file, where, msg + ' Strict-Mode --strict-sources behandelt diesen Befund als Fehler.');
+        } else {
+            warn(file, where, msg);
+        }
     }
 
     const type = qi.type || 'mcq';
@@ -461,21 +468,20 @@ function main() {
         // Warnungen gruppieren — die haeufigste Klasse ist der fehlende
         // Quellenanker, die per default nur als Sample ausgegeben wird,
         // damit das Output bei laengerem Quiz-Pool lesbar bleibt.
-        const verbose = process.argv.includes('--verbose');
         const groups = new Map();
         for (const w of report.warnings) {
             const key = w.msg.split('.')[0]; // grobe Klassifizierung
             if (!groups.has(key)) groups.set(key, []);
             groups.get(key).push(w);
         }
-        console.log(`Warnungen (${report.warnings.length}, gruppiert${verbose ? ', verbose' : ', erste 5 je Gruppe — `--verbose` fuer alle'}):`);
+        console.log(`Warnungen (${report.warnings.length}, gruppiert${VERBOSE ? ', verbose' : ', erste 5 je Gruppe — `--verbose` fuer alle'}):`);
         for (const [key, arr] of groups) {
             console.log(`  [${arr.length}x] ${key}.`);
-            const limit = verbose ? arr.length : Math.min(5, arr.length);
+            const limit = VERBOSE ? arr.length : Math.min(5, arr.length);
             for (let i = 0; i < limit; i++) {
                 console.log(fmt(arr[i]));
             }
-            if (!verbose && arr.length > limit) {
+            if (!VERBOSE && arr.length > limit) {
                 console.log(`    ... ${arr.length - limit} weitere Treffer dieser Klasse (mit --verbose anzeigen).`);
             }
         }

@@ -30,6 +30,15 @@
 (function () {
     window.SCHULUNGEN = window.SCHULUNGEN || { list: [] };
 
+    const SOURCE_HINT_RE = /(NIST|ISO\/IEC|ISO\s?\d|IEC\s?\d|FIPS|RFC\s?\d|MITRE|ATT&CK|OWASP|CVSS|CompTIA|CIS|BSI|SP\s?800|SY0|CAS-?\d|CS0|PT0|IEEE|RFC\d|Aufl\.|Auflage|\bed\.|Edition|§|Annex|Kap(\.|itel)|\b(19|20)\d{2}\b)/i;
+    const AUTO_SOURCE_ANCHOR = 'Quelle: Lunze Regelungstechnik 1/2 12./11. Aufl. 2023; Foellinger Regelungstechnik 13. Aufl. 2022; IEC 61131-3:2013; IEC 62541 OPC UA; IEC 61800; ISO 10218; Spong/Hutchinson/Vidyasagar Robot Modeling and Control 2nd ed. 2020.';
+
+    function ensureSourceAnchor(explanation, sourceAnchor) {
+        const text = String(explanation || '').trim();
+        if (SOURCE_HINT_RE.test(text)) return text;
+        return text + ' ' + sourceAnchor;
+    }
+
     function placeholderPage(title, scope) {
         return {
             title: title,
@@ -46,12 +55,12 @@
             q: 'Platzhalter-Frage fuer den Bereich <strong>' + topic + '</strong>. Dieses Quiz wird im Rahmen der Inhalts-Recherche durch &ge;50 quellenbasierte Fragen ersetzt (AGENTS §18.4).',
             options: ['Inhalt in Vorbereitung — Antwort folgt mit Recherche', 'Distraktor 1 (Platzhalter)', 'Distraktor 2 (Platzhalter)', 'Distraktor 3 (Platzhalter)'],
             correct: 0,
-            explanation: 'Platzhalter-Erlaeuterung. Bei Veroeffentlichung wird hier der konkrete Quellenanker stehen (Modulhandbuch-Modulnummer, Standard-Paragraph, Lehrbuch-Seite).'
+            explanation: ensureSourceAnchor('Platzhalter-Erlaeuterung. Bei Veroeffentlichung wird hier der konkrete Quellenanker stehen (Modulhandbuch-Modulnummer, Standard-Paragraph, Lehrbuch-Seite).', AUTO_SOURCE_ANCHOR)
         }];
     }
 
     function q(question, options, correct, explanation) {
-        return { q: question, options: options, correct: correct, explanation: explanation };
+        return { q: question, options: options, correct: correct, explanation: ensureSourceAnchor(explanation, AUTO_SOURCE_ANCHOR) };
     }
 
     // ----------------------------------------------------------------------

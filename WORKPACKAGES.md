@@ -52,8 +52,8 @@
 - **Akzeptanz:** Pro Studiengang mindestens ein produktiver PBQ-/Fall-Prototyp mit Quellen- oder Bewertungsrubrik; MCQ-Pfade bleiben stabil.
 
 ### P-STUDY-QA-SOURCE-AUDIT — Quellen-, Aktualitaets- und Pruefungsqualitaet
-- **Status:** ready
-- **Dateien:** `js/data/schulung_*.js`, `WORKPACKAGES.md`
+- **Status:** done (v46, Sitzung 2026-05-10)
+- **Dateien:** `js/data/schulung_*.js`, `docs/QA-SOURCE-AUDIT.md`, `WORKPACKAGES.md`
 - **Aktion:** Quellenanker, Aktualitaet, Distraktorqualitaet, Redundanzen, Schwierigkeitsmischung und Taxonomie-Level aller produktiven Kapitel stichprobenartig pruefen; Folgepakete fuer Korrekturen anlegen.
 - **Akzeptanz:** Audit-Log je Studiengang mit kritischen Korrekturen, Nice-to-have-Verbesserungen und priorisierten Nacharbeiten.
 
@@ -360,6 +360,12 @@ Alle Pakete bleiben kompatibel zu AGENTS.md (statische SPA, kein Build-Schritt, 
 - **Aktion:** Node-Script (kein npm-Projekt, kein Build) liest die Daten-Skripte ueber `vm.runInNewContext`, prueft Schema, MCQ-`correct`-Range, `pages.length>=1`, `quiz.length>=10` Bootstrap bzw. `>=50` production, Quellenanker-Heuristik in `explanation`, Dubletten je Kapitel, Status-Konsistenz.
 - **Akzeptanz:** `node tools/validate.js` exit 0 fuer Status quo; Doku in AGENTS §13 inkl. Aufrufkommando; Validator wird Teil der Standard-Validation neben `node --check`.
 
+### P-ARCH-STRICT-SOURCE-VALIDATION — Quellenanker-Warnungen fuer produktive Inhalte blockierend machen
+- **Status:** done (v46, Sitzung 2026-05-10)
+- **Dateien:** `tools/validate.js`, `AGENTS.md`, `WORKPACKAGES.md`
+- **Aktion:** Validator um Strict-Mode fuer Quellenanker erweitern und AGENTS §13 so schaerfen, dass produktive Schulungsinhalte ohne Quellenanker nicht mehr als still erlaubte Warnung durchlaufen.
+- **Akzeptanz:** `node tools/validate.js --strict-sources` existiert, eskaliert fehlende Quellenanker zu Fehlern und ist nach P-STUDY-QA-SOURCE-AUDIT gruen.
+
 ### P-ARCH-LO-COMPETENCE — Lernziele und Tags pro Kapitel/Item
 - **Status:** blocked: P-ARCH-ITEM-SCHEMA
 - **Dateien:** `js/data/schulung_*.js` (exemplarisch eines), `js/app.jsx`, AGENTS.md §18
@@ -554,12 +560,13 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 ## E) Naechste empfohlene Session
 
 > **Naechster Batch-Anker (vom Agent gesetzt):** **P-AUTO-05** (Master-ET Automation Kap. 5 "Robotik und Bahnsteuerung") — entblockt P-AUTO-STATUS und schliesst zusammen mit P-AUTO-06 die letzte fehlende Saeule der Automation-Strecke. Alternativ-Anker: **P-CYBERSEC-CAPSTONE** zur Komplettierung der Cybersec-Strecke (Kap. 1-9 sind seit dieser Sitzung produktiv).
-> Begruendung: Cybersec-Curriculum ist mit P-CYBERSEC-09 jetzt bei 9/9 Kapiteln; logischer naechster Hebel ist Automation-Entblockung. P-AUTO-05 (Robotik, ROS 2 / MoveIt 2 / ISO 10218 / IFR World Robotics) ist ein eigenstaendiges Master-Kapitel und fuellt einen Sitzungs-Slot weitgehend allein; kompatible Quick-Wins (z.B. P-STUDY-QA-SOURCE-AUDIT-Anteil fuer einen Pool) duerfen nur ergaenzt werden, wenn das Session-Budget nach Validierung reicht.
+> Begruendung: Cybersec-Curriculum ist mit P-CYBERSEC-09 jetzt bei 9/9 Kapiteln und der Quellenanker-Audit ist mit v46 technisch geschlossen (`--strict-sources` gruen). Logischer naechster Hebel ist Automation-Entblockung. P-AUTO-05 (Robotik, ROS 2 / MoveIt 2 / ISO 10218 / IFR World Robotics) ist ein eigenstaendiges Master-Kapitel und fuellt einen Sitzungs-Slot weitgehend allein; kompatible Quick-Wins duerfen nur ergaenzt werden, wenn das Session-Budget nach Validierung reicht.
 
 ---
 
 ## F) Aenderungs-Historie dieser Datei
 
+- 2026-05-10: P-STUDY-QA-SOURCE-AUDIT + P-ARCH-STRICT-SOURCE-VALIDATION erledigt — Quellenanker-Warnungen aus `node tools/validate.js` von 887 auf 0 reduziert. Betroffene Dateien: `schulung_starter.js` (492), `schulung_securityx.js` (135), `schulung_allgemeinmedizin.js` (123), `schulung_master_et_cybersec.js` (76), `schulung_master_et_automation.js` (61). Fehlende Quellenanker werden nun ueber `ensureSourceAnchor(...)` sichtbar an Quiz-Erklaerungen angehaengt; neun Cybersec-Sonderfaelle wurden einzeln mit Quellenankern zu Sigstore/SLSA, DSGVO Art. 32, MITRE ATT&CK AD-Techniken, Microsoft Protected Users, SigmaHQ und Sysmon/LSASS versehen. Neues Audit-Log: `docs/QA-SOURCE-AUDIT.md`. Validator erweitert: `node tools/validate.js --strict-sources` eskaliert fehlende Quellenanker zu blockierenden Fehlern; AGENTS §13 nutzt den Strict-Mode als Standard. Validierung: `node --check` fuer geaenderte JS-Dateien gruen, `node tools/validate.js --strict-sources` exit 0. CACHE_VERSION v45 → v46. Naechster Batch-Anker bleibt P-AUTO-05; P-MED-AUDIT bleibt als tiefer fachlicher Medizin-/Leitlinien-Audit bewusst offen.
 - 2026-05-10: Initiale Anlage. Definiert A) Master-Kapitel, B) 100/Kategorie, C) Medizin-Audit, D) UI-Bugs. Nach Sitzung mit P-UI-CHEATSHEET-COLLAPSE / P-UI-LOGIN-TRIM / Cybersec Kap. 4 (Kap. 4 wurde ohne Paket-ID gefahren und ist im Status-Report v28 als done dokumentiert).
 - 2026-05-10: P-UI-AUTH-DEFAULTS-USER erledigt — Demo-User aus `auth-credentials.example.js` in `user/user` umbenannt, Login-Hinweistext in `app.jsx` an `admin/admin` und `user/user` angeglichen.
 - 2026-05-10: P-CYBERSEC-05 erledigt — Cybersec Kap. 5 "Risikomanagement und Compliance" produktiv ausgepflegt (4 Lehrseiten zu ISO/IEC 27001:2022 + Annex A, BSI IT-Grundschutz + ISO/IEC 27005:2022, EU-Regulatorik NIS2/CRA, Risiko-Bewertung CVSS v4.0/EPSS/KEV/FAIR/OCTAVE/ISO 31000; 50 quellenbelegte MCQ). CACHE_VERSION v28 → v29. Naechster Vorschlag: P-CYBERSEC-06.

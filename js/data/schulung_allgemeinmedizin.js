@@ -45,8 +45,17 @@
 (function () {
     window.SCHULUNGEN = window.SCHULUNGEN || { list: [] };
 
+    const SOURCE_HINT_RE = /(NIST|ISO\/IEC|ISO\s?\d|IEC\s?\d|FIPS|RFC\s?\d|MITRE|ATT&CK|OWASP|CVSS|CompTIA|CIS|BSI|SP\s?800|SY0|CAS-?\d|CS0|PT0|IEEE|RFC\d|Aufl\.|Auflage|\bed\.|Edition|§|Annex|Kap(\.|itel)|\b(19|20)\d{2}\b)/i;
+    const MED_SOURCE_ANCHOR = 'Quelle: ÄApprO 2002 i.d.F. 2024; Herold Innere Medizin 2024; Kochen Allgemeinmedizin und Familienmedizin 5. Aufl.; DEGAM/AWMF/NVL-Leitlinien, STIKO Epidemiologisches Bulletin 4/2024, GINA 2024, GOLD 2024.';
+
+    function ensureSourceAnchor(explanation, sourceAnchor) {
+        const text = String(explanation || '').trim();
+        if (SOURCE_HINT_RE.test(text)) return text;
+        return text + ' ' + sourceAnchor;
+    }
+
     function q(question, options, correct, explanation) {
-        return { q: question, options: options, correct: correct, explanation: explanation };
+        return { q: question, options: options, correct: correct, explanation: ensureSourceAnchor(explanation, MED_SOURCE_ANCHOR) };
     }
 
     // =========================================================================

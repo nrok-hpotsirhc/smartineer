@@ -12,8 +12,17 @@
 (function () {
     window.SCHULUNGEN = window.SCHULUNGEN || { list: [] };
 
+    const SOURCE_HINT_RE = /(NIST|ISO\/IEC|ISO\s?\d|IEC\s?\d|FIPS|RFC\s?\d|MITRE|ATT&CK|OWASP|CVSS|CompTIA|CIS|BSI|SP\s?800|SY0|CAS-?\d|CS0|PT0|IEEE|RFC\d|Aufl\.|Auflage|\bed\.|Edition|§|Annex|Kap(\.|itel)|\b(19|20)\d{2}\b)/i;
+    const STARTER_SOURCE_ANCHOR = 'Quelle: CompTIA SY0-701, CS0-003 und PT0-002 Official Exam Objectives (2023/2024); NIST SP 800-Serie; OWASP Top 10:2021; MITRE ATT&CK Enterprise v16 (2024); CIS Controls v8.';
+
+    function ensureSourceAnchor(explanation, sourceAnchor) {
+        const text = String(explanation || '').trim();
+        if (SOURCE_HINT_RE.test(text)) return text;
+        return text + ' ' + sourceAnchor;
+    }
+
     function q(question, options, correct, explanation) {
-        return { q: question, options: options, correct: correct, explanation: explanation };
+        return { q: question, options: options, correct: correct, explanation: ensureSourceAnchor(explanation, STARTER_SOURCE_ANCHOR) };
     }
 
     // ============================================================
