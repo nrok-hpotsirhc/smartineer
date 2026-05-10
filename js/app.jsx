@@ -697,13 +697,24 @@ function CategoryCard({ cat, stats, onOpen, idx }) {
     );
 }
 
-function Dashboard({ data, order, isSolved, onOpenCategory, onReset, onInstall, onExport, onImport }) {
+function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrainingAt, onReset, onInstall, onExport, onImport }) {
     const totals = useMemo(() => {
         let total = 0, done = 0;
         order.forEach(k => { const s = categoryStats(data[k], isSolved); total += s.total; done += s.done; });
         const pct = total ? Math.round((done / total) * 100) : 0;
         return { total, done, pct };
     }, [data, order, isSolved]);
+
+    // P-LP-SRS-OPEN: Heute-faellig-Zaehler ueber Training und Schulungen.
+    const dueStats = useMemo(() => srsState
+        ? srsCrossTrackDue(data, order, srsState)
+        : { dueTraining: 0, dueSchulungen: 0, freshTraining: 0 },
+    [data, order, srsState]);
+    // P-LP-DAILY-MIX: deterministischer Tagesmix (5 Items, cross-Kategorie).
+    const dailyMix = useMemo(() => srsState
+        ? srsDailyMixTraining(data, order, srsState, 5)
+        : [], [data, order, srsState]);
+    const dailyMixRef = useKaTeX([dailyMix.length, dailyMix.map(e => e.catId + e.level + e.idx).join(',')]);
 
     return (
         <section className="view-fade">
@@ -762,12 +773,68 @@ function Dashboard({ data, order, isSolved, onOpenCategory, onReset, onInstall, 
                     return <CategoryCard key={k} cat={cat} stats={s} onOpen={() => onOpenCategory(k, 'training')} idx={i} />;
                 })}
             </div>
+
+            {srsState && (dueStats.dueTraining + dueStats.dueSchulungen > 0 || dailyMix.length > 0) && (
+                <div className="bg-gradient-to-br from-white via-white to-emerald-50/40 rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mt-10">
+                    <div className="flex flex-col md:flex-row gap-6">
+                        <div className="md:w-1/3">
+                            <h2 className="text-xl font-bold text-slate-800 mb-2">Heute zur Wiederholung</h2>
+                            <p className="text-slate-600 text-sm mb-4">Spaced-Repetition-Karteikarten faellig auf Basis deines Lernverlaufs (SM-2 lite). Karten entstehen, sobald du eine Aufgabe oder ein Quiz-Item bewertest.</p>
+                            <div className="grid grid-cols-3 gap-2 text-center">
+                                <div className="bg-white rounded-lg border border-slate-200 p-3">
+                                    <div className="text-2xl font-bold text-emerald-600">{dueStats.dueTraining + dueStats.dueSchulungen}</div>
+                                    <div className="text-[11px] uppercase tracking-wide text-slate-500">heute faellig</div>
+                                </div>
+                                <div className="bg-white rounded-lg border border-slate-200 p-3">
+                                    <div className="text-2xl font-bold text-blue-600">{dueStats.dueTraining}</div>
+                                    <div className="text-[11px] uppercase tracking-wide text-slate-500">Training</div>
+                                </div>
+                                <div className="bg-white rounded-lg border border-slate-200 p-3">
+                                    <div className="text-2xl font-bold text-violet-600">{dueStats.dueSchulungen}</div>
+                                    <div className="text-[11px] uppercase tracking-wide text-slate-500">Schulungen</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="md:w-2/3">
+                            <div className="flex items-baseline justify-between mb-2">
+                                <h2 className="text-xl font-bold text-slate-800">Tagesmix</h2>
+                                <span className="text-xs text-slate-500">deterministisch je Tag · 5 Aufgaben · max. 2/Kategorie</span>
+                            </div>
+                            {dailyMix.length === 0 ? (
+                                <p className="text-slate-500 text-sm italic">Noch keine Aufgaben verfuegbar.</p>
+                            ) : (
+                                <ol ref={dailyMixRef} className="flex flex-col gap-2">
+                                    {dailyMix.map((entry, i) => {
+                                        const stem = (entry.task && (entry.task.q || '')) + '';
+                                        const short = stem.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
+                                        const cat = data[entry.catId];
+                                        const catName = cat ? cat.name : entry.catId;
+                                        return (
+                                            <li key={`${entry.catId}-${entry.level}-${entry.idx}`} className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg p-3 hover:border-emerald-400 transition">
+                                                <span className="text-xs font-bold text-slate-400 w-6 flex-shrink-0">{i + 1}.</span>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-xs uppercase tracking-wide text-slate-500">{catName} · L{entry.level + 1} · #{entry.idx + 1}</div>
+                                                    <div className="text-sm text-slate-700 truncate">{short || '(Aufgabe)'}</div>
+                                                </div>
+                                                <button onClick={() => onOpenTrainingAt && onOpenTrainingAt(entry.catId, entry.level, entry.idx)}
+                                                    className="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition flex-shrink-0">
+                                                    Oeffnen
+                                                </button>
+                                            </li>
+                                        );
+                                    })}
+                                </ol>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
 
 // ---------------------------------------------------------------- Training
-function Sidebar({ data, order, currentCat, isSolved, onSelect }) {
+function Sidebar({ data, order, currentCat, isSolved, srsState, onSelect }) {
     return (
         <aside className="w-full md:w-1/4 flex flex-col gap-2">
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
@@ -777,6 +844,10 @@ function Sidebar({ data, order, currentCat, isSolved, onSelect }) {
                         const cat = data[k]; if (!cat) return null;
                         const s = categoryStats(cat, isSolved);
                         const active = k === currentCat;
+                        // P-LP-MASTERY: vier Punkte je Kategorie. Anzahl gefuellt = ganzzahlige
+                        // Mastery-Stufe (1..4) aus SRS, Default 0 = unbekannt.
+                        const m = srsState ? srsCategoryMastery(cat, srsState) : 0;
+                        const mIdx = Math.round(m);
                         return (
                             <button key={k} onClick={() => onSelect(k)}
                                 className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition border ${active
@@ -786,6 +857,15 @@ function Sidebar({ data, order, currentCat, isSolved, onSelect }) {
                                     <span>{cat.name}</span>
                                     <span className={`text-xs ${s.pct === 100 ? 'text-emerald-600 font-bold' : 'text-slate-500'}`}>{s.done}/{s.total}</span>
                                 </div>
+                                {srsState && (
+                                    <div className="flex items-center gap-1 mt-2" title={`Mastery (SRS): ${MASTERY_LABELS[mIdx]}`}>
+                                        {[1, 2, 3, 4].map((lvl) => (
+                                            <span key={lvl}
+                                                className={`inline-block w-2 h-2 rounded-full ${lvl <= mIdx ? MASTERY_DOT_CLASS[mIdx] : 'bg-slate-200'}`}></span>
+                                        ))}
+                                        <span className="ml-2 text-[10px] uppercase tracking-wide text-slate-400">{MASTERY_LABELS[mIdx]}</span>
+                                    </div>
+                                )}
                                 {active && (
                                     <div className="w-full bg-blue-100 rounded-full h-1 mt-2 overflow-hidden">
                                         <div className="bg-blue-500 h-1 rounded-full transition-all" style={{ width: `${s.pct}%` }}></div>
@@ -839,7 +919,7 @@ function TaskPills({ tasks, currentIdx, setIdx, isSolved, catId, lvl }) {
     );
 }
 
-function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMark }) {
+function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMark, srsCard, onGrade }) {
     const [showHint, setShowHint] = useState(false);
     const [showSolution, setShowSolution] = useState(false);
     useEffect(() => { setShowHint(false); setShowSolution(false); }, [catId, lvl, idx]);
@@ -908,14 +988,62 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
                     <div className="text-emerald-900 math-block" dangerouslySetInnerHTML={{ __html: solutionHtml }} />
                 </div>
             )}
+            {showSolution && onGrade && (
+                <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex flex-col text-xs text-slate-600">
+                            <span className="font-bold uppercase tracking-wide text-slate-500">Wie sicher hast du diese Aufgabe geloest?</span>
+                            <span className="text-slate-500">SRS plant naechsten Wiederholungstermin. Karteikarte: {
+                                srsCard
+                                    ? `${MASTERY_LABELS[srsMasteryLevel(srsCard)]} · ${srsCard.reps || 0} Reps · faellig ${srsCard.due || '?'}`
+                                    : 'neu'
+                            }</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <button onClick={() => onGrade(0)}
+                                className="px-3 py-1.5 text-sm font-medium rounded-lg bg-rose-100 text-rose-800 hover:bg-rose-200 border border-rose-300 transition"
+                                title="Falsch / nicht gewusst — Karte zurueck auf 1 Tag">
+                                Again
+                            </button>
+                            <button onClick={() => onGrade(1)}
+                                className="px-3 py-1.5 text-sm font-medium rounded-lg bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300 transition"
+                                title="Mit Muehe geloest — kuerzeres Intervall, ease sinkt">
+                                Hard
+                            </button>
+                            <button onClick={() => onGrade(2)}
+                                className="px-3 py-1.5 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-700 transition"
+                                title="Gut geloest — Standard-Intervall">
+                                Good
+                            </button>
+                            <button onClick={() => onGrade(3)}
+                                className="px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 border border-blue-700 transition"
+                                title="Muehelos geloest — verlaengertes Intervall, ease steigt">
+                                Easy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
 
-function Training({ data, order, isSolved, setSolved, currentCat, setCurrentCat }) {
+function Training({ data, order, isSolved, setSolved, currentCat, setCurrentCat,
+                    srsState, srsGradeMany, initialLevel, initialIdx, consumeInitialPos }) {
     const [level, setLevel] = useState(0);
     const [idx, setIdx] = useState(0);
-    useEffect(() => { setLevel(0); setIdx(0); }, [currentCat]);
+    useEffect(() => {
+        // Wenn das Dashboard eine Daily-Mix-Position uebergeben hat, springen wir dorthin,
+        // sonst auf den Anfang der Kategorie. consumeInitialPos() loescht den Puffer im App-Root.
+        if (initialLevel != null && initialIdx != null) {
+            setLevel(initialLevel);
+            setIdx(initialIdx);
+            if (consumeInitialPos) consumeInitialPos();
+        } else {
+            setLevel(0);
+            setIdx(0);
+        }
+    }, [currentCat]);
 
     const cat = data[currentCat];
     const tasks = (cat && cat.levels[level]) || [];
@@ -924,11 +1052,19 @@ function Training({ data, order, isSolved, setSolved, currentCat, setCurrentCat 
     const next = () => setIdx(i => tasks.length ? (i + 1) % tasks.length : 0);
     const prev = () => setIdx(i => tasks.length ? (i - 1 + tasks.length) % tasks.length : 0);
 
+    const onGradeTraining = useCallback((quality) => {
+        if (!cat || !task || !srsGradeMany) return;
+        const ref = srsTrainingRef(cat.id, task);
+        if (!ref) return;
+        srsGradeMany([{ ref, ok: quality > 0, quality }]);
+    }, [cat, task, srsGradeMany]);
+
     const titleRef = useKaTeX([currentCat]);
 
     return (
         <section className="view-fade flex flex-col md:flex-row gap-6">
-            <Sidebar data={data} order={order} currentCat={currentCat} isSolved={isSolved} onSelect={setCurrentCat} />
+            <Sidebar data={data} order={order} currentCat={currentCat} isSolved={isSolved}
+                srsState={srsState} onSelect={setCurrentCat} />
             <div className="w-full md:w-3/4">
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 min-h-[600px]">
                     <div ref={titleRef} className="mb-6">
@@ -952,6 +1088,8 @@ function Training({ data, order, isSolved, setSolved, currentCat, setCurrentCat 
                                 onPrev={prev}
                                 onNext={next}
                                 onMark={(v) => setSolved(cat.id, level, idx, v)}
+                                srsCard={task ? srsTrainingCard(srsState, cat.id, task) : null}
+                                onGrade={onGradeTraining}
                             />
                         </>
                     )}
@@ -1331,12 +1469,16 @@ function srsAddDaysISO(days) {
 // - Erste richtige Antwort → 1 Tag faellig.
 // - Folgerichtige Antworten → naechstes Intervall aus SRS_INTERVALS_DAYS.
 // - Falsche Antwort → reps zurueck auf 0, Intervall 1 Tag, ease leicht abgesenkt.
-function srsScheduleAfterAnswer(prev, ok) {
+// - `quality` (P-LP-SRS-OPEN, optional): 0=Again, 1=Hard, 2=Good, 3=Easy. Modu-
+//   liert ease und Intervall. Wenn nicht gesetzt, wird aus `ok` abgeleitet
+//   (true -> 2, false -> 0). Erhaelt Rueckwaertskompatibilitaet zum Schulungs-Quiz.
+function srsScheduleAfterAnswer(prev, ok, quality) {
     const today = srsTodayISO();
     const easePrev = (prev && typeof prev.ease === 'number') ? prev.ease : 2.5;
     const repsPrev = (prev && prev.reps) || 0;
     const lapsesPrev = (prev && prev.lapses) || 0;
-    if (!ok) {
+    const q = (typeof quality === 'number') ? quality : (ok ? 2 : 0);
+    if (q <= 0 || !ok) {
         return {
             ease: Math.max(1.3, easePrev - 0.2),
             interval: 1,
@@ -1347,10 +1489,14 @@ function srsScheduleAfterAnswer(prev, ok) {
         };
     }
     const repsNext = repsPrev + 1;
-    const intervalIdx = Math.min(repsNext - 1, SRS_INTERVALS_DAYS.length - 1);
-    const interval = SRS_INTERVALS_DAYS[intervalIdx];
+    let intervalIdx = Math.min(repsNext - 1, SRS_INTERVALS_DAYS.length - 1);
+    let interval = SRS_INTERVALS_DAYS[intervalIdx];
+    let easeDelta = 0.05;
+    if (q === 1) { easeDelta = -0.15; interval = Math.max(1, Math.round(interval * 0.7)); }
+    else if (q === 3) { easeDelta = 0.10; interval = Math.round(interval * 1.3); }
+    const easeNext = Math.min(2.9, Math.max(1.3, easePrev + easeDelta));
     return {
-        ease: Math.min(2.8, easePrev + 0.05),
+        ease: easeNext,
         interval,
         reps: repsNext,
         lapses: lapsesPrev,
@@ -1416,12 +1562,12 @@ function useSRSState() {
         if (!Array.isArray(updates) || !updates.length) return;
         setState((prev) => {
             const next = { ...prev };
-            updates.forEach(({ ref, ok }) => {
+            updates.forEach(({ ref, ok, quality }) => {
                 if (!ref || !ref.qid) return;
                 next[ref.tid] = { ...(next[ref.tid] || {}) };
                 next[ref.tid][ref.cid] = { ...(next[ref.tid][ref.cid] || {}) };
                 const prevCard = next[ref.tid][ref.cid][ref.qid];
-                next[ref.tid][ref.cid][ref.qid] = srsScheduleAfterAnswer(prevCard, ok);
+                next[ref.tid][ref.cid][ref.qid] = srsScheduleAfterAnswer(prevCard, ok, quality);
             });
             try { localStorage.setItem(SRS_KEY, JSON.stringify(next)); } catch (e) { /* quota */ }
             return next;
@@ -1432,6 +1578,172 @@ function useSRSState() {
         try { localStorage.removeItem(SRS_KEY); } catch (e) {}
     }, []);
     return { state, gradeMany, reset };
+}
+
+// ---------- P-LP-SRS-OPEN: SRS fuer Ingenieurs-Training ----------
+// Karteikarten fuer den Ingenieurs-Track liegen im selben SRS_KEY-Storage wie die
+// Schulungs-Karten, aber unter einer synthetischen Trainings-ID. So bleibt die
+// Daten-Form { [tid]: { [cid]: { [qid]: card } } } unveraendert und Export/Import
+// (EXPORT_KEYS enthaelt SRS_KEY) deckt den neuen Pfad automatisch ab.
+const TRAINING_SRS_TID = '__training__';
+
+function srsTrainingRef(catId, task) {
+    if (!task) return null;
+    const qid = stableQid(task);
+    if (!qid) return null;
+    return { tid: TRAINING_SRS_TID, cid: catId, qid };
+}
+
+function srsTrainingCard(srsState, catId, task) {
+    const ref = srsTrainingRef(catId, task);
+    if (!ref) return null;
+    const t = srsState && srsState[TRAINING_SRS_TID];
+    const c = t && t[catId];
+    return (c && c[ref.qid]) || null;
+}
+
+// Mastery-Stufen (P-LP-MASTERY): aus der Karteikarte abgeleitet.
+// 0 = unbekannt (keine Karte), 1 = familiar (1 reps oder lapses),
+// 2 = practiced (>=2 reps), 3 = proficient (>=4 reps, ease >=2.5),
+// 4 = mastered (>=6 reps, ease >=2.6, lapses<=1).
+function srsMasteryLevel(card) {
+    if (!card) return 0;
+    const reps = card.reps || 0;
+    const ease = (typeof card.ease === 'number') ? card.ease : 2.5;
+    const lapses = card.lapses || 0;
+    if (reps >= 6 && ease >= 2.6 && lapses <= 1) return 4;
+    if (reps >= 4 && ease >= 2.5) return 3;
+    if (reps >= 2) return 2;
+    if (reps >= 1 || lapses > 0) return 1;
+    return 0;
+}
+
+const MASTERY_LABELS = ['unbekannt', 'familiar', 'practiced', 'proficient', 'mastered'];
+const MASTERY_DOT_CLASS = [
+    'bg-slate-300',           // 0
+    'bg-amber-400',           // 1
+    'bg-yellow-500',          // 2
+    'bg-emerald-500',         // 3
+    'bg-emerald-600'          // 4
+];
+
+// Durchschnittliche Mastery einer Trainings-Kategorie (0..4 als float).
+function srsCategoryMastery(cat, srsState) {
+    if (!cat || !cat.levels) return 0;
+    let sum = 0, total = 0;
+    cat.levels.forEach((tasks) => {
+        (tasks || []).forEach((task) => {
+            total++;
+            sum += srsMasteryLevel(srsTrainingCard(srsState, cat.id, task));
+        });
+    });
+    return total ? (sum / total) : 0;
+}
+
+// Zaehlt heute faellige Items aller Tracks (Training + Schulungen) +
+// neu-noch-nie-gesehene Karten (only fuer Trainings, weil Schulungen-Quizzes
+// nur ueber Quiz-Lauf angefasst werden). Wird im Dashboard als „Heute faellig"-
+// Karte und als Basis fuer Daily-Mix genutzt.
+function srsCrossTrackDue(data, order, srsState) {
+    const today = srsTodayISO();
+    let dueTraining = 0, freshTraining = 0;
+    (order || []).forEach((catId) => {
+        const cat = data[catId]; if (!cat) return;
+        (cat.levels || []).forEach((tasks) => {
+            (tasks || []).forEach((task) => {
+                const card = srsTrainingCard(srsState, catId, task);
+                if (!card) { freshTraining++; return; }
+                if (card.due && card.due <= today) dueTraining++;
+            });
+        });
+    });
+    let dueSchulungen = 0;
+    const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
+    trainings.forEach((t) => {
+        const tState = (srsState && srsState[t.id]) || {};
+        (t.chapters || []).forEach((ch) => {
+            const cState = tState[ch.id] || {};
+            (ch.quiz || []).forEach((item) => {
+                const qid = stableQid(item);
+                const card = qid ? cState[qid] : null;
+                if (!card) return;
+                if (card.due && card.due <= today) dueSchulungen++;
+            });
+        });
+    });
+    return { dueTraining, dueSchulungen, freshTraining };
+}
+
+// Deterministische PRNG fuer Daily-Mix (mulberry32). Seed aus Datum + Salt.
+function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+        a = (a + 0x6D2B79F5) >>> 0;
+        let t = a;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+function hashStringToSeed(s) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+}
+
+// Cross-Kategorie Daily-Mix (P-LP-DAILY-MIX). Liefert n Items deterministisch
+// pro Tag. Strategie: zunaechst alle ueberfaelligen Trainings-Items (mit
+// Prioritaet), dann mit neuen (noch-nie-gesehenen) Items auffuellen. Pro
+// Kategorie hoechstens 2 Items, damit Interleaving entsteht. Seed = ISO-Datum.
+function srsDailyMixTraining(data, order, srsState, n, seedDate) {
+    n = n || 5;
+    const today = srsTodayISO();
+    const seedStr = (seedDate || today) + '|smartineer-daily-mix-v1';
+    const rand = mulberry32(hashStringToSeed(seedStr));
+    const due = [];
+    const fresh = [];
+    (order || []).forEach((catId) => {
+        const cat = data[catId]; if (!cat) return;
+        (cat.levels || []).forEach((tasks, level) => {
+            (tasks || []).forEach((task, idx) => {
+                const card = srsTrainingCard(srsState, catId, task);
+                const entry = { catId, level, idx, task };
+                if (!card) { fresh.push(entry); return; }
+                if (card.due && card.due <= today) due.push(entry);
+            });
+        });
+    });
+    function seededShuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(rand() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+    const pool = seededShuffle(due).concat(seededShuffle(fresh));
+    const perCat = {};
+    const pick = [];
+    for (const entry of pool) {
+        const c = perCat[entry.catId] || 0;
+        if (c >= 2) continue;
+        perCat[entry.catId] = c + 1;
+        pick.push(entry);
+        if (pick.length >= n) break;
+    }
+    // Falls cross-Kategorie-Limit nicht reicht: ohne Limit auffuellen.
+    if (pick.length < n) {
+        for (const entry of pool) {
+            if (pick.indexOf(entry) !== -1) continue;
+            pick.push(entry);
+            if (pick.length >= n) break;
+        }
+    }
+    return pick;
 }
 
 function shuffleSample(arr, n) {
@@ -1526,10 +1838,9 @@ function trainingProgress(training, tState) {
     return { readPct, quizPct, chapterCount: training.chapters.length };
 }
 
-function Schulungen({ auth, onGoToOptionen }) {
+function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
     const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
     const { state, setLastPage, recordQuiz } = useSchulungenState();
-    const { state: srsState, gradeMany: srsGradeMany } = useSRSState();
     const [stage, setStage] = useState('index'); // index | chapters | reader | quiz | quizResult
     const [tid, setTid] = useState(null);
     const [cid, setCid] = useState(null);
@@ -2388,6 +2699,9 @@ function App() {
     const [view, setView] = useState('dashboard');
     const [currentCat, setCurrentCat] = useState(allOrder[0] || null);
     const { isSolved, setSolved, reset } = useProgress();
+    // P-LP-SRS-OPEN: SRS-State wird im App-Root gehalten und an Training, Dashboard
+    // sowie Schulungen durchgereicht, damit alle Tracks denselben SRS-Storage sehen.
+    const { state: srsState, gradeMany: srsGradeMany, reset: resetSRS } = useSRSState();
 
     // Theme: Default dunkel. Pre-paint-Skript in index.html setzt die Klasse bereits am <html>,
     // hier wird der State synchron daraus initialisiert und bei Änderung sowohl <html> als auch <body> markiert.
@@ -2439,6 +2753,17 @@ function App() {
     const openCategory = (k, targetView) => {
         setCurrentCat(k);
         if (targetView) setView(targetView);
+    };
+
+    // P-LP-DAILY-MIX: oeffnet eine Trainings-Aufgabe an genauer (catId, level, idx)-
+    // Position. Die Position wird in einem Ref zwischengepuffert; <Training> liest
+    // sie beim Mount oder bei catId-Wechsel ueber `initialLevel`/`initialIdx` und
+    // ruft anschliessend consumeInitialPos() auf.
+    const pendingTrainingPosRef = useRef(null);
+    const openTrainingAt = (catId, level, idx) => {
+        pendingTrainingPosRef.current = { level, idx };
+        setCurrentCat(catId);
+        setView('training');
     };
 
     const onReset = () => {
@@ -2505,14 +2830,21 @@ function App() {
             <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {view === 'dashboard' && (
                     <Dashboard data={data} order={order} isSolved={isSolved}
-                        onOpenCategory={openCategory} onReset={null}
+                        srsState={srsState}
+                        onOpenCategory={openCategory} onOpenTrainingAt={(catId, level, idx) => openTrainingAt(catId, level, idx)}
+                        onReset={null}
                         onExport={null} onImport={null}
                         onInstall={null} />
                 )}
                 {view === 'training' && (
                     <Training data={data} order={order}
                         isSolved={isSolved} setSolved={setSolved}
-                        currentCat={(order.includes(currentCat) ? currentCat : order[0])} setCurrentCat={setCurrentCat} />
+                        srsState={srsState} srsGradeMany={srsGradeMany}
+                        currentCat={(order.includes(currentCat) ? currentCat : order[0])} setCurrentCat={setCurrentCat}
+                        initialLevel={pendingTrainingPosRef.current ? pendingTrainingPosRef.current.level : null}
+                        initialIdx={pendingTrainingPosRef.current ? pendingTrainingPosRef.current.idx : null}
+                        consumeInitialPos={() => { pendingTrainingPosRef.current = null; }}
+                        />
                 )}
                 {view === 'cheatsheet' && (
                     <Cheatsheet data={data} order={order} />
@@ -2521,7 +2853,8 @@ function App() {
                     <Schueler />
                 )}
                 {view === 'schulungen' && (
-                    <Schulungen auth={auth} onGoToOptionen={() => setView('optionen')} />
+                    <Schulungen auth={auth} onGoToOptionen={() => setView('optionen')}
+                        srsState={srsState} srsGradeMany={srsGradeMany} />
                 )}
                 {view === 'optionen' && (
                     <Optionen data={data} allOrder={allOrder} vis={vis} auth={auth}

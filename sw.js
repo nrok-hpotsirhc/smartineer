@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v49-auto-capstone';
+const CACHE_VERSION = 'smartineer-v50-lp-srs-open';
 const APP_SHELL = [
     './',
     './index.html',
