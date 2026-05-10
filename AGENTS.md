@@ -492,7 +492,9 @@ Pro Schulung eine Datei `js/data/schulung_<id>.js` als IIFE:
 
 Pflichtfelder pro Kapitel: `id`, `title`, `summary`, `pages` (≥ 1), `quiz` (≥ 50 Soll, ≥ 10 Mindest-Bootstrap).
 
-Quiz-Items duerfen zusaetzlich die optionalen Lernplattform-Metadaten `lo`, `bloom`, `difficulty`, `tags`, `source` tragen — siehe §22 (einheitliches Item-Schema, Adapter `toItem`). Diese Felder sind kompatibel mit MCQ, Sequence- und Cloze-Items.
+Optionales Kapitelfeld `learningObjectives` (P-ARCH-LO-COMPETENCE, seit v51): Liste `[{ id: 'LO-<KAP>-<N>', text: '…' }]`. Die LO-IDs werden von Quiz-Items im Feld `lo: ['LO-…']` referenziert; zusaetzliche Themen-Tags liegen in `tags: ['Standard', 'Bereich']`. Die Quiz-Result-Heatmap (`js/app.jsx`, Stage `quizResult`) aggregiert ok/total je `lo` und je `tag` und faerbt gruen (≥ 80 %) / gelb (50-79 %) / rot (< 50 %). Die Heatmap rendert nur, wenn das Kapitel `learningObjectives` definiert oder mindestens ein Item `lo`/`tags` traegt — Kapitel ohne LO-Pflege bleiben unveraendert. Beispielkapitel: Cybersec Kap. 5 (`risk`) in `js/data/schulung_master_et_cybersec.js` mit den Konstanten `RISK_LEARNING_OBJECTIVES` und `RISK_LO_TAGS` (Index-Bereiche -> lo+tags via Post-Process-Mutation).
+
+Quiz-Items duerfen zusaetzlich die optionalen Lernplattform-Metadaten `lo`, `bloom`, `difficulty`, `tags`, `source` tragen — siehe §22 (einheitliches Item-Schema, Adapter `toItem`). Diese Felder sind kompatibel mit MCQ-, Sequence- und Cloze-Items.
 
 ### 18.2 UX-Vertrag (Buch-Navigation)
 

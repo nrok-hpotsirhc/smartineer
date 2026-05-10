@@ -2338,6 +2338,77 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                         <p className="text-xs text-slate-500 mt-4">Karteikarten wurden aktualisiert. Falsche Antworten kommen morgen wieder, richtige nach gestaffelten Intervallen (Spaced Repetition).</p>
                     )}
                 </div>
+                {/* P-ARCH-LO-COMPETENCE: Kompetenz-Heatmap (richtig/total je LO und Tag).
+                    Wird nur gerendert, wenn das Kapitel learningObjectives definiert oder Items lo/tags tragen. */}
+                {(() => {
+                    const losCh = (chapter && chapter.learningObjectives) || [];
+                    const loStats = {};
+                    const tagStats = {};
+                    quizAnswers.forEach(a => {
+                        const it = a.item || {};
+                        (it.lo || []).forEach(loId => {
+                            loStats[loId] = loStats[loId] || { ok: 0, total: 0 };
+                            loStats[loId].total += 1;
+                            if (a.ok) loStats[loId].ok += 1;
+                        });
+                        (it.tags || []).forEach(tg => {
+                            tagStats[tg] = tagStats[tg] || { ok: 0, total: 0 };
+                            tagStats[tg].total += 1;
+                            if (a.ok) tagStats[tg].ok += 1;
+                        });
+                    });
+                    const loKeys = Object.keys(loStats);
+                    const tagKeys = Object.keys(tagStats);
+                    if (!loKeys.length && !tagKeys.length) return null;
+                    const heatColor = (ok, total) => {
+                        if (!total) return 'bg-slate-100 text-slate-500 border-slate-200';
+                        const pct = ok / total;
+                        if (pct >= 0.8) return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                        if (pct >= 0.5) return 'bg-amber-100 text-amber-900 border-amber-300';
+                        return 'bg-rose-100 text-rose-800 border-rose-300';
+                    };
+                    return (
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+                            <h3 className="font-bold text-slate-800 mb-1">Kompetenz-Heatmap</h3>
+                            <p className="text-xs text-slate-500 mb-4">Auswertung je Lernziel und Tag (gruen ≥ 80 %, gelb 50-79 %, rot &lt; 50 %).</p>
+                            {loKeys.length > 0 && (
+                                <div className="mb-5">
+                                    <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">Lernziele</h4>
+                                    <ul className="flex flex-col gap-2">
+                                        {loKeys.map(id => {
+                                            const s = loStats[id];
+                                            const lo = losCh.find(x => x.id === id);
+                                            const pct = Math.round((s.ok / s.total) * 100);
+                                            return (
+                                                <li key={id} className={`flex items-start gap-3 p-3 rounded-lg border ${heatColor(s.ok, s.total)}`}>
+                                                    <span className="font-mono text-xs font-bold flex-shrink-0">{id}</span>
+                                                    <span className="flex-1 text-sm">{lo ? lo.text : '(Lernziel nicht definiert)'}</span>
+                                                    <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap">{s.ok}/{s.total} · {pct}%</span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            )}
+                            {tagKeys.length > 0 && (
+                                <div>
+                                    <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">Tags</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {tagKeys.map(tg => {
+                                            const s = tagStats[tg];
+                                            const pct = Math.round((s.ok / s.total) * 100);
+                                            return (
+                                                <span key={tg} className={`text-xs font-medium px-3 py-1.5 rounded-full border ${heatColor(s.ok, s.total)}`}>
+                                                    {tg} · {s.ok}/{s.total} · {pct}%
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
                     <h3 className="font-bold text-slate-800 mb-4">Aufgaben im Überblick</h3>
                     <ol className="flex flex-col gap-3">

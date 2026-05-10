@@ -2318,6 +2318,33 @@
             'Caralli et al. CMU/SEI-2007-TR-012: OCTAVE Allegro ist asset-zentriert, qualitativ, 8 Schritte in 4 Phasen.')
     ];
 
+    // P-ARCH-LO-COMPETENCE: Lernziele und Tags fuer Kapitel 5 (risk).
+    // Lernziele entsprechen den fuenf grossen Themenbloecken; Tags ordnen
+    // Items zu Standards/Frameworks fuer die Kompetenz-Heatmap.
+    const RISK_LEARNING_OBJECTIVES = [
+        { id: 'LO-RISK-1', text: 'ISO/IEC 27001:2022 ISMS-Aufbau, Anhang A und Pflicht-Klauseln 4-10 erlaeutern' },
+        { id: 'LO-RISK-2', text: 'BSI IT-Grundschutz (200-1/-2/-3/-4) und seine Anwendung erklaeren' },
+        { id: 'LO-RISK-3', text: 'Risikomethodik nach ISO/IEC 27005:2022 und ISO 31000:2018 anwenden' },
+        { id: 'LO-RISK-4', text: 'EU-Regulatorik (NIS2, CRA) inkl. Fristen und Pflichten einordnen' },
+        { id: 'LO-RISK-5', text: 'Risiko-Bewertung mit CVSS v4.0, EPSS, KEV, FAIR und OCTAVE Allegro durchfuehren' }
+    ];
+    const RISK_LO_TAGS = [
+        { range: [0, 10],  lo: ['LO-RISK-1'], tags: ['ISO-27001', 'Annex-A'] },
+        { range: [10, 18], lo: ['LO-RISK-2'], tags: ['BSI-Grundschutz', 'BSI-200-x'] },
+        { range: [18, 23], lo: ['LO-RISK-3'], tags: ['ISO-27005', 'Risikomethodik'] },
+        { range: [23, 26], lo: ['LO-RISK-3'], tags: ['ISO-31000', 'Risikomethodik'] },
+        { range: [26, 34], lo: ['LO-RISK-4'], tags: ['EU-NIS2', 'Regulatorik'] },
+        { range: [34, 39], lo: ['LO-RISK-4'], tags: ['EU-CRA', 'Regulatorik'] },
+        { range: [39, 44], lo: ['LO-RISK-5'], tags: ['CVSS-v4'] },
+        { range: [44, 47], lo: ['LO-RISK-5'], tags: ['EPSS', 'CISA-KEV'] },
+        { range: [47, 50], lo: ['LO-RISK-5'], tags: ['FAIR', 'OCTAVE-Allegro'] }
+    ];
+    RISK_LO_TAGS.forEach(b => {
+        for (let i = b.range[0]; i < b.range[1]; i++) {
+            if (QUIZ_RISK[i]) { QUIZ_RISK[i].lo = b.lo.slice(); QUIZ_RISK[i].tags = b.tags.slice(); }
+        }
+    });
+
     // ----------------------------------------------------------------------
     // Kapitel 6 — AI-Security und vertrauenswuerdige Systeme (PRODUKTIV)
     // Quellen: Goodfellow/Shlens/Szegedy "Explaining and Harnessing Adversarial
@@ -5073,6 +5100,7 @@
                 id: 'risk',
                 title: 'Kapitel 5 — Risikomanagement und Compliance',
                 summary: 'ISO/IEC 27001:2022 ISMS mit 93 Annex-A-Controls, BSI-Grundschutz Edition 2024, ISO/IEC 27005:2022 und ISO 31000:2018, EU-Regulatorik (NIS2 / CRA / KRITIS), CVSS v4.0, EPSS, CISA KEV, FAIR und OCTAVE Allegro.',
+                learningObjectives: RISK_LEARNING_OBJECTIVES,
                 pages: [PAGE_RISK_ISMS, PAGE_RISK_BSI_27005, PAGE_RISK_REGULATIONS, PAGE_RISK_SCORING],
                 quiz: QUIZ_RISK
             },
