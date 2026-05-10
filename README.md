@@ -205,6 +205,7 @@ Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht
 - Der lokale Login fuer den Bereich **Schulungen** ist temporaer deaktiviert; Reaktivierung ist als Arbeitspaket `P-UI-LOGIN-REACTIVATE` in `WORKPACKAGES.md` vermerkt. Die Zugangsdaten-Vorlage bleibt fuer die spaetere Reaktivierung unter [js/auth-credentials.example.js](js/auth-credentials.example.js) erhalten.
 - Die Anmeldung ist eine reine UX-Hilfe ohne echten Sicherheitsanspruch. Der Quellcode und der Browser-Storage bleiben einsehbar.
 - Die Master-ET-Cybersec-Schulung ist seit v30 vollstaendig produktiv (alle 6 Kapitel ausgearbeitet); die Master-ET-Automation-Schulung ist als `status: 'preparation'` angelegt, drei Kapitel sind produktiv und die uebrigen als Platzhalter markiert.
+- Das Modulhandbuch und die Soll-/Ist-Matrix der drei Studiengaenge (Cyber-Security, Automatisierungstechnik, Allgemeinmedizin & Medizinstudium) liegen in [docs/CURRICULUM-MATRIX.md](docs/CURRICULUM-MATRIX.md) und sind die Referenz fuer alle Inhalts-Pakete in [WORKPACKAGES.md](WORKPACKAGES.md).
 
 ---
 
