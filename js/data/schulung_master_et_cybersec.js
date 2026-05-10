@@ -1219,6 +1219,482 @@
             'IEC TR 63069:2019 und ISA-TR84.00.09:2021 verzahnen Safety- und Security-Lifecycle.')
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 4 — Sichere Softwareentwicklung / S-SDLC (PRODUKTIV)
+    // Quellen: NIST SP 800-218 v1.1 "Secure Software Development Framework"
+    // (Feb. 2022); NIST SP 800-218A "SSDF for Generative AI" (Apr. 2024);
+    // OWASP Top 10:2021; OWASP ASVS 4.0.3 (2023); OWASP SAMM v2.0;
+    // Microsoft SDL (Howard/Lipner 2006, aktuelle Practices 2024);
+    // Shostack "Threat Modeling: Designing for Security" (2014);
+    // Deng et al. "LINDDUN: a privacy threat analysis framework" (2011);
+    // ISO/IEC 27034 (Application Security); IEC 62443-4-1:2018;
+    // CERT C Coding Standard 2016 + 2020 errata; MISRA C:2012 Amd.4 (2023);
+    // CWE Top 25 (2024); SLSA Spec v1.0 (Apr. 2023); in-toto Spec v0.9;
+    // Sigstore (Cooperation 2022); CycloneDX 1.6 (2024); SPDX 2.3 / 3.0 (2024);
+    // EU Cyber Resilience Act 2024/2847 (CRA); SolarWinds Sunburst (FireEye/
+    // Mandiant Dec. 2020); log4shell CVE-2021-44228; xz-utils CVE-2024-3094;
+    // CHECKMARX/Snyk State of Open Source Security 2024.
+    // ----------------------------------------------------------------------
+
+    const PAGE_SSE_TM = {
+        title: '4.1 Threat Modeling — STRIDE, LINDDUN, Attack Trees',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) den Threat-Modeling-Prozess in vier Schritten beschreiben, (2) STRIDE pro Datenflusselement anwenden, (3) LINDDUN fuer Privacy-Threats abgrenzen, (4) Attack Trees aufbauen und gewichten.</blockquote>'
+
+            + '<h4>4.1.1 Vier Fragen nach Shostack</h4>'
+            + '<ol>'
+            + '<li><em>What are we building?</em> &mdash; System-Skizze mit Data-Flow-Diagramm (DFD), Trust Boundaries einzeichnen.</li>'
+            + '<li><em>What can go wrong?</em> &mdash; STRIDE/LINDDUN systematisch je Element.</li>'
+            + '<li><em>What are we going to do about it?</em> &mdash; Mitigation pro identifizierter Bedrohung.</li>'
+            + '<li><em>Did we do a good job?</em> &mdash; Review, Restrisiko, naechste Iteration.</li>'
+            + '</ol>'
+
+            + '<h4>4.1.2 STRIDE</h4>'
+            + '<p>Microsoft-Akronym (Howard/Lipner 2006), das fuer jeden Datenfluss/-speicher/-prozess die folgenden Bedrohungsklassen abfragt:</p>'
+            + '<table><thead><tr><th>Buchstabe</th><th>Bedrohung</th><th>Verletztes Schutzziel</th></tr></thead><tbody>'
+            + '<tr><td>S</td><td>Spoofing</td><td>Authentizitaet</td></tr>'
+            + '<tr><td>T</td><td>Tampering</td><td>Integritaet</td></tr>'
+            + '<tr><td>R</td><td>Repudiation</td><td>Nichtabstreitbarkeit</td></tr>'
+            + '<tr><td>I</td><td>Information Disclosure</td><td>Vertraulichkeit</td></tr>'
+            + '<tr><td>D</td><td>Denial of Service</td><td>Verfuegbarkeit</td></tr>'
+            + '<tr><td>E</td><td>Elevation of Privilege</td><td>Autorisierung</td></tr>'
+            + '</tbody></table>'
+            + '<p><strong>STRIDE-per-Element</strong>: External Entity &rarr; S/R; Process &rarr; STRIDE komplett; Data Flow &rarr; T/I/D; Data Store &rarr; T/I/D/R. Das reduziert die Frage-Matrix erheblich (Shostack 2014, §3).</p>'
+
+            + '<h4>4.1.3 LINDDUN fuer Privacy-Threats</h4>'
+            + '<p>Deng et al. (KU Leuven) entwickelten LINDDUN als Privacy-Pendant zu STRIDE: <em>Linkability, Identifiability, Non-Repudiation, Detectability, Disclosure of Information, Unawareness, Non-Compliance</em>. Anwendung pro DFD-Element analog zu STRIDE; Fokus liegt auf Datenschutz-Risiken (DSGVO, EU AI Act). Aktuelle Variante: <strong>LINDDUN GO</strong> (2022) mit Karten-/Workshop-Format.</p>'
+
+            + '<h4>4.1.4 Attack Trees und Risiko-Bewertung</h4>'
+            + '<p>Schneier 1999. Wurzel: Angreifer-Ziel; AND/OR-Verzweigung in Sub-Ziele bis zu konkreten Aktionen. Knoten lassen sich mit Kosten (USD), Skill (Level 1-5) oder Wahrscheinlichkeit gewichten; minimaler Pfad = leichtester Angriff. Werkzeuge: Microsoft Threat Modeling Tool 2016 (Office365), OWASP Threat Dragon 2.x, IriusRisk.</p>'
+
+            + '<h4>4.1.5 Bewertung mit DREAD/CVSS</h4>'
+            + '<p>DREAD (Damage, Reproducibility, Exploitability, Affected Users, Discoverability) ist heuristisch und schwer reproduzierbar &mdash; aktuell empfohlen: <strong>CVSS v4.0</strong> (FIRST Nov. 2023) fuer technische Schwachstellen, <strong>EPSS</strong> fuer Wahrscheinlichkeit, <strong>FAIR</strong> (Open FAIR Body of Knowledge 2024) fuer monetaer-quantitative Risikoanalyse. CISA-KEV-Katalog ergaenzt um Felddaten zur tatsaechlichen Ausnutzung.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: Shostack 2014; Howard/Lipner "The Security Development Lifecycle" 2006; Deng et al. 2011, Springer Requirements Engineering 16(1); Schneier "Attack Trees" Dr. Dobb&#39;s Dec. 1999; FIRST CVSS v4.0 Spec 2023; CISA KEV (laufend gepflegt).</em></p>'
+    };
+
+    const PAGE_SSE_CODE = {
+        title: '4.2 Sichere Coding-Standards und Memory-Safety',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die wichtigsten Memory-Safety-Schwachstellen benennen, (2) MISRA-C und CERT-C einordnen, (3) typische Mitigationen (Stack-Canaries, ASLR, CFI) erklaeren, (4) den Wechsel auf memory-safe-Sprachen (Rust) im Embedded-Kontext bewerten.</blockquote>'
+
+            + '<h4>4.2.1 CWE Top 25 (2024)</h4>'
+            + '<p>MITRE/CISA pflegen jaehrlich eine Liste der gefaehrlichsten Software-Schwachstellen, gewichtet nach Anzahl der CVEs und Schwere. Top-Plaetze 2024 (Auswahl):</p>'
+            + '<ol>'
+            + '<li>CWE-787 Out-of-bounds Write</li>'
+            + '<li>CWE-79 Cross-Site Scripting</li>'
+            + '<li>CWE-89 SQL Injection</li>'
+            + '<li>CWE-416 Use After Free</li>'
+            + '<li>CWE-78 OS Command Injection</li>'
+            + '<li>CWE-20 Improper Input Validation</li>'
+            + '<li>CWE-125 Out-of-bounds Read</li>'
+            + '<li>CWE-22 Path Traversal</li>'
+            + '</ol>'
+            + '<p>Davon sind <strong>CWE-787, -416, -125, -476, -190</strong> klassische Memory-Safety-Bugs &mdash; in C/C++ vermeidbar nur durch Disziplin oder Sprachwechsel.</p>'
+
+            + '<h4>4.2.2 MISRA-C und CERT-C</h4>'
+            + '<table><thead><tr><th>Standard</th><th>Zielgruppe</th><th>Charakter</th></tr></thead><tbody>'
+            + '<tr><td>MISRA C:2012 (Amd. 4 2023)</td><td>Automotive, Industrie, Medizin</td><td>Coding-Regeln (175+ Rules); Pflicht in ISO 26262 ASIL-A+</td></tr>'
+            + '<tr><td>CERT C Coding Standard (2016 + 2020-Errata)</td><td>allgemein sicherheitskritisch</td><td>Schwachstellen-Vermeidung, Mapping auf CWE/CVE</td></tr>'
+            + '<tr><td>MISRA C++:2023</td><td>moderne C++17-Codebasen</td><td>aktualisiert MISRA-C++:2008 fuer C++17/20</td></tr>'
+            + '<tr><td>AUTOSAR C++14</td><td>Automotive (vor MISRA C++:2023)</td><td>weitgehend in MISRA C++:2023 ueberfuehrt</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>4.2.3 Hardening-Mechanismen</h4>'
+            + '<ul>'
+            + '<li><strong>Stack-Canaries</strong> (StackGuard 1998 / GCC <code>-fstack-protector-strong</code>): Wert vor Return-Adresse; Mismatch &rarr; Abort.</li>'
+            + '<li><strong>ASLR</strong> (Address Space Layout Randomization, PaX 2001): zufaellige Basis fuer Code/Stack/Heap.</li>'
+            + '<li><strong>DEP / NX</strong>: Datenseiten nicht ausfuehrbar (W^X).</li>'
+            + '<li><strong>RELRO + BIND_NOW</strong>: Linker-Tabellen schreibgeschuetzt.</li>'
+            + '<li><strong>FORTIFY_SOURCE=2/3</strong>: Compiler-seitige Bounds-Checks fuer libc-Funktionen.</li>'
+            + '<li><strong>Control Flow Integrity (CFI)</strong>: Forward-edge (LLVM CFI, Microsoft CFG) und Backward-edge (Intel CET Shadow Stack, ARM PAC/BTI).</li>'
+            + '<li><strong>Sanitizers</strong> in Tests: AddressSanitizer (Serebryany et al. 2012), UndefinedBehaviorSanitizer, ThreadSanitizer, MemorySanitizer.</li>'
+            + '</ul>'
+
+            + '<h4>4.2.4 Memory-safe Sprachen im Embedded-Kontext</h4>'
+            + '<p>NSA "Software Memory Safety" Cybersecurity Information Sheet (Nov. 2022) und ONCD "Back to the Building Blocks" (Feb. 2024) empfehlen den Wechsel auf <strong>memory-safe languages</strong> (Rust, Go, Swift, Java, C#, Python) wo moeglich. Im Embedded-Bereich:</p>'
+            + '<ul>'
+            + '<li><strong>Rust</strong> mit <code>no_std</code> + <code>embassy</code>/<code>RTIC</code> fuer Cortex-M; Borrow-Checker schliesst CWE-416/787/125/476 zur Compile-Zeit aus.</li>'
+            + '<li><strong>Ada/SPARK</strong> seit Jahrzehnten in Avionik (DO-178C); SPARK 2014 mit formaler Verifikation.</li>'
+            + '<li><strong>Linux Kernel</strong> akzeptiert Rust-Module seit 6.1 (Dez. 2022); produktive Treiber ab 6.6 (Okt. 2023).</li>'
+            + '</ul>'
+            + '<p>Pragmatische Migration: neue Komponenten in Rust, Bestandscode in C++ mit Hardening + Sanitizers; <em>nicht</em> bestehende sicherheitskritische Module umschreiben ohne Re-Validation.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: MITRE/CISA CWE Top 25 (2024); MISRA C:2012 Amd. 4 (2023); SEI CERT C 2016+2020; NSA "Software Memory Safety" CSI Nov. 2022; ONCD Tech-Report Feb. 2024; Microsoft Security Response Center "70% of vulnerabilities are memory safety issues" (BlueHat 2019); Linux Kernel 6.1 Release Notes Dec. 2022.</em></p>'
+    };
+
+    const PAGE_SSE_TEST = {
+        title: '4.3 SAST, DAST, Fuzzing und SCA',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) statische und dynamische Analyse-Verfahren abgrenzen, (2) Fuzzing-Strategien (mutational vs. structure-aware vs. coverage-guided) unterscheiden, (3) SBOM-Formate (CycloneDX, SPDX) zuordnen, (4) typische SCA-Workflows beschreiben.</blockquote>'
+
+            + '<h4>4.3.1 Static Application Security Testing (SAST)</h4>'
+            + '<p>Sucht ohne Programmausfuehrung in Quell-/Bytecode nach Mustern (Taint-Analysen, Datenfluss, abstrakte Interpretation). Etablierte Werkzeuge: <em>CodeQL</em> (GitHub Advanced Security), <em>Semgrep</em>, <em>Coverity</em>, <em>Klocwork</em>, <em>SonarQube</em>, <em>Fortify</em>. Stärken: skaliert auf grosse Codebasen, frueh im SDLC anwendbar. Schwäche: hohe False-Positive-Rate, schlechte Erfassung von semantischen Logikfehlern. ISO/IEC 5055:2021 standardisiert Quality Measures fuer SAST-Berichte.</p>'
+
+            + '<h4>4.3.2 Dynamic Application Security Testing (DAST)</h4>'
+            + '<p>Pruft die laufende Applikation black-box ueber HTTP, RPC oder Protokoll-Probes. Etablierte Werkzeuge: <em>OWASP ZAP 2.14+</em>, <em>Burp Suite Pro</em>, <em>Nikto</em>, <em>Acunetix</em>. Erfasst Konfigurationsfehler, Authentifizierungs-Schwaechen, Injection-Pfade. Komplementaer zu SAST &mdash; OWASP empfiehlt beide kombiniert. Subform <strong>IAST</strong> (Interactive AST) nutzt Instrumentierung im Application-Server fuer hoehere Genauigkeit.</p>'
+
+            + '<h4>4.3.3 Fuzzing</h4>'
+            + '<table><thead><tr><th>Variante</th><th>Prinzip</th><th>Beispiele</th></tr></thead><tbody>'
+            + '<tr><td>Black-box mutational</td><td>Bytes-Flip, kein Coverage-Feedback</td><td>radamsa, peach (Legacy)</td></tr>'
+            + '<tr><td>Coverage-guided greybox</td><td>Coverage-Bitmap als Fitness, Genetic-Algorithmus</td><td>AFL++, libFuzzer (LLVM), honggfuzz</td></tr>'
+            + '<tr><td>Structure-aware</td><td>Grammatik/Protobuf-Schema</td><td>libprotobuf-mutator, Gramatron, Domato</td></tr>'
+            + '<tr><td>Symbolic / Concolic</td><td>SMT-Solver erzeugt deckende Inputs</td><td>KLEE, angr, SAGE</td></tr>'
+            + '</tbody></table>'
+            + '<p>Industriell-relevant: <strong>OSS-Fuzz</strong> (Google) hat seit 2016 ueber 36 000 Bugs in Open-Source-Software gefunden (Stand 2024). Continuous Fuzzing wird in NIST SP 800-218 v1.1 PW.4.4 explizit empfohlen.</p>'
+
+            + '<h4>4.3.4 Software Composition Analysis (SCA) und SBOMs</h4>'
+            + '<p>Moderne Anwendungen bestehen zu 70-90&nbsp;% aus Open-Source-Komponenten (Synopsys OSSRA 2024). SCA-Tools (<em>Snyk</em>, <em>Dependabot</em>, <em>Renovate</em>, <em>OWASP Dependency-Check</em>, <em>Trivy</em>) inventarisieren Abhaengigkeiten, mappen sie auf CVE/Advisory-Datenbanken (NVD, GHSA, OSV) und melden gefaehrdete Versionen. Eine <strong>Software Bill of Materials (SBOM)</strong> ist die maschinen-lesbare Stueckliste.</p>'
+            + '<p>Standard-Formate (Wahl ist organisationsabhaengig):</p>'
+            + '<ul>'
+            + '<li><strong>CycloneDX 1.6</strong> (OWASP, Apr. 2024) &mdash; JSON/XML, breite Tool-Unterstuetzung, VEX/SaaSBOM/HBOM-Erweiterungen.</li>'
+            + '<li><strong>SPDX 3.0</strong> (Linux Foundation, Apr. 2024) &mdash; ISO/IEC 5962:2021; modulare Profile (Build, AI, Dataset).</li>'
+            + '<li>VEX (Vulnerability Exploitability eXchange, CycloneDX und CSAF) ergaenzt SBOMs um Status-Informationen ("Not affected", "Under investigation").</li>'
+            + '</ul>'
+            + '<p>EU CRA (2024/2847) und US Executive Order 14028 (2021) machen SBOMs fuer staatliche Beschaffung verbindlich.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-218 v1.1 PW.4-PW.7 (Feb. 2022); OWASP ASVS 4.0.3 §1.2; CycloneDX 1.6 Spec (2024); SPDX 3.0 (2024) / ISO/IEC 5962:2021; Google OSS-Fuzz Stats 2024; Synopsys "Open Source Security and Risk Analysis" 2024.</em></p>'
+    };
+
+    const PAGE_SSE_SUPPLY = {
+        title: '4.4 Supply-Chain-Security, SSDF und Vorfaelle',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) NIST SSDF-Practices den Phasen PO/PS/PW/RV zuordnen, (2) SLSA-Levels einordnen, (3) Sigstore und in-toto erklaeren, (4) Lessons Learned aus SolarWinds, log4shell und xz-utils benennen.</blockquote>'
+
+            + '<h4>4.4.1 NIST SP 800-218 (SSDF v1.1)</h4>'
+            + '<p>Vier Practice-Gruppen mit jeweiligen Tasks:</p>'
+            + '<ul>'
+            + '<li><strong>PO &mdash; Prepare the Organization</strong> (Roles, Toolchain-Schutz, Trainings, Security Requirements).</li>'
+            + '<li><strong>PS &mdash; Protect the Software</strong> (Code-Integritaet, Provenance, signierte Releases).</li>'
+            + '<li><strong>PW &mdash; Produce Well-Secured Software</strong> (Threat Modeling, Secure Coding, SAST/DAST/Fuzzing, Hardening, peer review).</li>'
+            + '<li><strong>RV &mdash; Respond to Vulnerabilities</strong> (Vulnerability Management, Disclosure, Patch Lifecycle).</li>'
+            + '</ul>'
+            + '<p><strong>NIST SP 800-218A</strong> (Apr. 2024) ergaenzt Practices fuer generative AI-Systeme: Modell-, Daten- und Prompt-Provenance.</p>'
+
+            + '<h4>4.4.2 SLSA &mdash; Supply-chain Levels for Software Artifacts</h4>'
+            + '<p>SLSA Spec v1.0 (OpenSSF, Apr. 2023). Stufen <em>Build L1 .. L4</em> mit zunehmenden Anforderungen:</p>'
+            + '<table><thead><tr><th>Level</th><th>Anforderung</th></tr></thead><tbody>'
+            + '<tr><td>Build L1</td><td>Provenance vorhanden &mdash; Build-Plattform dokumentiert ihren Output (z.B. GitHub Actions provenance attestation).</td></tr>'
+            + '<tr><td>Build L2</td><td>Hosted Build-Plattform; signierte Provenance.</td></tr>'
+            + '<tr><td>Build L3</td><td>Build-Plattform haltbar gehaertet; Isolation, Non-Falsifiable Provenance.</td></tr>'
+            + '</tbody></table>'
+            + '<p>Track <em>Source</em> (in v1.1 angekuendigt) wird Versionierungs-Anforderungen erweitern.</p>'
+
+            + '<h4>4.4.3 Sigstore und in-toto</h4>'
+            + '<p><strong>Sigstore</strong> (Cooperation 2022) ist ein Public-Good-Service-Stack zum keyless-Signieren: <em>cosign</em> (CLI), <em>Fulcio</em> (kurzlebige X.509 via OIDC), <em>Rekor</em> (transparency log analog Certificate Transparency, RFC 6962). Kein Schluessel-Management noetig &mdash; OIDC-Identitaet (z.B. GitHub Actions, Google Workload Identity) ersetzt klassische PGP-Keys.</p>'
+            + '<p><strong>in-toto</strong> (Torres-Arias et al. 2019, NDSS) liefert ein <em>Layout</em> mit erwarteten Pipeline-Schritten und kryptographische <em>Link-Metadaten</em> pro Schritt; Verifikation prueft, dass jeder Schritt von berechtigten Funktionaeren gemaess Layout durchgefuehrt wurde.</p>'
+
+            + '<h4>4.4.4 Vorfaelle &mdash; Lessons Learned</h4>'
+            + '<ul>'
+            + '<li><strong>SolarWinds Sunburst</strong> (Dez. 2020, FireEye/Mandiant Bericht): Build-System der Orion-Plattform kompromittiert, manipuliertes DLL <code>SolarWinds.Orion.Core.BusinessLayer.dll</code> mit gueltiger Signatur an ~18 000 Kunden ausgeliefert. <em>Lesson:</em> reproducible builds, Build-System-Hardening, Provenance.</li>'
+            + '<li><strong>log4shell</strong> (Dez. 2021, CVE-2021-44228, CVSS 10.0): JNDI-Lookup-Funktion in log4j 2 erlaubte RCE durch Logging eines manipulierten Strings (<code>${jndi:ldap://...}</code>). <em>Lesson:</em> Default-Sicheres Verhalten, kontinuierliches SBOM-Monitoring, Verzicht auf JNDI-/EL-Features in Logging-Bibliotheken.</li>'
+            + '<li><strong>xz-utils-Backdoor</strong> (Maerz 2024, CVE-2024-3094, CVSS 10.0): boeswillig eingeschleuste Backdoor in liblzma durch Maintainer "Jia Tan" ueber zwei Jahre Social-Engineering. Ziel: sshd-RCE bei systemd-Linkage. <em>Lesson:</em> Maintainer-Diversitaet, Reproduzierbare Builds, kritische Aufmerksamkeit fuer Build-System-Aenderungen.</li>'
+            + '<li><strong>npm typosquatting/dependency confusion</strong> (Birsan 2021): unbenutzte Internal-Package-Namen oeffentlich registriert &rarr; Build zog automatisch die boeswillige Version. <em>Lesson:</em> Scope-Locking, Private Registry, Allowlists.</li>'
+            + '</ul>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-218 v1.1 (Feb. 2022); NIST SP 800-218A (Apr. 2024); SLSA Spec v1.0 (OpenSSF Apr. 2023); Sigstore (Cooperation 2022 IEEE S&P); Torres-Arias et al. "in-toto: Providing farm-to-table guarantees for bits and bytes" USENIX Security 2019; FireEye/Mandiant "Highly Evasive Attacker..." Dec. 2020; CVE-2021-44228; CVE-2024-3094; Birsan "Dependency Confusion" Medium 2021.</em></p>'
+    };
+
+    const QUIZ_SSE = [
+        q('Welche vier Fragen strukturieren den Threat-Modeling-Prozess nach Shostack?',
+            ['What are we building? / What can go wrong? / What do we do about it? / Did we do a good job?',
+             'Wer hackt uns? / Wie viel kostet es? / Wann passiert es? / Wer haftet?',
+             'Threat / Vulnerability / Exploit / Patch',
+             'Plan / Do / Check / Act'], 0,
+            'Shostack 2014 §1: vier Fragen als Backbone des Threat-Modeling-Workshops; PDCA ist ISMS-Schleife (ISO 27001), nicht Threat Modeling.'),
+        q('Welche Bedrohungsklasse in STRIDE adressiert Authentizitaet?',
+            ['S — Spoofing', 'T — Tampering', 'I — Information Disclosure', 'D — Denial of Service'], 0,
+            'STRIDE: S=Authentizitaet, T=Integritaet, R=Nichtabstreitbarkeit, I=Vertraulichkeit, D=Verfuegbarkeit, E=Autorisierung.'),
+        q('Welche STRIDE-Bedrohungen sind nach STRIDE-per-Element fuer einen Data Flow relevant?',
+            ['T (Tampering), I (Information Disclosure), D (Denial of Service)',
+             'Alle sechs (S/T/R/I/D/E)',
+             'Nur S (Spoofing)',
+             'Nur E (Elevation of Privilege)'], 0,
+            'Shostack 2014 Tab. 3-1: External Entity = S+R; Process = STRIDE komplett; Data Flow = T/I/D; Data Store = T/I/D/R.'),
+        q('Wofuer steht das "L" in LINDDUN?',
+            ['Linkability — die Faehigkeit, zwei Beobachtungen demselben Subjekt zuzuordnen',
+             'Logging',
+             'Latency',
+             'Loss of Service'], 0,
+            'Deng et al. 2011: L=Linkability, I=Identifiability, N=Non-Repudiation, D=Detectability, D=Disclosure of Information, U=Unawareness, N=Non-Compliance.'),
+        q('Welche Variante von LINDDUN nutzt ein Karten-/Workshop-Format fuer agile Teams?',
+            ['LINDDUN GO (2022)',
+             'LINDDUN PRO',
+             'LINDDUN+',
+             'LINDDUN-XL'], 0,
+            'LINDDUN GO ist die kartenbasierte Schnellvariante (2022); LINDDUN PRO ist die formale Methode.'),
+        q('Wofuer eignen sich Attack Trees nach Schneier 1999?',
+            ['Strukturierte Zerlegung eines Angreifer-Ziels in Teilziele mit AND/OR-Verzweigung; Gewichtung mit Kosten/Skill/Wahrscheinlichkeit',
+             'Modellierung von Datenbank-Schemata',
+             'Optimierung von Compiler-Backends',
+             'Visualisierung von Performance-Profilen'], 0,
+            'Schneier "Attack Trees" Dr. Dobb&#39;s 1999: Wurzel = Goal, Pfade = alternative Angriffe; minimaler Pfad = leichtester Angriff.'),
+        q('Welcher Standard ist heute fuer technische Schwachstellen-Bewertung empfohlen?',
+            ['CVSS v4.0 (FIRST, Nov. 2023) plus EPSS fuer Exploitwahrscheinlichkeit',
+             'DREAD',
+             'CIA-Triade',
+             'OWASP Top 10'], 0,
+            'DREAD ist heuristisch und schwer reproduzierbar; CVSS v4.0 + EPSS sind Standard.'),
+        q('Welche Schwachstellen-Klasse fuehrt seit Jahren die CWE Top 25 an?',
+            ['CWE-787 Out-of-bounds Write',
+             'CWE-79 Cross-Site Scripting',
+             'CWE-89 SQL Injection',
+             'CWE-352 CSRF'], 0,
+            'MITRE/CISA CWE Top 25 (2024): CWE-787 auf Platz 1.'),
+        q('Welche der folgenden CWE-Klassen sind ueberwiegend Memory-Safety-Fehler?',
+            ['CWE-787, CWE-416, CWE-125, CWE-476, CWE-190',
+             'CWE-79, CWE-89, CWE-352, CWE-918',
+             'CWE-22, CWE-78, CWE-798, CWE-200',
+             'CWE-307, CWE-352, CWE-918, CWE-863'], 0,
+            'Klassische Memory-Safety-CWEs: Out-of-bounds Write/Read, Use-After-Free, NULL-Deref, Integer Overflow.'),
+        q('Welcher Hardening-Mechanismus erkennt Stack-Buffer-Overflows zur Laufzeit?',
+            ['Stack-Canary (z.B. -fstack-protector-strong)',
+             'ASLR',
+             'NX-Bit',
+             'RELRO'], 0,
+            'StackGuard 1998 / GCC -fstack-protector-strong: Canary-Wert vor Return-Adresse, Mismatch &rarr; abort.'),
+        q('Was bewirkt ASLR?',
+            ['Zufaellige Basisadressen fuer Code/Stack/Heap, erschwert ROP/Return-into-libc',
+             'Verhindert Race Conditions',
+             'Erzwingt Bounds-Checks',
+             'Macht Code unausfuehrbar'], 0,
+            'PaX 2001 / Linux mainline. ASLR = Address Space Layout Randomization.'),
+        q('Welcher Mechanismus implementiert Backward-edge-CFI auf Intel-CPUs?',
+            ['Intel CET Shadow Stack (CPL3-Shadow Stack)',
+             'AES-NI',
+             'SMAP',
+             'TSX-NI'], 0,
+            'Intel CET (seit Tiger Lake/Sapphire Rapids): Shadow Stack schuetzt Backward-edge; IBT schuetzt Forward-edge.'),
+        q('Welche ARMv8.3+ -Erweiterung schuetzt Pointer gegen Manipulation?',
+            ['PAC (Pointer Authentication Codes)',
+             'TBI (Top Byte Ignore)',
+             'PAN (Privileged Access Never)',
+             'WXN (Write XOR eXecute Never)'], 0,
+            'ARMv8.3-A PAC: kryptographische Signatur in oberen Pointer-Bits, BTI ergaenzt Forward-edge-CFI.'),
+        q('Welcher Sanitizer findet Out-of-bounds-/UAF-Bugs zur Laufzeit?',
+            ['AddressSanitizer (ASan, Serebryany et al. 2012 USENIX ATC)',
+             'ThreadSanitizer',
+             'MemorySanitizer',
+             'UBSan'], 0,
+            'AddressSanitizer instrumentiert Memory-Zugriffe und nutzt Shadow-Memory; UBSan adressiert Undefined Behavior, TSan Race Conditions, MSan uninitialisierte Reads.'),
+        q('Welche Standardpflicht ergibt sich aus ISO 26262 ASIL-A+ fuer Quellcode?',
+            ['Anwendung von MISRA C:2012 (oder gleichwertig) als Coding-Standard',
+             'Pflicht zu Java',
+             'Verbot statischer Analyse',
+             'Pflicht zur Open-Source-Veroeffentlichung'], 0,
+            'MISRA C:2012 (Amd. 4 2023) ist die etablierte Coding-Norm fuer ISO 26262 / IEC 61508 / EN 50128.'),
+        q('Was empfiehlt die NSA "Software Memory Safety" Information Sheet (Nov. 2022)?',
+            ['Wechsel auf memory-safe Sprachen (Rust, Swift, Go, Java, C#) fuer neuen Code wo moeglich',
+             'Verzicht auf Compiler-Optimierung',
+             'Komplettverzicht auf C/C++ ab sofort',
+             'Backup als ausreichende Mitigation'], 0,
+            'NSA CSI Nov. 2022; ONCD "Back to the Building Blocks" Feb. 2024 wiederholt diese Empfehlung.'),
+        q('Welche Aussage zu OWASP Top 10:2021 ist korrekt?',
+            ['A01:2021 ist Broken Access Control; A03:2021 ist Injection; A06:2021 ist Vulnerable & Outdated Components',
+             'A01:2021 ist SQL Injection',
+             'A03:2021 ist XSS',
+             'A06:2021 ist Insecure Design'], 0,
+            'OWASP Top 10:2021: A01 BAC, A02 Crypto Failures, A03 Injection, A04 Insecure Design, A05 Security Misconfig, A06 V&O Components, A07 ID&A Failures, A08 Software & Data Integrity, A09 Logging Failures, A10 SSRF.'),
+        q('Welche neue Top-10-Kategorie wurde 2021 gegenueber 2017 explizit hinzugefuegt?',
+            ['A04:2021 Insecure Design',
+             'A03:2021 Injection',
+             'A07:2021 Identification & Authentication Failures',
+             'A09:2021 Logging Failures'], 0,
+            'A04 Insecure Design ist 2021 neu, basiert auf vermehrten Threat-Modeling-/SAMM-Anforderungen.'),
+        q('Welcher OWASP-Standard liefert verifikable Anforderungen fuer Web-/API-Anwendungen?',
+            ['OWASP ASVS 4.0.3',
+             'OWASP Top 10',
+             'OWASP SAMM',
+             'OWASP Cheat Sheet Series'], 0,
+            'ASVS = Application Security Verification Standard; Top 10 ist Awareness, SAMM ist Reifegrad-Modell.'),
+        q('Welcher Begriff beschreibt Coverage-guided Greybox-Fuzzing?',
+            ['AFL++ / libFuzzer mit Coverage-Bitmap als Genetik-Fitness',
+             'Reines random byte flipping ohne Feedback',
+             'Statischer Solver wie KLEE',
+             'Manuelles Testdaten-Erstellen'], 0,
+            'AFL/AFL++ und libFuzzer nutzen Compiler-instrumentierte Coverage-Bitmaps zur Mutation-Steuerung.'),
+        q('Was leistet OSS-Fuzz?',
+            ['Continuous Fuzzing kostenfrei fuer relevante OSS-Projekte; >36 000 Bugs gefunden seit 2016',
+             'Manuelles Code-Review-Service',
+             'Ein DAST-Werkzeug fuer Webapps',
+             'Eine SBOM-Generator-CLI'], 0,
+            'Google OSS-Fuzz Stats 2024: ~36 000 gefundene Bugs in OSS seit Start 2016.'),
+        q('Welche SBOM-Spezifikation ist als ISO/IEC 5962 standardisiert?',
+            ['SPDX',
+             'CycloneDX',
+             'SWID-Tags',
+             'PURL'], 0,
+            'SPDX 2.2 wurde als ISO/IEC 5962:2021 standardisiert; SPDX 3.0 (Apr. 2024) erweitert um Profile.'),
+        q('Welche aktuelle CycloneDX-Version bringt VEX/SaaSBOM/HBOM-Erweiterungen?',
+            ['CycloneDX 1.6 (Apr. 2024)',
+             'CycloneDX 1.0',
+             'CycloneDX 0.9',
+             'CycloneDX 2.0'], 0,
+            'OWASP CycloneDX 1.6 (Apr. 2024) erweitert Lifecycle-/Service-/Hardware-BOM-Profile.'),
+        q('Was beschreibt VEX?',
+            ['Vulnerability Exploitability eXchange — Status-Information ergaenzend zu SBOMs ("Not affected", "Under investigation")',
+             'Eine alternative Programmiersprache',
+             'Ein Hypervisor-Schutz',
+             'Ein Fuzzer'], 0,
+            'VEX-Formate: CycloneDX VEX und CSAF VEX (CISA). Reduziert SBOM-False-Positives.'),
+        q('Welche Practice-Gruppe von NIST SSDF v1.1 deckt "Roles, Toolchain-Schutz, Trainings" ab?',
+            ['PO — Prepare the Organization',
+             'PS — Protect the Software',
+             'PW — Produce Well-Secured Software',
+             'RV — Respond to Vulnerabilities'], 0,
+            'NIST SP 800-218 v1.1 §2.1: PO bereitet Organisation vor.'),
+        q('Welche SSDF-Gruppe enthaelt Tasks fuer Code-Integritaet und signierte Releases?',
+            ['PS — Protect the Software',
+             'PO',
+             'PW',
+             'RV'], 0,
+            'NIST SP 800-218 v1.1 §2.2: PS deckt Software-Integritaet/Provenance ab.'),
+        q('Welche Stufe verlangt SLSA v1.0 fuer "non-falsifiable Provenance"?',
+            ['Build Level 3',
+             'Build Level 1',
+             'Build Level 2',
+             'Source Level 1'], 0,
+            'SLSA Spec v1.0 (Apr. 2023): Build L3 erfordert hardened Build-Plattform mit non-falsifiable Provenance.'),
+        q('Was leistet Sigstore "Fulcio"?',
+            ['Stellt kurzlebige X.509-Zertifikate auf Basis von OIDC-Identitaeten aus',
+             'Logged signierte Eintraege im Transparency-Log',
+             'Generiert SBOMs',
+             'Fuehrt Fuzzing durch'], 0,
+            'Sigstore Architektur: cosign (Tool), Fulcio (kurzlebige Certs via OIDC), Rekor (Transparency Log).'),
+        q('Was ist Rekor im Sigstore-Stack?',
+            ['Append-only Transparency-Log fuer signierte Software-Artefakte (analog Certificate Transparency, RFC 6962)',
+             'Ein Fuzzer',
+             'Ein Linter',
+             'Ein Container-Registry'], 0,
+            'Rekor ist Merkle-Tree-basiertes Append-only-Log; ermoeglicht Verifikation, dass eine Signatur oeffentlich registriert wurde.'),
+        q('Was beschreibt in-toto?',
+            ['Layout + Link-Metadata, das jede Pipeline-Stufe kryptographisch bezeugt und beim Endprodukt verifiziert wird',
+             'Ein Web-Framework',
+             'Ein Threat-Modeling-Tool',
+             'Eine Fuzzing-Bibliothek'], 0,
+            'Torres-Arias et al. USENIX Security 2019. Kombination Layout (erwartete Schritte) + Links (Beweise).'),
+        q('Welche CVE bezieht sich auf log4shell?',
+            ['CVE-2021-44228',
+             'CVE-2017-5638',
+             'CVE-2014-0160',
+             'CVE-2024-3094'], 0,
+            'CVE-2021-44228 (Dez. 2021): JNDI-RCE in log4j 2.x, CVSS 10.0.'),
+        q('Welche Eigenschaft hatte SolarWinds Sunburst (Dez. 2020)?',
+            ['Build-System-Kompromittierung; manipuliertes signiertes DLL ueber Standard-Update verteilt',
+             'Reine Phishing-Kampagne',
+             'Hardware-Implant',
+             'BLE-basierter Wurm'], 0,
+            'FireEye/Mandiant Dec. 2020: Build-Pipeline kompromittiert, ~18 000 Kunden mit signiertem boeswilligem DLL.'),
+        q('Welche CVE bezieht sich auf die xz-utils-Backdoor (Maerz 2024)?',
+            ['CVE-2024-3094',
+             'CVE-2022-3236',
+             'CVE-2023-44487',
+             'CVE-2014-6271'], 0,
+            'CVE-2024-3094: liblzma-Backdoor mit sshd-RCE-Ziel; Maintainer "Jia Tan" ueber 2 Jahre Social Engineering.'),
+        q('Welche Lesson-Learned schlaegt aus der xz-utils-Backdoor besonders durch?',
+            ['Maintainer-Diversitaet, reproduzierbare Builds, Aufmerksamkeit fuer Build-System-Aenderungen',
+             'Verzicht auf Open-Source',
+             'Erhoehung der Zykluszeit',
+             'Keine konkreten Konsequenzen'], 0,
+            'CVE-2024-3094-Analyse: Single-Maintainer-Pakete ohne Build-Reproduzierbarkeit sind Top-Risiko.'),
+        q('Was ist "Dependency Confusion" (Birsan 2021)?',
+            ['Veroeffentlichung gleichnamiger interner Package-Namen in oeffentlicher Registry; Build zieht boeswillige Version automatisch',
+             'Falsches Package-Manager-Tool',
+             'Tippfehler im package.json',
+             'Hash-Kollision in npm'], 0,
+            'Alex Birsan 2021: namespace-globaler PyPI/npm/GemPaket-Bezug ohne Scope-Lock fuehrt zu automatischer Bevorzugung der oeffentlichen Variante.'),
+        q('Welche Gegenmassnahme adressiert Dependency Confusion?',
+            ['Scope-Locking, Private-Registry-Mirror und Allowlist',
+             'AV-Scan zur Laufzeit',
+             'Manuelle Git-Tags',
+             'Verzicht auf Dependency-Manager'], 0,
+            'NIST SP 800-218 PW.4 / GitHub Security Lab Guidance 2021.'),
+        q('Welcher OWASP-Standard quantifiziert organisatorische Reife fuer Application Security?',
+            ['OWASP SAMM v2.0',
+             'OWASP Top 10',
+             'OWASP ASVS',
+             'OWASP ZAP'], 0,
+            'SAMM = Software Assurance Maturity Model; misst Reifegrad in 5 Business-Funktionen.'),
+        q('Was empfiehlt OWASP ASVS 4.0.3 zur Authentifizierung?',
+            ['Verbot universeller Default-Passwoerter, MFA fuer privilegierte Konten, NIST-SP-800-63B-konforme Passwoerter',
+             'Default-Admin-Konto OK',
+             'Single-Factor reicht immer',
+             'Keine Vorgaben'], 0,
+            'OWASP ASVS V2 (Authentication) referenziert NIST SP 800-63B und MFA fuer L2/L3.'),
+        q('Was unterscheidet IAST von SAST/DAST?',
+            ['IAST instrumentiert die laufende Anwendung von innen und kombiniert Coverage-Daten mit Datenfluss-Analyse',
+             'IAST ist nur statisch',
+             'IAST ist ein Cloud-Provider',
+             'IAST ist veraltet und durch SAST ersetzt'], 0,
+            'OWASP DevSecOps-Guide 2024: Interactive AST liefert hoehere Praezision als reines SAST oder DAST.'),
+        q('Welche Massnahme ist aus log4shell als organisatorische Lesson-Learned korrekt?',
+            ['Kontinuierliches SBOM-Monitoring und Notfall-Patch-Drehbuch fuer kritische Komponenten',
+             'Verbot von Logging',
+             'Java vollstaendig ersetzen',
+             'Verzicht auf Open Source'], 0,
+            'CISA Log4Shell Mitigation Guidance Dec. 2021 / NIST SP 800-218 RV.'),
+        q('Welche Massnahme erfuellt CRA-Anforderung Art. 13 (Defined Support Period) am direktesten?',
+            ['Veroeffentlichung definierter Sicherheits-Update-Zeitraeume mind. 5 Jahre fuer Produkte mit digitalen Elementen',
+             'Open-Source-Komplettveroeffentlichung',
+             'Auslagerung des Patch-Managements an einen Dritten',
+             'Verzicht auf Updates'], 0,
+            'EU CRA 2024/2847 Art. 13: mind. 5 Jahre Sicherheits-Updates fuer "Produkte mit digitalen Elementen", angepasst an Lebensdauer.'),
+        q('Welche Eigenschaft hat das CSAF-Format?',
+            ['Common Security Advisory Framework (OASIS) — maschinen-lesbare Vendor-Advisories und VEX',
+             'CSS-Style fuer Sicherheitsberichte',
+             'Ein Fuzzing-Tool',
+             'Ein Container-Format'], 0,
+            'CSAF 2.0 (OASIS 2022): JSON-Format fuer Advisories, VEX-Profile fuer Exploitability-Status.'),
+        q('Welche Aussage zu reproduzierbaren Builds ist korrekt?',
+            ['Identische Quellen + identischer Build-Prozess erzeugen byteidentische Artefakte; ermoeglicht unabhaengige Verifikation',
+             'Builds sollen pro Maschine variieren',
+             'Reproducible Builds verhindern Compiler-Optimierung',
+             'Reproducible Builds sind nur fuer Java relevant'], 0,
+            'Reproducible-Builds.org / Debian Reproducible Builds Project. NIST SSDF PS.3.1 verweist darauf als Empfehlung.'),
+        q('Welche Aussage zu Microsoft SDL ist korrekt?',
+            ['Treibt Threat Modeling, Secure Coding, FXCop/CodeQL, Fuzzing und Final Security Review als Pflichtschritte vor Release',
+             'Ist auf Windows-Code beschraenkt',
+             'Ist seit 2010 nicht mehr aktiv',
+             'Ersetzt OWASP ASVS'], 0,
+            'Howard/Lipner 2006; aktuell als "Microsoft Security Development Lifecycle Practices" 2024 publiziert.'),
+        q('Welcher Begriff beschreibt automatische Erkennung verwundbarer Open-Source-Bibliotheken?',
+            ['Software Composition Analysis (SCA)',
+             'Static Application Security Testing',
+             'Threat Modeling',
+             'Fuzzing'], 0,
+            'OWASP DevSecOps-Guide 2024: SCA-Tools (Snyk, Dependabot, OWASP Dependency-Check, Trivy).'),
+        q('Welche Identitaets-Anbindung nutzt Sigstore Fulcio fuer kurzlebige Certs?',
+            ['OpenID Connect (OIDC) — z.B. GitHub Actions, Google Workload Identity',
+             'Klassisches PGP',
+             'X.509 mit 10 Jahren Laufzeit',
+             'Kerberos'], 0,
+            'Sigstore Fulcio Spec: OIDC-Token bestaetigt Identity, Cert-Lifetime ~10 Minuten.'),
+        q('Welche Variante von SPDX deckt AI-Modelle und Datasets ab?',
+            ['SPDX 3.0 mit AI- und Dataset-Profil (Apr. 2024)',
+             'SPDX 1.0',
+             'SPDX 2.0',
+             'SPDX-Lite'], 0,
+            'SPDX 3.0 (Linux Foundation, Apr. 2024) modularisiert Profile (Build, AI, Dataset, Security).'),
+        q('Welche Aussage zur Memory-Safety in modernem Linux ist korrekt?',
+            ['Linux 6.1 (Dez. 2022) akzeptierte Rust als Zweitsprache neben C; produktive Treiber ab 6.6',
+             'Linux ist seit 5.0 vollstaendig in Rust',
+             'Rust ist im Kernel verboten',
+             'Kernel-Module muessen weiterhin in Assembly geschrieben werden'], 0,
+            'Linux Kernel 6.1 Release Notes Dez. 2022; Rust-Module ab 6.6 (Okt. 2023) z.B. Apple-AGX-Treiber-Hilfen.'),
+        q('Welche Best-Practice nennt OWASP ASVS V14 fuer Konfiguration?',
+            ['Sichere Defaults, getrennte Build-/Runtime-Profile, kein Geheimnis im Quellcode',
+             'Default-Admin-Konto OK',
+             'Klartext-Credentials in Git',
+             'Auto-Setup ohne Hardening'], 0,
+            'OWASP ASVS 4.0.3 §V14 Configuration: Defaults secure, Secrets-Management, Hardening-Profiles.'),
+        q('Welche Zertifizierung wird durch ISO/IEC 27034 adressiert?',
+            ['Application Security Lifecycle (Application Security Management Process)',
+             'Cloud-Service-Security',
+             'Funktionale Safety',
+             'Hardware-Krypto-Module'], 0,
+            'ISO/IEC 27034 spezifiziert Application-Security-Anforderungen ergaenzend zu ISO 27001.')
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_cybersec',
         code: 'MA-ET CyberSec',
@@ -1252,29 +1728,8 @@
                 id: 'sse',
                 title: 'Kapitel 4 — Sichere Softwareentwicklung (S-SDLC)',
                 summary: 'Threat Modeling (STRIDE, LINDDUN), sichere Coding-Standards, statische/dynamische Analyse, OWASP Top 10 / ASVS, Supply-Chain-Sicherheit (NIST SP 800-218 SSDF).',
-                pages: [
-                    placeholderPage('Threat Modeling', [
-                        'STRIDE pro Datenfluss, Anwendung auf Embedded und Cloud',
-                        'LINDDUN fuer Privacy-Threats',
-                        'Attack Trees, MITRE ATT&CK fuer ICS'
-                    ]),
-                    placeholderPage('Sichere Coding-Standards', [
-                        'CERT C/C++ Coding Standard, MISRA C',
-                        'Memory-Safety: Bounds-Checking, Sanitizers, Rust',
-                        'CWE Top 25 (2024) und Mitigation-Patterns'
-                    ]),
-                    placeholderPage('Static / Dynamic Application Security Testing', [
-                        'SAST-Werkzeuge (Coverity, CodeQL, SonarQube)',
-                        'DAST und Fuzzing (libFuzzer, AFL++)',
-                        'Software Composition Analysis (SCA), SBOM (CycloneDX, SPDX)'
-                    ]),
-                    placeholderPage('Supply-Chain-Security und SSDF', [
-                        'NIST SP 800-218 Secure Software Development Framework',
-                        'SLSA-Levels, in-toto, sigstore',
-                        'Vorfaelle: SolarWinds, log4shell, xz-utils Backdoor (2024)'
-                    ])
-                ],
-                quiz: placeholderQuiz('Sichere Softwareentwicklung')
+                pages: [PAGE_SSE_TM, PAGE_SSE_CODE, PAGE_SSE_TEST, PAGE_SSE_SUPPLY],
+                quiz: QUIZ_SSE
             },
             {
                 id: 'risk',

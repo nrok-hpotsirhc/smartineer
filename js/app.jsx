@@ -750,43 +750,58 @@ function Cheatsheet({ data, order }) {
             </div>
 
             {tab === 'formulas' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="flex flex-col gap-3 max-w-5xl mx-auto">
+                    {order.length === 0 && (
+                        <p className="text-center text-slate-500 italic">Keine Kategorien aktiv. Aktiviere Kategorien unter <strong>Optionen → Kategorien</strong>.</p>
+                    )}
                     {order.map(k => {
                         const cat = data[k]; if (!cat) return null;
                         return (
-                            <div key={k} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
-                                <h3 className="text-lg font-bold text-slate-800 border-b pb-2 mb-4">{cat.name}</h3>
-                                <div className="text-slate-700 math-block" dangerouslySetInnerHTML={{ __html: cat.formulas }} />
-                            </div>
+                            <details key={k} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                <summary className="cursor-pointer select-none px-6 py-4 font-bold text-slate-800 hover:bg-slate-50 flex items-center justify-between">
+                                    <span>{cat.name}</span>
+                                    <span className="text-xs text-slate-500 font-normal">Formelsammlung</span>
+                                </summary>
+                                <div className="px-6 pb-6 pt-2 text-slate-700 math-block" dangerouslySetInnerHTML={{ __html: cat.formulas }} />
+                            </details>
                         );
                     })}
                 </div>
             )}
             {tab === 'solutions' && (
-                <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-3 max-w-5xl mx-auto">
+                    {order.length === 0 && (
+                        <p className="text-center text-slate-500 italic">Keine Kategorien aktiv. Aktiviere Kategorien unter <strong>Optionen → Kategorien</strong>.</p>
+                    )}
                     {order.map(k => {
                         const cat = data[k]; if (!cat) return null;
+                        const totalTasks = cat.levels.reduce((s, t) => s + t.length, 0);
                         return (
-                            <div key={k} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                                <h3 className="text-2xl font-bold text-slate-800 border-b pb-2 mb-4">{cat.name} — Isolierte Musterlösungen</h3>
-                                {cat.levels.map((tasks, lvl) => tasks.length === 0 ? null : (
-                                    <details key={lvl} className="mb-4" open={lvl === 0}>
-                                        <summary className="font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 px-3 py-2 rounded">
-                                            Level {lvl + 1} — {tasks.length} Aufgaben
-                                        </summary>
-                                        <div className="mt-4 flex flex-col gap-6">
-                                            {tasks.map((t, i) => (
-                                                <div key={i} className="border-l-4 border-emerald-300 pl-4">
-                                                    <h4 className="font-bold text-slate-600 mb-1">Aufgabe {lvl + 1}.{i + 1}</h4>
-                                                    <div className="bg-slate-50 p-3 rounded mb-3 text-slate-800 math-block" dangerouslySetInnerHTML={{ __html: t.q }} />
-                                                    <h5 className="font-bold text-emerald-700 mb-1">Rechenweg &amp; Kommentar</h5>
-                                                    <div className="text-slate-700 math-block" dangerouslySetInnerHTML={{ __html: t.s }} />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </details>
-                                ))}
-                            </div>
+                            <details key={k} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                <summary className="cursor-pointer select-none px-6 py-4 font-bold text-slate-800 hover:bg-slate-50 flex items-center justify-between">
+                                    <span>{cat.name} — Isolierte Musterlösungen</span>
+                                    <span className="text-xs text-slate-500 font-normal">{totalTasks} Aufgaben</span>
+                                </summary>
+                                <div className="px-6 pb-6 pt-2">
+                                    {cat.levels.map((tasks, lvl) => tasks.length === 0 ? null : (
+                                        <details key={lvl} className="mb-3">
+                                            <summary className="cursor-pointer font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 px-3 py-2 rounded">
+                                                Level {lvl + 1} — {tasks.length} Aufgaben
+                                            </summary>
+                                            <div className="mt-4 flex flex-col gap-6">
+                                                {tasks.map((t, i) => (
+                                                    <div key={i} className="border-l-4 border-emerald-300 pl-4">
+                                                        <h4 className="font-bold text-slate-600 mb-1">Aufgabe {lvl + 1}.{i + 1}</h4>
+                                                        <div className="bg-slate-50 p-3 rounded mb-3 text-slate-800 math-block" dangerouslySetInnerHTML={{ __html: t.q }} />
+                                                        <h5 className="font-bold text-emerald-700 mb-1">Rechenweg &amp; Kommentar</h5>
+                                                        <div className="text-slate-700 math-block" dangerouslySetInnerHTML={{ __html: t.s }} />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </details>
+                                    ))}
+                                </div>
+                            </details>
                         );
                     })}
                 </div>
@@ -1939,7 +1954,7 @@ function OptionenKonto({ auth }) {
     const [err, setErr] = useState(null);
     const submit = (e) => {
         if (e && e.preventDefault) e.preventDefault();
-        const r = auth.login(user.trim(), pass);
+        const r = auth.login(user.trim(), pass.trim());
         if (r.ok) { setUser(''); setPass(''); setErr(null); }
         else setErr(r.error || 'Anmeldung fehlgeschlagen.');
     };
@@ -1959,6 +1974,11 @@ function OptionenKonto({ auth }) {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
             <h3 className="text-lg font-bold text-slate-800 mb-2">Anmelden</h3>
             <p className="text-sm text-slate-600 mb-4">Notwendig nur fuer den Schulungen-Bereich. Dashboard, Training, Cheatsheets und Schueler-Bereich sind ohne Anmeldung nutzbar.</p>
+            {auth.configured && (
+                <div className="bg-blue-50 border border-blue-200 text-blue-900 text-sm p-3 rounded-lg mb-4">
+                    Default-Zugangsdaten (siehe <code>js/auth-credentials.js</code>): <strong>admin / admin</strong> oder <strong>demo / user</strong>. Lokal in <code>js/auth-credentials.js</code> anpassen.
+                </div>
+            )}
             {!auth.configured && (
                 <div className="bg-amber-50 border border-amber-200 text-amber-900 text-sm p-3 rounded-lg mb-4">
                     Auth-Konfiguration fehlt: <code>js/auth-credentials.js</code> nicht geladen. Beispiel siehe <code>js/auth-credentials.example.js</code>.
