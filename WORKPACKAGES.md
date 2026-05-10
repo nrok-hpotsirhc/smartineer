@@ -85,11 +85,15 @@ Ziel laut Mega-Vorhaben: 100 Aufgaben je Kategorie (Summe ueber L1+L2+L3). AGENT
 | P-CAT-NEURAL | Neuronale Netze | `js/data/neural_nets.js` | ready |
 | P-CAT-PLC | SPS / IEC 61131-3 | `js/data/plc.js` | ready |
 | P-CAT-CYBSEC | Cyber Security | `js/data/cyber_security.js` | ready |
-| P-CAT-KRL | Roboter-Sprachen (KRL) | `js/data/krl.js` | ready |
+| P-CAT-KRL | KUKA Robot Language (KRL) | `js/data/krl.js` | ready |
+| P-CAT-ABB | ABB Roboterprogrammierung (RAPID), analog KUKA/KRL | `js/data/abb_rapid.js` (neu) | ready |
+| P-CAT-PLC-SIEMENS | Siemens PLC Programming (TIA Portal / S7, SCL, FUP/KOP) | `js/data/plc_siemens.js` (neu) | ready |
+| P-CAT-PLC-CODESYS | CODESYS PLC Programming (IEC 61131-3, Libraries, Tasks) | `js/data/plc_codesys.js` (neu) | ready |
+| P-CAT-PLC-BECKHOFF | Beckhoff PLC Programming (TwinCAT 3 / IEC 61131-3 / EtherCAT) | `js/data/plc_beckhoff.js` (neu) | ready |
 | P-CAT-WELDING | Fuegetechniken | `js/data/fuegetechniken.js` | ready |
 | P-CAT-AGAI | Agentic AI | `js/data/agentic_ai.js` | ready |
 
-Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Report festhalten; Soll: Gesamt ≥100. Falls Gap < 30 Aufgaben, Paket darf in einer Session erledigt werden; falls > 30, Paket aufteilen (Suffix `-A` / `-B`).
+Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Report festhalten; Soll: Gesamt ≥100. Falls Gap < 30 Aufgaben, Paket darf in einer Session erledigt werden; falls > 30, Paket aufteilen (Suffix `-A` / `-B`). Neue Kategorien muessen zusaetzlich in `index.html`, `sw.js` und README registriert werden; bei App-Shell-/Datenskript-Aenderungen `CACHE_VERSION` bumpen.
 
 ---
 
@@ -147,3 +151,4 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 
 - 2026-05-10: P-AUTO-03 erledigt — Master-ET Automation Kap. 3 "Feldbusse und OPC UA" produktiv ausgepflegt: 4 Lehrseiten (Industrial Ethernet und Echtzeitklassen; PROFINET/EtherCAT/Modbus/CANopen; OPC UA Architektur/PubSub/Security/FX; TSN-Auslegung und Migration) und 50 quellenbelegte MCQ mit Quellenankern (IEC 61158/61784, IEC 61784-2:2019, IEC 62541 Parts 1/4/6/14, IEEE 802.1Q-2022, IEEE 802.1AS-2020, IEEE 802.1CB-2017, ETG.1000, CiA 301, Modbus AP V1.1b3, IEC 62443-3-2/-3-3, OPC UA FX 1.00). `correct`-Verteilung balanciert auf [13,13,12,12]. CACHE_VERSION v33 → v34. Naechster Vorschlag: P-AUTO-04.
 - 2026-05-10: P-AUTO-04 erledigt — Master-ET Automation Kap. 4 "Antriebs- und Leistungselektronik" produktiv ausgepflegt: 4 Lehrseiten (4.1 Drehstrommaschinen + Park/Clarke + Klosssche Gleichung; 4.2 FOC fuer PMSM/IPMSM/ASM mit Hasse-Leonhard/Blaschke + sensorlos Back-EMF/HFI + DTC; 4.3 VSI/CSI + 2-Level/3-Level NPC + Sinus-PWM/SVPWM/DPWM + Si/SiC/GaN + EMV/IEC 61800-3/IEEE 519-2022; 4.4 Reglerkaskade Strom/Drehzahl/Lage + Massentraegheits-Verhaeltnis + Bahnplanung + IEC 61800-5-2 STO/SS1/SS2/SOS/SLS/SDI/SBC + IES-Klassen). 50 quellenbelegte MCQ mit Quellenanker pro `explanation` (Park 1929, Clarke 1943, Schroeder/Boecker 2021, Leonhard 2001, Vas 1998, Holmes/Lipo 2003, Mohan 2003, Takahashi/Noguchi IEEE TIA 1986, Nabae/Takahashi/Akagi 1981, IEC 60034-30-1:2014, IEC 61800-5-2:2016, IEC 61800-9-2:2017, IEC 61800-3:2017, IEEE 519-2022, ISO 13849-1:2023, IEC 62061:2021, EU-VO 2019/1781). `correct`-Verteilung balanciert auf [13,13,12,12]. CACHE_VERSION v34 → v35. Naechster Vorschlag: P-AUTO-05.
+- 2026-05-10: Neue Arbeitspakete aufgenommen: P-CAT-ABB fuer ABB Roboterprogrammierung/RAPID mit 100 Fragen analog KUKA/KRL, P-CAT-PLC-SIEMENS fuer Siemens PLC Programming mit 100 Fragen, P-CAT-PLC-CODESYS fuer CODESYS PLC Programming mit 100 Fragen und P-CAT-PLC-BECKHOFF fuer Beckhoff/TwinCAT PLC Programming mit 100 Fragen. P-CAT-KRL bleibt als KUKA Robot Language (KRL) mit Soll ≥100 Fragen bestehen.
