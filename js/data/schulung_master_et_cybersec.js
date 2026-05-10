@@ -4622,6 +4622,418 @@
             explanation: 'Microsoft KRBTGT-Reset-Empfehlung: zweimaliger Reset binnen ~10 h (Replikationszyklus); CVSS v4.0 (FIRST, Nov. 2023) ist seit 2024 der aktuelle Standard fuer Pentest-Reports.' }
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 10 — Master-Capstone Cyber-Security (PRODUKTIV)
+    // Referenz-Szenario: Smart-Factory-Roboterzelle (ABB IRB 1600 Cobot,
+    // Siemens S7-1500F SPS, ProfiSafe, EtherCAT-Servoachsen, OPC UA FX,
+    // AAS-Cloud-Konnektor, REST-API zum MES, Predictive-Maintenance-ML).
+    // Quellen: ISO/IEC 27001:2022 + 27005:2022, IEC 62443-3-2:2020 / -3-3:2013
+    // / -4-1:2018 / -4-2:2019, NIST CSF 2.0 (Feb. 2024), NIST SP 800-53 r5,
+    // NIST SP 800-30 r1, NIST SP 800-37 r2 (RMF), NIST SP 800-61 r2, NIST SP
+    // 800-160 Vol. 1 r1 (2022), Microsoft STRIDE / Threat Modeling Manifesto
+    // 2020, FAIR Institute „Open FAIR Body of Knowledge" 2024, MITRE
+    // ATT&CK for ICS v15 (Apr. 2024), MITRE D3FEND v1.0, NIS-2 (EU 2022/2555),
+    // CRA (EU 2024/2847), DORA (EU 2022/2554, Anw. 17.01.2025),
+    // EU AI Act (2024/1689), BSI IT-Grundschutz Edition 2024.
+    // ----------------------------------------------------------------------
+
+    const PAGE_CAPSTONE_SCOPE = {
+        title: '10.1 Capstone-Szenario und Architektur-Scope',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) ein realistisches industrielles Cyber-Physical-System in Subsysteme und Trust-Boundaries zerlegen, (2) Schutzziele und Schutzbedarf gemaess BSI-Grundschutz/ISO 27005 begruenden, (3) den Geltungsbereich (Scope) eines Cybersec-Capstones nach IEC 62443-3-2 §4.2 (ZCR 1) festlegen, (4) Stakeholder, Annahmen und Out-of-Scope-Elemente sauber dokumentieren.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kapitel 3 (OT/IEC 62443, Zonen/Conduits), Kapitel 5 (ISO 27005-Risikoprozess, NIS-2/CRA), Kapitel 7 (Zero Trust, IAM), Kapitel 8 (IR-Lifecycle), Kapitel 9 (Pentest-Methodik).</p>'
+
+            + '<h4>10.1.1 Referenz-Szenario „Roboterzelle PM-1"</h4>'
+            + '<p>Smart-Factory-Linie eines mittelstaendischen Automotive-Zulieferers, Werk Sueddeutschland, ca. 220 Mitarbeitende. Die zu bewertende <strong>Roboterzelle PM-1</strong> fertigt Press-Montagegruppen und besteht aus:</p>'
+            + '<ul>'
+            + '<li>ABB IRB 1600 Cobot (RobotWare 7.x, ABB Connected Services aktiv) + ABB SafeMove2 PFL nach ISO/TS 15066:2016.</li>'
+            + '<li>Siemens S7-1500F (Failsafe) mit ProfiSafe ueber PROFINET; Engineering via TIA Portal V18.</li>'
+            + '<li>EtherCAT-Servoachsen (Beckhoff AX5000) mit STO/SS1 nach IEC 61800-5-2:2016.</li>'
+            + '<li>OPC UA FX Backbone (Edition 2022) ueber TSN (IEEE 802.1Qbv-2015).</li>'
+            + '<li>AAS-basierter Cloud-Konnektor (IDTA 01001-3, MQTT 5.0 ueber mTLS, Azure IoT Hub).</li>'
+            + '<li>REST-API (HTTPS, OAuth 2.1) zum unternehmenseigenen MES (ISA-95 L3, Edge-K3s-Cluster auf einem Dell-Server in der Werkshalle).</li>'
+            + '<li>Predictive-Maintenance-ML (XGBoost-Modell, monatlich neu trainiert auf Schwingungsdaten; Modell liegt im Edge-Container).</li>'
+            + '<li>Engineering-Workstation Windows 11 Ent. mit TIA Portal, ABB RobotStudio, Domain-Join an Werks-AD.</li>'
+            + '</ul>'
+
+            + '<h4>10.1.2 Schutzbedarf und Schutzziele</h4>'
+            + '<p>Schutzbedarfsfeststellung nach BSI-Standard 200-2 Edition 2024 ergibt fuer PM-1 Schutzbedarf <strong>hoch</strong> in Verfuegbarkeit und Integritaet (Personenschutz, Produktqualitaet), <strong>normal</strong> in Vertraulichkeit (Konstruktionsdaten gelten als „intern", keine Patente). Schutzziele nach ISO/IEC 27000:2018 §3.28 + IEC 62443-1-1:2009 (Foundational Requirements FR1–FR7):</p>'
+            + '<ul>'
+            + '<li>FR1 Identification &amp; Authentication — alle Maintenance-Logins MFA, keine geteilten Konten.</li>'
+            + '<li>FR2 Use Control — RBAC im TIA Portal, ABB User Authentication.</li>'
+            + '<li>FR3 System Integrity — signierte Firmware (ABB RobotWare Secure Boot, Siemens TIA Portal Know-how-Schutz).</li>'
+            + '<li>FR4 Data Confidentiality — TLS 1.3 (OPC UA SecurityPolicy <code>Aes256-Sha256-RsaPss</code>).</li>'
+            + '<li>FR5 Restricted Data Flow — Zonen/Conduits nach IEC 62443-3-2:2020.</li>'
+            + '<li>FR6 Timely Response to Events — SIEM-Anbindung (Wazuh) ueber Syslog ueber Conduit.</li>'
+            + '<li>FR7 Resource Availability — N+1 fuer NTP/PTP-Grandmaster, geplante Wartungsfenster.</li>'
+            + '</ul>'
+
+            + '<h4>10.1.3 Scope-Definition (IEC 62443-3-2 ZCR 1)</h4>'
+            + '<p>IEC 62443-3-2:2020 §4.2 (Zone and Conduit Requirements 1) fordert eine schriftliche <em>System under Consideration (SuC)</em>-Definition. Fuer PM-1:</p>'
+            + '<ul>'
+            + '<li><strong>In-Scope:</strong> alle PM-1-Assets oben, das angeschlossene MES-Edge-Segment, der AAS-Cloud-Konnektor bis zum Azure-IoT-Hub-Endpoint, die Engineering-Workstation.</li>'
+            + '<li><strong>Out-of-Scope:</strong> Werks-AD jenseits der OT-Workstation, Office-IT, Lieferanten-Backend ueber Cloud.</li>'
+            + '<li><strong>Annahmen:</strong> ProfiSafe-Schicht bleibt unveraendert (Personenschutz separat zertifiziert nach ISO 13849-1:2023 PLd); Stromversorgung redundant.</li>'
+            + '<li><strong>Stakeholder:</strong> Werksleitung, Produktionsleitung, OT-Engineering, IT-Security (CISO), Betriebsrat (Mitbestimmung ML-Modell), externer Auditor (TUEV).</li>'
+            + '</ul>'
+
+            + '<h4>Worked Example: Erstzerlegung in Zonen</h4>'
+            + '<p>Anhand der Datenfluesse ergibt sich eine kompakte Zonen-Karte:</p>'
+            + '<ol>'
+            + '<li>Z1 „Safety/Drive Zone": SafeMove2, AX5000, ProfiSafe — Security-Level-Ziel <em>SL-T 3</em> (intentionale, gezielte Angriffe mit moderaten Ressourcen).</li>'
+            + '<li>Z2 „Control Zone": S7-1500F, IRB 1600 Controller — SL-T 3.</li>'
+            + '<li>Z3 „Edge/MES Zone": K3s-Cluster, OPC UA Server, AAS-Konnektor — SL-T 2.</li>'
+            + '<li>Z4 „Engineering Zone": TIA-Workstation, RobotStudio — SL-T 3 (privilegiert).</li>'
+            + '<li>Z5 „Cloud Egress": Azure IoT Hub, ML-Trainings-Pipeline — SL-T 2.</li>'
+            + '</ol>'
+            + '<p>Zwischen Z1 und Z2 liegt ein industrieller Firewall-Conduit (Phoenix Contact mGuard rs4000), zwischen Z3 und Z5 ein gehaerteter Edge-Gateway mit ausgehender Verbindung. Diese Zerlegung ist iterativ und wird in Lehrseite 10.2 risikobasiert verfeinert.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche fuenf Stakeholder muessen den Scope mitzeichnen, und warum?</li>'
+            + '<li>Begruenden Sie, warum der Personenschutz <strong>nicht</strong> Teil dieses Cybersec-Capstones ist.</li>'
+            + '<li>Welche zwei Annahmen aus Abschnitt 10.1.3 sind kritisch fuer die Validitaet der Risikoanalyse?</li>'
+            + '<li>Wie unterscheidet sich SL-T von SL-C nach IEC 62443-3-3:2013?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Out-of-Scope nicht dokumentiert. <em>Korrekt:</em> Out-of-Scope explizit listen — sonst wandern Audit-Erkenntnisse spaeter „nach innen" und entwerten den Capstone.</li>'
+            + '<li><em>Fehler:</em> SL-T-Ziel ohne Bedrohungsmodell festgelegt. <em>Korrekt:</em> SL-T leitet sich aus den Akteuren in Lehrseite 10.2 ab — hier nur eine erste Schaetzung.</li>'
+            + '<li><em>Fehler:</em> ML-Modell als „nur Daten" eingestuft. <em>Korrekt:</em> Das ML-Modell ist ein eigenes Asset mit eigenen Bedrohungen (Poisoning, Modell-Diebstahl) — siehe AI-Sec in Kap. 6.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Skizzieren Sie ein analoges Capstone-Szenario fuer eine medizintechnische Roentgenanlage oder eine Smart-Grid-Sekundaerstation. Listen Sie alle Assets, Stakeholder, Schutzbedarfe und mindestens drei Out-of-Scope-Annahmen. Die Loesung wird in den Review-Fragen 10.6 partiell abgefragt.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: BSI-Standard 200-2 „IT-Grundschutz-Methodik" Edition 2024, §8 Schutzbedarfsfeststellung; IEC 62443-3-2:2020 §4.2 (ZCR 1); IEC 62443-1-1:2009 §5.6 (FR1–FR7); IEC 62443-3-3:2013 §3 (SL-T vs. SL-C); ISO/IEC 27000:2018 §3.28 (Schutzziele); ISO 13849-1:2023 §4 (PL-Methodik).</em></p>'
+    };
+
+    const PAGE_CAPSTONE_THREAT = {
+        title: '10.2 Threat Model und Risikoanalyse',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) ein STRIDE-basiertes Threat Model fuer ein OT/IT-Misch-System aufbauen, (2) Risiken nach ISO/IEC 27005:2022 und IEC 62443-3-2 ZCR 4 quantifizieren, (3) Bedrohungsakteure und Angriffsketten via MITRE ATT&amp;CK for ICS v15 (Apr. 2024) modellieren, (4) Risiken priorisieren und Akzeptanzkriterien dokumentieren.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Lehrseite 10.1 (Scope, Zonen), Kap. 4.1 (STRIDE/LINDDUN), Kap. 5.1 (ISO 27005 Prozess), Kap. 5.4 (CVSS v4.0, FAIR).</p>'
+
+            + '<h4>10.2.1 Akteursmodell</h4>'
+            + '<p>Nach BSI „Gefaehrdungskatalog" 2024 und IEC 62443-1-1:2009 Annex A werden drei relevante Akteursklassen unterschieden:</p>'
+            + '<ul>'
+            + '<li><strong>Insider</strong> (verärgerter Servicetechniker): Tier 1 nach NIST SP 800-30 r1 Appendix D — Capability low, Intent high, Access high.</li>'
+            + '<li><strong>Organisierte Kriminalitaet</strong> (Ransomware-Affiliate): Tier 3 — Capability medium, Intent commercial, Access via Phishing.</li>'
+            + '<li><strong>Staatlich gefoerdert</strong> (APT, vergleichbar mit Sandworm/Volt Typhoon — CISA AA24-038A, Feb. 2024): Tier 5 — Capability high, Intent strategic, Access via Supply-Chain / Living-off-the-Land.</li>'
+            + '</ul>'
+
+            + '<h4>10.2.2 STRIDE pro Asset</h4>'
+            + '<p>Microsoft Threat Modeling (Howard/LeBlanc 2003, Threat Modeling Manifesto 2020) verwendet sechs Kategorien. Beispielhafte Anwendung auf den OPC-UA-Server:</p>'
+            + '<table><thead><tr><th>STRIDE</th><th>Konkretisierung OPC UA Server</th><th>Mitigation</th></tr></thead><tbody>'
+            + '<tr><td>Spoofing</td><td>Anonyme Klienten verbinden sich als „Operator"</td><td>SecurityPolicy <code>Aes256-Sha256-RsaPss</code>, X.509-Klientzertifikate, GDS (Part 12)</td></tr>'
+            + '<tr><td>Tampering</td><td>Manipulation von SetpointSetz-Knoten ueber kompromittierten Edge-Container</td><td>Signierte und verschluesselte Nachrichten (<code>SignAndEncrypt</code>), Role-Permissions Part 18 (2022)</td></tr>'
+            + '<tr><td>Repudiation</td><td>Operator bestreitet kritischen Schreibvorgang</td><td>Audit-Events (Part 5), Forwarding an SIEM</td></tr>'
+            + '<tr><td>Information Disclosure</td><td>Klartext-Lesen von Prozessparametern auf TSN-Backbone</td><td>Encrypt-Modus statt Sign-only, Switch-Port-Security, TSN-VLAN-Isolation</td></tr>'
+            + '<tr><td>Denial of Service</td><td>Subscription-Flood erschoepft Sessions</td><td>Session-Limits (Part 4 §5.6), Rate-Limit am Edge-Gateway</td></tr>'
+            + '<tr><td>Elevation of Privilege</td><td>Operator-Token erhaelt durch Bug Admin-Rechte</td><td>RBAC (Part 3 §4), regelmaessiges Patchen, Pen-Tests</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>10.2.3 Angriffsketten (ATT&amp;CK for ICS)</h4>'
+            + '<p>Aus MITRE ATT&amp;CK for ICS v15 (Apr. 2024) ist eine plausible APT-Kette: Initial Access (T0817 „Drive-by Compromise" auf RobotStudio-Update-Server) → Execution (T0871 „Execution through API") → Persistence (T0859 „Valid Accounts") → Lateral Movement (T0867 „Lateral Tool Transfer" via TIA-Workstation) → Impact (T0831 „Manipulation of Control", T0880 „Loss of Safety", T0826 „Loss of Availability"). Diese Kette wird in 10.4 als Tabletop durchgespielt.</p>'
+
+            + '<h4>10.2.4 Risikobewertung</h4>'
+            + '<p>ISO/IEC 27005:2022 §8 erlaubt qualitative (Likelihood × Impact) oder quantitative (FAIR LEF × LM) Bewertung. Fuer den Capstone wird eine 5&times;5-Matrix verwendet:</p>'
+            + '<ul>'
+            + '<li>Likelihood: 1 (rare, &lt; 1/10 a) bis 5 (very likely, &gt; 1/a).</li>'
+            + '<li>Impact: 1 (kein Produktionsausfall) bis 5 (mehrtaegiger Ausfall, Personenschaden, Meldepflicht NIS-2/CRA).</li>'
+            + '<li>Risikoklasse = L &times; I; ab 12 „hoch", ab 20 „kritisch".</li>'
+            + '</ul>'
+            + '<p>Akzeptanzkriterium: Risiken &ge; 12 sind nicht akzeptabel und erhalten eine Mitigation in Lehrseite 10.3. Restrisiken &lt; 12 werden mit Begruendung dokumentiert und vom Risk Owner gezeichnet (ISO 27001:2022 §6.1.3 lit. f).</p>'
+
+            + '<h4>Worked Example: Top-3-Risiken</h4>'
+            + '<table><thead><tr><th>#</th><th>Risiko</th><th>L</th><th>I</th><th>L&times;I</th><th>Begruendung</th></tr></thead><tbody>'
+            + '<tr><td>R1</td><td>Ransomware via Phishing → Verschluesselung Edge-K3s → Produktionsstopp</td><td>4</td><td>4</td><td>16</td><td>BSI Lagebericht 2024: Ransomware bleibt #1; OT-Edges mit Linux waren 2023/2024 mehrfach betroffen (Akira, BlackCat).</td></tr>'
+            + '<tr><td>R2</td><td>Manipulation Robotik-Setpoints ueber kompromittierte Engineering-WS → Werkstueck-/Werkzeugbruch</td><td>2</td><td>5</td><td>10</td><td>Personenschutz separat (Z1), aber Werkzeugbruch ist >100 kEUR; APT-Szenario.</td></tr>'
+            + '<tr><td>R3</td><td>ML-Modell-Poisoning → falsche Predictive-Maintenance-Alarme → Ausfall</td><td>2</td><td>3</td><td>6</td><td>Trainingsdaten kommen aus dem Edge selbst — bei Edge-Kompromittierung indirekt manipuliert (vgl. Kap. 6.3 OWASP LLM Top 10 Analog).</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche STRIDE-Kategorie greift, wenn ein Operator behauptet, einen Schreibbefehl nie ausgeloest zu haben?</li>'
+            + '<li>Welche ATT&amp;CK-for-ICS-Tactic adressiert „Loss of Safety"?</li>'
+            + '<li>Wann ist quantitative Bewertung (FAIR) der qualitativen 5&times;5-Matrix vorzuziehen?</li>'
+            + '<li>Wer muss die Restrisiko-Akzeptanz nach ISO 27001:2022 §6.1.3 lit. f zeichnen?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Likelihood mit „mein Bauchgefuehl" begruenden. <em>Korrekt:</em> Likelihood durch externe Lageberichte (BSI, ENISA Threat Landscape 2024) oder eigene Incident-Historie unterstuetzen.</li>'
+            + '<li><em>Fehler:</em> Impact rein finanziell bewerten. <em>Korrekt:</em> Personen-/Umweltschutz, regulatorische Meldepflichten und Reputationsschaden gehoeren in das Impact-Modell — IEC 62443-3-2:2020 §4.5 (ZCR 4).</li>'
+            + '<li><em>Fehler:</em> STRIDE einmal global durchziehen. <em>Korrekt:</em> STRIDE pro Asset/Datenfluss, weil Kontroll- und Vertraulichkeitsanforderungen je Asset differieren.</li>'
+            + '<li><em>Fehler:</em> ATT&amp;CK Enterprise statt ATT&amp;CK for ICS verwenden. <em>Korrekt:</em> Fuer OT-Komponenten liefert ATT&amp;CK for ICS v15 die passendere Tactic „Inhibit Response Function" / „Impair Process Control".</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Fuegen Sie der 5&times;5-Matrix ein viertes Risiko zum Thema „Supply-Chain Kompromittierung des RobotWare-Updates" hinzu. Wie schaetzen Sie L und I, welche Quellen stuetzen Ihre Schaetzung? Welche zwei ATT&amp;CK-for-ICS-Techniken treffen zu? Welche IEC-62443-FR werden verletzt? Loesung wird in Review-Fragen 10.6 (Item 5–7) partiell rueckgespiegelt.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-30 r1 Appendix D (Threat Sources), Sep. 2012; ISO/IEC 27005:2022 §8 (Risikoassessment); IEC 62443-3-2:2020 §4.5 (ZCR 4 Risikoassessment); Microsoft „The STRIDE Threat Model" (1999/2003, Howard &amp; LeBlanc); Threat Modeling Manifesto (Nov. 2020); MITRE ATT&amp;CK for ICS v15 (Apr. 2024); CISA AA24-038A „Volt Typhoon" (Feb. 2024); ENISA Threat Landscape 2024 (Sep. 2024); BSI Lagebericht IT-Sicherheit 2024 (Okt. 2024); ISO/IEC 27001:2022 §6.1.3 (Risikobehandlung).</em></p>'
+    };
+
+    const PAGE_CAPSTONE_CONTROLS = {
+        title: '10.3 Controls-Auswahl und Testplan',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Controls aus mehreren Frameworks (IEC 62443-3-3, ISO 27001 Annex A, NIST SP 800-53 r5, BSI Grundschutz) auf das Threat Model abbilden, (2) Mitigation-Strategien priorisieren und auf Restrisiko abbilden, (3) einen Testplan formulieren, der Pentest, Tabletop, technische Audits und Detection-Engineering verbindet, (4) Controls auf Kosten/Wirkung bewerten.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Lehrseite 10.2 (Risiken), Kap. 3 (IEC 62443-3-3 SR/RE), Kap. 5.3 (ISO 27001 Annex A 93 Controls), Kap. 8.2 (Detection Engineering / Sigma).</p>'
+
+            + '<h4>10.3.1 Mapping Risiken → Controls</h4>'
+            + '<p>Die Controls werden tabellarisch je Risiko und Framework zugeordnet — so wird Doppelarbeit zwischen Audit-Frameworks vermieden:</p>'
+            + '<table><thead><tr><th>Risiko</th><th>IEC 62443-3-3</th><th>ISO 27001:2022 Annex A</th><th>NIST SP 800-53 r5</th><th>BSI Grundschutz Edition 2024</th></tr></thead><tbody>'
+            + '<tr><td>R1 Ransomware Edge</td><td>SR 7.3 (Backup), SR 3.4 (Software/Information Integrity)</td><td>A.8.13 (Backup), A.8.7 (Malware-Schutz)</td><td>CP-9 (System Backup), SI-3 (Malicious Code Protection)</td><td>OPS.1.2.5 Backup, OPS.1.1.4 Schutz vor Schadprogrammen</td></tr>'
+            + '<tr><td>R2 Manipulation Setpoints</td><td>SR 3.1 (Communication Integrity), SR 1.1 (Human User Identification)</td><td>A.8.2 (Privileged Access), A.8.24 (Krypto)</td><td>AC-6 (Least Privilege), SC-8 (Transmission Integrity)</td><td>IND.2.7 PLC-Sicherheit, ORP.4 Identitaetsmanagement</td></tr>'
+            + '<tr><td>R3 ML-Poisoning</td><td>SR 3.4 (Information Integrity)</td><td>A.5.23 (Cloud-Services), A.8.28 (Secure Coding)</td><td>SI-7 (Software, Firmware, Information Integrity), CA-7 (Continuous Monitoring)</td><td>APP.4.4 Sichere Web-Anwendungen (in Vertretung), CON.10 Entwicklung von ML-Komponenten (Community-Baustein 2024)</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>10.3.2 Mitigation-Bauplan</h4>'
+            + '<p>Pro Risiko werden eine bis drei priorisierte Mitigations gewaehlt. Beispiel R1 Ransomware Edge:</p>'
+            + '<ol>'
+            + '<li><strong>3-2-1-1-0-Backup</strong> (BSI 2024, ENISA Ransomware Guide 2024): drei Kopien, zwei Medien, eine offsite, eine offline (Immutable Storage, Tape oder S3 Object Lock 30 d), null Fehler im jaehrlichen Restore-Test.</li>'
+            + '<li><strong>Application-Allowlisting</strong> auf Edge-Hosts (Microsoft AppLocker / Linux SELinux + dm-verity), Sigstore-Cosign-Verifikation aller Container-Images vor Pull.</li>'
+            + '<li><strong>Egress-Filtering</strong> aus Z3 nur zu definierten Cloud-FQDNs, kein Plain-Internet — schliesst initialen C2-Aufbau weitgehend aus.</li>'
+            + '</ol>'
+
+            + '<h4>10.3.3 Testplan</h4>'
+            + '<p>Ein Testplan kombiniert nach NIST SP 800-115 §3 und Penetration Testing Execution Standard (PTES, 2014) drei Schichten:</p>'
+            + '<ul>'
+            + '<li><strong>Pentest, technisch</strong>: Black-Box auf Engineering-WS, Grey-Box auf Edge, Read-Only auf SPS/Robotik (kein Active-Testing waehrend Produktion — IEC 62443-2-4 §SP.03.03 Mandatory Requirement). Zeitfenster: geplantes Wartungsfenster.</li>'
+            + '<li><strong>Tabletop-Uebung</strong> (Crisis Simulation) nach NIST SP 800-84 (2006): 3-h-Szenario „R1 Ransomware via Phishing" mit Werksleitung, OT/IT-Security, Kommunikation.</li>'
+            + '<li><strong>Detection-Engineering-Audit</strong>: Sigma-Regeln (SigmaHQ 2024) gegen Wazuh, Tests via Atomic Red Team T1486 (Data Encrypted for Impact). Akzeptanzkriterium: TTD &lt; 60 min, TTC &lt; 4 h.</li>'
+            + '</ul>'
+
+            + '<h4>Worked Example: Test-Skript fuer R1</h4>'
+            + '<ol>'
+            + '<li>Phishing-Simulation (autorisiert): Versand an die zehn am haeufigsten extern korrespondierenden Konten in der Engineering-Abteilung; Macro-basiertes Dropper-Decoy. Erfolgsmetrik: Klickrate, Detection-Latenz.</li>'
+            + '<li>Atomic-Red-Team T1059.001 (PowerShell) und T1486 (Data Encrypted for Impact, gezielt auf isolierten Lab-Edge-Container) — niemals produktive Edges.</li>'
+            + '<li>Restore-Drill: Wiederherstellen eines Edge-Knotens aus Backup, Messung RTO (Soll: &lt; 2 h) und RPO (Soll: &lt; 24 h).</li>'
+            + '<li>Auswertung: Vergleich Sigma-Alarmierung gegen Aktivitaeten-Log, Lessons Learned in den Detection-Backlog uebernehmen.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Warum erscheinen Controls in mehreren Frameworks parallel — und welche Reihenfolge ist beim Audit-Mapping sinnvoll?</li>'
+            + '<li>Was ist der Unterschied zwischen RTO und RPO, und welcher Wert ist fuer R1 typischerweise wichtiger?</li>'
+            + '<li>Welche Mitigation aus 10.3.2 wirkt sowohl auf R1 als auch auf R2?</li>'
+            + '<li>Warum darf Active-Testing nicht waehrend laufender Produktion stattfinden (IEC 62443-2-4)?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> „Wir kaufen ein EDR, das deckt alles." <em>Korrekt:</em> Controls werden je Risiko ausgewaehlt; EDR adressiert primaer SR 3.4 / A.8.7 / SI-3, nicht aber Backup oder Communication Integrity.</li>'
+            + '<li><em>Fehler:</em> Test nur als „Pentest" verstehen. <em>Korrekt:</em> NIST SP 800-115 §3 fordert mehrere Methoden, idealerweise inkl. Tabletop und Audit.</li>'
+            + '<li><em>Fehler:</em> Active-Testing auf der produktiven Robotik. <em>Korrekt:</em> Read-Only auf produktive OT, Active im Lab-Mirror.</li>'
+            + '<li><em>Fehler:</em> Backup-Test nur einmalig dokumentieren. <em>Korrekt:</em> Jaehrlicher Restore-Drill ist Teil der 3-2-1-1-0-Regel und der ISO 27001:2022 A.8.13.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ergaenzen Sie das Mapping in Tabelle 10.3.1 fuer ein viertes Risiko „R4 OPC-UA-Session-Hijack via gestohlenem Klientzertifikat". Welche IEC-62443-3-3-SRs, welche ISO 27001 Annex-A-Controls, welche NIST-Familie? Welche Tests verifizieren die Mitigations? Loesung wird in 10.6 Review-Fragen 8–10 angesprochen.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: IEC 62443-3-3:2013 §5–§11 (SR/RE pro FR); ISO/IEC 27001:2022 Annex A (93 Controls); NIST SP 800-53 r5 (Sep. 2020, Update Dec. 2023); NIST SP 800-115 §3 (Sep. 2008); NIST SP 800-84 (Sep. 2006); BSI IT-Grundschutz Kompendium Edition 2024; ENISA „Threat Landscape for Ransomware Attacks" (Jul. 2024); SigmaHQ Detection Rules 2024.</em></p>'
+    };
+
+    const PAGE_CAPSTONE_RUNBOOK = {
+        title: '10.4 Incident-Runbook und Management-Summary',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) ein Incident-Runbook fuer den hoechstpriorisierten Vorfall (R1 Ransomware Edge) nach NIST SP 800-61 r2 strukturieren, (2) Meldepflichten gemaess NIS-2 Art. 23, CRA Art. 14 und DORA Art. 19 einhalten, (3) ein Executive Summary fuer die Geschaeftsfuehrung schreiben, (4) Lessons Learned in ein Continuous-Improvement-Backlog ueberfuehren.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kap. 8.1 (IR-Lifecycle, SP 800-61), Kap. 8.2 (Detection &amp; Triage), Lehrseite 10.3 (Testplan).</p>'
+
+            + '<h4>10.4.1 Runbook-Struktur</h4>'
+            + '<p>NIST SP 800-61 r2 (Aug. 2012) §3 unterscheidet vier Phasen: <em>Preparation</em>, <em>Detection &amp; Analysis</em>, <em>Containment / Eradication / Recovery</em>, <em>Post-Incident Activity</em>. Das Runbook bildet diese in konkrete Schritte ab:</p>'
+            + '<ol>'
+            + '<li><strong>Preparation</strong>: Vorab definierte Rollen (RACI), 24/7-Erreichbarkeit, Lab-Edge-Mirror fuer Forensik, vorbereitete Stilllegungs-Skripte fuer K3s-Nodes.</li>'
+            + '<li><strong>Detection &amp; Analysis</strong>: Wazuh-Alert auf Sigma-Regel <code>proc_creation_lnx_susp_cron_disable.yml</code> + ATT&amp;CK T1486-Anomalie (Massen-Verschluesselung). Triage-SLA: 15 min Erst-Bewertung, 60 min Bestaetigung.</li>'
+            + '<li><strong>Containment</strong>: Isolation des betroffenen Edge-Knotens (K3s-Cordon + Drain, Netz-Egress sperren), keine Zahlung an Erpresser (BSI-Empfehlung 2024).</li>'
+            + '<li><strong>Eradication / Recovery</strong>: Neuaufsetzen aus Immutable-Backup, Restore-Drill-Procedure aus 10.3, Re-Hardening per Ansible Playbook „edge-baseline-2024".</li>'
+            + '<li><strong>Post-Incident</strong>: Lessons Learned binnen 14 Tagen, Update der Sigma-Regeln, Anpassung des Threat Models (10.2).</li>'
+            + '</ol>'
+
+            + '<h4>10.4.2 Meldepflichten</h4>'
+            + '<table><thead><tr><th>Regelung</th><th>Fristen</th><th>Inhalt</th></tr></thead><tbody>'
+            + '<tr><td>NIS-2 Art. 23 (Richtlinie (EU) 2022/2555, Anwendung ab 18.10.2024)</td><td>Frueh­warnung &le; 24 h, Incident-Notification &le; 72 h, Abschlussbericht &le; 1 Monat</td><td>Schwerwiegende Sicherheitsvorfaelle bei wesentlichen Einrichtungen → zustaendige Behoerde (BSI), ENISA-Repository</td></tr>'
+            + '<tr><td>CRA Art. 14 (Verordnung (EU) 2024/2847, Anwendung ab 11.12.2027, Reporting ab 11.09.2026)</td><td>Frueh­warnung &le; 24 h, Notification &le; 72 h, Abschlussbericht &le; 14 d</td><td>Aktiv ausgenutzte Schwachstellen und schwere Vorfaelle in Produkten mit digitalen Elementen → ENISA + zustaendige Behoerde</td></tr>'
+            + '<tr><td>DORA Art. 19 (Verordnung (EU) 2022/2554, Anwendung ab 17.01.2025)</td><td>Initial &le; 4 h nach Klassifizierung, Zwischenbericht &le; 72 h, Final &le; 1 Monat</td><td>Schwerwiegende IKT-Vorfaelle in Finanzentitaeten → zustaendige Behoerde (BaFin/EZB), Vorlagen via ESA-RTS 2024</td></tr>'
+            + '<tr><td>DS-GVO Art. 33 (EU 2016/679)</td><td>Meldung &le; 72 h</td><td>Datenschutzverletzungen → zustaendige Datenschutzaufsicht (Landesbehoerde)</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>10.4.3 Executive Summary (Muster)</h4>'
+            + '<p>Maximal eine A4-Seite, lesbar fuer Nicht-Techniker, frei von Tool-Namen, nach NIST SP 800-115 §6.2 sowie BSI-Praxisleitfaden Version 5 (2023):</p>'
+            + '<blockquote>'
+            + '<p><em>Anlass.</em> Cyber-Security-Capstone fuer die Roboterzelle PM-1 (Werk Sueddeutschland), durchgefuehrt im 1. Quartal des Geschaeftsjahres.</p>'
+            + '<p><em>Vorgehensweise.</em> Threat Model (STRIDE, MITRE ATT&amp;CK for ICS), Risikobewertung (ISO 27005), Auswahl von Schutzmassnahmen (IEC 62443, ISO 27001, NIST SP 800-53), Test in Lab und Tabletop.</p>'
+            + '<p><em>Ergebnis.</em> Es wurden drei kritische und vier hohe Risiken identifiziert. Fuer alle drei kritischen Risiken liegen priorisierte Schutzmassnahmen vor; die Umsetzung erfordert Investitionen in Hoehe von ca. 180 kEUR (Capex) und 60 kEUR/a (Opex), saemtlich innerhalb der laufenden OT-Cybersec-Roadmap.</p>'
+            + '<p><em>Empfehlung.</em> Sofortige Freigabe der Backup-Modernisierung (R1, geringer Aufwand, hohe Wirkung) und der Egress-Filterung; mittelfristige Umsetzung der OPC-UA-RBAC-Erweiterung; jaehrlich wiederkehrender Restore-Drill.</p>'
+            + '<p><em>Restrisiko.</em> Nach Umsetzung verbleiben Risiken &lt; 12 (mittel), die durch die Werksleitung formell akzeptiert werden.</p>'
+            + '</blockquote>'
+
+            + '<h4>Worked Example: Eskalations-Matrix R1</h4>'
+            + '<table><thead><tr><th>Zeit</th><th>Stufe</th><th>Aktion</th><th>Verantwortlich</th></tr></thead><tbody>'
+            + '<tr><td>T+0 min</td><td>L1 SOC</td><td>Alert-Triage, Sigma-Hit pruefen, OT-Engineer informieren</td><td>SOC-Schichtleiter</td></tr>'
+            + '<tr><td>T+15 min</td><td>L2</td><td>Containment-Empfehlung, Edge-Knoten isolieren</td><td>IR-Lead (CIRT)</td></tr>'
+            + '<tr><td>T+60 min</td><td>L3</td><td>Pre-Notification an BSI vorbereiten (Art. 23 NIS-2)</td><td>CISO</td></tr>'
+            + '<tr><td>T+4 h</td><td>Mgmt</td><td>Krisenstab tagt, Kommunikation Mitarbeiter / Kunden</td><td>Werksleitung + Pressestelle</td></tr>'
+            + '<tr><td>T+24 h</td><td>Behoerde</td><td>NIS-2 Frueh­warnung an BSI absenden</td><td>CISO</td></tr>'
+            + '<tr><td>T+72 h</td><td>Behoerde</td><td>Incident-Notification mit Lagebild</td><td>CISO</td></tr>'
+            + '<tr><td>T+30 d</td><td>Abschluss</td><td>Lessons Learned, Update Threat Model 10.2, Update Sigma-Regeln</td><td>IR-Lead + Detection Engineer</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche NIS-2-Frist gilt fuer die <em>erste</em> Meldung eines bestaetigten schwerwiegenden Vorfalls?</li>'
+            + '<li>Warum darf das Lessons-Learned-Meeting nicht vom Krisenstab geleitet werden?</li>'
+            + '<li>Welche zwei Inhalte gehoeren <strong>nicht</strong> in das Executive Summary?</li>'
+            + '<li>In welchem Phasenuebergang nach NIST SP 800-61 r2 ist das Containment-Risiko am hoechsten — und warum?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Im Executive Summary ATT&amp;CK-IDs nennen. <em>Korrekt:</em> Tool- und Framework-Bezeichner gehoeren in den Technical Annex.</li>'
+            + '<li><em>Fehler:</em> NIS-2-Fristen mit DS-GVO-Fristen verwechseln. <em>Korrekt:</em> NIS-2 hat 24 h Frueh­warnung; DS-GVO Art. 33 hat 72 h.</li>'
+            + '<li><em>Fehler:</em> Loesegeld zahlen ohne BSI-/Strafverfolgungs-Konsultation. <em>Korrekt:</em> BSI raet 2024 grundsaetzlich von Zahlung ab; Sanktionen via OFAC und EU Cyber-Sanktionsregime moeglich.</li>'
+            + '<li><em>Fehler:</em> Kein definiertes RTO/RPO. <em>Korrekt:</em> Beides muss vor dem Vorfall in einem Business-Impact-Analysis-Dokument festgehalten sein.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Schreiben Sie eine Eskalations-Matrix wie in 10.4 fuer Risiko R2 (Manipulation Setpoints). Welche Akteure, welche Fristen, welche Behoerden? Welche Meldepflichten greifen (NIS-2, ProdSG, ggf. ProdSV §6)? Loesung wird teilweise in 10.6 Review-Fragen 11–14 abgefragt.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-61 r2 (Aug. 2012) §3; NIST SP 800-115 §6.2 (Sep. 2008); BSI-Praxisleitfaden „IS-Revision und IS-Beratung", Version 5 (2023); BSI Lagebericht IT-Sicherheit 2024 (Okt. 2024); Richtlinie (EU) 2022/2555 (NIS-2) Art. 23; Verordnung (EU) 2024/2847 (CRA) Art. 14; Verordnung (EU) 2022/2554 (DORA) Art. 19; Verordnung (EU) 2016/679 (DS-GVO) Art. 33; ESA Joint Final RTS DORA (2024).</em></p>'
+    };
+
+    const PAGE_CAPSTONE_RUBRIC = {
+        title: '10.5 Bewertungsrubrik und Selbstbewertung',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die Capstone-Abgabe entlang einer mehrdimensionalen Rubrik selbst bewerten, (2) typische Bewertungsmuster (Pflicht/Soll/Kann) anwenden, (3) Verbesserungsschleifen aus der Selbstbewertung in eine Roadmap ueberfuehren.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Lehrseiten 10.1–10.4, ISO/IEC 17024 (Personalzertifizierung) als methodisches Vorbild fuer Kompetenzpruefung.</p>'
+
+            + '<h4>10.5.1 Rubrik (5 Dimensionen)</h4>'
+            + '<table><thead><tr><th>Dimension</th><th>Pruefkriterium</th><th>Pflicht</th><th>Soll</th><th>Hervorragend</th></tr></thead><tbody>'
+            + '<tr><td>D1 Scope &amp; Stakeholder</td><td>SuC nach IEC 62443-3-2 ZCR 1 dokumentiert</td><td>SuC vorhanden, Stakeholder benannt</td><td>plus Annahmen, Out-of-Scope, RACI</td><td>plus Stakeholder-Sign-off-Workflow und Mitbestimmungs-Workflow Betriebsrat</td></tr>'
+            + '<tr><td>D2 Threat &amp; Risk</td><td>Risiken nach ISO 27005 + STRIDE + ATT&amp;CK</td><td>&ge; 5 Risiken, qualitativ bewertet</td><td>plus Akteursmodell, plus ATT&amp;CK-IDs</td><td>plus quantitative FAIR-Auswertung fuer Top-Risiko</td></tr>'
+            + '<tr><td>D3 Controls &amp; Testplan</td><td>Controls aus mind. zwei Frameworks gemappt</td><td>Mapping zu IEC 62443 + ISO 27001</td><td>plus NIST SP 800-53 + BSI Grundschutz</td><td>plus Cost-Benefit-Bewertung pro Mitigation</td></tr>'
+            + '<tr><td>D4 IR-Runbook &amp; Compliance</td><td>Meldepflichten &amp; Eskalations-Matrix</td><td>NIST 800-61 Phasen + NIS-2 Fristen</td><td>plus CRA, DORA, DS-GVO</td><td>plus Tabletop-Protokoll mit TTD/TTC-Messung</td></tr>'
+            + '<tr><td>D5 Kommunikation</td><td>Executive Summary &amp; technischer Anhang</td><td>1-Seiten-Summary, Anhang lesbar</td><td>plus Restrisiko-Akzeptanz dokumentiert</td><td>plus Lessons-Learned-Backlog mit Owner und Datum</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>10.5.2 Bestehensregel</h4>'
+            + '<p>Alle fuenf Dimensionen muessen mindestens „Pflicht" erreichen; mindestens drei Dimensionen muessen „Soll" erreichen; eine Dimension auf „Hervorragend" hebt die Gesamtnote nicht ueber „bestanden mit Auszeichnung". Die Bewertung erfolgt durch einen unabhaengigen Pruefenden (z.B. CISO eines anderen Standorts oder externer TUEV/SGS-Pruefer).</p>'
+
+            + '<h4>10.5.3 Selbstbewertungs-Workflow</h4>'
+            + '<ol>'
+            + '<li>Pro Dimension Punktwert (Pflicht=1, Soll=2, Hervorragend=3) vergeben und mit Beleg verlinken (Kapitelreferenz, Anhang).</li>'
+            + '<li>Gap-Analyse: Wo liegt die Differenz zwischen Selbstbewertung und Anspruch?</li>'
+            + '<li>Verbesserungsschleifen priorisieren: jede Dimension &le; 1 erhaelt ein konkretes Backlog-Item.</li>'
+            + '<li>Re-Review nach 30 d: hat sich der Punktwert pro Dimension verbessert?</li>'
+            + '</ol>'
+
+            + '<h4>Worked Example: Selbstbewertung fuer Roboterzelle PM-1</h4>'
+            + '<ul>'
+            + '<li>D1 — Pflicht (1 Punkt): SuC + Stakeholder OK; Out-of-Scope noch nicht freigegeben.</li>'
+            + '<li>D2 — Soll (2 Punkte): 7 Risiken inkl. ATT&amp;CK for ICS; FAIR nur fuer R1.</li>'
+            + '<li>D3 — Soll (2 Punkte): Mapping zu IEC 62443 + ISO 27001 + NIST; Cost-Benefit nur fuer R1+R2.</li>'
+            + '<li>D4 — Pflicht (1 Punkt): Runbook + NIS-2 fertig; CRA/DORA noch offen.</li>'
+            + '<li>D5 — Soll (2 Punkte): Executive Summary + Lessons-Learned-Backlog vorhanden; Acceptance-Signaturen ausstehend.</li>'
+            + '<li>Summe 8/15 Punkte → „bestanden", aber D1 und D4 zur Nachbesserung.</li>'
+            + '</ul>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche Dimension ist im obigen Beispiel kritisch unter Soll?</li>'
+            + '<li>Wie unterscheidet sich „bestanden mit Auszeichnung" von „bestanden" nach 10.5.2?</li>'
+            + '<li>Warum sollte der Pruefende organisatorisch unabhaengig sein?</li>'
+            + '<li>Welche zwei Belege verlinken Sie konkret fuer D3 in Ihrer eigenen Selbstbewertung?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Punkte ohne Beleg vergeben. <em>Korrekt:</em> Jeder Punkt muss auf einen Kapitelabschnitt oder Anhang verweisen.</li>'
+            + '<li><em>Fehler:</em> Selbstbewertung durch das gleiche Team, das die Loesung gebaut hat. <em>Korrekt:</em> Vier-Augen-Prinzip — z.B. CISO eines Schwesterwerks.</li>'
+            + '<li><em>Fehler:</em> Dimension D5 nur als Layout verstehen. <em>Korrekt:</em> Kommunikationsqualitaet ist eine kompetenzrelevante Dimension nach Bloom „evaluate"/„create" und entscheidend fuer Management-Buy-in.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Wenden Sie die Rubrik aus 10.5.1 auf Ihren <em>letzten</em> realen Cybersec-Bericht an. Wo liegen Sie unter Pflicht? Schreiben Sie drei Backlog-Items, mit Owner und Faelligkeit binnen 30 d.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: ISO/IEC 17024:2012 (Allgemeine Anforderungen an Personalzertifizierungsstellen); ISO/IEC 27001:2022 §6.1.3 (Risikoakzeptanz); NIST SP 800-160 Vol. 1 r1 (Nov. 2022) §3 (System-Life-Cycle Outcomes); Anderson Bloom-Revision (Anderson &amp; Krathwohl 2001); BSI-Praxisleitfaden Version 5 (2023).</em></p>'
+    };
+
+    const QUIZ_CAPSTONE = [
+        // --- Pool 1: Scope &amp; Stakeholder (5) ---
+        q('Welche Anforderung der IEC 62443-3-2:2020 verlangt eine schriftliche „System under Consideration"-Definition?',
+            ['ZCR 1', 'ZCR 3', 'ZCR 5', 'ZCR 7'], 0,
+            'IEC 62443-3-2:2020 §4.2 (ZCR 1 „Identify the SuC") fordert die schriftliche Festlegung des Bewertungsgegenstandes inklusive logischer und physikalischer Grenzen.'),
+        q('Welcher BSI-Standard beschreibt die Schutzbedarfsfeststellung?',
+            ['BSI 200-1', 'BSI 200-2', 'BSI 200-3', 'BSI 200-4'], 1,
+            'BSI-Standard 200-2 „IT-Grundschutz-Methodik" Edition 2024 §8 beschreibt das Verfahren der Schutzbedarfsfeststellung in den Schutzzielen Vertraulichkeit/Integritaet/Verfuegbarkeit.'),
+        q('Welche IEC-62443-Foundational-Requirement adressiert „Restricted Data Flow"?',
+            ['FR2', 'FR3', 'FR5', 'FR7'], 2,
+            'IEC 62443-1-1:2009 §5.6 listet FR5 „Restricted Data Flow" — Grundlage fuer das Zonen-/Conduit-Modell.'),
+        q('Welche Stakeholder-Gruppe muss bei einem Capstone-Vorhaben in Deutschland zur ML-Komponente formal angehoert werden?',
+            ['IT-Security', 'Werksleitung', 'Betriebsrat (Mitbestimmung nach BetrVG §87 Abs. 1 Nr. 6)', 'Pressestelle'], 2,
+            'BetrVG §87 Abs. 1 Nr. 6 begruendet die Mitbestimmung bei technischen Einrichtungen zur Verhaltens-/Leistungskontrolle — ML-Komponenten mit Personalbezug fallen darunter.'),
+        q('Welche zwei Werte beschreibt der Security Level „SL-T"?',
+            ['Capability Level eines Produkts', 'Target Security Level einer Zone', 'Achieved Security Level eines Audits', 'Compliance Score'], 1,
+            'IEC 62443-3-3:2013 §3 unterscheidet SL-T (Target, Zonen-Sollwert), SL-A (Achieved, gemessen) und SL-C (Capability, Produkt-Eigenschaft).'),
+
+        // --- Pool 2: Threat Model &amp; Risk (5) ---
+        q('Welche STRIDE-Kategorie adressiert ein Operator-Konto, das einen kritischen Schreibvorgang spaeter abstreitet?',
+            ['Spoofing', 'Tampering', 'Repudiation', 'Information Disclosure'], 2,
+            'STRIDE (Howard/LeBlanc 2003): Repudiation adressiert das Bestreiten von durchgefuehrten Aktionen. Mitigation typischerweise via signierte Audit-Logs (OPC UA Part 5).'),
+        q('Welches Framework liefert ICS-spezifische Tactics wie „Inhibit Response Function" und „Impair Process Control"?',
+            ['MITRE ATT&CK Enterprise', 'MITRE ATT&CK Mobile', 'MITRE ATT&CK for ICS v15 (2024)', 'CAPEC'], 2,
+            'MITRE ATT&CK for ICS v15 (Apr. 2024) hat eigene ICS-Tactics: „Inhibit Response Function" (TA0107) und „Impair Process Control" (TA0106).'),
+        q('Welche Bewertungsmethode liefert quantitative Risikowerte in Geldeinheiten?',
+            ['STRIDE', 'Open FAIR (LEF &times; LM)', '5&times;5-Matrix', 'CVSS v4.0'], 1,
+            'Open FAIR Body of Knowledge 2024 berechnet Annualized Loss Expectancy = Loss Event Frequency &times; Loss Magnitude in monetaeren Werten.'),
+        q('Welche CISA-Veroeffentlichung warnte 2024 explizit vor „Living-off-the-Land"-Aktivitaeten staatlicher Akteure in kritischer Infrastruktur?',
+            ['AA22-040A „Conti"', 'AA23-201A „BlackCat"', 'AA24-038A „Volt Typhoon" (Feb. 2024)', 'AA24-241A'], 2,
+            'CISA AA24-038A (Feb. 2024) „People&apos;s Republic of China State-Sponsored Cyber Actor Living off the Land" warnte vor Volt Typhoon in US-Kritis.'),
+        q('Welche Akzeptanzkriterien fuer Restrisiko verlangt ISO/IEC 27001:2022?',
+            ['Kein Restrisiko zulaessig', 'Schriftliche Akzeptanz durch Risk Owner (§6.1.3 lit. f)', 'Akzeptanz nur durch CISO', 'Akzeptanz durch Auditor'], 1,
+            'ISO/IEC 27001:2022 §6.1.3 lit. f verlangt, dass die Risikobehandlungsentscheidung — inklusive Akzeptanz — vom „Risk Owner" formal genehmigt wird.'),
+
+        // --- Pool 3: Controls &amp; Testplan (5) ---
+        q('Welche Annex-A-Control der ISO/IEC 27001:2022 adressiert das Backup-Konzept?',
+            ['A.5.7', 'A.8.13 Information Backup', 'A.6.4', 'A.8.28'], 1,
+            'ISO/IEC 27001:2022 Annex A.8.13 „Information Backup" — referenziert in ISO/IEC 27002:2022 §8.13.'),
+        q('Welche „3-2-1-1-0"-Regel ist 2024 Best Practice gegen Ransomware?',
+            ['3 Kopien, 2 Medien, 1 offsite', '3 Kopien, 2 Medien, 1 offsite, 1 offline, 0 Fehler beim Restore-Test', '3 Standorte, 2 Wochen, 1 Tag, 1 Stunde, 0 Latenz', '3-Jahres-Plan, 2 Audits/Jahr, 1 Standard'], 1,
+            'ENISA „Threat Landscape for Ransomware Attacks" (Jul. 2024) und BSI 2024: 3 Kopien, 2 Medien, 1 offsite, 1 offline/immutable, 0 Fehler im jaehrlichen Restore-Drill.'),
+        q('Welche IEC-Norm verbietet praktisch Active-Testing auf produktiven OT-Systemen waehrend der Produktion?',
+            ['IEC 62443-2-4 §SP.03.03 (Service Provider)', 'IEC 62443-3-3 §SR 1.1', 'IEC 61131-3', 'IEC 60204-1'], 0,
+            'IEC 62443-2-4:2015+A1:2017 §SP.03.03 (Mandatory Requirement) verlangt fuer Service Provider, dass intrusive Tests nur in genehmigten Wartungsfenstern oder im Lab-Mirror stattfinden.'),
+        q('Welche Detection-Sprache erlaubt SIEM-uebergreifende Detection-Engineering?',
+            ['YARA', 'Sigma (SigmaHQ 2024)', 'Snort', 'Suricata'], 1,
+            'Sigma (SigmaHQ 2024) ist log-quellenuebergreifend und wird via „pySigma" auf SIEM-spezifische Queries konvertiert (Splunk SPL, Microsoft Sentinel KQL, Elastic ES|QL).'),
+        q('Welche zwei Detection-Reife-Kennzahlen sind Standard im Purple Teaming?',
+            ['MTBF und MTTR', 'TTD und TTC', 'CVSS und EPSS', 'ROI und TCO'], 1,
+            'SANS „Continuous Adversary Emulation" 2024 und MITRE Adversary Emulation Plans 2023: Time-to-Detection und Time-to-Containment je ATT&CK-Technique.'),
+
+        // --- Pool 4: Compliance / Reporting (5) ---
+        q('Wann muss eine wesentliche Einrichtung nach NIS-2 Art. 23 erstmals melden?',
+            ['Innerhalb von 4 h', 'Innerhalb von 24 h (Frueh­warnung)', 'Innerhalb von 72 h', 'Innerhalb von 30 Tagen'], 1,
+            'Richtlinie (EU) 2022/2555 (NIS-2) Art. 23 Abs. 4 lit. a: Frueh­warnung innerhalb 24 h, Incident-Notification 72 h, Abschlussbericht 1 Monat.'),
+        q('Welche CRA-Frist gilt fuer den Reporting-Beginn nach Verordnung (EU) 2024/2847?',
+            ['10.12.2024', '11.09.2026', '11.12.2027', '17.01.2025'], 1,
+            'CRA Art. 14 Reporting-Pflichten greifen ab 11.09.2026, Hauptanwendung (Marktanforderungen) ab 11.12.2027 (Art. 71).'),
+        q('Welche DORA-Frist gilt fuer die initiale Meldung schwerwiegender IKT-Vorfaelle in Finanzentitaeten?',
+            ['4 h nach Klassifizierung', '24 h', '72 h', '1 Monat'], 0,
+            'Verordnung (EU) 2022/2554 (DORA) Art. 19 mit ESA-RTS 2024: initial &le; 4 h nach Klassifizierung, Zwischenbericht 72 h, Final 1 Monat.'),
+        q('Welche zwei Elemente gehoeren NICHT in das Executive Summary einer Capstone-Abgabe?',
+            ['Geschaeftsrisiko und Empfehlung', 'Tool-Namen und ATT&CK-IDs', 'Restrisiko-Akzeptanz', 'Investitionsbedarf'], 1,
+            'NIST SP 800-115 §6.2 und BSI-Praxisleitfaden Version 5 (2023): Tool-/Framework-Bezeichner gehoeren in den technischen Anhang, nicht in das Executive Summary.'),
+        q('Welche BSI-Empfehlung 2024 gilt zur Loesegeldzahlung bei Ransomware?',
+            ['Grundsaetzlich zahlen, um Daten zurueckzubekommen', 'Grundsaetzlich nicht zahlen; Konsultation Strafverfolgung und Rechtsabteilung; OFAC-/EU-Sanktionsregime pruefen', 'Halben Betrag zahlen', 'Verhandeln'], 1,
+            'BSI Lagebericht IT-Sicherheit 2024 (Okt. 2024) raet grundsaetzlich von Zahlung ab; OFAC-Listen und EU-Cyber-Sanktionsregime koennen Zahlung sogar verbieten.')
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_cybersec',
         code: 'MA-ET CyberSec',
@@ -4691,6 +5103,13 @@
                 summary: 'Pentest-Methodik (NIST SP 800-115, PTES, OWASP WSTG v4.2), Web-/API-Security (OWASP Top 10:2021, OWASP API Top 10:2023, ASVS 4.0.3), Active-Directory-Angriffspfade (Kerberoasting, AS-REP, PtH/PtT, Golden/Silver Ticket, AD CS ESC1–ESC8, Tier-Modell), Adversary Emulation und Purple Teaming (MITRE Caldera, Atomic Red Team, D3FEND), Reporting nach CVSS v4.0 sowie Recht (StGB § 202c, NIS-2 Art. 21, CRA Art. 13, ISO/IEC 29147/30111).',
                 pages: [PAGE_OFFSEC_METHOD, PAGE_OFFSEC_WEB, PAGE_OFFSEC_AD, PAGE_OFFSEC_REDTEAM],
                 quiz: QUIZ_OFFSEC
+            },
+            {
+                id: 'capstone',
+                title: 'Kapitel 10 — Master-Capstone Cyber-Security',
+                summary: 'Pruefungsnaher Abschluss-Block: Architekturbewertung einer industriellen Roboterzelle, Threat Model nach STRIDE und MITRE ATT&CK for ICS v15, Risikoanalyse nach ISO/IEC 27005:2022 und IEC 62443-3-2 ZCR 4, Controls-Mapping ueber IEC 62443-3-3 / ISO 27001 Annex A / NIST SP 800-53 r5 / BSI Grundschutz Edition 2024, Testplan, Incident-Runbook nach NIST SP 800-61 r2, Compliance (NIS-2 / CRA / DORA / DS-GVO), Executive-Summary-Muster, Bewertungsrubrik mit Selbstbewertungs-Workflow.',
+                pages: [PAGE_CAPSTONE_SCOPE, PAGE_CAPSTONE_THREAT, PAGE_CAPSTONE_CONTROLS, PAGE_CAPSTONE_RUNBOOK, PAGE_CAPSTONE_RUBRIC],
+                quiz: QUIZ_CAPSTONE
             }
         ]
     });
