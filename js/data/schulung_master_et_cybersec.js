@@ -745,6 +745,480 @@
             'IEC 62443-4-1:2018 fordert acht Practices: Security Management, Specification, Design, Implementation, Verification & Validation, Defect Management, Update Management, Security Guidelines.')
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 3 — Industrielle Netzsicherheit / OT (PRODUKTIV)
+    // Quellen: IEC 62443-Serie (1-1:2009, 2-1:2010, 2-4:2015+A1:2017,
+    // 3-2:2020, 3-3:2013, 4-1:2018, 4-2:2019); ISA-99/IEC TR 62443-1-1;
+    // ANSI/ISA-95 (IEC 62264) Purdue Reference Model;
+    // NIST SP 800-82 Rev. 3 "Guide to OT Security" (Sep. 2023);
+    // BSI ICS-Security-Kompendium 2024;
+    // ENISA "Good Practices for Security of IoT in OT" (2023);
+    // Falliere/Murchu/Chien "W32.Stuxnet Dossier" v1.4, Symantec 2011;
+    // Dragos / ESET "Industroyer" Reports 2017; FireEye / Dragos "TRITON"
+    // Reports 2017/2018; ESET "Industroyer2" Apr. 2022;
+    // CISA Advisories (ICS-CERT) 2020-2025; Claroty Team82 Reports;
+    // OPC UA Specification Part 2 "Security Model" v1.05 (2022);
+    // PROFINET Security Class 1-3 nach IEC 61784-3-3:2021.
+    // ----------------------------------------------------------------------
+
+    const PAGE_OT_VS_IT = {
+        title: '3.1 OT vs. IT — Schutzziele, Lebenszyklen, Echtzeit',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die Verschiebung der CIA-Triade in OT-Umgebungen begruenden, (2) das Purdue Enterprise Reference Architecture (PERA) Level 0&ndash;5 erlaeutern, (3) typische Echtzeit-Anforderungen industrieller Steuerungen einordnen, (4) Patch-Restriktionen in OT begruenden.</blockquote>'
+
+            + '<h4>3.1.1 Schutzziele: AIC statt CIA</h4>'
+            + '<p>In klassischer IT-Sicherheit gilt die Reihenfolge <em>Confidentiality &gt; Integrity &gt; Availability</em>. In OT/ICS kehrt sich die Prioritaet um: <strong>Availability &gt; Integrity &gt; Confidentiality</strong> (<em>AIC</em>). Begruendung (NIST SP 800-82r3 §2.4): Ausfaelle koennen physische Schaeden, Personenschaeden oder Umweltschaeden ausloesen — Vertraulichkeit von Prozessdaten ist sekundaer. Zusaetzlich kommt <em>Safety</em> als uebergeordnetes Schutzziel hinzu (Functional Safety nach IEC 61508 / IEC 61511).</p>'
+
+            + '<h4>3.1.2 Purdue-Modell (PERA Level 0&ndash;5)</h4>'
+            + '<table><thead><tr><th>Level</th><th>Funktion</th><th>Typische Komponenten</th></tr></thead><tbody>'
+            + '<tr><td>5</td><td>Enterprise Network</td><td>ERP, Internet, E-Mail</td></tr>'
+            + '<tr><td>4</td><td>Site Business Planning</td><td>MES-Reporting, Office-IT pro Standort</td></tr>'
+            + '<tr><td>3.5</td><td>iDMZ</td><td>Patch-Server, AV-Update-Relay, Historian-Replica</td></tr>'
+            + '<tr><td>3</td><td>Site Operations</td><td>MES, Engineering Workstations, Domain Controller (OT)</td></tr>'
+            + '<tr><td>2</td><td>Area Supervisory</td><td>SCADA/HMI, Batch-Server</td></tr>'
+            + '<tr><td>1</td><td>Basic Control</td><td>SPS, DCS-Controller, Safety-PLC</td></tr>'
+            + '<tr><td>0</td><td>Process</td><td>Sensoren, Aktoren, Antriebe</td></tr>'
+            + '</tbody></table>'
+            + '<p>Die <strong>Industrial DMZ</strong> (Level 3.5) trennt OT (Level 0&ndash;3) und IT (Level 4&ndash;5). Direkter Datenverkehr zwischen Level 5 und Level 3 ist verboten — alle Verbindungen <em>terminieren</em> in der iDMZ (NIST SP 800-82r3 §5.2; ISA-95 / IEC 62264).</p>'
+
+            + '<h4>3.1.3 Echtzeit-Anforderungen</h4>'
+            + '<p>Steuerungstaktzeiten typischer Anlagen (IEC 61784-2:2023, RT-Profile):</p>'
+            + '<ul>'
+            + '<li><strong>Werkzeugmaschinen / Servoachsen:</strong> 31,25 µs &ndash; 250 µs Zykluszeit, Jitter &lt; 1 µs (Isochronous Real-Time, IRT).</li>'
+            + '<li><strong>Verfahrenstechnik (Prozessindustrie):</strong> 100 ms &ndash; 1 s Zykluszeit, weiche Echtzeit.</li>'
+            + '<li><strong>Safety-Funktionen (PROFIsafe, CIP Safety, openSAFETY):</strong> Reaktionszeit-Budget meist 100 ms; F-Telegramm + Black-Channel-Prinzip nach IEC 61784-3.</li>'
+            + '</ul>'
+            + '<p>Konsequenz fuer Security: jede zusaetzliche Latenz durch Verschluesselung, Firewall-Inspection oder Authentifizierung muss <em>im Latenz-Budget</em> bleiben — sonst ist die Sicherheits-Massnahme untragbar.</p>'
+
+            + '<h4>3.1.4 Lebenszyklus und Patch-Restriktionen</h4>'
+            + '<p>OT-Lebenszyklen liegen typischerweise bei 15&ndash;30 Jahren (Kraftwerke, Stahlwerke, Pharma). Konsequenzen:</p>'
+            + '<ul>'
+            + '<li>Hersteller-Support fuer Steuerungs-Firmware oft &lt; Anlagen-Lebenszyklus &rarr; <strong>Compensating Controls</strong> noetig (Netzsegmentation, Application Allowlisting, Industrial Firewalls).</li>'
+            + '<li>Patches duerfen nur in geplanten Wartungsfenstern eingespielt werden; vorher Re-Validation der Steuerungsfunktion (oft mehrere Tage Stillstand).</li>'
+            + '<li>Asset-Inventory ist Pflicht: ohne valide Inventar-Liste keine Risikoabschaetzung. ENISA &amp; BSI fordern Asset-Discovery via passiver Netzwerkanalyse, da aktives Scanning ICS-Komponenten zum Absturz bringen kann.</li>'
+            + '</ul>'
+            + '<p>BSI ICS-Security-Kompendium 2024 fordert: Backup &amp; Recovery getestet, dokumentierte Notfallpraxis (M5.7), klare Verantwortung fuer OT-Security (oft Hybridrolle Engineering+IT-Sec).</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-82 Rev. 3 (Sep. 2023); ANSI/ISA-95 / IEC 62264; IEC 61784-2:2023, IEC 61784-3:2021; IEC 61508-1:2010; BSI ICS-Security-Kompendium, Stand 2024; ENISA "Good Practices for Security of IoT in OT" 2023.</em></p>'
+    };
+
+    const PAGE_IEC62443 = {
+        title: '3.2 IEC-62443-Serie: Zonen, Conduits, Security Levels',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die Struktur der IEC-62443-Serie benennen, (2) die sieben Foundational Requirements FR 1&ndash;7 nennen, (3) Security Level SL 1&ndash;4 unterscheiden, (4) eine Zonen-&-Conduit-Architektur nach IEC 62443-3-2 entwerfen.</blockquote>'
+
+            + '<h4>3.2.1 Struktur der Normenreihe</h4>'
+            + '<table><thead><tr><th>Teil</th><th>Adressat</th><th>Inhalt</th></tr></thead><tbody>'
+            + '<tr><td>62443-1-x</td><td>alle</td><td>Begriffe, Konzepte, Modelle (1-1:2009)</td></tr>'
+            + '<tr><td>62443-2-x</td><td>Anlagen-Betreiber</td><td>2-1: ISMS fuer IACS; 2-3: Patch-Management; 2-4: Anforderungen an Service-Provider (2015+A1:2017)</td></tr>'
+            + '<tr><td>62443-3-x</td><td>System-Integrator</td><td>3-2:2020 Risikoanalyse / Zonen &amp; Conduits; 3-3:2013 System-Anforderungen pro SL</td></tr>'
+            + '<tr><td>62443-4-x</td><td>Komponenten-Hersteller</td><td>4-1:2018 sicherer Entwicklungsprozess; 4-2:2019 Komponenten-Anforderungen</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>3.2.2 Sieben Foundational Requirements (FR)</h4>'
+            + '<ol>'
+            + '<li><strong>FR 1 — Identification &amp; Authentication Control (IAC):</strong> Wer/was greift zu?</li>'
+            + '<li><strong>FR 2 — Use Control (UC):</strong> Welche Aktionen sind erlaubt?</li>'
+            + '<li><strong>FR 3 — System Integrity (SI):</strong> Schutz vor unautorisierter Aenderung.</li>'
+            + '<li><strong>FR 4 — Data Confidentiality (DC):</strong> Schutz von Informationen vor unbefugter Einsicht.</li>'
+            + '<li><strong>FR 5 — Restricted Data Flow (RDF):</strong> Segmentierung, Conduits.</li>'
+            + '<li><strong>FR 6 — Timely Response to Events (TRE):</strong> Logging, Detection, Incident Response.</li>'
+            + '<li><strong>FR 7 — Resource Availability (RA):</strong> Schutz vor DoS, robuste Kommunikation.</li>'
+            + '</ol>'
+
+            + '<h4>3.2.3 Security Levels SL 1&ndash;4</h4>'
+            + '<table><thead><tr><th>SL</th><th>Bedrohungsmodell</th><th>Beispiel-Angreifer</th></tr></thead><tbody>'
+            + '<tr><td>SL 1</td><td>versehentliche oder zufaellige Vorfaelle</td><td>Bedienfehler, fehlkonfiguriertes Asset</td></tr>'
+            + '<tr><td>SL 2</td><td>vorsaetzlich, geringe Mittel, allgemeine Faehigkeiten</td><td>Innentaeter mit Standard-Tools</td></tr>'
+            + '<tr><td>SL 3</td><td>vorsaetzlich, moderate Mittel, IACS-spezifische Faehigkeiten</td><td>Hacktivisten, Konkurrenz mit OT-Wissen</td></tr>'
+            + '<tr><td>SL 4</td><td>vorsaetzlich, erhebliche Mittel, IACS-spezifisch + Spezialisten-Toolchain</td><td>nation-state Acteur (APT)</td></tr>'
+            + '</tbody></table>'
+            + '<p>Pro Zone werden drei SL-Werte gefuehrt: <strong>SL-T</strong> (Target, gewuenscht), <strong>SL-C</strong> (Capability, was Komponenten technisch leisten), <strong>SL-A</strong> (Achieved, real erreicht). Ziel: SL-A &ge; SL-T (IEC 62443-3-2:2020 §ZCR 6).</p>'
+
+            + '<h4>3.2.4 Zonen- und Conduit-Modell (62443-3-2)</h4>'
+            + '<p>Eine <strong>Zone</strong> ist eine Gruppe logischer und physischer Assets mit gemeinsamen Sicherheitsanforderungen. <strong>Conduits</strong> verbinden Zonen und buendeln den gesamten Datenfluss zwischen ihnen. Risikoanalyse-Schritte nach 62443-3-2:</p>'
+            + '<ol>'
+            + '<li>System under Consideration (SuC) abgrenzen.</li>'
+            + '<li>High-Level Risk Assessment.</li>'
+            + '<li>Zone- und Conduit-Aufteilung.</li>'
+            + '<li>Detailed Risk Assessment pro Zone/Conduit.</li>'
+            + '<li>Cybersecurity Requirements Specification (CRS).</li>'
+            + '</ol>'
+            + '<p>Beispiel-Conduit-Anforderungen: deny-by-default-Filter in der iDMZ, definierte zugelassene Protokolle (z.B. nur OPC UA Pub/Sub und HTTPS-API), Logging aller queruebergreifenden Verbindungen, technisch erzwungene Einbahn-Stroeme durch <em>Data Diodes</em> bei Lvl 3 &rarr; Lvl 4-Replikation.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: IEC 62443-3-2:2020; IEC 62443-3-3:2013; IEC 62443-4-1:2018; IEC 62443-4-2:2019; ISA-TR84.00.09:2021 (Konvergenz Safety/Security); BSI ICS-Security-Kompendium 2024.</em></p>'
+    };
+
+    const PAGE_OT_PROTOCOLS = {
+        title: '3.3 Industrieprotokolle und Hardening-Massnahmen',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Klartext- vs. abgesicherte Industrieprotokolle einordnen, (2) OPC UA Security Modes erklaeren, (3) PROFINET Security Class 1&ndash;3 unterscheiden, (4) sinnvolle Hardening-Massnahmen fuer OT-Netze auswaehlen.</blockquote>'
+
+            + '<h4>3.3.1 Protokoll-Landschaft</h4>'
+            + '<table><thead><tr><th>Protokoll</th><th>Default-Sicherheit</th><th>Sichere Variante</th></tr></thead><tbody>'
+            + '<tr><td>Modbus TCP (Schneider 1979/1999)</td><td>keine — Klartext, keine Auth</td><td>Modbus Security (TLS) seit 2018</td></tr>'
+            + '<tr><td>DNP3</td><td>keine</td><td>Secure Authentication v5 nach IEEE 1815-2012</td></tr>'
+            + '<tr><td>PROFINET</td><td>keine in Class 1</td><td>Class 2 (signed RPC), Class 3 (TLS, IEC 61784-3-3:2021)</td></tr>'
+            + '<tr><td>EtherNet/IP + CIP</td><td>keine</td><td>CIP Security (Vol 8) — TLS+DTLS, Pull-Modell</td></tr>'
+            + '<tr><td>OPC UA (IEC 62541)</td><td>konfigurierbar</td><td>Sign &amp; Encrypt mit X.509-Zertifikaten</td></tr>'
+            + '<tr><td>S7Comm/S7CommPlus</td><td>S7Comm trivial spoofbar</td><td>S7CommPlus v3+ (Trial-Encryption); offiziell Migration auf OPC UA</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>3.3.2 OPC UA Security</h4>'
+            + '<p>OPC UA Part 2 v1.05 (2022) definiert pro Secure-Channel einen <strong>Security Mode</strong>: <em>None</em>, <em>Sign</em>, <em>SignAndEncrypt</em>. Empfohlen ist ausschliesslich <em>SignAndEncrypt</em> mit Profil <code>Basic256Sha256</code> oder <code>Aes256_Sha256_RsaPss</code>. Authentifizierung ueber X.509-Zertifikate (Anwendungs- und User-Zertifikate); Trust Lists pro Server. <strong>OPC UA Pub/Sub</strong> (Part 14, 2018) erlaubt UDP-Multicast und MQTT-Tunneling — fuer schutzbeduerftige Daten zwingend mit Message Security (Symmetric Key Service nach Part 14 §7).</p>'
+
+            + '<h4>3.3.3 PROFINET Security Classes</h4>'
+            + '<ul>'
+            + '<li><strong>Class 1 (Robustness):</strong> protokollseitige Robustheit gegen Fehlpakete; <em>keine</em> Authentifizierung. Default-Stufe vor 2021.</li>'
+            + '<li><strong>Class 2 (Integrity &amp; Authenticity):</strong> signierte RPCs zwischen Engineering, IO-Controller und IO-Device.</li>'
+            + '<li><strong>Class 3 (Confidentiality):</strong> Verschluesselung der Anwenderdaten (TLS/DTLS), spezifiziert in IEC 61784-3-3:2021. Voraussetzung: Hardware mit krypto-faehigem ASIC.</li>'
+            + '</ul>'
+
+            + '<h4>3.3.4 Hardening-Massnahmen</h4>'
+            + '<ol>'
+            + '<li><strong>Netzsegmentierung:</strong> VLANs nicht ausreichend — physikalische Separierung oder VLAN+Industrial-Firewall mit Deep Packet Inspection (DPI).</li>'
+            + '<li><strong>Industrial Firewalls / Next-Gen-Firewalls:</strong> Modbus-DPI (whitelisting Function-Codes), OPC-UA-Aware Inspection.</li>'
+            + '<li><strong>Data Diodes:</strong> physisch unidirektional von Lvl 3 nach Lvl 4 oder von Anlage in iDMZ — keine Rueckkanal moeglich.</li>'
+            + '<li><strong>Application Allowlisting:</strong> auf Engineering Workstations und HMIs (z.B. McAfee/Trellix Application Control, Carbon Black, Microsoft AppLocker).</li>'
+            + '<li><strong>Asset Discovery / Continuous Monitoring:</strong> passive OT-IDS (Claroty CTD, Nozomi Guardian, Dragos Platform) — kein aktives Scanning.</li>'
+            + '<li><strong>Remote-Access:</strong> Jump-Server in iDMZ, MFA, Session-Recording. Direkter VPN-Zugriff von Lieferanten auf SPS ist ein Top-Befund in BSI-Audits 2023/2024.</li>'
+            + '<li><strong>Secure Engineering:</strong> Engineering-Workstations gehaertet, kein Internetzugriff, separate Domain — Stuxnet-Lessons-Learned.</li>'
+            + '</ol>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: OPC UA Specification Part 2 v1.05 (2022); IEC 61784-3-3:2021; IEC 62541:2020; CIP Security Volume 8 v1.13 (2024); Modbus Organization "Modbus Security" Spec (2018); IEEE 1815-2012; NIST SP 800-82r3 §5; BSI ICS-Security-Kompendium 2024 §M5.</em></p>'
+    };
+
+    const PAGE_OT_INCIDENTS = {
+        title: '3.4 Vorfaelle und Lessons Learned (Stuxnet, Industroyer, TRITON)',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Stuxnet, Industroyer/Industroyer2 und TRITON in Bezug auf Ziel, TTPs und Wirkung beschreiben, (2) MITRE ATT&amp;CK for ICS einordnen, (3) Lessons Learned auf Anlagen-Architektur und Incident Response abbilden.</blockquote>'
+
+            + '<h4>3.4.1 Stuxnet (2010)</h4>'
+            + '<p>Erster bekannt gewordener APT-Wurm gegen ICS, attribuiert auf Operation "Olympic Games" (USA/Israel). Ziel: Sabotage iranischer Urananreicherung in Natanz durch Manipulation der Drehzahl von Siemens-S7-300/-400-gesteuerten Zentrifugen. Kombination (Falliere/Murchu/Chien, Symantec 2011 v1.4):</p>'
+            + '<ul>'
+            + '<li><strong>4 Windows-Zero-Days:</strong> CVE-2010-2568 (LNK), CVE-2010-2729 (Print Spooler), CVE-2010-2743 (Win32k Keyboard Layout), CVE-2010-3338 (Task Scheduler).</li>'
+            + '<li><strong>Gestohlene Code-Signing-Zertifikate</strong> Realtek und JMicron fuer signierte Treiber.</li>'
+            + '<li><strong>WinCC-Hardcoded-Credentials</strong> (Default-DB-Passwort) fuer SCADA-Zugriff.</li>'
+            + '<li><strong>S7-Rootkit:</strong> Zwischen STEP7-Engineering-Tool und S7-CPU eingeschleuster DLL-Hook, der manipulierte Step-7-Bloecke auf der CPU einspielt und beim Auslesen die Originale zurueckliefert (Man-in-the-Middle).</li>'
+            + '</ul>'
+            + '<p>Wirkung: ca. 1000 Zentrifugen zerstoert. Lessons Learned: USB-Sticks als Bedrohungsvektor fuer Air-Gapped-Anlagen ernst nehmen; Engineering-Software haerten; supply-chain code-signing schuetzen.</p>'
+
+            + '<h4>3.4.2 Industroyer / CRASHOVERRIDE (2016) und Industroyer2 (2022)</h4>'
+            + '<p>Erste auf Stromnetz-Protokolle zugeschnittene Malware (Dragos/ESET 2017, attribuiert SANDWORM/GRU 74455). Kernmodule:</p>'
+            + '<ul>'
+            + '<li>Protokoll-Module fuer <strong>IEC 60870-5-101/104</strong>, <strong>IEC 61850 GOOSE/MMS</strong>, <strong>OPC DA</strong>.</li>'
+            + '<li>Wiper-Komponente fuer Windows-Hosts.</li>'
+            + '<li>DoS-Modul gegen Siemens SIPROTEC-Schutzrelais (CVE-2015-5374).</li>'
+            + '</ul>'
+            + '<p>Wirkung: ein-stuendiger Stromausfall in Kiew (Dez. 2016, ~200 MW). <strong>Industroyer2</strong> (April 2022, Ukraine-Krieg) erweiterte das IEC-104-Modul; ESET/CERT-UA verhinderten den Angriff vor Ausfuehrung.</p>'
+
+            + '<h4>3.4.3 TRITON / TRISIS / HatMan (2017)</h4>'
+            + '<p>Erste Malware, die <strong>Safety-Instrumented-Systems</strong> angreift (FireEye/Dragos 2017, Mandiant Reports 2018-2020). Ziel: Triconex-SIS in einer petrochemischen Anlage in Saudi-Arabien. TTPs:</p>'
+            + '<ul>'
+            + '<li>Pivot von IT-Netz ueber Engineering Workstation auf SIS-Engineering-Software (TriStation 1131).</li>'
+            + '<li>Ausnutzung undokumentierter Kommandos der Tricon-3008-Firmware, um Kontrollroutine zu modifizieren.</li>'
+            + '<li>Logikfehler im Implant fuehrte zum Plant-Shutdown statt zum unbemerkten Override — Vorfall wurde dadurch ueberhaupt erst entdeckt.</li>'
+            + '</ul>'
+            + '<p>Lessons Learned: Safety-Netz physisch trennen, Engineering-Workstation fuer SIS streng beschraenken, Schreibschutz-Schluesselschalter am Controller aktiv halten.</p>'
+
+            + '<h4>3.4.4 MITRE ATT&amp;CK for ICS</h4>'
+            + '<p>MITRE ATT&amp;CK for ICS (Version 14, Okt. 2023) ist die Referenz-Taxonomie fuer ICS-TTPs: 12 Tactics, 96 Techniques, 14 dokumentierte Threat Groups (u.a. SANDWORM, XENOTIME, ELECTRUM). Wichtige Tactics: <em>Initial Access</em>, <em>Execution</em>, <em>Persistence</em>, <em>Evasion</em>, <em>Discovery</em>, <em>Lateral Movement</em>, <em>Collection</em>, <em>Command and Control</em>, <em>Inhibit Response Function</em>, <em>Impair Process Control</em>, <em>Impact</em>.</p>'
+            + '<p>Praxis-Empfehlung: Detection-Regeln (Sigma, YARA) gegen ATT&amp;CK-Techniken mappen — beispielsweise T0843 "Program Download" (typisch fuer Stuxnet/TRITON) oder T0857 "System Firmware".</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: Symantec "W32.Stuxnet Dossier" v1.4 (2011); Dragos/ESET "Industroyer" Whitepaper (Jun. 2017); ESET "Industroyer2" Apr. 2022; FireEye/Mandiant "TRITON Attribution: Russian GRU-affiliated TsNIIKhM" (2018); MITRE ATT&CK for ICS v14 (Oct. 2023); CISA Advisory ICSA-22-103-04 (Industroyer2); CISA AA22-110A.</em></p>'
+    };
+
+    const QUIZ_OT = [
+        q('Welche Reihenfolge der Schutzziele gilt typischerweise in OT-/ICS-Umgebungen?',
+            ['Availability &gt; Integrity &gt; Confidentiality, ergaenzt um Safety',
+             'Confidentiality &gt; Integrity &gt; Availability',
+             'Integrity &gt; Confidentiality &gt; Availability',
+             'Confidentiality &gt; Availability &gt; Integrity'], 0,
+            'NIST SP 800-82r3 §2.4: AIC statt CIA. Safety als uebergeordnetes Ziel (IEC 61508/61511).'),
+        q('Was ist der Zweck einer Industrial DMZ (Level 3.5 nach Purdue/ISA-95)?',
+            ['Sie terminiert alle Verbindungen zwischen IT (Level 4-5) und OT (Level 0-3) und verhindert direkten Datenverkehr',
+             'Sie ist nur ein logisches VLAN ohne Filterung',
+             'Sie ersetzt das ERP-System',
+             'Sie ist optional und nicht in NIST SP 800-82 gefordert'], 0,
+            'NIST SP 800-82r3 §5.2: keine direkten Sessions zwischen Level 5 und Level 3, alle Verbindungen brechen in der iDMZ.'),
+        q('Welche Zykluszeit ist fuer isochronous-Real-Time-PROFINET typisch?',
+            ['31,25 µs bis 250 µs mit Jitter unter 1 µs',
+             '10 ms bis 100 ms',
+             '1 s',
+             '1 µs ohne Jitter-Anforderung'], 0,
+            'IEC 61784-2:2023 RT-Klasse IRT (Class 3) fuer Servoregler-Anwendungen.'),
+        q('Warum sind klassische aktive Schwachstellen-Scanner in OT-Netzen problematisch?',
+            ['Aktives Probing kann Steuerungen zum Absturz bringen oder Echtzeit verletzen',
+             'Sie liefern keine verwertbaren Ergebnisse',
+             'Sie verstossen gegen die DSGVO',
+             'Sie sind in IEC 62443 verboten'], 0,
+            'BSI ICS-Kompendium 2024, ENISA 2023: passive Asset Discovery (z.B. SPAN-Port + Claroty/Nozomi/Dragos) statt aktives Scannen.'),
+        q('Welcher Teil der IEC-62443-Serie adressiert Komponenten-Hersteller mit dem Entwicklungsprozess-Standard?',
+            ['IEC 62443-4-1:2018', 'IEC 62443-2-1:2010', 'IEC 62443-3-3:2013', 'IEC 62443-1-1:2009'], 0,
+            'IEC 62443-4-1:2018 definiert acht Practices (SM, SR, SD, SI, SVV, DM, SUM, SG).'),
+        q('Welche Foundational Requirement (FR) deckt Logging, Detection und Incident Response ab?',
+            ['FR 6 — Timely Response to Events',
+             'FR 1 — Identification & Authentication Control',
+             'FR 4 — Data Confidentiality',
+             'FR 7 — Resource Availability'], 0,
+            'IEC 62443-3-3:2013 §3 listet FR 1-7. FR 6 = TRE.'),
+        q('Welche Aussage zu IEC-62443-Security-Levels SL 1-4 ist korrekt?',
+            ['SL 4 modelliert nation-state-Acteure mit erheblichen Mitteln und IACS-spezifischer Spezialisten-Toolchain',
+             'SL 4 modelliert Bedienfehler',
+             'SL 1 schuetzt vor APTs',
+             'SL 2 ist nur fuer DMZ-Komponenten'], 0,
+            'IEC 62443-3-3:2013 Tabelle SL-Definitionen.'),
+        q('Was unterscheidet SL-T, SL-C und SL-A?',
+            ['SL-T = gewuenscht (Target), SL-C = technische Faehigkeit (Capability), SL-A = real erreicht (Achieved)',
+             'Die drei Werte sind synonym',
+             'SL-T ist nur fuer Komponenten relevant',
+             'SL-A ist die Mindestanforderung an die DMZ'], 0,
+            'IEC 62443-3-2:2020 §ZCR 6: Ziel ist SL-A &ge; SL-T pro Zone/Conduit.'),
+        q('Welche Reihenfolge entspricht der Risikoanalyse nach IEC 62443-3-2:2020?',
+            ['SuC-Definition &rarr; High-Level RA &rarr; Zonen/Conduits &rarr; Detailed RA &rarr; Cybersecurity Requirements Specification',
+             'Pen-Test &rarr; Patch &rarr; Zertifizierung',
+             'Threat Modeling &rarr; Patch &rarr; Audit',
+             'Asset-Inventory &rarr; AV-Update &rarr; Backup'], 0,
+            'IEC 62443-3-2:2020 §ZCR 1-7 in dieser Reihenfolge.'),
+        q('Was ist der Hauptzweck eines Conduits in IEC 62443?',
+            ['Buendelung und Kontrolle saemtlichen Datenverkehrs zwischen Zonen',
+             'Stromversorgung der Steuerungen',
+             'Mechanische Trennung des Schaltschranks',
+             'Synchronisation der Echtzeit-Uhr'], 0,
+            'IEC 62443-1-1:2009 Begriffe; -3-2:2020 Anwendung. Conduit = sichere Roehre fuer Inter-Zone-Verkehr.'),
+        q('Welche Sicherheits-Eigenschaft fehlt klassischem Modbus TCP per Default?',
+            ['Authentifizierung und Verschluesselung — beide nicht vorgesehen',
+             'Adressierung',
+             'Funktion-Code-Definition',
+             'TCP-Transport'], 0,
+            'Modbus TCP (1999) ist Klartext, ohne Auth. Modbus Security Spec (2018) ergaenzt TLS und Rolle "Authorization" via X.509.'),
+        q('Welcher Security-Mode ist in OPC UA produktiv zu verwenden?',
+            ['SignAndEncrypt mit modernem Profil (z.B. Aes256_Sha256_RsaPss)',
+             'None',
+             'Sign (ohne Encrypt)',
+             'Compatibility'], 0,
+            'OPC UA Part 2 v1.05 §6.7. None ist nur fuer Discovery erlaubt; Sign ohne Encrypt schuetzt Vertraulichkeit nicht.'),
+        q('Welche PROFINET Security Class fuegt Vertraulichkeit (Verschluesselung) hinzu?',
+            ['Class 3', 'Class 1', 'Class 2', 'Class 0'], 0,
+            'IEC 61784-3-3:2021: Class 1 Robustness, Class 2 Integrity/Authenticity, Class 3 Confidentiality (TLS).'),
+        q('Was war das Hauptziel von Stuxnet (2010)?',
+            ['Sabotage von Siemens-S7-Steuerungen iranischer Uranzentrifugen durch Drehzahlmanipulation',
+             'Erpressung mit Ransomware',
+             'Diebstahl von Geschaeftsgeheimnissen',
+             'Cryptomining auf SPS-CPUs'], 0,
+            'Symantec "W32.Stuxnet Dossier" v1.4 (2011): Sabotage in Natanz, Manipulation Frequenzumrichter (Vacon, Fararo Paya) ueber S7-Rootkit.'),
+        q('Welche Komponente in Stuxnet ermoeglichte das unbemerkte Veraendern der SPS-Logik?',
+            ['Ein S7-Rootkit, das im STEP7-Engineering-Tool den Datenstrom manipulierte (Lese-/Schreib-MITM)',
+             'Eine Phishing-Mail',
+             'Ein Hardware-Implant in der CPU',
+             'Ein TLS-Downgrade-Angriff'], 0,
+            'Falliere/Murchu/Chien: DLL-Hook in STEP7 lieferte beim Auslesen der SPS-Bloecke die Originale zurueck — typischer "ladder logic bombs"-Angriff.'),
+        q('Wer wird als Acteur hinter Industroyer / CRASHOVERRIDE attribuiert?',
+            ['SANDWORM (GRU Unit 74455)',
+             'Lazarus Group (DPRK)',
+             'APT41 (China)',
+             'Equation Group'], 0,
+            'Dragos/ESET 2017 und CISA AA22-110A: Industroyer2 (Apr. 2022) explizit SANDWORM/GRU 74455.'),
+        q('Welche Industrieprotokolle adressiert Industroyer modular?',
+            ['IEC 60870-5-101/104, IEC 61850 (GOOSE/MMS) und OPC DA',
+             'Modbus TCP und CIP',
+             'BACnet und KNX',
+             'PROFINET IRT und EtherCAT'], 0,
+            'Industroyer-Whitepaper Dragos/ESET 2017: 4 Protokoll-Module + Wiper + SIPROTEC-DoS (CVE-2015-5374).'),
+        q('Welche Besonderheit zeichnet TRITON / TRISIS aus?',
+            ['Erste Malware, die ein Safety-Instrumented-System (Triconex 3008) angegriffen hat',
+             'Erste Ransomware in OT',
+             'Erste Air-Gap-uebergreifende Verbreitung',
+             'Erste auf Modbus zugeschnittene Malware'], 0,
+            'FireEye/Mandiant 2017/2018: Modifikation einer SIS-Routine ueber TriStation-1131-Engineering-Software in einer petrochemischen Anlage in Saudi-Arabien.'),
+        q('Welche Schutzmassnahme haette TRITON am wirksamsten verhindert?',
+            ['Schreibschutz-Schluesselschalter "Run/Program" am Triconex auf Run gesetzt',
+             'Aktivierung von HTTP/2',
+             'Wechsel von 100 MBit/s auf Gigabit-Ethernet',
+             'Erhoehung der Polling-Rate'], 0,
+            'Mandiant TRITON Report: physischer Schluesselschalter haette Programmaenderung blockiert. Gehaert zur Standard-OT-Sicherheitspraxis fuer SIS.'),
+        q('Was ist MITRE ATT&CK for ICS v14 (Okt. 2023)?',
+            ['Taxonomie aus 12 Tactics, 96 Techniques und dokumentierten ICS-Threat-Groups',
+             'Ein kommerzielles SIEM-Produkt',
+             'Eine OT-Firewall',
+             'Eine Norm zur Funktionalen Sicherheit'], 0,
+            'MITRE ATT&CK for ICS v14 (Oct. 2023) — referenziert in NIST CSF 2.0 (Feb. 2024) und IEC-62443-Audits.'),
+        q('Welche Massnahme erzwingt Einbahn-Datenfluss aus einer OT-Zone heraus?',
+            ['Eine Data-Diode (unidirectional security gateway)',
+             'Ein Stateful Inspection Firewall',
+             'Ein VPN-Gateway',
+             'Ein DNS-Server'], 0,
+            'NIST SP 800-82r3 §5.4 und IEC 62443-3-3 SR 5.2 RE 1: Data Diodes als physisch unidirektionaler Conduit.'),
+        q('Welche Engineering-Workstation-Massnahme ist Stuxnet-Lesson-Learned?',
+            ['Application Allowlisting und kein Internetzugriff fuer Engineering-Hosts',
+             'Aktivierung von TLS 1.0 zur Kompatibilitaet',
+             'Deaktivierung der Windows-Firewall',
+             'Default-Admin-Konto belassen'], 0,
+            'BSI ICS-Kompendium 2024 M5.4 / NIST SP 800-82r3 §6.2.5: Engineering-Workstations gehaerten, AppLocker/AppControl, kein Internet, separate Domain.'),
+        q('Welche Schutzmassnahme ist gegen passive OT-Anomalie-Erkennung ungeeignet?',
+            ['Aktive Nmap-Scans zur Asset-Discovery',
+             'SPAN-/Mirror-Port mit passiver Sonde',
+             'NetFlow-/IPFIX-Analyse',
+             'Application-Layer-Parsing der Industrie-Protokolle'], 0,
+            'Aktives Scannen kann ICS-Assets crashen; passive Methoden sind Stand der Praxis (Claroty, Nozomi, Dragos).'),
+        q('Was ist der Black-Channel-Ansatz nach IEC 61784-3?',
+            ['Funktionale-Safety-Telegramme (z.B. PROFIsafe) werden ueber unsichere Kommunikation transportiert; Sicherheitsfunktion liegt in den Safety-Endpunkten',
+             'Eine optische Glasfaserverbindung',
+             'Ein verschluesselter Ethernet-Kanal',
+             'Ein dediziertes Frequenzband'], 0,
+            'IEC 61784-3:2021: Safety-Layer mit CRC, Sequenznummer, Timeout liegt in der Anwendung; das Transport-Netz ("Black Channel") muss nur deterministisch genug sein.'),
+        q('Welche Massnahme adressiert FR 5 (Restricted Data Flow) primaer?',
+            ['Zonen-/Conduit-Architektur und gefilterte iDMZ',
+             'TLS-Verschluesselung von OT-Daten',
+             'Multi-Faktor-Authentifizierung am HMI',
+             'Backup-Strategie'], 0,
+            'IEC 62443-3-3:2013 SR 5.x. FR 5 = RDF. iDMZ + Conduits sind Standardumsetzung.'),
+        q('Welche IEC-62443-Norm spezifiziert die Sicherheitsanforderungen an einzelne IACS-Komponenten?',
+            ['IEC 62443-4-2:2019', 'IEC 62443-2-4:2015', 'IEC 62443-3-3:2013', 'IEC 62443-1-1:2009'], 0,
+            'IEC 62443-4-2:2019 spezifiziert die Anforderungen pro SL fuer Software- und Hardware-Komponenten (Embedded Devices, Network Devices, Host Devices, Software Apps).'),
+        q('Welche Rolle hat IEC 62443-2-4:2015+A1:2017?',
+            ['Sicherheitsanforderungen an Service-Provider/Integratoren',
+             'Komponenten-Zertifizierung',
+             'Funktionale Safety',
+             'Krypto-Algorithmen'], 0,
+            'IEC 62443-2-4 adressiert Anforderungen an Solution-Provider (z.B. Inbetriebnahme, Wartungsdienstleister).'),
+        q('Welche Massnahme verhindert Default-Credential-Angriffe in OT am wirksamsten?',
+            ['Asset-Inventory mit Pflicht zur Default-Passwort-Aenderung in Inbetriebnahme',
+             'Aktivierung von DHCP',
+             'Erhoehung der MTU',
+             'IPv6-Migration'], 0,
+            'NIST SP 800-82r3 §6.2.4 / BSI M5.5: Default-Credentials wechseln, individuelle Konten, MFA wo moeglich.'),
+        q('Welche Schwachstelle wurde von Industroyer gegen Siemens SIPROTEC-Schutzrelais ausgenutzt?',
+            ['CVE-2015-5374 — DoS in Ethernet-Stack der SIPROTEC-4-Familie',
+             'CVE-2017-12741 — SHA-1-Bruch',
+             'CVE-2020-15782 — RCE in S7-1500',
+             'CVE-2022-25622 — Modbus-Auth-Bypass'], 0,
+            'CVE-2015-5374: praeparierte Ethernet-Pakete legen das SIPROTEC-Relais lahm. Industroyer enthielt ein dediziertes Modul.'),
+        q('Welcher Standard regelt die Funktionale Sicherheit in der Prozessindustrie?',
+            ['IEC 61511 (mit IEC 61508 als Grundnorm)',
+             'IEC 27001',
+             'ISO 9001',
+             'ISO 22000'], 0,
+            'IEC 61508-1:2010 generisch; IEC 61511-1:2017 fuer Prozessindustrie (SIS).'),
+        q('Welche Konvergenz-Norm verbindet Safety- und Security-Lifecycle?',
+            ['ISA-TR84.00.09:2021 (Cybersecurity Related to the Safety Lifecycle)',
+             'IEC 60870-5-104',
+             'ISO 31000',
+             'IEC 61968'], 0,
+            'ISA-TR84.00.09:2021 (rev.) verzahnt IEC 61511- mit IEC-62443-Lifecycle.'),
+        q('Welcher Punkt ist KEIN Ziel des BSI-ICS-Kompendiums 2024?',
+            ['Festlegung kommerzieller Lizenzbedingungen fuer SCADA-Systeme',
+             'Hilfestellung zur Schutzbedarfsfeststellung',
+             'Massnahmenkatalog M1-M9 fuer ICS',
+             'Mapping zu ISO/IEC 27001:2022'], 0,
+            'BSI-Kompendium ist normativ-neutral; Lizenzen sind nicht Gegenstand.'),
+        q('Welche Eigenschaft hat OPC UA Pub/Sub (Part 14)?',
+            ['Ereignis-orientierte UDP-Multicast/MQTT-Publikation, optional mit Symmetric Key Service fuer Message Security',
+             'Ausschliesslich TCP-basiert',
+             'Erfordert immer X.509-Zertifikate pro Subscriber',
+             'Definiert eine SPS-Programmiersprache'], 0,
+            'OPC UA Part 14 (2018, rev. 2022): Pub/Sub mit UDP/MQTT/AMQP; Security via SKS oder Brokered Security.'),
+        q('Welche Massnahme adressiert den Initial-Access-Vektor "Lieferanten-VPN" in OT-Netzen?',
+            ['Jump-Server in iDMZ mit MFA und Session-Recording',
+             'Direkter VPN-Tunnel auf SPS',
+             'WLAN-Hotspot fuer Servicetechniker',
+             'Public-IP fuer das HMI'], 0,
+            'BSI-Audits 2023/2024: direkter Lieferanten-VPN ist Top-Befund. Sicherheitsstandard: Bastion-/Jump-Host in iDMZ, MFA, Session-Recording (NIST SP 800-82r3 §6.2.6).'),
+        q('Welche ICS-MITRE-ATT&CK-Tactic beschreibt Angriffe, die Steuerprozesse stoeren?',
+            ['Impair Process Control', 'Initial Access', 'Persistence', 'Discovery'], 0,
+            'MITRE ATT&CK for ICS v14: Tactic TA0106 "Impair Process Control" (z.B. Spoof Reporting Message, Modify Parameter).'),
+        q('Welche Massnahme reduziert die Angriffsflaeche eines historians in iDMZ?',
+            ['Pull-Modell aus OT in iDMZ statt push-Verbindungen aus IT in OT',
+             'Direktes Push aus OT ins Internet',
+             'WLAN-basierter Datenabruf',
+             'Telnet-Konsole'], 0,
+            'Industrial-DMZ-Designs (Cisco/Rockwell CPwE 2024): historian replicates one-way; OT-Quelle pullt nicht aus IT.'),
+        q('Welcher Foundational-Requirement-Bereich ist mit "Restricted Data Flow" gemeint?',
+            ['FR 5 — Segmentation, Conduit-Filterung, Daten-Diode',
+             'FR 4 — Data Confidentiality',
+             'FR 6 — Timely Response',
+             'FR 7 — Resource Availability'], 0,
+            'IEC 62443-3-3:2013 SR 5.x; FR 5 = RDF.'),
+        q('Welche Aussage zu DNP3 ist korrekt?',
+            ['DNP3 Secure Authentication v5 ist in IEEE 1815-2012 normiert und addiert HMAC-basierte Auth ohne Verschluesselung',
+             'DNP3 verwendet TLS standardmaessig seit 1995',
+             'DNP3 ist auf Modbus-RTU aufgesetzt',
+             'DNP3 hat keine Standardisierung'], 0,
+            'IEEE 1815-2012: SAv5 setzt HMAC-SHA-256 ein; Vertraulichkeit ueber zusaetzlichen TLS-Wrap (DNP3-SA + TLS).'),
+        q('Welche Eigenschaft hat ein Safety-Schutzschalter "Run/Program/Remote" an Steuerungen wie Triconex / Siemens S7?',
+            ['Mechanischer Schluesselschalter blockiert Programmaenderungen, sofern in Run-Position',
+             'Reine Software-Funktion',
+             'Aktiviert nur das Web-Interface',
+             'Wechselt zwischen IPv4 und IPv6'], 0,
+            'Standard-OT-Praxis (Mandiant TRITON Lessons): Schluesselschalter haerten gegen unautorisierte Logik-Aenderung.'),
+        q('Welche der folgenden Kennziffern ist KEIN Bestandteil von SL-A nach 62443?',
+            ['Anzahl Schichten im Purdue-Modell',
+             'IAC-Anforderungen tatsaechlich erfuellt',
+             'UC-Anforderungen tatsaechlich erfuellt',
+             'TRE-Anforderungen tatsaechlich erfuellt'], 0,
+            'SL-A ist die je FR pro Zone real erreichte Faehigkeit (FR 1-7). Schichtenzahl gehoert nicht dazu.'),
+        q('Welche Empfehlung gibt NIST SP 800-82r3 zu Patch-Management in OT?',
+            ['Risikobasierte Priorisierung mit dokumentierter Test- und Wartungsfenster-Planung; "patch when feasible" mit Compensating Controls',
+             '24/7-Auto-Update wie in Office-IT',
+             'Komplettverzicht auf Patches',
+             'Patches nur an Wochenenden ausschliesslich automatisch'], 0,
+            'NIST SP 800-82r3 §6.2.10: Patches risikobasiert, in Wartungsfenster, mit Re-Validation und Compensating Controls bei Patch-Verzug.'),
+        q('Welche Aussage zu Engineering-Workstations ist nach NIST SP 800-82r3 korrekt?',
+            ['Sie sind hochwertige Ziele und gehoeren in eine separate, gehaertete OT-Domain ohne Internetzugang',
+             'Sie duerfen direkt im Office-LAN stehen',
+             'Sie benoetigen keine Endpoint-Protection',
+             'Sie sind als Wegwerfgeraete gedacht'], 0,
+            'NIST SP 800-82r3 §6.2.5; BSI M5.4. Engineering-Workstation ist Schluessel zum Tier 1 (z.B. Stuxnet, TRITON, BlackEnergy).'),
+        q('Welche Norm regelt Zertifizierung von OT-Komponenten ueber das ISASecure-Programm?',
+            ['IEC 62443-4-2 in Verbindung mit 62443-4-1',
+             'ISO 9001',
+             'IEC 60601',
+             'ISO 14001'], 0,
+            'ISASecure Component Security Assurance (CSA) basiert auf IEC 62443-4-1 (Prozess) + 62443-4-2 (Komponenten-Anforderungen).'),
+        q('Welche Eigenschaft hat IEC 61850 GOOSE?',
+            ['Ethernet-Multicast mit harter Echtzeitanforderung (typisch &lt; 4 ms), kein TCP, optional R-GOOSE mit Authentifizierung',
+             'Punkt-zu-Punkt seriell mit RS-485',
+             'HTTPS-basiert',
+             'Modbus-RTU-Kompatibel'], 0,
+            'IEC 61850-8-1:2020: GOOSE auf Ethernet-Layer 2, Multicast. Authentifizierung ueber HMAC nach IEC 62351-6 (R-GOOSE).'),
+        q('Welche Norm-Familie schuetzt IEC-61850-Kommunikation auf Anwendungsebene?',
+            ['IEC 62351 (insbesondere -3 fuer TLS, -4 fuer MMS, -6 fuer GOOSE/SV)',
+             'IEC 60870-5-104',
+             'ISO 27001',
+             'IEC 61131-3'], 0,
+            'IEC 62351-Serie deckt Authentizitaet/Vertraulichkeit fuer EVU-Protokolle ab.'),
+        q('Welche der folgenden Aussagen zu CIP Security ist korrekt?',
+            ['Es ergaenzt EtherNet/IP um TLS, DTLS, X.509-Auth und Pull-Modell-Konfiguration; spezifiziert in CIP Volume 8',
+             'Es ersetzt Modbus',
+             'Es ist ein Hardware-VPN',
+             'Es ist nur fuer Allen-Bradley verfuegbar'], 0,
+            'CIP Volume 8 v1.13 (2024). CIP Security ist herstelleruebergreifend (ODVA) und kombiniert Endpoint Identity + Data Integrity + Confidentiality.'),
+        q('Welche Massnahme erfuellt FR 7 (Resource Availability) am direktesten?',
+            ['DoS-Resistenz, redundante Steuerungen und kontrollierte Ressourcen-Limits',
+             'AES-Verschluesselung der Engineering-Daten',
+             'Multi-Faktor-Authentifizierung',
+             'Logging der HMI-Zugriffe'], 0,
+            'IEC 62443-3-3:2013 SR 7.x: u.a. SR 7.1 DoS-Schutz, SR 7.4 Wiederherstellbarkeit, SR 7.5 Notbetrieb.'),
+        q('Welche Anforderung der EU-NIS2-Richtlinie ist fuer KRITIS-OT-Betreiber besonders relevant?',
+            ['Meldepflichten fuer Sicherheitsvorfaelle innerhalb von 24 h Frueh- und 72 h Folgemeldung',
+             'Pflicht zur Open-Source-Veroeffentlichung der Steuerungslogik',
+             'Verbot von Cloud-Diensten',
+             'Pflicht zur Zertifizierung nach ISO 9001'], 0,
+            'NIS2-Richtlinie (EU 2022/2555) Art. 23: 24 h Early Warning, 72 h Incident Notification, 1 Monat Final Report.'),
+        q('Welcher Begriff beschreibt die getrennte Engineering-Toolchain mit "Whitelist" zugelassener Programme?',
+            ['Application Allowlisting (frueher: Whitelisting)',
+             'AV-Signaturen',
+             'Cloud-EDR',
+             'NAT-Traversal'], 0,
+            'NIST SP 800-167; BSI M5.4. Allowlisting (z.B. Trellix Application Control, Microsoft AppLocker, Carbon Black) ist OT-Standard fuer HMI/EWS.'),
+        q('Welcher Begriff beschreibt die gemeinsame Pflege von Schutzbedarfen Safety+Security?',
+            ['Safety-Security-Co-Engineering nach ISA-TR84.00.09 / IEC 63069',
+             'CIA-Triade',
+             'AAA-Modell',
+             'Bell-LaPadula-Modell'], 0,
+            'IEC TR 63069:2019 und ISA-TR84.00.09:2021 verzahnen Safety- und Security-Lifecycle.')
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_cybersec',
         code: 'MA-ET CyberSec',
@@ -771,29 +1245,8 @@
                 id: 'industrial',
                 title: 'Kapitel 3 — Industrielle Netzsicherheit (OT / IEC 62443)',
                 summary: 'OT vs. IT, Bedrohungsmodelle in der Automatisierung, Zonen- und Conduit-Modell, IEC 62443-3-3 System-Anforderungen, Anlagen-Hardening.',
-                pages: [
-                    placeholderPage('OT vs. IT — Sicherheitsanforderungen', [
-                        'Verfuegbarkeit als Top-Schutzziel in OT',
-                        'Echtzeit-Anforderungen, Patch-Restriktionen, Lebenszyklus 20+ Jahre',
-                        'Purdue-Modell und Zonen 0-5'
-                    ]),
-                    placeholderPage('IEC 62443-Serie im Ueberblick', [
-                        'Teile 1 (Begriffe), 2 (Programme), 3 (System), 4 (Komponenten)',
-                        'Security Levels SL 1-4, Foundational Requirements FR 1-7',
-                        'Zonen-und-Conduit-Modell nach IEC 62443-3-2'
-                    ]),
-                    placeholderPage('Protokolle und Hardening', [
-                        'Modbus, PROFINET, OPC UA — Sicherheits-Optionen',
-                        'Network Segmentation, Data Diodes, Industrial Firewalls',
-                        'Anomalie-Erkennung in OT-Netzen (Claroty, Nozomi, Dragos)'
-                    ]),
-                    placeholderPage('Vorfaelle und Lessons Learned', [
-                        'Stuxnet (2010): SCADA + Zero-Day + USB-Verbreitung',
-                        'Industroyer/CRASHOVERRIDE (2016), Triton (2017), Industroyer2 (2022)',
-                        'Konsequenzen fuer Anlagen-Architektur und Incident Response'
-                    ])
-                ],
-                quiz: placeholderQuiz('Industrielle Netzsicherheit')
+                pages: [PAGE_OT_VS_IT, PAGE_IEC62443, PAGE_OT_PROTOCOLS, PAGE_OT_INCIDENTS],
+                quiz: QUIZ_OT
             },
             {
                 id: 'sse',

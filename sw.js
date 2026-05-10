@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v26-cybersec-emb';
+const CACHE_VERSION = 'smartineer-v27-cybersec-ot';
 const APP_SHELL = [
     './',
     './index.html',
