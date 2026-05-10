@@ -34,10 +34,10 @@
         users: {
             // Admin sieht alle Schulungen, kann Kategorien global ein/ausblenden
             // und User-Anfragen aus dem Store sehen.
-            'admin': { pass: 'change-me-admin-2026', role: 'admin' },
+            'admin': { pass: 'admin', role: 'admin' },
 
             // Demo-User (nur Lese-Zugriff auf Schulungen).
-            'demo':  { pass: 'demo', role: 'user' }
+            'demo':  { pass: 'user', role: 'user' }
         },
         sessionDays: 30
     };
