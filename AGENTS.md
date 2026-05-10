@@ -642,28 +642,30 @@ Smartineer wird in **mobilen Agent-Sessions** weiterentwickelt. Damit jede Sessi
 
 **Pflicht-Workflow fuer jede Session (auch mobil):**
 
-1. **Sichten.** Zu Beginn jeder Session zuerst `WORKPACKAGES.md` lesen. Reihenfolge fuer die Auswahl des aktuellen Pakets:
-   - Wenn der User explizit ein Paket nennt (z.B. "P-CYBERSEC-05") → genau dieses bearbeiten.
-   - Sonst das Paket aus Abschnitt **E) Naechste empfohlene Session** uebernehmen.
-   - Sonst das erste Paket mit `status: ready` (in der Reihenfolge A → B → C → D).
-2. **Locken.** Status des gewaehlten Pakets in `WORKPACKAGES.md` auf `in-progress` setzen, bevor inhaltlich gearbeitet wird. Maximal **ein** Paket gleichzeitig in-progress.
-3. **Bearbeiten.** Paket gemaess seiner Akzeptanzkriterien abschliessen (siehe AGENTS §0, §8, §18.4–18.6 fuer Master-Kapitel; §9 fuer Aufgabenkategorien).
-4. **Abschliessen.** Status auf `done (v<CACHE_VERSION>, Sitzung YYYY-MM-DD)` setzen. Falls Paket nur teilweise erledigt: Status auf `in-progress` lassen und im Eintrag den genauen Stand vermerken (z.B. "Lehrseiten fertig, Quiz 30/50").
-5. **Naechsten Vorschlag setzen.** Abschnitt **E) Naechste empfohlene Session** in `WORKPACKAGES.md` mit dem konkret naechsten Paket aktualisieren (mit Begruendung in einem Satz).
-6. **Status-Report.** Im finalen Status-Report (AGENTS §0/§0.1) das gerade erledigte Paket unter DONE und den naechsten Vorschlag explizit nennen.
+1. **Sichten.** Zu Beginn jeder Session zuerst `WORKPACKAGES.md` lesen und einen **Session-Batch** bestimmen. Der Batch enthaelt die optimale Anzahl an Paketen, die in der verfuegbaren Session realistisch sauber erledigt werden koennen. Ziel ist volle Session-Ausnutzung, nicht kuenstlich ein Paket pro Session.
+  - Wenn der User explizit ein oder mehrere Pakete nennt (z.B. "P-CYBERSEC-05" oder "P-AUTO-05 und P-AUTO-06") → diese Pakete bilden den Start des Batches. Weitere passende Pakete duerfen ergaenzt werden, sofern der User nicht ausdruecklich "nur" dieses Paket verlangt.
+  - Sonst das Paket bzw. die Paketgruppe aus Abschnitt **E) Naechste empfohlene Session** als Batch-Anker uebernehmen.
+  - Sonst das erste Paket mit `status: ready` (in der Reihenfolge A → B → C → D) als Batch-Anker waehlen.
+  - Danach kompatible `ready`-Pakete ergaenzen, bis der Batch eine sinnvolle Session-Groesse erreicht: gleicher Themenblock, gleiche Datei, gemeinsamer Validator-/Cache-Bump, Blocker-Abbau, Quick-Wins oder fachlich eng zusammenhaengende Top-ups.
+  - Batch nicht erweitern, wenn das naechste Paket eigene Quellenrecherche, eigenes didaktisches Lehrseitenpaket oder ein separates Validierungsrisiko braucht und dadurch Qualitaet, wissenschaftliche Korrektheit oder Status-Report leiden wuerden.
+2. **Locken.** Status aller Pakete im Session-Batch in `WORKPACKAGES.md` auf `in-progress` setzen, bevor inhaltlich gearbeitet wird. Pakete, die am Ende doch nicht begonnen wurden, muessen im Abschluss-Update wieder auf `ready` oder `blocked` zurueckgestellt und im Status-Report erwaehnt werden.
+3. **Bearbeiten.** Pakete gemaess ihren Akzeptanzkriterien abschliessen (siehe AGENTS §0, §8, §18.4–18.6 fuer Master-Kapitel; §9 fuer Aufgabenkategorien). Innerhalb des Batches wird sequenziell gearbeitet; nach jedem fertigen Paket wird entschieden, ob noch genug Session-Budget fuer das naechste Batch-Paket inklusive Validierung bleibt.
+4. **Abschliessen.** Erledigte Pakete auf `done (v<CACHE_VERSION>, Sitzung YYYY-MM-DD)` setzen. Teilweise erledigte Pakete bleiben auf `in-progress` und erhalten im Eintrag den genauen Stand (z.B. "Lehrseiten fertig, Quiz 30/50"). Nicht begonnene Batch-Pakete werden nicht als `in-progress` liegen gelassen.
+5. **Naechsten Vorschlag setzen.** Abschnitt **E) Naechste empfohlene Session** in `WORKPACKAGES.md` mit dem konkret naechsten Paket oder Batch aktualisieren (mit Begruendung in einem Satz). Der Vorschlag soll die verbleibenden Blocker und den groessten Nutzen fuer die naechste Session priorisieren.
+6. **Status-Report.** Im finalen Status-Report (AGENTS §0/§0.1) alle erledigten, teilweise erledigten und bewusst nicht begonnenen Batch-Pakete nennen sowie den naechsten Paket-/Batch-Vorschlag explizit auffuehren.
 
 **Pflege der Pakete:**
 
 - **Neue Anforderungen** (User-Wunsch, neuer Bug, neue Schulung, neue Kategorie) werden vom Agent **selbst** als neue P-...-Eintraege in `WORKPACKAGES.md` aufgenommen. Naming: `P-<BEREICH>-<KENNUNG>` (z.B. `P-UI-DARKMODE-FIX`, `P-CAT-NEW-MECHATRONIK`).
-- **Pakete aufteilen**, wenn der Aufwand das Sitzungsbudget eines Master-Kapitels (4 Lehrseiten + 50 MCQ) sprengen wuerde. Suffix `-A`/`-B`/...
+- **Pakete aufteilen**, wenn der Aufwand ein sinnvolles Batch-Budget sprengen wuerde (z.B. mehr als ein Master-Kapitel mit 4 Lehrseiten + 50 MCQ oder ein grosser Quellen-Audit-Block). Suffix `-A`/`-B`/...
 - **Pakete blockieren** (z.B. abhaengig von vorherigem Paket): Status `blocked: <Verweis>`. Auflocken erfolgt automatisch, sobald das Vorpaket auf `done` gesetzt wird.
 - **Roll-Forward (AGENTS §0.1):** Das Statusfeld in `WORKPACKAGES.md` ist die einzige Wahrheitsquelle fuer den Roadmap-Zustand. Status-Report bezieht sich auf die Eintraege dort.
 - **Cache-Version** bei jeder Paket-Erledigung, die App-Shell oder Daten-Skripte aendert, in `sw.js` bumpen (siehe §14a).
 
 **Konvention fuer mobile Agent-Sessions:**
 
-- Mobile-Trigger: User schickt einen kurzen Prompt wie "neue Session bitte" oder nennt direkt ein Paket-Kuerzel. Der Agent sichtet `WORKPACKAGES.md`, waehlt deterministisch (kein Raten), bestaetigt das gewaehlte Paket im ersten Output-Satz und liefert am Ende den Roll-Forward + naechsten Vorschlag.
-- Keine Session ohne Update von `WORKPACKAGES.md`: auch eine reine Bugfix-Session muss mindestens ein Done-Eintrag und ggf. einen neuen P-UI-... Eintrag setzen.
+- Mobile-Trigger: User schickt einen kurzen Prompt wie "neue Session bitte" oder nennt direkt ein Paket-Kuerzel. Der Agent sichtet `WORKPACKAGES.md`, waehlt deterministisch einen Session-Batch (kein Raten), bestaetigt den Batch im ersten Output-Satz und liefert am Ende Roll-Forward + naechsten Paket-/Batch-Vorschlag.
+- Keine Session ohne Update von `WORKPACKAGES.md`: auch eine reine Bugfix-Session muss mindestens einen Done-Eintrag, einen aktualisierten Batch-Stand und ggf. einen neuen P-UI-... Eintrag setzen.
 
 ---
 
