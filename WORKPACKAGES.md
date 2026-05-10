@@ -70,7 +70,7 @@ Pro Paket: ≥4 Lehrseiten (AGENTS §18.6) + ≥50 quellenbelegte MCQ (AGENTS §
 - **Akzeptanz:** 20 neue quellenbelegte MCQ anhaengen (30 → 50), `correct`-Verteilung ausbalancieren, keine Umordnung bestehender Quiz-Items, CACHE_VERSION bumpen.
 
 ### P-CYBERSEC-07 — Security Architecture, Zero Trust und Cloud/Kubernetes-Security
-- **Status:** ready
+- **Status:** in-progress (Sitzung 2026-05-10)
 - **Datei:** `js/data/schulung_master_et_cybersec.js`
 - **Schwerpunkte:** NIST SP 800-207 Zero Trust, Cloud Shared Responsibility, IAM/PAM, Kubernetes Threat Model, Container Image Supply Chain, Secrets-Management, CSPM/CWPP, Network Segmentation.
 - **Akzeptanz:** Neues Kapitel mit ≥4 Lehrseiten + ≥50 quellenbelegten MCQ; `index`/SW nur anpassen falls neue Datei noetig, sonst CACHE_VERSION bumpen.
