@@ -26,7 +26,7 @@ const SRS_INTERVALS_DAYS = [1, 3, 7, 16, 35, 70, 140]; // SM-2 lite, gestaffelt
 // DevTools sichtbar. Geeignet nur fuer leichten Zugang-Schutz im Bereich der
 // Schulungen, nicht fuer regulatorisch sensible Inhalte.
 const AUTH_KEY = 'smartineer_auth_v1'; // { user, role, since (ISO), expires (ISO) }
-const AUTH_TEMPORARILY_DISABLED = true; // TODO: P-UI-LOGIN-REACTIVATE — Auth-Gate wieder aktivieren.
+const AUTH_TEMPORARILY_DISABLED = false; // P-UI-LOGIN-REACTIVATE (v43): Auth-Gate wieder aktiv.
 const VISIBLE_CATS_KEY = 'smartineer_visible_categories_v1'; // { [catId]: false } — Default: alle sichtbar
 const ADMIN_GLOBAL_KEY = 'smartineer_admin_global_v1'; // reserviert fuer kuenftige globale Settings
 
@@ -966,6 +966,27 @@ function Cheatsheet({ data, order }) {
     const [tab, setTab] = useState('formulas');
     const ref = useKaTeX([tab, order.length]);
 
+    // P-UI-KATEX-DETAILS-TOGGLE: native <details>-Elemente sind bei Erst-Render
+    // geschlossen (display:none auf Inhalt). KaTeX measure-Pfade liefern dann
+    // gelegentlich Layout-Fehler. Beim Oeffnen explizit auf dem geoeffneten
+    // Element nochmal rendern. Idempotent dank `data-katex-rendered`-Flag.
+    const onDetailsToggle = useCallback((e) => {
+        const el = e.currentTarget;
+        if (!el.open) return;
+        if (el.dataset.katexRendered === '1') return;
+        if (!window.renderMathInElement) return;
+        try {
+            window.renderMathInElement(el, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false }
+                ],
+                throwOnError: false
+            });
+            el.dataset.katexRendered = '1';
+        } catch (err) { /* ignore */ }
+    }, []);
+
     return (
         <section className="view-fade" ref={ref}>
             <div className="text-center max-w-3xl mx-auto mb-8">
@@ -995,7 +1016,7 @@ function Cheatsheet({ data, order }) {
                     {order.map(k => {
                         const cat = data[k]; if (!cat) return null;
                         return (
-                            <details key={k} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            <details key={k} onToggle={onDetailsToggle} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                                 <summary className="cursor-pointer select-none px-6 py-4 font-bold text-slate-800 hover:bg-slate-50 flex items-center justify-between">
                                     <span>{cat.name}</span>
                                     <span className="text-xs text-slate-500 font-normal">Formelsammlung</span>
@@ -1015,14 +1036,14 @@ function Cheatsheet({ data, order }) {
                         const cat = data[k]; if (!cat) return null;
                         const totalTasks = cat.levels.reduce((s, t) => s + t.length, 0);
                         return (
-                            <details key={k} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            <details key={k} onToggle={onDetailsToggle} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                                 <summary className="cursor-pointer select-none px-6 py-4 font-bold text-slate-800 hover:bg-slate-50 flex items-center justify-between">
                                     <span>{cat.name} — Isolierte Musterlösungen</span>
                                     <span className="text-xs text-slate-500 font-normal">{totalTasks} Aufgaben</span>
                                 </summary>
                                 <div className="px-6 pb-6 pt-2">
                                     {cat.levels.map((tasks, lvl) => tasks.length === 0 ? null : (
-                                        <details key={lvl} className="mb-3">
+                                        <details key={lvl} onToggle={onDetailsToggle} className="mb-3">
                                             <summary className="cursor-pointer font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 px-3 py-2 rounded">
                                                 Level {lvl + 1} — {tasks.length} Aufgaben
                                             </summary>

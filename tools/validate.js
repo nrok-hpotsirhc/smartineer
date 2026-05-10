@@ -429,7 +429,9 @@ function validateAppShellSync(loadedFiles) {
     // sw.js / APP_SHELL muss alle Daten-Skripte enthalten.
     const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
     for (const rel of loadedFiles) {
-        const needle = `./${rel}`;
+        // sw.js verwendet ausschliesslich Forward-Slashes (Web-URL-Konvention).
+        // Auf Windows liefert path.join Backslashes, daher normalisieren.
+        const needle = `./${rel.replace(/\\/g, '/')}`;
         if (!sw.includes(needle)) {
             err('sw.js', 'APP_SHELL', `Eintrag "${needle}" fehlt — Offline-Cache wuerde diese Datei nicht enthalten (AGENTS §14a).`);
         }
