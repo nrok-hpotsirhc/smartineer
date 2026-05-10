@@ -274,11 +274,13 @@ Folgende DOM-IDs/Klassen sind Vertrag zwischen `index.html`, `css/styles.css` un
 
 ## 11. Persistenz / Migrationen
 
-- Storage-Key: `wissen_reloaded_progress_v1`.
-- Format: `{ "<catId>|<level>|<idx>": 1, ... }`.
-- **Wenn sich die Reihenfolge (`idx`) bestehender Aufgaben ändert**, kann der Lernfortschritt eines Users falschen Aufgaben zugeordnet werden. Daher:
-  - **Neue Aufgaben bevorzugt anhängen**, nicht mittendrin einsortieren.
-  - Wenn eine inhaltliche Umsortierung **doch** nötig ist, Storage-Key bumpen (`_v2`) und in Release-Notes erwähnen.
+- Ingenieurs-Track: Storage-Key `wissen_reloaded_progress_v1`, Format `{ "<catId>|<level>|<idx>": 1, ... }`. Identitaet ueber `(catId, level, idx)`.
+- Schulungen-Track: Storage-Key `smartineer_schulungen_v2` (vorher `_v1`; gleiche Form, Versions-Bump zur Symmetrie mit SRS). v1 bleibt nach der Migration als Fallback im Storage.
+- Spaced Repetition: Storage-Key `smartineer_srs_v2`. **Schluessel-Identitaet ist die stable QID (content-Hash), nicht der `idx`** — siehe §18.3 / P-ARCH-STABLE-QID. Damit ueberleben Karteikarten beliebige Quiz-Item-Umsortierungen innerhalb eines Kapitels. Migration v1 -> v2 laeuft genau einmal beim App-Start; v1 bleibt unangetastet.
+- **Wenn sich die Reihenfolge (`idx`) bestehender Aufgaben aendert**, kann der Lernfortschritt eines Users falschen Aufgaben zugeordnet werden — gilt fuer alle Tracks, deren Identitaet noch ueber `idx` laeuft (Ingenieurs-Track, Schueler-Pools). Daher:
+  - **Neue Aufgaben bevorzugt anhaengen**, nicht mittendrin einsortieren.
+  - Wenn eine inhaltliche Umsortierung **doch** noetig ist, Storage-Key bumpen (`_vN`) und in Release-Notes erwaehnen.
+  - Schulungen-Quiz sind seit Stable-QID **gegen Umsortierung resistent**, solange `q` + Antwort-Felder identisch bleiben — Aenderungen am Frage-Stem oder an der korrekten Antwort erzeugen einen neuen `qid` und damit eine neue Karteikarte.
 - Niemals personenbezogene Daten in `localStorage` schreiben.
 
 ---
@@ -504,8 +506,8 @@ Quiz-Items duerfen zusaetzlich die optionalen Lernplattform-Metadaten `lo`, `blo
 
 ### 18.3 Persistenz
 
-- Eigener Storage-Key `smartineer_schulungen_v1`. **Niemals** an `wissen_reloaded_progress_v1` oder `smartineer_schueler_*` mischen.
-- Spaced-Repetition-Karteikarten leben separat in `smartineer_srs_v1` mit Schema `{ [trainingId]: { [chapterId]: { [quizIdx]: { ease, interval, due (YYYY-MM-DD), reps, lapses, last } } } }`. SM-2 lite: bei richtiger Antwort Intervall aus `[1,3,7,16,35,70,140]` (Tage) je nach `reps`; bei falscher Antwort `reps=0`, Intervall 1 Tag, `ease -= 0.2`. Item-Identitaet ueber den 0-basierten Index in `chapter.quiz` — Quiz-Items deshalb nur **anhaengen**, nicht umsortieren (sonst Karten-Drift, vgl. §11).
+- Eigener Storage-Key `smartineer_schulungen_v2` (vorher `_v1`; Versions-Bump fuer Symmetrie mit SRS, Shape unveraendert). **Niemals** an `wissen_reloaded_progress_v1` oder `smartineer_schueler_*` mischen.
+- Spaced-Repetition-Karteikarten leben separat in `smartineer_srs_v2` mit Schema `{ [trainingId]: { [chapterId]: { [qid]: { ease, interval, due (YYYY-MM-DD), reps, lapses, last } } } }`. SM-2 lite: bei richtiger Antwort Intervall aus `[1,3,7,16,35,70,140]` (Tage) je nach `reps`; bei falscher Antwort `reps=0`, Intervall 1 Tag, `ease -= 0.2`. Item-Identitaet ist seit P-ARCH-STABLE-QID die **stable QID** (FNV-1a-Hash ueber Frage-Stem + antwortdefinierende Felder, siehe `stableQid()` in `js/app.jsx`). Quiz-Items duerfen damit umsortiert werden, ohne den Lernstand zu verlieren — aber Aenderungen am Frage-Stem oder am korrekten Antwort-Text erzeugen einen neuen `qid` und damit eine neue Karte. Migration v1 -> v2 (idx -> qid) laeuft einmalig beim App-Start; v1 (`smartineer_srs_v1`) bleibt als Fallback liegen.
 - Format: `{ [trainingId]: { [chapterId]: { lastPage: int, quizBest: { score, total, date }, quizLast: {...} } } }`.
 - Bei Schema-Änderung: Key auf `_v2` bumpen.
 - Reihenfolge der Kapitel/Seiten **nicht** nachträglich ändern (Lesestand-Drift). Lieber neue Seiten anhängen.
@@ -587,8 +589,8 @@ Da der Fortschritt rein in `localStorage` lebt und damit gerätegebunden ist, bi
   "exportedAt": "2026-05-08T12:34:56.000Z",
   "data": {
     "wissen_reloaded_progress_v1": { "<catId>|<level>|<idx>": 1, ... },
-    "smartineer_schulungen_v1": { "<trainingId>": { "<chapterId>": { "lastPage": 0, "quizBest": { "score": 8, "total": 10, "date": "..." } } } },
-    "smartineer_srs_v1": { "<trainingId>": { "<chapterId>": { "<quizIdx>": { "ease": 2.5, "interval": 7, "due": "2026-05-16", "reps": 3, "lapses": 0, "last": "2026-05-09" } } } }
+    "smartineer_schulungen_v2": { "<trainingId>": { "<chapterId>": { "lastPage": 0, "quizBest": { "score": 8, "total": 10, "date": "..." } } } },
+    "smartineer_srs_v2": { "<trainingId>": { "<chapterId>": { "<qid>": { "ease": 2.5, "interval": 7, "due": "2026-05-16", "reps": 3, "lapses": 0, "last": "2026-05-09" } } } }
   }
 }
 ```
@@ -674,7 +676,8 @@ Smartineer haelt drei getrennte Tracks (Ingenieurs-Training §5, Schulungen §18
 
 ```js
 {
-    id,           // Stable-Best-Effort-Referenz; die richtige stabile QID kommt mit P-ARCH-STABLE-QID
+    id,           // Best-Effort-Referenz aus dem Kontext (kind/catId/level/idx). Fuer persistente Item-Identitaet die separate `qid` verwenden.
+    qid,          // Stable QID — FNV-1a-32-Hash ueber Frage-Stem + antwortdefinierende Felder (P-ARCH-STABLE-QID, AGENTS §11/§18.3).
     type,         // 'training' | 'mcq' | 'sequence' | 'cloze' | 'schueler'
     stem,         // Frage-/Aufgabentext als HTML (entspricht Legacy `q`)
     h, s,         // Training: Hinweis / Musterloesung (HTML)
@@ -763,13 +766,13 @@ const item = toItem(drillItem, { kind: 'schueler', classId, subject, idx });
 - **`lo`-IDs** stammen aus `docs/CURRICULUM-MATRIX.md` (Modulhandbuch). Wenn die ID dort noch nicht existiert, dort zuerst eintragen.
 - **`source` ist Pflicht** in jeder Aufgabe, deren `lo` produktiv ist (Pruefungsmodus zeigt sie an). Bis dahin: jede neue Frage kriegt Quelle, sobald sie hinzugefuegt wird (siehe §8 / §18.5).
 - **Keine Reihenfolge-Aenderung** beim Hinzufuegen von Metadaten (gleiche Regel wie §11 / §18.3): Felder *am bestehenden Objekt* ergaenzen, nicht das Objekt im Array verschieben.
-- **Stable-QID** (`P-ARCH-STABLE-QID`) ersetzt spaeter die Hilfs-`id` aus `toItem` durch einen content-Hash. Bis dahin nicht auf das `id`-Format verlassen — es kann in zukuenftigen Sitzungen angepasst werden.
+- **Stable-QID** (`P-ARCH-STABLE-QID`) liefert seit v37 die kanonische `qid` aus `toItem` als FNV-1a-32-Hash (8 Hex). Die Hilfs-`id` bleibt als Kontext-Referenz (Anzeige/Routing); fuer persistente Speicherung (z.B. SRS-Karten) immer `qid` nutzen.
 
 ### 22.5 Anti-Pattern
 
 - Adapter umgehen und gleichzeitig das Datenformat aendern — fuehrt zu Doppelmigration. Adapter ist die einzige Brücke.
 - Pflichtfelder eines Tracks (z.B. `q`/`h`/`s` im Training, `correct` in MCQ) durch Adapter-Felder ersetzen. Legacy-Felder bleiben primaer.
 - Metadaten in `_legacy` schreiben — `_legacy` ist ein read-only Verweis auf das Originalobjekt, kein Schreibziel.
-- `id` aus `toItem` als persistenten Schluessel in `localStorage` verwenden — der Wert ist Best-Effort und wird mit `P-ARCH-STABLE-QID` neu definiert.
+- `id` aus `toItem` als persistenten Schluessel in `localStorage` verwenden — der Wert ist Best-Effort und kontextabhaengig. Fuer persistente Identitaet die `qid` aus `toItem` nutzen (oder direkt `stableQid(legacy)`).
 
 

@@ -7,12 +7,18 @@ const { useState, useEffect, useMemo, useRef, useCallback } = React;
 const STORAGE_KEY = 'wissen_reloaded_progress_v1';
 const INSTALL_DISMISS_KEY = 'smartineer_install_dismissed_v1';
 const THEME_KEY = 'smartineer_theme_v1'; // 'dark' | 'light' (Default: 'dark')
-const SCHULUNGEN_KEY = 'smartineer_schulungen_v1'; // { [trainingId]: { [chapterId]: { lastPage, quizBest } } }
+// Schulungen-State (Stand v2): wie v1, mit Versions-Bump fuer Stable-QID-Symmetrie.
+// Shape unveraendert: { [trainingId]: { [chapterId]: { lastPage, quizBest, quizLast } } }.
+const SCHULUNGEN_KEY = 'smartineer_schulungen_v2';
+const SCHULUNGEN_KEY_V1 = 'smartineer_schulungen_v1';
 // Spaced Repetition (SM-2 lite): pro Quiz-Item Karteikarte mit Faelligkeit.
-// Schema: { [trainingId]: { [chapterId]: { [quizIndex]: { ease, interval, due, reps, lapses, last } } } }
-// Kein PII. Item-Identitaet ueber den 0-basierten Index in chapter.quiz — bei Umsortierung
-// werden Karten implizit verschoben (siehe AGENTS.md §11). Daher Quiz-Items immer anhaengen.
-const SRS_KEY = 'smartineer_srs_v1';
+// Schema v2 (stable QID): { [trainingId]: { [chapterId]: { [qid]: { ease, interval, due, reps, lapses, last } } } }.
+// `qid` ist ein content-Hash (stableQid()) ueber Frage + antwortdefinierende Felder
+// (siehe AGENTS.md §11/§18.3). Damit verlieren Quiz-Item-Umsortierungen keinen Lernstand mehr
+// — Karteikarten haengen am Inhalt, nicht am 0-basierten Index. Beim ersten App-Start nach
+// dem Schema-Bump wird das v1-Format einmalig nach v2 migriert (siehe migrateLegacyStorage()).
+const SRS_KEY = 'smartineer_srs_v2';
+const SRS_KEY_V1 = 'smartineer_srs_v1';
 const SRS_INTERVALS_DAYS = [1, 3, 7, 16, 35, 70, 140]; // SM-2 lite, gestaffelt
 // ----- Optionen / Auth (Schulungen-Bereich, FRONTEND-ONLY UX-CONVENIENCE) -----
 // WICHTIG: Diese Auth ist KEIN echter Schutz — Credentials liegen client-seitig
@@ -64,6 +70,44 @@ function downloadProgressFile() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+// Migriert einen aus einer aelteren App-Version exportierten `data`-Block
+// (z.B. mit `smartineer_srs_v1` / `smartineer_schulungen_v1`) auf das aktuelle
+// v2-Schema. Aufgerufen vor dem eigentlichen Merge — die nachgelagerte Logik
+// in mergeProgressKey() arbeitet dann nur mit v2-Keys. Bestehende v2-Eintraege
+// im Import gewinnen Vorrang vor v1-Spiegelungen.
+function upgradeImportedData(data) {
+    if (!data || typeof data !== 'object') return data || {};
+    const out = { ...data };
+    // Schulungen v1 -> v2: gleiche Form, nur Key.
+    if (out[SCHULUNGEN_KEY_V1] && out[SCHULUNGEN_KEY] == null) {
+        out[SCHULUNGEN_KEY] = out[SCHULUNGEN_KEY_V1];
+    }
+    // SRS v1 -> v2: idx-Schluessel auf qid-Schluessel umrechnen.
+    if (out[SRS_KEY_V1] && out[SRS_KEY] == null) {
+        const v1 = out[SRS_KEY_V1] || {};
+        const v2 = {};
+        const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
+        trainings.forEach(t => {
+            const tState = v1[t.id]; if (!tState) return;
+            const tOut = {};
+            (t.chapters || []).forEach(ch => {
+                const cState = tState[ch.id]; if (!cState) return;
+                const cOut = {};
+                (ch.quiz || []).forEach((item, idx) => {
+                    const card = cState[idx]; if (!card) return;
+                    const qid = stableQid(item); if (!qid) return;
+                    const prev = cOut[qid];
+                    if (!prev || (card.last || '') >= (prev.last || '')) cOut[qid] = card;
+                });
+                if (Object.keys(cOut).length) tOut[ch.id] = cOut;
+            });
+            if (Object.keys(tOut).length) v2[t.id] = tOut;
+        });
+        out[SRS_KEY] = v2;
+    }
+    return out;
+}
+
 function applyImportedPayload(payload, mode) {
     if (!payload || payload.format !== EXPORT_FORMAT) {
         throw new Error('Datei ist keine Smartineer-Fortschrittsdatei.');
@@ -71,7 +115,7 @@ function applyImportedPayload(payload, mode) {
     if (typeof payload.version !== 'number' || payload.version > EXPORT_VERSION) {
         throw new Error('Dateiversion wird nicht unterstützt (' + payload.version + ').');
     }
-    const incoming = payload.data || {};
+    const incoming = upgradeImportedData(payload.data || {});
     EXPORT_KEYS.forEach((k) => {
         const next = incoming[k];
         if (next === undefined) return;
@@ -271,6 +315,114 @@ function categoryStats(cat, isSolved) {
     return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
 }
 
+// ---------------------------------------------------------------- Stable QID
+// Deterministischer 32-bit FNV-1a-Hash (8-stelliges Hex). Wird als content-addressierte
+// Item-Identitaet fuer Spaced-Repetition-Karten und kuenftige item-bezogene Statistiken
+// genutzt — damit Quiz-Items in einem Kapitel umsortiert werden duerfen, ohne den
+// Lernstand zu verlieren (vgl. AGENTS §11/§18.3, P-ARCH-STABLE-QID).
+function fnv1a32Hex(str) {
+    let h = 0x811c9dc5;
+    const s = String(str);
+    for (let i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        // h *= 16777619, expressed as additions/shifts to keep 32-bit unsigned.
+        h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+    }
+    return ('00000000' + h.toString(16)).slice(-8);
+}
+
+// Liefert eine stabile, content-addressierte Identitaet fuer ein Legacy-Item.
+// Die Hash-Eingabe enthaelt einen Typ-Praefix sowie alle Felder, die die
+// Identitaet einer Aufgabe definieren — bei MCQ den Frage-Stem plus den Text
+// der korrekten Antwort (nicht den Index — so bleibt qid stabil, wenn Optionen
+// umsortiert werden). Bei Sequence/Cloze die zu sortierenden Bloecke bzw. die
+// akzeptierten Antworten der Lueckentexte.
+function stableQid(legacy) {
+    if (!legacy) return null;
+    const q = String(legacy.q || '');
+    const t = legacy.type || (Array.isArray(legacy.options) ? 'mcq' : null);
+    let payload;
+    if (t === 'sequence') {
+        payload = 'seq|' + q + '|'
+            + JSON.stringify(legacy.items || []) + '|'
+            + JSON.stringify(legacy.correct || []);
+    } else if (t === 'cloze') {
+        // Synonyme normalisieren + sortieren, damit Reihenfolge in `accept`
+        // nicht den Hash veraendert.
+        const blanks = (legacy.blanks || []).map(b => ({
+            label: b.label || '',
+            accept: (b.accept || []).map(s => String(s).toLowerCase().trim()).sort()
+        }));
+        payload = 'cloze|' + q + '|' + JSON.stringify(blanks);
+    } else if (t === 'mcq' || Array.isArray(legacy.options)) {
+        const correctIdx = legacy.correct;
+        const correctText = (Array.isArray(legacy.options) && correctIdx != null)
+            ? String(legacy.options[correctIdx] != null ? legacy.options[correctIdx] : '')
+            : '';
+        payload = 'mcq|' + q + '|' + correctText;
+    } else if (typeof legacy.h === 'string' || typeof legacy.s === 'string') {
+        // Trainings-Aufgabe (Ingenieurs-Track). Stem + Musterloesung sind
+        // typischerweise unique innerhalb einer Kategorie.
+        payload = 'training|' + q + '|' + (legacy.s || '');
+    } else if (typeof legacy.a === 'string') {
+        // Schueler-Drill-Item.
+        payload = 'sch|' + q + '|' + legacy.a;
+    } else {
+        payload = 'x|' + q;
+    }
+    return fnv1a32Hex(payload);
+}
+
+// Migration v1 -> v2 fuer SRS-/Schulungen-Storage (P-ARCH-STABLE-QID, AGENTS §11/§18.3).
+// Wird genau einmal beim App-Start ausgefuehrt — sobald der v2-Key gesetzt ist,
+// passiert nichts mehr. v1-Keys bleiben unangetastet als Fallback fuer Rollback.
+function migrateLegacyStorage() {
+    if (typeof localStorage === 'undefined') return;
+    // Schulungen v1 -> v2: gleiche Form, nur Key-Bump.
+    try {
+        if (localStorage.getItem(SCHULUNGEN_KEY) == null) {
+            const v1 = localStorage.getItem(SCHULUNGEN_KEY_V1);
+            if (v1 != null) localStorage.setItem(SCHULUNGEN_KEY, v1);
+        }
+    } catch (e) { /* quota / privacy mode */ }
+    // SRS v1 -> v2: idx-Schluessel gegen qid (content-Hash) tauschen. Wir laufen
+    // ueber window.SCHULUNGEN, damit jede Karte ihren Inhalt findet. Items, die
+    // im Daten-Skript nicht mehr existieren, werden verworfen (entspricht dem
+    // Verhalten unter v1, wo der Index ins Leere zeigte).
+    try {
+        if (localStorage.getItem(SRS_KEY) != null) return;
+        const v1raw = localStorage.getItem(SRS_KEY_V1);
+        if (!v1raw) return;
+        const v1 = JSON.parse(v1raw) || {};
+        const v2 = {};
+        const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
+        trainings.forEach(t => {
+            const tState = v1[t.id]; if (!tState) return;
+            const tOut = {};
+            (t.chapters || []).forEach(ch => {
+                const cState = tState[ch.id]; if (!cState) return;
+                const cOut = {};
+                (ch.quiz || []).forEach((item, idx) => {
+                    const card = cState[idx];
+                    if (!card) return;
+                    const qid = stableQid(item);
+                    if (!qid) return;
+                    // Bei (theoretischen) Hash-Kollisionen / Duplikaten: juengsten
+                    // Lernstand behalten — analog zu mergeProgressKey(SRS_KEY).
+                    const prev = cOut[qid];
+                    if (!prev || (card.last || '') >= (prev.last || '')) cOut[qid] = card;
+                });
+                if (Object.keys(cOut).length) tOut[ch.id] = cOut;
+            });
+            if (Object.keys(tOut).length) v2[t.id] = tOut;
+        });
+        localStorage.setItem(SRS_KEY, JSON.stringify(v2));
+    } catch (e) { /* ignore */ }
+}
+// Beim ersten Modul-Eval ausfuehren — Daten-Skripte sind zu diesem Zeitpunkt geladen
+// (siehe Script-Lade-Reihenfolge in AGENTS §4: Daten-Skripte vor React/Babel/app.jsx).
+migrateLegacyStorage();
+
 // ---------------------------------------------------------------- Einheitliches Item-Schema
 // Kanonische Laufzeit-Form fuer Training-Aufgaben, Schulungen-Quizfragen und Schueler-Drill-Items.
 // Siehe AGENTS.md §22. Daten-Skripte werden NICHT migriert — der Adapter hebt Legacy-Items
@@ -296,6 +448,11 @@ function toItem(legacy, ctx) {
             : kind === 'training' ? 'training'
             : kind === 'schueler' ? 'schueler'
             : kind);
+    // Stabile, content-addressierte Identitaet (P-ARCH-STABLE-QID, AGENTS §22).
+    // Wird fuer SRS-Karten und kuenftige item-bezogene Statistiken genutzt; ist
+    // unabhaengig vom 0-basierten Index im Pool — Quiz-Items duerfen also umsortiert
+    // werden, ohne den Lernstand zu verlieren.
+    const qid = stableQid(legacy);
     // Stabile Referenz-ID (best-effort; vollstaendige Stable-QID folgt in P-ARCH-STABLE-QID):
     let id = legacy.id;
     if (!id) {
@@ -311,6 +468,7 @@ function toItem(legacy, ctx) {
     }
     return {
         id,
+        qid,
         type,
         stem: legacy.q,
         // Training-Felder
@@ -1190,13 +1348,15 @@ function srsDueItems(training, srsState, includeNew) {
     training.chapters.forEach((ch) => {
         const cState = tState[ch.id] || {};
         ch.quiz.forEach((item, idx) => {
-            const card = cState[idx];
+            // Stable-QID (P-ARCH-STABLE-QID): Karten haengen am Inhalt, nicht am Index.
+            const qid = stableQid(item);
+            const card = qid ? cState[qid] : null;
             if (!card) {
-                if (includeNew) fresh.push({ item, trainingId: training.id, chapterId: ch.id, idx, status: 'new' });
+                if (includeNew) fresh.push({ item, trainingId: training.id, chapterId: ch.id, idx, qid, status: 'new' });
                 return;
             }
             if (card.due && card.due <= today) {
-                due.push({ item, trainingId: training.id, chapterId: ch.id, idx, status: 'due', card });
+                due.push({ item, trainingId: training.id, chapterId: ch.id, idx, qid, status: 'due', card });
             }
         });
     });
@@ -1210,9 +1370,10 @@ function srsTrainingStats(training, srsState) {
     let total = 0, learned = 0, due = 0, lapsed = 0;
     training.chapters.forEach((ch) => {
         const cState = tState[ch.id] || {};
-        ch.quiz.forEach((_, idx) => {
+        ch.quiz.forEach((item) => {
             total++;
-            const card = cState[idx];
+            const qid = stableQid(item);
+            const card = qid ? cState[qid] : null;
             if (!card) return;
             learned++;
             if (card.due && card.due <= today) due++;
@@ -1227,18 +1388,19 @@ function useSRSState() {
         try { return JSON.parse(localStorage.getItem(SRS_KEY)) || {}; }
         catch (e) { return {}; }
     });
-    // Nimmt eine Liste von { ref:{tid,cid,idx}, ok:boolean } und schreibt alle
-    // Karten in einem Rutsch — ein localStorage-Write pro Quiz-Lauf.
+    // Nimmt eine Liste von { ref:{tid,cid,qid,idx?}, ok:boolean } und schreibt alle
+    // Karten in einem Rutsch — ein localStorage-Write pro Quiz-Lauf. Schluessel ist
+    // die stable QID (P-ARCH-STABLE-QID); der idx im ref bleibt nur Diagnosehilfe.
     const gradeMany = useCallback((updates) => {
         if (!Array.isArray(updates) || !updates.length) return;
         setState((prev) => {
             const next = { ...prev };
             updates.forEach(({ ref, ok }) => {
-                if (!ref || ref.idx == null) return;
+                if (!ref || !ref.qid) return;
                 next[ref.tid] = { ...(next[ref.tid] || {}) };
                 next[ref.tid][ref.cid] = { ...(next[ref.tid][ref.cid] || {}) };
-                const prevCard = next[ref.tid][ref.cid][ref.idx];
-                next[ref.tid][ref.cid][ref.idx] = srsScheduleAfterAnswer(prevCard, ok);
+                const prevCard = next[ref.tid][ref.cid][ref.qid];
+                next[ref.tid][ref.cid][ref.qid] = srsScheduleAfterAnswer(prevCard, ok);
             });
             try { localStorage.setItem(SRS_KEY, JSON.stringify(next)); } catch (e) { /* quota */ }
             return next;
@@ -1424,7 +1586,7 @@ function Schulungen({ auth, onGoToOptionen }) {
         }
         const picked = indices.slice(0, Math.min(10, indices.length));
         const sample = picked.map(i => pool[i]);
-        const refs = picked.map(i => ({ tid, cid, idx: i }));
+        const refs = picked.map(i => ({ tid, cid, idx: i, qid: stableQid(pool[i]) }));
         setReviewMode(false);
         setQuizSet(sample); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]);
         setQuizInput(sample.length ? defaultInputForItem(sample[0]) : null);
@@ -1450,7 +1612,7 @@ function Schulungen({ auth, onGoToOptionen }) {
             [sample[i], sample[j]] = [sample[j], sample[i]];
         }
         const items = sample.map(s => s.item);
-        const refs = sample.map(s => ({ tid: s.trainingId, cid: s.chapterId, idx: s.idx }));
+        const refs = sample.map(s => ({ tid: s.trainingId, cid: s.chapterId, idx: s.idx, qid: s.qid }));
         setReviewMode(true);
         setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]);
         setQuizInput(items.length ? defaultInputForItem(items[0]) : null);
