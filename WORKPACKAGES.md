@@ -272,7 +272,7 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 - **Status:** ready
 - **Datei:** `js/data/schulung_allgemeinmedizin.js`
 - **Schwerpunkte:** Schwangerschaftsbasis, Vorsorge, Impfungen, Fieberkind, Exantheme, Hauttumoren, Ohr-/Augen-Notfaelle, Red Flags.
-- **Akzeptanz:** ≥4 Lehrseiten + ≥50 quellenbelegte MCQ; pädiatrische Dosierungen nur mit klarer Quellen-/Sicherheitskennzeichnung.
+- **Akzeptanz:** ≥4 Lehrseiten + ≥50 quellenbelegte MCQ; paediatrische Dosierungen nur mit klarer Quellen-/Sicherheitskennzeichnung.
 
 ### P-MED-M2-DIAGNOSTIK-QUERSCHNITT — Radiologie, Labor, Pathologie, Pharmakologie, Notfall
 - **Status:** ready
