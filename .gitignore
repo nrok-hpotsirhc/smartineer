@@ -50,3 +50,9 @@ coverage/
 .env
 .env.local
 .env.*.local
+
+# Auth-Credentials für Schulungen (Frontend-only UX-Convenience, kein echter Schutz).
+# Es wird ausschliesslich die Vorlage `auth-credentials.example.js` eingecheckt;
+# die produktive Datei muss lokal aus der Vorlage kopiert und mit eigenen Werten
+# gepflegt werden, damit Default-Passwoerter nicht im Repo landen.
+js/auth-credentials.js

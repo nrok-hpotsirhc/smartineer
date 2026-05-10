@@ -14,6 +14,14 @@ const SCHULUNGEN_KEY = 'smartineer_schulungen_v1'; // { [trainingId]: { [chapter
 // werden Karten implizit verschoben (siehe AGENTS.md §11). Daher Quiz-Items immer anhaengen.
 const SRS_KEY = 'smartineer_srs_v1';
 const SRS_INTERVALS_DAYS = [1, 3, 7, 16, 35, 70, 140]; // SM-2 lite, gestaffelt
+// ----- Optionen / Auth (Schulungen-Bereich, FRONTEND-ONLY UX-CONVENIENCE) -----
+// WICHTIG: Diese Auth ist KEIN echter Schutz — Credentials liegen client-seitig
+// in window.SMARTINEER_AUTH (siehe js/auth-credentials.js, gitignored). Im
+// DevTools sichtbar. Geeignet nur fuer leichten Zugang-Schutz im Bereich der
+// Schulungen, nicht fuer regulatorisch sensible Inhalte.
+const AUTH_KEY = 'smartineer_auth_v1'; // { user, role, since (ISO), expires (ISO) }
+const VISIBLE_CATS_KEY = 'smartineer_visible_categories_v1'; // { [catId]: false } — Default: alle sichtbar
+const ADMIN_GLOBAL_KEY = 'smartineer_admin_global_v1'; // reserviert fuer kuenftige globale Settings
 
 // ---------------------------------------------------------------- Export / Import
 // Plattform-portables JSON-Format zur Synchronisation des Lernfortschritts
@@ -185,6 +193,64 @@ function useKaTeX(deps) {
     return ref;
 }
 
+// Auth: liest window.SMARTINEER_AUTH (aus js/auth-credentials.js); persistiert
+// Login-Session in localStorage. KEIN echter Schutz, nur UX-Gate.
+function useAuth() {
+    const [session, setSession] = useState(() => {
+        try {
+            const raw = localStorage.getItem(AUTH_KEY);
+            if (!raw) return null;
+            const s = JSON.parse(raw);
+            if (s && s.expires && new Date(s.expires).getTime() > Date.now()) return s;
+            localStorage.removeItem(AUTH_KEY);
+            return null;
+        } catch (e) { return null; }
+    });
+    const cfg = (typeof window !== 'undefined') ? window.SMARTINEER_AUTH : null;
+    const login = useCallback((user, pass) => {
+        if (!cfg || !cfg.users) return { ok: false, error: 'Auth-Konfiguration fehlt (js/auth-credentials.js).' };
+        const u = cfg.users[user];
+        if (!u || u.pass !== pass) return { ok: false, error: 'Benutzername oder Passwort falsch.' };
+        const days = (cfg.sessionDays | 0) || 30;
+        const expires = new Date(Date.now() + days * 86400000).toISOString();
+        const s = { user, role: u.role || 'user', since: new Date().toISOString(), expires };
+        try { localStorage.setItem(AUTH_KEY, JSON.stringify(s)); } catch (e) { /* quota */ }
+        setSession(s);
+        return { ok: true };
+    }, [cfg]);
+    const logout = useCallback(() => {
+        try { localStorage.removeItem(AUTH_KEY); } catch (e) { /* ignore */ }
+        setSession(null);
+    }, []);
+    const isAdmin = !!(session && session.role === 'admin');
+    return { session, login, logout, isAdmin, configured: !!cfg };
+}
+
+// Sichtbare Kategorien: Default alle sichtbar. Speichert nur die deaktivierten
+// (Wert false). Filter wird im Dashboard / Training / Cheatsheet / Radar genutzt.
+function useVisibleCategories(allOrder) {
+    const [hidden, setHidden] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(VISIBLE_CATS_KEY)) || {}; }
+        catch (e) { return {}; }
+    });
+    const persist = useCallback((next) => {
+        setHidden(next);
+        try { localStorage.setItem(VISIBLE_CATS_KEY, JSON.stringify(next)); } catch (e) { /* quota */ }
+    }, []);
+    const toggle = useCallback((catId) => {
+        setHidden(prev => {
+            const next = { ...prev };
+            if (next[catId]) delete next[catId]; else next[catId] = true;
+            try { localStorage.setItem(VISIBLE_CATS_KEY, JSON.stringify(next)); } catch (e) {}
+            return next;
+        });
+    }, []);
+    const isVisible = useCallback((catId) => !hidden[catId], [hidden]);
+    const visibleOrder = useMemo(() => allOrder.filter(k => !hidden[k]), [allOrder, hidden]);
+    const reset = useCallback(() => persist({}), [persist]);
+    return { hidden, isVisible, visibleOrder, toggle, reset };
+}
+
 function categoryStats(cat, isSolved) {
     let total = 0, done = 0;
     cat.levels.forEach((tasks, lvl) => {
@@ -240,6 +306,13 @@ const NAV_ICONS = {
             <circle cx="12" cy="8" r="3.5" />
             <path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6" />
         </svg>
+    ),
+    optionen: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+             strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
     )
 };
 
@@ -249,7 +322,8 @@ function Nav({ view, setView, theme, onToggleTheme }) {
         { id: 'training', label: 'Training' },
         { id: 'cheatsheet', label: 'Cheatsheets' },
         { id: 'schulungen', label: 'Schulungen' },
-        { id: 'schueler', label: 'Schüler' }
+        { id: 'schueler', label: 'Schüler' },
+        { id: 'optionen', label: 'Optionen' }
     ];
     return (
         <nav className="nav-glass sticky top-0 z-40 backdrop-blur-md bg-slate-900/90 text-white shadow-lg border-b border-slate-700/50 w-full">
@@ -416,10 +490,12 @@ function Dashboard({ data, order, isSolved, onOpenCategory, onReset, onInstall, 
                             className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-105 transition-all">
                             Training starten →
                         </button>
-                        <button onClick={onReset}
-                            className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all">
-                            Fortschritt zurücksetzen
-                        </button>
+                        {onReset && (
+                            <button onClick={onReset}
+                                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all">
+                                Fortschritt zurücksetzen
+                            </button>
+                        )}
                         {onExport && (
                             <button onClick={onExport}
                                 className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all"
@@ -1172,7 +1248,7 @@ function trainingProgress(training, tState) {
     return { readPct, quizPct, chapterCount: training.chapters.length };
 }
 
-function Schulungen() {
+function Schulungen({ auth, onGoToOptionen }) {
     const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
     const { state, setLastPage, recordQuiz } = useSchulungenState();
     const { state: srsState, gradeMany: srsGradeMany } = useSRSState();
@@ -1197,6 +1273,25 @@ function Schulungen() {
         return <section className="view-fade p-8 text-red-700">
             Keine Schulungen geladen. Prüfe <code>js/data/schulung_*.js</code> in <code>index.html</code>.
         </section>;
+    }
+
+    // Auth-Gate: nur sichtbar fuer eingeloggte Nutzer. Sehr leichter Schutz —
+    // siehe Disclaimer in js/auth-credentials.js (Frontend-only).
+    if (auth && !auth.session) {
+        return (
+            <section className="view-fade max-w-xl mx-auto">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+                    <div className="text-5xl mb-3" aria-hidden="true">·</div>
+                    <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">Schulungen — Anmeldung erforderlich</h1>
+                    <p className="text-slate-600 mb-6">Der Schulungs-Bereich (Cert-Prep) ist passwortgeschuetzt. Melde dich unter <strong>Optionen → Konto</strong> an. Dashboard, Training, Cheatsheets und Schueler-Bereich sind ohne Anmeldung nutzbar.</p>
+                    <button onClick={onGoToOptionen}
+                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
+                        Zu den Optionen
+                    </button>
+                    <p className="text-xs text-slate-400 mt-6">Hinweis: Die Anmeldung dient allein der Zugangs-Bequemlichkeit, nicht der Sicherheit. Inhalte werden nicht verschluesselt.</p>
+                </div>
+            </section>
+        );
     }
 
     const training = trainings.find(t => t.id === tid);
@@ -1799,13 +1894,202 @@ function InstallPrompt({ open, onClose, deferredEvent, platform }) {
     );
 }
 
+// ---------------------------------------------------------------- Optionen
+// Tabs: Konto, Kategorien, Daten (Export/Import + Reset), Store (Skeleton),
+// PWA (Install), Admin (nur fuer admin-Rolle).
+function Optionen({ data, allOrder, vis, auth, onExport, onImport, onReset, onInstall, installAvailable }) {
+    const [tab, setTab] = useState('konto');
+    const tabs = [
+        { id: 'konto',      label: 'Konto' },
+        { id: 'kategorien', label: 'Kategorien' },
+        { id: 'daten',      label: 'Daten' },
+        { id: 'store',      label: 'Store' },
+        { id: 'pwa',        label: 'App-Installation' }
+    ];
+    if (auth.isAdmin) tabs.push({ id: 'admin', label: 'Admin' });
+
+    return (
+        <section className="view-fade max-w-4xl mx-auto">
+            <div className="text-center mb-6">
+                <h1 className="text-3xl md:text-4xl font-extrabold mb-2 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Optionen</h1>
+                <p className="text-slate-600 text-sm">Konto, Kategorie-Sichtbarkeit, Daten-Sync, App-Installation.</p>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-5 border-b border-slate-200">
+                {tabs.map(t => (
+                    <button key={t.id} onClick={() => setTab(t.id)}
+                        className={`px-4 py-2 text-sm font-bold border-b-2 transition ${tab === t.id ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>
+                        {t.label}
+                    </button>
+                ))}
+            </div>
+
+            {tab === 'konto' && <OptionenKonto auth={auth} />}
+            {tab === 'kategorien' && <OptionenKategorien data={data} allOrder={allOrder} vis={vis} />}
+            {tab === 'daten' && <OptionenDaten onExport={onExport} onImport={onImport} onReset={onReset} />}
+            {tab === 'store' && <OptionenStore auth={auth} />}
+            {tab === 'pwa' && <OptionenPwa onInstall={onInstall} installAvailable={installAvailable} />}
+            {tab === 'admin' && auth.isAdmin && <OptionenAdmin auth={auth} vis={vis} />}
+        </section>
+    );
+}
+
+function OptionenKonto({ auth }) {
+    const [user, setUser] = useState('');
+    const [pass, setPass] = useState('');
+    const [err, setErr] = useState(null);
+    const submit = (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const r = auth.login(user.trim(), pass);
+        if (r.ok) { setUser(''); setPass(''); setErr(null); }
+        else setErr(r.error || 'Anmeldung fehlgeschlagen.');
+    };
+    if (auth.session) {
+        return (
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 className="text-lg font-bold text-slate-800 mb-2">Angemeldet</h3>
+                <p className="text-sm text-slate-700 mb-1">Benutzer: <strong>{auth.session.user}</strong> ({auth.session.role})</p>
+                <p className="text-xs text-slate-500 mb-4">Sitzung gueltig bis {new Date(auth.session.expires).toLocaleString()}.</p>
+                <button onClick={auth.logout}
+                    className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-5 rounded-lg shadow transition">Abmelden</button>
+                <p className="text-xs text-slate-400 mt-4">Hinweis: Die Anmeldung dient allein der Zugangs-Bequemlichkeit, nicht der Sicherheit. Credentials liegen client-seitig in <code>js/auth-credentials.js</code>.</p>
+            </div>
+        );
+    }
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-2">Anmelden</h3>
+            <p className="text-sm text-slate-600 mb-4">Notwendig nur fuer den Schulungen-Bereich. Dashboard, Training, Cheatsheets und Schueler-Bereich sind ohne Anmeldung nutzbar.</p>
+            {!auth.configured && (
+                <div className="bg-amber-50 border border-amber-200 text-amber-900 text-sm p-3 rounded-lg mb-4">
+                    Auth-Konfiguration fehlt: <code>js/auth-credentials.js</code> nicht geladen. Beispiel siehe <code>js/auth-credentials.example.js</code>.
+                </div>
+            )}
+            <form onSubmit={submit} className="flex flex-col gap-3 max-w-sm">
+                <label className="flex flex-col gap-1 text-sm">
+                    <span className="font-bold text-slate-700">Benutzername</span>
+                    <input type="text" autoComplete="username" value={user} onChange={(e) => setUser(e.target.value)}
+                        className="px-3 py-2 rounded-lg border border-slate-300 focus:border-blue-500 outline-none bg-white text-slate-800" />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                    <span className="font-bold text-slate-700">Passwort</span>
+                    <input type="password" autoComplete="current-password" value={pass} onChange={(e) => setPass(e.target.value)}
+                        className="px-3 py-2 rounded-lg border border-slate-300 focus:border-blue-500 outline-none bg-white text-slate-800" />
+                </label>
+                {err && <div className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded p-2">{err}</div>}
+                <button type="submit" disabled={!auth.configured || !user.trim() || !pass}
+                    className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2 px-5 rounded-lg shadow transition w-fit">
+                    Anmelden
+                </button>
+            </form>
+        </div>
+    );
+}
+
+function OptionenKategorien({ data, allOrder, vis }) {
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-2">Sichtbare Kategorien</h3>
+            <p className="text-sm text-slate-600 mb-4">Deaktivierte Kategorien verschwinden aus Dashboard, Training, Cheatsheet und Radar. Aufgaben-Fortschritt bleibt erhalten und kommt zurueck, sobald du eine Kategorie wieder einblendest.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {allOrder.map(k => {
+                    const cat = data[k]; if (!cat) return null;
+                    const visible = vis.isVisible(k);
+                    return (
+                        <label key={k} className={`flex items-start gap-3 px-3 py-2 rounded-lg border cursor-pointer transition ${visible ? 'border-blue-200 bg-blue-50/40' : 'border-slate-200 bg-slate-50'}`}>
+                            <input type="checkbox" className="mt-1" checked={visible} onChange={() => vis.toggle(k)} />
+                            <div className="min-w-0">
+                                <div className="font-bold text-slate-800 text-sm">{cat.name}</div>
+                                <div className="text-xs text-slate-500 line-clamp-2">{cat.desc}</div>
+                            </div>
+                        </label>
+                    );
+                })}
+            </div>
+            <button onClick={vis.reset}
+                className="mt-4 px-4 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition">Alle einblenden</button>
+        </div>
+    );
+}
+
+function OptionenDaten({ onExport, onImport, onReset }) {
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-2">Lernfortschritt</h3>
+            <p className="text-sm text-slate-600 mb-4">Geraeteuebergreifender Abgleich ueber portable JSON-Datei. Theme und Anmeldung werden bewusst nicht exportiert (geraete-spezifisch).</p>
+            <div className="flex flex-wrap gap-3">
+                <button onClick={onExport}
+                    className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-5 rounded-lg transition">Fortschritt exportieren</button>
+                <button onClick={onImport}
+                    className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-5 rounded-lg transition">Fortschritt importieren</button>
+                <button onClick={onReset}
+                    className="bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 font-bold py-2 px-5 rounded-lg transition">Fortschritt zuruecksetzen</button>
+            </div>
+        </div>
+    );
+}
+
+function OptionenStore({ auth }) {
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-2">Store — Kategorien &amp; Schulungen freischalten</h3>
+            <p className="text-sm text-slate-600 mb-4">Geplante Funktion: hier wirst du in Zukunft zusaetzliche Kategorien und Schulungen freischalten oder eigene zur Aufnahme vorschlagen koennen. Das Backend dafuer ist noch nicht implementiert &mdash; Smartineer ist eine reine Static-Site (siehe AGENTS.md §1).</p>
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-700 space-y-2">
+                <div><strong>Status:</strong> Skeleton / Coming Soon</div>
+                <div><strong>Geplant:</strong></div>
+                <ul className="list-disc list-inside text-slate-600 ml-2">
+                    <li>Freischalt-Codes fuer proprietaere Kategorien (lokal validiert).</li>
+                    <li>User-Vorschlag fuer neue Kategorie / Schulung (per Mailto-Link, kein Backend).</li>
+                    <li>Optional: Anbindung an einen Static-File-Manifest mit signierten Modulen.</li>
+                </ul>
+                <div className="text-xs text-slate-500 mt-2">Hinweis: Da Smartineer kein Backend hat, ist eine echte Bezahlung/Lizenzierung nur mit zusaetzlicher Infrastruktur moeglich. Dies waere eine Architektur-Aenderung und muss vorher diskutiert werden (siehe AGENTS.md §1).</div>
+            </div>
+            <a href="mailto:?subject=Smartineer%20Store%20-%20Vorschlag&body=Bitte%20beschreibe%20deinen%20Wunsch%20fuer%20eine%20neue%20Kategorie%20oder%20Schulung."
+                className="inline-block mt-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold py-2 px-5 rounded-lg shadow text-sm hover:shadow-lg transition">
+                Vorschlag per E-Mail senden
+            </a>
+            {!auth.session && (
+                <p className="text-xs text-slate-400 mt-4">Hinweis: Spaeter wird der Store an dein Konto gekoppelt sein.</p>
+            )}
+        </div>
+    );
+}
+
+function OptionenPwa({ onInstall, installAvailable }) {
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-2">App-Installation</h3>
+            <p className="text-sm text-slate-600 mb-4">Smartineer ist eine PWA und kann auf Smartphone, Tablet und Desktop wie eine native App installiert werden. Service Worker speichert die App-Shell offline.</p>
+            <button onClick={onInstall} disabled={!installAvailable}
+                className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2 px-5 rounded-lg shadow transition">
+                Als App installieren
+            </button>
+            {!installAvailable && (
+                <p className="text-xs text-slate-500 mt-3">Smartineer ist bereits installiert oder dein Browser unterstuetzt keine PWA-Installation.</p>
+            )}
+        </div>
+    );
+}
+
+function OptionenAdmin({ auth }) {
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-2">Admin</h3>
+            <p className="text-sm text-slate-600 mb-2">Eingeloggt als <strong>{auth.session.user}</strong> (admin).</p>
+            <p className="text-sm text-slate-500">Reservierter Bereich fuer kuenftige globale Konfigurationen (Default-Sichtbarkeit von Kategorien, Store-Manifest-URL, Auth-Defaults). Aktuell keine Aktionen verfuegbar.</p>
+        </div>
+    );
+}
+
 // ---------------------------------------------------------------- App
 function App() {
     const data = window.APP_DATA || {};
-    const order = (window.APP_ORDER && window.APP_ORDER.length) ? window.APP_ORDER : Object.keys(data);
+    const allOrder = (window.APP_ORDER && window.APP_ORDER.length) ? window.APP_ORDER : Object.keys(data);
+    const auth = useAuth();
+    const vis = useVisibleCategories(allOrder);
+    const order = vis.visibleOrder;
 
     const [view, setView] = useState('dashboard');
-    const [currentCat, setCurrentCat] = useState(order[0] || null);
+    const [currentCat, setCurrentCat] = useState(allOrder[0] || null);
     const { isSolved, setSolved, reset } = useProgress();
 
     // Theme: Default dunkel. Pre-paint-Skript in index.html setzt die Klasse bereits am <html>,
@@ -1910,7 +2194,7 @@ function App() {
 
     const showInstallButton = !platform.isStandalone && (deferredEvent || platform.isIOS || platform.isAndroid);
 
-    if (!order.length) {
+    if (!allOrder.length) {
         return (
             <div className="p-8 text-red-700">
                 Keine Daten geladen. Prüfe die Skript-Reihenfolge in <code>index.html</code>.
@@ -1924,14 +2208,14 @@ function App() {
             <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {view === 'dashboard' && (
                     <Dashboard data={data} order={order} isSolved={isSolved}
-                        onOpenCategory={openCategory} onReset={onReset}
-                        onExport={onExport} onImport={onImportClick}
-                        onInstall={showInstallButton ? () => setInstallOpen(true) : null} />
+                        onOpenCategory={openCategory} onReset={null}
+                        onExport={null} onImport={null}
+                        onInstall={null} />
                 )}
                 {view === 'training' && (
                     <Training data={data} order={order}
                         isSolved={isSolved} setSolved={setSolved}
-                        currentCat={currentCat || order[0]} setCurrentCat={setCurrentCat} />
+                        currentCat={(order.includes(currentCat) ? currentCat : order[0])} setCurrentCat={setCurrentCat} />
                 )}
                 {view === 'cheatsheet' && (
                     <Cheatsheet data={data} order={order} />
@@ -1940,7 +2224,13 @@ function App() {
                     <Schueler />
                 )}
                 {view === 'schulungen' && (
-                    <Schulungen />
+                    <Schulungen auth={auth} onGoToOptionen={() => setView('optionen')} />
+                )}
+                {view === 'optionen' && (
+                    <Optionen data={data} allOrder={allOrder} vis={vis} auth={auth}
+                        onExport={onExport} onImport={onImportClick} onReset={onReset}
+                        onInstall={showInstallButton ? () => setInstallOpen(true) : null}
+                        installAvailable={!!showInstallButton} />
                 )}
             </main>
             <footer className="bg-slate-900 text-slate-400 py-6 text-center text-sm mt-auto">

@@ -6,13 +6,14 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v24-spaced-repetition';
+const CACHE_VERSION = 'smartineer-v25-options-auth';
 const APP_SHELL = [
     './',
     './index.html',
     './manifest.webmanifest',
     './css/styles.css',
     './js/app.jsx',
+    './js/auth-credentials.example.js',
     './js/data/math.js',
     './js/data/control.js',
     './js/data/digital_control.js',
@@ -24,10 +25,15 @@ const APP_SHELL = [
     './js/data/neural_nets.js',
     './js/data/plc.js',
     './js/data/cyber_security.js',
+    './js/data/krl.js',
+    './js/data/fuegetechniken.js',
+    './js/data/agentic_ai.js',
     './js/data/schueler.js',
     './js/data/schulung_securityx.js',
     './js/data/schulung_starter.js',
     './js/data/schulung_allgemeinmedizin.js',
+    './js/data/schulung_master_et_cybersec.js',
+    './js/data/schulung_master_et_automation.js',
     './icons/icon.svg',
     './icons/icon-192.svg',
     './icons/icon-512.svg'

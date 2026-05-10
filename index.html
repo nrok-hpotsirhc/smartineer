@@ -50,6 +50,10 @@
         </div>
     </noscript>
 
+    <!-- Auth-Konfiguration: Frontend-only Convenience, KEIN Schutz. -->
+    <!-- Datei ist gitignored; bei fehlender Datei laedt eine optionale Vorlage als Fallback. -->
+    <script src="js/auth-credentials.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='js/auth-credentials.example.js';document.head.appendChild(s);"></script>
+
     <!-- Daten-Module: registrieren window.APP_DATA / window.APP_ORDER -->
     <script src="js/data/math.js"></script>
     <script src="js/data/control.js"></script>
@@ -62,10 +66,15 @@
     <script src="js/data/neural_nets.js"></script>
     <script src="js/data/plc.js"></script>
     <script src="js/data/cyber_security.js"></script>
+    <script src="js/data/krl.js"></script>
+    <script src="js/data/fuegetechniken.js"></script>
+    <script src="js/data/agentic_ai.js"></script>
     <script src="js/data/schueler.js"></script>
     <script src="js/data/schulung_securityx.js"></script>
     <script src="js/data/schulung_starter.js"></script>
     <script src="js/data/schulung_allgemeinmedizin.js"></script>
+    <script src="js/data/schulung_master_et_cybersec.js"></script>
+    <script src="js/data/schulung_master_et_automation.js"></script>
 
     <!-- React + ReactDOM (UMD via CDN) und Babel-standalone (JSX-Transform im Browser) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
