@@ -1976,7 +1976,7 @@ function OptionenKonto({ auth }) {
             <p className="text-sm text-slate-600 mb-4">Notwendig nur fuer den Schulungen-Bereich. Dashboard, Training, Cheatsheets und Schueler-Bereich sind ohne Anmeldung nutzbar.</p>
             {auth.configured && (
                 <div className="bg-blue-50 border border-blue-200 text-blue-900 text-sm p-3 rounded-lg mb-4">
-                    Default-Zugangsdaten (siehe <code>js/auth-credentials.js</code>): <strong>admin / admin</strong> oder <strong>demo / user</strong>. Lokal in <code>js/auth-credentials.js</code> anpassen.
+                    Default-Zugangsdaten (siehe <code>js/auth-credentials.js</code>): <strong>admin / admin</strong> oder <strong>user / user</strong>. Lokal in <code>js/auth-credentials.js</code> anpassen.
                 </div>
             )}
             {!auth.configured && (
