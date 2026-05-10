@@ -625,4 +625,35 @@ Die Top-Navigation wird auf Mobil/PWA häufig zu breit, wenn alle Tabs als Text 
 - Beim Hinzufügen neuer Top-Level-Views: passendes Icon in `NAV_ICONS` ergänzen, sonst rendert die Mobile-Variante leer.
 - Keine externen Icon-Bibliotheken (Heroicons-CDN, FontAwesome) — vermeidet zusätzliche CDN-Abhängigkeit und respektiert §1 (keine zusätzlichen Frameworks ohne Diskussion).
 
+---
+
+## 21. Arbeitspakete (Session-Plan, verbindlich)
+
+Smartineer wird in **mobilen Agent-Sessions** weiterentwickelt. Damit jede Session einen klaren Auftrag hat und nichts zwischen Sessions verloren geht, existiert die Datei **`WORKPACKAGES.md`** im Repo-Root.
+
+**Pflicht-Workflow fuer jede Session (auch mobil):**
+
+1. **Sichten.** Zu Beginn jeder Session zuerst `WORKPACKAGES.md` lesen. Reihenfolge fuer die Auswahl des aktuellen Pakets:
+   - Wenn der User explizit ein Paket nennt (z.B. "P-CYBERSEC-05") → genau dieses bearbeiten.
+   - Sonst das Paket aus Abschnitt **E) Naechste empfohlene Session** uebernehmen.
+   - Sonst das erste Paket mit `status: ready` (in der Reihenfolge A → B → C → D).
+2. **Locken.** Status des gewaehlten Pakets in `WORKPACKAGES.md` auf `in-progress` setzen, bevor inhaltlich gearbeitet wird. Maximal **ein** Paket gleichzeitig in-progress.
+3. **Bearbeiten.** Paket gemaess seiner Akzeptanzkriterien abschliessen (siehe AGENTS §0, §8, §18.4–18.6 fuer Master-Kapitel; §9 fuer Aufgabenkategorien).
+4. **Abschliessen.** Status auf `done (v<CACHE_VERSION>, Sitzung YYYY-MM-DD)` setzen. Falls Paket nur teilweise erledigt: Status auf `in-progress` lassen und im Eintrag den genauen Stand vermerken (z.B. "Lehrseiten fertig, Quiz 30/50").
+5. **Naechsten Vorschlag setzen.** Abschnitt **E) Naechste empfohlene Session** in `WORKPACKAGES.md` mit dem konkret naechsten Paket aktualisieren (mit Begruendung in einem Satz).
+6. **Status-Report.** Im finalen Status-Report (AGENTS §0/§0.1) das gerade erledigte Paket unter DONE und den naechsten Vorschlag explizit nennen.
+
+**Pflege der Pakete:**
+
+- **Neue Anforderungen** (User-Wunsch, neuer Bug, neue Schulung, neue Kategorie) werden vom Agent **selbst** als neue P-...-Eintraege in `WORKPACKAGES.md` aufgenommen. Naming: `P-<BEREICH>-<KENNUNG>` (z.B. `P-UI-DARKMODE-FIX`, `P-CAT-NEW-MECHATRONIK`).
+- **Pakete aufteilen**, wenn der Aufwand das Sitzungsbudget eines Master-Kapitels (4 Lehrseiten + 50 MCQ) sprengen wuerde. Suffix `-A`/`-B`/...
+- **Pakete blockieren** (z.B. abhaengig von vorherigem Paket): Status `blocked: <Verweis>`. Auflocken erfolgt automatisch, sobald das Vorpaket auf `done` gesetzt wird.
+- **Roll-Forward (AGENTS §0.1):** Das Statusfeld in `WORKPACKAGES.md` ist die einzige Wahrheitsquelle fuer den Roadmap-Zustand. Status-Report bezieht sich auf die Eintraege dort.
+- **Cache-Version** bei jeder Paket-Erledigung, die App-Shell oder Daten-Skripte aendert, in `sw.js` bumpen (siehe §14a).
+
+**Konvention fuer mobile Agent-Sessions:**
+
+- Mobile-Trigger: User schickt einen kurzen Prompt wie "neue Session bitte" oder nennt direkt ein Paket-Kuerzel. Der Agent sichtet `WORKPACKAGES.md`, waehlt deterministisch (kein Raten), bestaetigt das gewaehlte Paket im ersten Output-Satz und liefert am Ende den Roll-Forward + naechsten Vorschlag.
+- Keine Session ohne Update von `WORKPACKAGES.md`: auch eine reine Bugfix-Session muss mindestens ein Done-Eintrag und ggf. einen neuen P-UI-... Eintrag setzen.
+
 
