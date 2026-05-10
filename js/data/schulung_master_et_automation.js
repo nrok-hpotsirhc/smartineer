@@ -154,6 +154,385 @@
             + '<p class="text-xs text-slate-500"><em>Quellen: Khalil, Nonlinear Systems, 3rd ed. 2002, Kap. 4, 13, 14; Krstic et al., Nonlinear and Adaptive Control Design, Wiley 1995; Skogestad/Postlethwaite 2005, Kap. 3, 9; Doyle et al., IEEE Trans. AC 1989; Levant, Int. J. Control 2003.</em></p>'
     };
 
+    // ----------------------------------------------------------------------
+    // Kapitel 2 — SPS-Programmierung (IEC 61131-3 / IEC 61499) — PRODUKTIV
+    // Quellen: IEC 61131-3:2013 (Ed. 3.0) "Programmable controllers — Part 3:
+    // Programming languages"; IEC 61131-1:2003 (Allgemeine Information);
+    // IEC 61499-1:2012 (Function blocks for distributed systems); IEC 61508
+    // Ed. 2.0:2010 (Functional safety of E/E/PE safety-related systems);
+    // IEC 62061:2021 (Safety of machinery — functional safety); ISO 13849-1:
+    // 2023 (Safety-related parts of control systems); PLCopen "Safety
+    // Software" Technical Specification Part 1 v2.01 (2018) und Part 2 v1.0;
+    // John/Tiegelkamp "SPS-Programmierung mit IEC 61131-3", 5. Aufl. Springer
+    // 2010; Vyatkin "IEC 61499 Function Blocks for Embedded and Distributed
+    // Control Systems Design", 3rd ed. ISA 2020; Heinrich, "Automatisierung",
+    // Hanser 2021.
+    // ----------------------------------------------------------------------
+    const PAGE_SPS_LANG = {
+        title: '2.1 IEC 61131-3 — Sprachen, Datenmodell und Software-Modell',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die fuenf Sprachen der IEC 61131-3 Ed. 3 voneinander abgrenzen, (2) das Software-Modell (Configuration / Resource / Task / Program / POU) erklaeren, (3) elementare und abgeleitete Datentypen korrekt verwenden, (4) Geltungsbereiche von Variablen einordnen.</blockquote>'
+
+            + '<h4>2.1.1 Geschichte und Geltungsbereich</h4>'
+            + '<p>IEC 61131-3 ist Teil 3 der Norm IEC 61131 fuer speicherprogrammierbare Steuerungen (SPS / engl. PLC). Die <strong>3. Ausgabe (2013)</strong> definiert vier Programmiersprachen — Strukturierter Text (ST), Funktionsbausteinsprache (FBD), Kontaktplan (LD) und Ablaufsprache (SFC) — sowie die textuelle Anweisungsliste (IL) als <em>deprecated</em> (sie ist nur noch im informativen Anhang). Industrieprodukte (CODESYS, TIA Portal, B&amp;R Automation Studio, TwinCAT) implementieren die Norm mit jeweils eigenen Erweiterungen, dokumentieren aber die Konformitaetsstufe (Base/Compliance Level).</p>'
+            + '<p>Die Ed. 3 fuehrte gegenueber Ed. 2 (2003) eine <strong>objektorientierte Erweiterung</strong> ein: <code>CLASS</code>, <code>METHOD</code>, <code>EXTENDS</code>, <code>INTERFACE</code>, <code>THIS^</code>. Diese OO-Mechanismen sind im IEC-61131-3-Sinn <em>optional</em>; viele sicherheitsgerichtete Steuerungen (z.B. nach IEC 61508 SIL 3) verzichten weiterhin darauf, weil die Verifikation von dynamischer Bindung aufwendig ist.</p>'
+
+            + '<h4>2.1.2 Software-Modell</h4>'
+            + '<p>Das hierarchische Modell (IEC 61131-3 §6) besteht aus:</p>'
+            + '<ul>'
+            + '<li><strong>Configuration:</strong> Top-Element pro Steuerungssystem.</li>'
+            + '<li><strong>Resource:</strong> Verarbeitungseinheit (typisch: ein CPU-Modul). Pro Resource laufen mehrere Tasks.</li>'
+            + '<li><strong>Task:</strong> Ablaufeinheit; <em>cyclic</em> mit Periode (z.B. $T=10\\,\\text{ms}$) oder <em>event-triggered</em> (Eingangsflanke). Eine Task hat <em>priority</em>, <em>interval</em> und referenziert ein oder mehrere Programme.</li>'
+            + '<li><strong>Program / POU:</strong> Programm-Organisations-Einheit, ausgefuehrt durch eine Task.</li>'
+            + '<li><strong>Global Variables / Access Paths:</strong> ueber Resource-Grenzen hinweg sichtbare Variablen; <code>VAR_ACCESS</code> definiert nach aussen sichtbare Bezeichner.</li>'
+            + '</ul>'
+            + '<p>Ein <strong>Scan-Zyklus</strong> einer cyclic Task lautet konventionell: <em>(1) Eingaenge lesen → (2) Programme ausfuehren → (3) Ausgaenge schreiben → (4) Diagnose/Idle</em>. Die Norm schreibt diese Reihenfolge nicht zwingend vor, aber alle gaengigen Plattformen halten sie ein, weil sie <em>Konsistenz der Prozessabbild-Sicht</em> garantiert (E/A wird nicht mitten im Programm aktualisiert).</p>'
+
+            + '<h4>2.1.3 POU-Typen</h4>'
+            + '<p>Drei Typen von Program Organisation Units:</p>'
+            + '<ul>'
+            + '<li><strong>FUNCTION (FUN):</strong> stateless — bei gleichen Eingaengen identischer Ausgang. Genau ein Rueckgabewert vom Typ der Funktion. Beispiele: <code>SQRT</code>, <code>SEL</code>, <code>MAX</code>.</li>'
+            + '<li><strong>FUNCTION_BLOCK (FB):</strong> instanziiert; haelt internen Zustand zwischen Aufrufen (z.B. Timer <code>TON</code>, Flankenerkennung <code>R_TRIG</code>, PI-Regler). Mehrere Ein-/Ausgaenge moeglich.</li>'
+            + '<li><strong>PROGRAM (PRG):</strong> oberste Ebene der Anwendungs-Logik; wird einer Task zugewiesen.</li>'
+            + '</ul>'
+
+            + '<h4>2.1.4 Datentypen</h4>'
+            + '<p>Elementare Typen mit definierter Bitbreite:</p>'
+            + '<ul>'
+            + '<li>Bool: <code>BOOL</code> (1 Bit logisch).</li>'
+            + '<li>Ganzzahl: <code>SINT</code>/<code>USINT</code> (8), <code>INT</code>/<code>UINT</code> (16), <code>DINT</code>/<code>UDINT</code> (32), <code>LINT</code>/<code>ULINT</code> (64).</li>'
+            + '<li>Gleitkomma: <code>REAL</code> (32, IEEE 754 single), <code>LREAL</code> (64, double).</li>'
+            + '<li>Bitfolge: <code>BYTE</code>, <code>WORD</code>, <code>DWORD</code>, <code>LWORD</code>.</li>'
+            + '<li>Zeit: <code>TIME</code>, <code>DATE</code>, <code>TIME_OF_DAY</code> (TOD), <code>DATE_AND_TIME</code> (DT).</li>'
+            + '<li>Zeichen: <code>CHAR</code>, <code>WCHAR</code>, <code>STRING</code>, <code>WSTRING</code>.</li>'
+            + '</ul>'
+            + '<p>Abgeleitete Typen via <code>TYPE ... END_TYPE</code>: <em>Strukturen</em> (<code>STRUCT</code>), <em>Aufzaehlungen</em> (<code>ENUM</code>), <em>Felder</em> (<code>ARRAY[1..10] OF INT</code>), <em>Subranges</em> (<code>INT(0..100)</code>), <em>Aliase</em>. Literale tragen Typ-Praefix: <code>16#FF</code> (hex), <code>2#1010</code> (binaer), <code>T#100ms</code> (Zeit), <code>UINT#42</code> (typed).</p>'
+
+            + '<h4>2.1.5 Variablen-Geltungsbereiche (Scopes)</h4>'
+            + '<p>Pro POU werden Variablen in Sektionen deklariert. Die wichtigsten:</p>'
+            + '<ul>'
+            + '<li><code>VAR ... END_VAR</code> — lokale Variablen.</li>'
+            + '<li><code>VAR_INPUT</code> / <code>VAR_OUTPUT</code> / <code>VAR_IN_OUT</code> — Schnittstelle eines FB/FUN.</li>'
+            + '<li><code>VAR_TEMP</code> — temporaer (wird im PRG/FB pro Aufruf neu initialisiert; in Funktionen implizit).</li>'
+            + '<li><code>VAR_GLOBAL</code> — auf Resource-/Configuration-Ebene.</li>'
+            + '<li><code>VAR_EXTERNAL</code> — Zugriff auf <code>VAR_GLOBAL</code> in einer POU.</li>'
+            + '<li><code>VAR_ACCESS</code> — definiert nach aussen sichtbare Zugriffspfade (Configuration-Ebene).</li>'
+            + '<li><code>RETAIN</code>/<code>NON_RETAIN</code>/<code>PERSISTENT</code> — Verhalten bei Warm-/Kaltstart und Spannungsausfall.</li>'
+            + '<li><code>CONSTANT</code> — Compile-Zeit-Konstante.</li>'
+            + '</ul>'
+
+            + '<h4>2.1.6 Die fuenf Sprachen</h4>'
+            + '<p><strong>Strukturierter Text (ST)</strong> — pascal-aehnlich; Pflicht-Sprache fuer komplexe Algorithmen. Kontrollstrukturen <code>IF/ELSIF/ELSE</code>, <code>CASE</code>, <code>FOR</code>, <code>WHILE</code>, <code>REPEAT</code>, <code>EXIT</code>, <code>RETURN</code>. Ausdruecke folgen Operator-Praezedenz wie in C/Pascal; Zuweisung ist <code>:=</code>.</p>'
+            + '<p><strong>Funktionsbausteinsprache (FBD)</strong> — grafisch; Bausteine werden ueber Datenfluss-Linien verbunden. Auswertung typischerweise <em>links nach rechts</em>; bei Rueckkopplungen muss explizit eine 1-Zyklus-Verzoegerung modelliert werden.</p>'
+            + '<p><strong>Kontaktplan (LD, Ladder Diagram)</strong> — grafisch; angelehnt an Relais-Schaltplaene. Linke Sammelschiene = Power-Rail; Strompfad ueber Schliesser/Oeffner zu Spulen. Pflicht in vielen US-amerikanischen Anlagen wegen Wartungs-Tradition.</p>'
+            + '<p><strong>Anweisungsliste (IL)</strong> — textuell, akkumulator-basiert (<code>LD</code>, <code>ST</code>, <code>AND</code>, <code>JMP</code>). <em>In Ed. 3 (2013) als deprecated markiert</em>; nur noch im informativen Anhang gefuehrt. Neue Projekte sollten IL nicht mehr einsetzen.</p>'
+            + '<p><strong>Ablaufsprache (SFC, Sequential Function Chart)</strong> — grafisch; Schritte (Steps) und Transitionen modellieren Ablaeufe. Ein Schritt traegt <em>Aktionen</em> mit Qualifizierern (<code>N</code> non-stored, <code>S</code>/<code>R</code> set/reset, <code>L</code> time-limited, <code>D</code> time-delayed, <code>P</code> pulse, <code>P1</code>/<code>P0</code> rising/falling). SFC ist als <em>Strukturierungselement</em> gedacht; Aktionen werden in einer der anderen Sprachen geschrieben.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: IEC 61131-3:2013 §5–§7 (Datenmodell, Software-Modell, POU); §6.5.1 (Tasks); Annex G (deprecated IL); John/Tiegelkamp 2010 Kap. 2–4; Heinrich 2021 §6.</em></p>'
+    };
+
+    const PAGE_SPS_POU = {
+        title: '2.2 POU, Tasking und Echtzeit-Verhalten',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) FB-Instanzen korrekt deklarieren und aufrufen, (2) Standard-FB <code>TON</code>/<code>TOF</code>/<code>TP</code>/<code>R_TRIG</code>/<code>F_TRIG</code>/<code>CTU</code>/<code>CTD</code> einsetzen, (3) Task-Konfigurationen (cyclic vs. event) auslegen, (4) WCET, Jitter und Pre-emption einschaetzen.</blockquote>'
+
+            + '<h4>2.2.1 Funktionsbaustein-Instanzen</h4>'
+            + '<p>Jeder Funktionsbaustein wird <em>instanziiert</em>; die Instanz haelt zwischen Aufrufen Zustand. Beispiel ST:</p>'
+            + '<pre><code>VAR\n    tonHeating : TON;     (* eine TON-Instanz *)\n    tonCooling : TON;     (* unabhaengige zweite Instanz *)\nEND_VAR\n\ntonHeating(IN := bSensorOn, PT := T#5s);\nIF tonHeating.Q THEN bRelay := TRUE; END_IF</code></pre>'
+            + '<p>Wichtige Regel (IEC 61131-3 §6.6.4): jede Instanz muss <em>periodisch aufgerufen</em> werden, damit interne Zeitbasis aktualisiert wird; ein TON, der nur in einem nicht-aktiven IF-Zweig steht, „faehrt" nicht. Standard-FB (Anhang) sind immer mit den Anschluessen <code>EN</code>/<code>ENO</code> kompatibel.</p>'
+
+            + '<h4>2.2.2 Standard-Funktionsbausteine</h4>'
+            + '<table><thead><tr><th>FB</th><th>Verhalten</th><th>Kernparameter</th></tr></thead><tbody>'
+            + '<tr><td><code>TON</code></td><td>On-delay: $Q$ wird $\\text{PT}$ nach steigender Flanke an $IN$ wahr.</td><td>$IN$, $PT$ → $Q$, $ET$</td></tr>'
+            + '<tr><td><code>TOF</code></td><td>Off-delay: $Q$ folgt $IN$ steigend; bei fallender Flanke bleibt $Q$ noch $PT$ wahr.</td><td>$IN$, $PT$ → $Q$, $ET$</td></tr>'
+            + '<tr><td><code>TP</code></td><td>Pulse: bei steigender Flanke wird $Q$ fuer genau $PT$ wahr (nicht retriggerbar).</td><td>$IN$, $PT$ → $Q$, $ET$</td></tr>'
+            + '<tr><td><code>R_TRIG</code></td><td>Erkennt steigende Flanke an $CLK$.</td><td>$CLK$ → $Q$</td></tr>'
+            + '<tr><td><code>F_TRIG</code></td><td>Erkennt fallende Flanke.</td><td>$CLK$ → $Q$</td></tr>'
+            + '<tr><td><code>CTU</code></td><td>Aufwaerts-Zaehler; $CV$ inkrementiert bei steigender Flanke an $CU$ bis $PV$.</td><td>$CU$, $R$, $PV$ → $Q$, $CV$</td></tr>'
+            + '<tr><td><code>CTD</code></td><td>Abwaerts-Zaehler.</td><td>$CD$, $LD$, $PV$ → $Q$, $CV$</td></tr>'
+            + '<tr><td><code>SR</code></td><td>Set-dominantes Flipflop ($S1$ hat Vorrang vor $R$).</td><td>$S1$, $R$ → $Q1$</td></tr>'
+            + '<tr><td><code>RS</code></td><td>Reset-dominantes Flipflop ($R1$ hat Vorrang).</td><td>$S$, $R1$ → $Q1$</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>2.2.3 Tasks und Scheduling</h4>'
+            + '<p>Eine <em>cyclic</em> Task hat eine fest konfigurierte Periode (Beispiel: $T=10\\,\\text{ms}$). Ihre Worst-Case-Ausfuehrungszeit (WCET) muss <em>kleiner</em> als die Periode sein, sonst tritt ein <em>Task-Overrun</em> auf. Die Norm verlangt, dass Overruns als Diagnosebit verfuegbar sind; viele Plattformen erlauben konfigurierbare Reaktion (z.B. Stopp oder Watchdog-Trip).</p>'
+            + '<p>Eine <em>event-triggered</em> Task wird durch ein Ereignis ausgeloest (Eingangsflanke, Bus-Telegramm, externes Interrupt). Sinnvoll fuer asynchrone Reaktionen wie Not-Aus, aber Vorsicht: die <em>Aufrufrate</em> ist nicht durch die Hardware deterministisch begrenzt — daher in IEC 61508-Kontexten meist mit Maximalrate-Filter abgesichert.</p>'
+            + '<p>Bei mehreren Tasks pro Resource entscheidet die <em>priority</em> (kleinerer Wert = hoehere Prioritaet ist Plattform-Konvention, IEC 61131-3 schreibt sie nicht zwingend vor — daher Plattform-Doku konsultieren). Gaengig ist <strong>fixed-priority preemptive scheduling</strong>: hochprior unterbricht niedrigprior. Der Datenaustausch zwischen Prioritaetsstufen muss konsistent sein — Loesungen: Doppelpufferung, Shadow-Variables, oder explizite IEC-61131-Konstrukte wie <code>VAR_GLOBAL</code> mit atomarem Zugriff (Plattform-spezifisch garantiert).</p>'
+
+            + '<h4>2.2.4 Determinismus und Jitter</h4>'
+            + '<p>Eine harte Echtzeitgarantie verlangt: $\\text{WCET} + J + I \\le T$, wobei $T$ die Task-Periode, $J$ der Scheduling-Jitter und $I$ die maximale Interrupt-Latenz ist. Lesehinweis: ein <em>10-ms-Task</em> bei 80 % Last hat im Schnitt 8 ms Code-Ausfuehrung — <em>nicht</em> die WCET. Ohne Lasttest und Worst-Case-Pfadanalyse ist die Echtzeitgarantie unbelegt.</p>'
+
+            + '<h4>2.2.5 Wiederverwendung — Bibliotheken und OO</h4>'
+            + '<p>Bibliotheken bundlen FB/FUN/Datentypen wiederverwendbar. Konventionen:</p>'
+            + '<ul>'
+            + '<li>Eindeutige Praefixe (Hersteller- oder Domaenen-Praefix) gegen Namenskollisionen.</li>'
+            + '<li>Versionierung im Bibliotheks-Header (PLCopen XML <code>&lt;header&gt;</code>).</li>'
+            + '<li>Ed. 3 OO: <code>CLASS</code> + <code>METHOD</code> + <code>EXTENDS</code>; <code>INTERFACE</code> fuer dynamische Bindung. <code>FINAL</code>/<code>ABSTRACT</code> wie in Java. Verwendung in SIL-zertifizierten Projekten kritisch pruefen, weil dynamische Bindung WCET schwerer abschaetzbar macht.</li>'
+            + '</ul>'
+
+            + '<h4>2.2.6 PLCopen XML — Austauschformat</h4>'
+            + '<p>PLCopen TC 6 spezifiziert ein XML-Format fuer den Austausch von IEC-61131-3-Projekten zwischen Engineering-Tools. Aktuell <strong>Version 2.01 (2009)</strong>, Erweiterungen fuer OO-Elemente in V3.0 (Draft). Damit ist Tool-uebergreifende Wiederverwendung von Bibliotheken moeglich, ohne herstellerspezifisches Bin-Format.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: IEC 61131-3:2013 §6.6 (POU), Annex F (Standard-FB); John/Tiegelkamp 2010 Kap. 5–7; PLCopen TC6 XML v2.01; Heinrich 2021 §6.4.</em></p>'
+    };
+
+    const PAGE_SPS_SAFETY = {
+        title: '2.3 Sicherheitsgerichtete Steuerung — IEC 61508 / 62061 / ISO 13849-1',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) SIL- und PL-Klassifizierung gegeneinander einordnen, (2) Hardware Fault Tolerance (HFT) und Safe-Failure-Fraction (SFF) berechnen, (3) PLCopen-Safety-FB anwenden, (4) Safety- und Standard-Steuerung sauber trennen.</blockquote>'
+
+            + '<h4>2.3.1 Normensystematik</h4>'
+            + '<p>Sicherheitsgerichtete Steuerungen folgen einem Normen-Zoo, der historisch gewachsen ist:</p>'
+            + '<ul>'
+            + '<li><strong>IEC 61508 Ed. 2.0:2010</strong> — Grundnorm fuer funktionale Sicherheit von <em>elektrischen / elektronischen / programmierbaren elektronischen</em> Systemen. Definiert SIL 1 bis SIL 4 ueber tolerierbare Versagenswahrscheinlichkeiten (PFD bzw. PFH).</li>'
+            + '<li><strong>IEC 62061:2021</strong> — Maschinen-spezifische Anwendung von IEC 61508 (sektorale Norm). Ersetzt die Vorgaengerversion 2005+A2:2015.</li>'
+            + '<li><strong>ISO 13849-1:2023</strong> — alternative Maschinen-Norm; klassifiziert in <em>Performance Level</em> PL a–e.</li>'
+            + '<li><strong>IEC 61131-6:2012</strong> — Functional Safety fuer SPS speziell, darauf aufbauend.</li>'
+            + '</ul>'
+            + '<p>Im Maschinenkontext duerfen sowohl IEC 62061 als auch ISO 13849-1 angewendet werden (Maschinenrichtlinie EU 2006/42/EG bzw. ab 2027 EU 2023/1230 Maschinen-Verordnung). Eine Quervergleichstabelle ist in IEC 62061:2021 Annex C enthalten.</p>'
+
+            + '<h4>2.3.2 SIL-Tabelle (IEC 61508 / 62061)</h4>'
+            + '<table><thead><tr><th>SIL</th><th>PFD<sub>avg</sub> (Low Demand)</th><th>PFH (High Demand)</th><th>Risikoreduktion</th></tr></thead><tbody>'
+            + '<tr><td>1</td><td>$10^{-2}$ … $10^{-1}$</td><td>$10^{-6}$ … $10^{-5}$ /h</td><td>10–100×</td></tr>'
+            + '<tr><td>2</td><td>$10^{-3}$ … $10^{-2}$</td><td>$10^{-7}$ … $10^{-6}$ /h</td><td>100–1000×</td></tr>'
+            + '<tr><td>3</td><td>$10^{-4}$ … $10^{-3}$</td><td>$10^{-8}$ … $10^{-7}$ /h</td><td>1000–10 000×</td></tr>'
+            + '<tr><td>4</td><td>$10^{-5}$ … $10^{-4}$</td><td>$10^{-9}$ … $10^{-8}$ /h</td><td>10 000–100 000×</td></tr>'
+            + '</tbody></table>'
+            + '<p><strong>Low demand</strong>: Anforderung an die Sicherheitsfunktion seltener als $1/\\text{Jahr}$ (z.B. Druckentlastung). <strong>High demand / continuous</strong>: haeufiger oder kontinuierlich (typisch fuer Maschinensicherheit; deshalb dort PFH).</p>'
+
+            + '<h4>2.3.3 SFF und HFT</h4>'
+            + '<p>Die <em>Safe Failure Fraction</em> ist nach IEC 61508-2 §7.4.4.1.2:</p>'
+            + '<p>$$\\mathrm{SFF}=\\frac{\\sum\\lambda_S+\\sum\\lambda_{DD}}{\\sum\\lambda_S+\\sum\\lambda_D}$$</p>'
+            + '<p>$\\lambda_S$ = sichere Ausfaelle, $\\lambda_D$ = gefaehrliche Ausfaelle (Index $DD$ = detektiert, $DU$ = nicht detektiert). Zusammen mit der <em>Hardware Fault Tolerance</em> (HFT — Anzahl der Faults, die das Element noch tolerieren kann, ohne die Sicherheitsfunktion zu verlieren) ergibt sich der erreichbare SIL aus den Tabellen 2/3 der IEC 61508-2. Beispiel: <em>Type-B-Element</em> (komplex, z.B. Mikrocontroller) mit HFT = 1 und SFF = 90 % erreicht maximal SIL 3.</p>'
+            + '<p><strong>Architekturen:</strong> 1oo1 (single channel), 1oo2 (zwei Kanaele, einer reicht zum Ausloesen — hohe Verfuegbarkeit der Sicherheitsfunktion, aber haeufiger Fehl-Ausloesungen), 2oo2, 2oo3, 1oo2D (mit Diagnose). Wahl je nach SIL-Ziel und Verfuegbarkeitsanforderung.</p>'
+
+            + '<h4>2.3.4 PL nach ISO 13849-1</h4>'
+            + '<p>ISO 13849-1 klassifiziert ueber Kategorie (B, 1, 2, 3, 4), MTTF<sub>D</sub> (Mean Time To Dangerous Failure) und DC<sub>avg</sub> (Diagnostic Coverage) in PL a (geringste) bis PL e (hoechste Risikoreduktion). PFH-Bandbreiten der PL korrespondieren grob mit den SIL — Quervergleich in IEC 62061:2021 Annex C: PL e ≈ SIL 3, PL d ≈ SIL 2, PL c ≈ SIL 1 (<em>nicht</em> 1:1, sondern als Orientierung).</p>'
+
+            + '<h4>2.3.5 PLCopen Safety</h4>'
+            + '<p>Die PLCopen-Spezifikation <em>"Safety Software Technical Specification Part 1 — Concepts and Function Blocks", Version 2.01 (2018)</em> definiert sicherheitsgerichtete FB mit dem Praefix <code>SF_</code>. Wichtige Bausteine:</p>'
+            + '<ul>'
+            + '<li><code>SF_EmergencyStop</code> — Notausschaltung gemaess EN/IEC 60204-1.</li>'
+            + '<li><code>SF_SafetyGuard</code> — Schutztuer-Ueberwachung (incl. Reset).</li>'
+            + '<li><code>SF_TwoHandControlTypeII/III</code> — Zwei-Hand-Schaltung (ISO 13851).</li>'
+            + '<li><code>SF_EnableSwitch</code> — Zustimm-Taster.</li>'
+            + '<li><code>SF_SafelyLimitedSpeed</code> — sicher begrenzte Geschwindigkeit (SLS, EN 61800-5-2).</li>'
+            + '<li><code>SF_TestableSafetySensor</code>, <code>SF_OutControl</code>.</li>'
+            + '</ul>'
+            + '<p>Konvention: alle Sicherheitssignale sind <em>aktiv-low</em> auf der Steuerungsseite (Drahtbruch ist sicherer Zustand). Eingangs-Sicherheits-Signale werden ueber zertifizierte Auswerte-FB diagnostiziert (z.B. Diskrepanzueberwachung bei Zwei-Kanal-Eingaengen).</p>'
+
+            + '<h4>2.3.6 Trennung Standard / Safety</h4>'
+            + '<p>Sicherheitsgerichtete Software wird auf der Steuerung in einem <em>separaten Programm-Bereich</em> ausgefuehrt — Speichersegmentierung, eigene Task, oft eigener Co-Prozessor (z.B. Siemens F-CPU, B&amp;R SafeLOGIC, Pilz PNOZmulti). <em>Standard-Variablen duerfen Safety-Variablen lesen, aber nicht schreiben</em> — der Datenfluss von Safety nach Standard ist erlaubt, von Standard nach Safety nur ueber dedizierte Mechanismen mit Ruecklesepruefung.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: IEC 61508-2:2010 §7.4 (SFF/HFT, Tabellen 2/3); IEC 62061:2021 §5.2, Annex C; ISO 13849-1:2023 §4.5; PLCopen Safety TS Part 1 v2.01 (2018); IEC 61131-6:2012.</em></p>'
+    };
+
+    const PAGE_SPS_61499 = {
+        title: '2.4 IEC 61499 — Verteilte ereignisgetriebene Steuerung',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Event- und Datenfluss in IEC-61499-Function-Blocks unterscheiden, (2) System-/Device-/Resource-/Application-Modell einordnen, (3) Vor- und Nachteile gegenueber IEC 61131-3 benennen, (4) Industrie-4.0-Bezug herstellen.</blockquote>'
+
+            + '<h4>2.4.1 Motivation</h4>'
+            + '<p>IEC 61131-3 wurde fuer <em>einzelne</em> Steuerungen entworfen — verteilte Anwendungen erfordern manuelles Splitting der Logik auf mehrere SPS-Programme plus Engineering der Kommunikation (Feldbus-Variablen, OPC UA, etc.). <strong>IEC 61499:2012 (Ed. 2.0)</strong> macht den Gegenentwurf: <em>eine Anwendung</em>, die deklarativ ueber mehrere Geraete (Devices) verteilt wird; das Engineering-Tool generiert die noetige Kommunikation automatisch.</p>'
+
+            + '<h4>2.4.2 Modell-Ebenen</h4>'
+            + '<ul>'
+            + '<li><strong>System:</strong> Gesamtanwendung; enthaelt Devices und Application(s).</li>'
+            + '<li><strong>Device:</strong> physisches Geraet (CPU, Edge-Box). Enthaelt Resources.</li>'
+            + '<li><strong>Resource:</strong> unabhaengige Verarbeitungseinheit; haelt einen Teil der Anwendung.</li>'
+            + '<li><strong>Application:</strong> Netz aus Function Blocks; wird per <em>Mapping</em> auf Resources/Devices verteilt.</li>'
+            + '<li><strong>Function Block:</strong> Grundbaustein.</li>'
+            + '</ul>'
+
+            + '<h4>2.4.3 Function-Block-Typen</h4>'
+            + '<ul>'
+            + '<li><strong>Basic FB:</strong> intern als <em>Execution Control Chart (ECC)</em> realisiert — Zustandsautomat, dessen Transitionen durch eingehende Events ausgeloest werden. Aktionen rufen interne Algorithmen auf (in beliebiger Sprache, z.B. ST).</li>'
+            + '<li><strong>Composite FB:</strong> Netz aus weiteren FBs.</li>'
+            + '<li><strong>Service Interface FB (SIFB):</strong> Schnittstelle zu Hardware/IO/Kommunikation; werden vom Plattform-Anbieter geliefert.</li>'
+            + '<li><strong>Adapter Interface:</strong> ab Ed. 2.0 — gebuendelte Schnittstellen mit Events + Daten + Plug/Socket-Konzept fuer einfacheres Wiring.</li>'
+            + '</ul>'
+
+            + '<h4>2.4.4 Event-getriebene Ausfuehrung</h4>'
+            + '<p>Im Unterschied zur zyklischen Abarbeitung der IEC 61131-3 sind FBs in IEC 61499 <em>passiv</em>: sie werden erst durch ein eingehendes Event aktiviert. Datenleitungen (DI/DO) tragen Werte; Event-Leitungen (EI/EO) triggern. Die Norm verlangt <em>WITH-Beziehungen</em>, die Daten an Events koppeln — damit ist klar, welche Daten beim Eintreffen eines Events <em>gueltig</em> sein sollen.</p>'
+            + '<p>Konsequenz: ein FB, das nur Daten erhaelt, aber kein zugehoeriges Event, fuehrt seinen Algorithmus nicht aus. Das ist gewollt, kann aber Anfaenger irritieren.</p>'
+
+            + '<h4>2.4.5 Vergleich zu IEC 61131-3</h4>'
+            + '<table><thead><tr><th>Aspekt</th><th>IEC 61131-3</th><th>IEC 61499</th></tr></thead><tbody>'
+            + '<tr><td>Ausfuehrungsmodell</td><td>zyklisch (scan)</td><td>ereignisgetrieben</td></tr>'
+            + '<tr><td>Verteilung</td><td>manuell, Bus-Variablen</td><td>deklarativ, ueber Mapping</td></tr>'
+            + '<tr><td>Wiederverwendung</td><td>POU, Bibliotheken</td><td>FB, Adapter, Plug/Socket</td></tr>'
+            + '<tr><td>Werkzeugverbreitung</td><td>sehr hoch (alle SPS-Anbieter)</td><td>begrenzt (nxtControl/Schneider, 4DIAC, ISaGRAF)</td></tr>'
+            + '<tr><td>Echtzeitgarantie</td><td>WCET pro Task gut analysierbar</td><td>komplexer durch verteilte Events</td></tr>'
+            + '<tr><td>I4.0-Eignung</td><td>via OPC UA + Engineering</td><td>nativ verteilt, mit OPC-UA-Mapping (Ed. 2.0)</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>2.4.6 4DIAC und Industrie-4.0-Bezug</h4>'
+            + '<p>Die Open-Source-Implementierung <strong>Eclipse 4DIAC</strong> (Forge: 4diac-ide, Runtime FORTE) ist die Referenzplattform fuer Lehre und Forschung; sie unterstuetzt seit 2.x auch OPC UA Pub/Sub als Transport. Industriell ist IEC 61499 bislang Nische — relevante Anbieter: Schneider Electric (EcoStruxure Automation Expert seit 2021, basiert auf IEC 61499), nxtControl (in Schneider integriert), ISaGRAF.</p>'
+            + '<p>Im RAMI-4.0-Kontext spielt IEC 61499 dort, wo Anwendungen ueber Feldgeraete, Edge-Knoten und Cloud verteilt werden sollen, ohne fuer jede Verschiebung das Engineering neu aufzusetzen — das ist konzeptionell die Verwandtschaft zur Asset-Administration-Shell-Idee „portable Software-Komponenten".</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: IEC 61499-1:2012 §4–§5 (Modell), §6 (FB-Typen), §7 (ECC); Vyatkin, "IEC 61499 Function Blocks", 3rd ed. 2020 Kap. 2–4; Eclipse 4DIAC Doku v2.0 (2023); Schneider Electric EcoStruxure Automation Expert White Paper 2021.</em></p>'
+    };
+
+    const QUIZ_SPS = [
+        // ---- IEC 61131-3 — Sprachen, Datenmodell, Software-Modell (1-15)
+        q('Welche Ausgabe der IEC 61131-3 fuehrte die objektorientierten Erweiterungen (CLASS, METHOD, EXTENDS, INTERFACE) ein?',
+            ['Ed. 2.0 (2003)', 'Ed. 3.0 (2013)', 'Ed. 4.0 (2024)', 'Ed. 1.0 (1993)'], 1,
+            'IEC 61131-3:2013 (Ed. 3.0) §2 fuehrt OO-Konstrukte CLASS, METHOD, EXTENDS, INTERFACE, THIS^ ein; in Ed. 2.0 (2003) noch nicht enthalten.'),
+        q('Welcher Status hat die Anweisungsliste (IL, Instruction List) in IEC 61131-3 Ed. 3?',
+            ['Empfohlen fuer alle Neuprojekte', 'Als deprecated markiert, nur noch im informativen Anhang', 'Wurde unveraendert beibehalten', 'Pflicht-Sprache fuer Compliance Level 2'], 1,
+            'IEC 61131-3:2013 Annex G: IL ist deprecated und nur noch informativ — neue Projekte sollen ST/FBD/LD/SFC verwenden.'),
+        q('Welche Sprachen normiert IEC 61131-3 Ed. 3 als <em>verbindliche</em> Programmiersprachen?',
+            ['ST, FBD, LD, SFC (IL nur informativ)', 'Nur ST und LD', 'C, C++, ST, FBD', 'IL, ST, FBD, LD, SFC'], 0,
+            'Ed. 3.0 fuehrt ST, FBD, LD und SFC; IL ist auf den informativen Anhang G abgewertet.'),
+        q('Was bezeichnet eine "Resource" im Software-Modell der IEC 61131-3?',
+            ['Ein Speicherbereich fuer Konstanten', 'Eine Stellgroesse', 'Eine Verarbeitungseinheit innerhalb einer Configuration (typisch eine CPU)', 'Ein Eingangssignal'], 2,
+            'IEC 61131-3:2013 §6.2: Configuration enthaelt Resources, jede Resource ist eine eigenstaendige Verarbeitungseinheit, die Tasks ausfuehrt.'),
+        q('Welche Reihenfolge entspricht der ueblichen zyklischen Abarbeitung einer Cyclic-Task in einer SPS?',
+            ['Ausgaenge → Eingaenge → Programme', 'Diagnose → Ausgaenge → Eingaenge → Programme', 'Programm → Eingaenge → Ausgaenge', 'Eingaenge lesen → Programme ausfuehren → Ausgaenge schreiben'], 3,
+            'Konventioneller Scan-Zyklus: konsistente Eingangsabbildung → Logik → Ausgangsabbildung. Garantiert konsistente Sicht auf das Prozessabbild (vgl. Heinrich 2021 §6.2).'),
+        q('Welche POU-Art behaelt zwischen Aufrufen einen internen Zustand?',
+            ['FUNCTION', 'FUNCTION_BLOCK', 'TYPE', 'CONFIGURATION'], 1,
+            'IEC 61131-3 §6.6.4: FUNCTION_BLOCK-Instanzen halten Zustand; FUNCTION ist explizit zustandslos (gleiche Eingaenge → gleicher Ausgang).'),
+        q('Welche Anzahl von Rueckgabewerten besitzt eine FUNCTION nach IEC 61131-3?',
+            ['Genau einen, vom Typ der FUNCTION', 'Beliebig viele ueber VAR_OUTPUT', 'Maximal drei', 'Null'], 0,
+            'IEC 61131-3 §6.6.2: Eine FUNCTION liefert genau einen Wert vom deklarierten Funktionstyp; weitere Ausgaenge werden ueber FB modelliert.'),
+        q('Welcher Datentyp ist ein 32-Bit-IEEE-754-Gleitkomma in IEC 61131-3?',
+            ['DWORD', 'DINT', 'REAL', 'LREAL'], 2,
+            'IEC 61131-3 §6.5.1 Tabelle: REAL = 32-Bit IEEE 754 single precision; LREAL = 64-Bit double.'),
+        q('Welches Literal ist gemaess IEC 61131-3 syntaktisch korrekt fuer hexadezimal $\\mathrm{FF}$?',
+            ['$FF', '16#FF', 'FFh', '0xFF'], 1,
+            'IEC 61131-3 §6.5.2: typisierte Literale verwenden Basenotation <Basis>#<Wert>; hex = 16#, binaer = 2#, oktal = 8#.'),
+        q('Wie wird in IEC 61131-3 ST eine Zuweisung geschrieben?',
+            ['<code>==</code>', '<code>&lt;-</code>', '<code>=</code>', '<code>:=</code>'], 3,
+            'IEC 61131-3 §7.3.2: Zuweisungsoperator in ST ist <code>:=</code> (pascal-aehnlich); <code>=</code> ist Gleichheits-Vergleich.'),
+        q('Welche Variablensektion enthaelt die Eingangsschnittstelle eines Funktionsbausteins?',
+            ['VAR_GLOBAL', 'VAR_TEMP', 'VAR', 'VAR_INPUT'], 3,
+            'IEC 61131-3 §6.5.5: VAR_INPUT deklariert Schnittstellen-Eingaenge; VAR ist lokaler Speicher der POU.'),
+        q('Welche Eigenschaft hat ein Bezeichner mit Attribut <code>RETAIN</code>?',
+            ['Behaelt seinen Wert ueber einen Warmstart hinweg', 'Ist nur in Funktionen erlaubt', 'Erzeugt eine Compile-Zeit-Konstante', 'Wird bei jedem Zyklus zurueckgesetzt'], 0,
+            'IEC 61131-3 §6.5.4: RETAIN-Variablen behalten ihren Wert beim Warmstart; PERSISTENT zusaetzlich beim Kaltstart (Plattform-spezifisch).'),
+        q('Welcher Qualifizierer in einer SFC-Aktion bewirkt ein <em>einmaliges</em> Setzen ohne Speicherverhalten?',
+            ['<code>R</code>', '<code>N</code>', '<code>L</code>', '<code>S</code>'], 1,
+            'IEC 61131-3 §6.7.5: <code>N</code> (non-stored) — Aktion ist solange aktiv, wie der Schritt aktiv ist; <code>S</code> setzt gespeichert (bleibt nach Schritt-Verlassen aktiv), <code>R</code> setzt zurueck.'),
+        q('Was unterscheidet <code>VAR_GLOBAL</code> von <code>VAR_EXTERNAL</code>?',
+            ['<code>VAR_GLOBAL</code> deklariert die Variable, <code>VAR_EXTERNAL</code> importiert sie in eine POU', '<code>VAR_EXTERNAL</code> ist ein Synonym fuer <code>VAR_TEMP</code>', '<code>VAR_GLOBAL</code> ist nur in Funktionen erlaubt', 'Kein Unterschied'], 0,
+            'IEC 61131-3 §6.5.5: VAR_GLOBAL deklariert auf Resource/Configuration-Ebene; VAR_EXTERNAL ist die Sichtbarkeit innerhalb einer einzelnen POU auf eine bestehende globale Variable.'),
+        q('Auf welcher Ebene des Software-Modells werden Tasks konfiguriert?',
+            ['Program', 'Function', 'Configuration', 'Resource'], 3,
+            'IEC 61131-3 §6.7.1: Tasks werden innerhalb einer Resource definiert (CYCLIC mit INTERVAL und PRIORITY oder SINGLE event-triggered).'),
+
+        // ---- POU, Tasking, Standard-FB (16-30)
+        q('Was passiert, wenn ein Aufruf eines TON-Bausteins in einem nicht-aktiven IF-Zweig liegt?',
+            ['Der Compiler verweigert die Uebersetzung', 'Q wird sofort TRUE', 'Die interne Zeit laeuft trotzdem', 'Die Instanz bleibt eingefroren — die Zeitbasis wird nicht aktualisiert'], 3,
+            'IEC 61131-3 §6.6.4: FB-Instanzen werden nur aktualisiert, wenn sie aufgerufen werden — fehlt der zyklische Aufruf, friert der Zustand ein.'),
+        q('Welche Standard-FB-Beschreibung trifft auf <code>TP</code> (Pulse) zu?',
+            ['Off-delay: Q bleibt nach fallender Flanke noch PT TRUE', 'Bei steigender Flanke wird Q fuer genau PT TRUE und ist nicht retriggerbar', 'Aufwaerts-Zaehler bis PV', 'On-delay: Q wird PT nach steigender Flanke TRUE'], 1,
+            'IEC 61131-3 Annex F: TP — bei steigender Flanke an IN wird Q fuer die Pulszeit PT wahr; weitere Flanken waehrend des Pulses werden ignoriert.'),
+        q('Welche Funktion erfuellt <code>R_TRIG</code>?',
+            ['PI-Regler', 'Tiefpassfilter', 'Erkennung einer steigenden Flanke an CLK', 'Wurzelfunktion'], 2,
+            'IEC 61131-3 Annex F: R_TRIG erzeugt einen einzelnen TRUE-Impuls (Q) bei steigender Flanke an CLK; F_TRIG analog fuer fallende Flanke.'),
+        q('Welche FB-Variante ist <em>set-dominant</em>?',
+            ['Keiner der Standard-FB ist dominant', '<code>SR</code> (Inputs S1, R)', '<code>RS</code> (Inputs S, R1)', 'Beide gleich'], 1,
+            'IEC 61131-3 Annex F: SR-FB hat S1 als dominanten Setz-Eingang (bei S1=1 und R=1 bleibt Q1=1); RS ist reset-dominant (R1 dominant).'),
+        q('Welche Variablen liefert ein <code>CTU</code> (Up-Counter) zurueck?',
+            ['Q (Schwelle erreicht), CV (aktueller Zaehlerstand)', 'Nur CV', 'Q, CV, ET, IN', 'Q, PT'], 0,
+            'IEC 61131-3 Annex F: CTU mit Eingaengen CU (count-up), R (reset), PV (preset) liefert Q (TRUE wenn CV ≥ PV) und CV (current value).'),
+        q('Welche Bedingung ist hinreichend, dass eine cyclic Task die Echtzeitanforderung erfuellt?',
+            ['WCET + Jitter + Interrupt-Latenz <= Periode', 'WCET = Periode', 'Periode beliebig waehlbar', 'Mittlere Ausfuehrungszeit < Periode'], 0,
+            'Klassische harte Echtzeit-Bedingung (Liu/Layland 1973, allg. anwendbar): die Worst-Case-Antwortzeit der Task muss kleiner-gleich der Deadline / Periode sein.'),
+        q('Was bedeutet ein "Task-Overrun" auf einer SPS?',
+            ['Der Stack laeuft ueber', 'Eine Task hat ihre Periode ueberschritten', 'Eine Task wurde gestrichen', 'Die Spannung ist ausgefallen'], 1,
+            'Heinrich 2021 §6.4.2: Task-Overrun = die Ausfuehrung einer Task war noch nicht fertig, als die naechste Periode begann; Diagnose-Bit + Reaktion sind Plattform-konfigurierbar.'),
+        q('Welche Scheduling-Strategie ist auf einer Industrie-SPS am verbreitetsten?',
+            ['Cooperative ohne Pre-emption', 'Round-Robin ohne Prioritaet', 'Earliest-Deadline-First (EDF)', 'Fixed-Priority preemptive'], 3,
+            'In allen verbreiteten Echtzeit-Kerneln (VxWorks, Tasking-Layer von CODESYS, TwinCAT) wird Fixed-Priority preemptive Scheduling eingesetzt — RM/DM-Analyse ist anwendbar.'),
+        q('Welche Funktion hat das PLCopen-XML-Format?',
+            ['Definition von OPC-UA-Knotenids', 'Visualisierung von HMI', 'Tool-uebergreifender Austausch von IEC-61131-3-Projekten', 'Kompilierung in Maschinencode'], 2,
+            'PLCopen TC6 XML v2.01 (2009): herstelleruebergreifender Austausch von POU, Bibliotheken, Tasks zwischen Engineering-Tools.'),
+        q('Welche objektorientierte Erweiterung in IEC 61131-3 Ed. 3 entspricht in etwa der Java-Schnittstelle (interface)?',
+            ['<code>NAMESPACE</code>', '<code>ALIAS</code>', '<code>CLASS</code>', '<code>INTERFACE</code>'], 3,
+            'IEC 61131-3:2013 §6.6.5: INTERFACE deklariert eine reine Methodensignatur ohne Implementierung; mehrfach-implementierbar.'),
+        q('Welche Sprache ist fuer komplexe Algorithmen am besten geeignet?',
+            ['Strukturierter Text (ST)', 'SFC ohne ST-Aktionen', 'Kontaktplan (LD)', 'Anweisungsliste (IL)'], 0,
+            'ST ist pascal-aehnlich, deckt Kontrollstrukturen, Funktionen, Mathematik vollstaendig ab; LD ist auf bool/zaehler-Logik spezialisiert.'),
+        q('Welche Aussage zu <code>VAR_TEMP</code> ist korrekt?',
+            ['Nur in CONFIGURATION zulaessig', 'Erzeugt eine retentive Variable', 'Wert bleibt zwischen Aufrufen erhalten', 'Wird bei jedem POU-Aufruf neu initialisiert'], 3,
+            'IEC 61131-3 §6.5.5: VAR_TEMP existiert nur waehrend eines Aufrufs; in FUNCTIONs sind alle lokalen Variablen implizit temporaer.'),
+        q('Welche Methode wird verwendet, um Daten zwischen Tasks unterschiedlicher Prioritaet konsistent auszutauschen?',
+            ['Doppelpufferung / Shadow-Variables / atomarer Zugriff', 'Spinlocks im Anwendungsprogramm', 'Signal/SIGINT', 'Globale Variable ohne Schutz'], 0,
+            'Plattform-Praxis (Heinrich 2021 §6.4.4): zur Vermeidung von Race-Conditions zwischen Tasks unterschiedlicher Prioritaet werden Doppelpuffer oder atomare Plattform-Mechanismen verwendet.'),
+        q('Was ist ein typischer SPS-Watchdog?',
+            ['Eine Diagnose-LED', 'Ein Sensor zur Stromueberwachung', 'Ein Timer, der bei Ueberschreitung einer Grenz-Ausfuehrungszeit eine Reaktion ausloest', 'Ein RPC-Mechanismus zur Cloud'], 2,
+            'Watchdog-Timer: wird zyklisch zurueckgesetzt; bleibt das Reset aus, wird die Steuerung in den sicheren Zustand gefahren — ueblich in IEC 61508-konformen Systemen.'),
+        q('Welche Bibliotheks-Konvention reduziert Namenskollisionen?',
+            ['Kurze, generische Namen', 'Eindeutige Hersteller- oder Domaenen-Praefixe', 'Nur Kleinbuchstaben', 'Keine — Namen sind global frei'], 1,
+            'PLCopen-Empfehlung und Industrie-Praxis: Praefixe wie <code>SF_</code> (Safety), Hersteller-Kuerzel oder Domaenen-Praefixe schuetzen vor Kollisionen.'),
+
+        // ---- Funktionale Sicherheit IEC 61508 / 62061 / ISO 13849-1 (31-42)
+        q('Welche Norm ist die <em>Grundnorm</em> fuer funktionale Sicherheit programmierbarer Systeme?',
+            ['IEC 61508', 'ISO 9001', 'ISO 27001', 'IEC 61131-3'], 0,
+            'IEC 61508 Ed. 2.0:2010 ist die generische Grundnorm; sektorale Anwendungen (62061 Maschinen, 61511 Prozessindustrie, 50128 Bahn) leiten daraus ab.'),
+        q('In welcher Bandbreite liegt PFH fuer SIL 3 (high demand)?',
+            ['$10^{-7}$ … $10^{-6}$ /h', '$10^{-8}$ … $10^{-7}$ /h', '$10^{-9}$ … $10^{-8}$ /h', '$10^{-5}$ … $10^{-4}$ /h'], 1,
+            'IEC 61508-1:2010 Tabelle 3: SIL 3 (high demand or continuous mode) entspricht PFH von $10^{-8}$ bis $10^{-7}$ pro Stunde.'),
+        q('Wie ist die Safe Failure Fraction (SFF) definiert?',
+            ['Reziprokes der MTTF', 'Anzahl der Tests pro Jahr', 'Anteil sicherer plus detektierter gefaehrlicher Ausfaelle an allen Ausfaellen', 'Quotient aus PFD und PFH'], 2,
+            'IEC 61508-2:2010 §7.4.4: $\\mathrm{SFF}=(\\sum\\lambda_S+\\sum\\lambda_{DD})/(\\sum\\lambda_S+\\sum\\lambda_D)$.'),
+        q('Welcher SIL ist maximal erreichbar bei Type-B-Element, HFT = 1, SFF = 90%?',
+            ['SIL 1', 'SIL 2', 'SIL 3', 'SIL 4'], 2,
+            'IEC 61508-2:2010 Tabelle 3 (Type-B-Subsystems): HFT=1 + SFF in [90%, 99%] -> max. SIL 3.'),
+        q('Was bedeutet eine Architektur "1oo2"?',
+            ['Zwei Kanaele fuehren parallel verschiedene Funktionen aus', 'Einer-aus-zwei: ein Kanal genuegt zum Ausloesen der Sicherheitsfunktion', 'Ein Kanal nur fuer Diagnose', 'Zwei Kanaele muessen beide ausloesen'], 1,
+            'IEC 61508-6 Annex B: 1oo2 = 1-out-of-2 — ein Kanal allein loest aus; hohe Sicherheit, aber haeufigere Fehl-Ausloesungen.'),
+        q('Welche Norm ist die Maschinen-spezifische Anwendung von IEC 61508?',
+            ['IEC 60204-1', 'ISO 12100', 'IEC 61131-6', 'IEC 62061:2021'], 3,
+            'IEC 62061:2021 ist die sektorale Anwendung von IEC 61508 fuer Maschinen-Sicherheit; ISO 13849-1 ist die alternative Maschinen-Norm.'),
+        q('Welche Klassifizierung verwendet ISO 13849-1?',
+            ['SIL 1–4', 'PL a–e', 'Class A–D', 'Tier 1–3'], 1,
+            'ISO 13849-1:2023 §4.5: Performance Level PL a (geringste Risikoreduktion) bis PL e (hoechste).'),
+        q('Welche Eingangsgroessen bestimmen den PL nach ISO 13849-1?',
+            ['Nur Anzahl Kanaele', 'SFF und HFT', 'Kategorie + MTTF<sub>D</sub> + DC<sub>avg</sub>', 'Nur PFH'], 2,
+            'ISO 13849-1:2023 §4.5: Kategorie (B, 1, 2, 3, 4), Mean Time To Dangerous Failure und Diagnostic Coverage avg ergeben den PL.'),
+        q('Was ist gemaess IEC 61508 ein "Type B"-Subsystem?',
+            ['Sensor in Niederspannung', 'Mechanischer Schalter', 'Komplexes Element (z.B. Mikrocontroller) mit nicht vollstaendig vorhersagbarem Versagensverhalten', 'Element mit Ausfallrate 0'], 2,
+            'IEC 61508-2:2010 §7.4.4.1.3: Type B = mindestens ein Bauteil mit nicht vollstaendig spezifiziertem Ausfallverhalten (typ. Mikrocontroller, ASIC); Type A umfasst nur einfache, voll spezifizierte Bauteile.'),
+        q('Welcher PLCopen-Safety-FB realisiert eine Notausschaltung?',
+            ['<code>SF_EmergencyStop</code>', '<code>SF_SafetyGuard</code>', '<code>SF_EnableSwitch</code>', '<code>SF_TwoHandControlTypeII</code>'], 0,
+            'PLCopen Safety TS Part 1 v2.01 (2018) §5.3.2: SF_EmergencyStop konformiert Not-Aus gemaess EN/IEC 60204-1 + ISO 13850.'),
+        q('Was schreibt IEC 61131-6:2012 vor?',
+            ['Kommunikationsprofile fuer EtherCAT', 'Programmiersprachen fuer Visualisierung', 'Funktionale Sicherheit speziell fuer SPS, ergaenzend zu IEC 61508', 'OPC-UA-Companion-Specs'], 2,
+            'IEC 61131-6:2012: Functional Safety speziell fuer SPS — definiert sicherheitsbezogene Software-Anforderungen ergaenzend zu IEC 61508.'),
+        q('Welcher Datenfluss ist zwischen Standard- und Safety-Steuerung typischerweise <em>nicht</em> direkt erlaubt?',
+            ['Standard schreibt direkt in Safety-Variablen', 'Safety liest eigene Diagnose-Werte', 'Safety liest Standard-Variablen', 'Standard liest Safety-Variablen'], 0,
+            'Standard-Praxis (z.B. Siemens F-CPU, B&amp;R SafeLOGIC): Standard nach Safety nur ueber dedizierte Mechanismen mit Ruecklesepruefung; direktes Schreiben verletzt die Trennung der Bewertungspfade.'),
+
+        // ---- IEC 61499 (43-50)
+        q('Welche Ausgabe der IEC 61499 ist aktuell gueltig?',
+            ['Ed. 1.0:1999', 'Ed. 1.0:2005', 'Ed. 2.0:2012', 'Ed. 3.0:2018'], 2,
+            'IEC 61499-1:2012 (Ed. 2.0) ist die aktuelle Ausgabe der Function-Block-Norm fuer verteilte Steuerungssysteme.'),
+        q('Was ist das zentrale Ausfuehrungsmodell der IEC 61499?',
+            ['Continuous-Time-Simulation', 'Polling jedes Datenflusses', 'Zyklische Abarbeitung wie IEC 61131-3', 'Ereignisgetriebene Ausfuehrung mit Event-Eingaengen/-Ausgaengen'], 3,
+            'IEC 61499-1:2012 §6: FBs werden durch Events (EI/EO) aktiviert; Daten (DI/DO) sind ueber WITH-Beziehungen an Events gekoppelt.'),
+        q('Welche Zustandsbeschreibung verwendet ein Basic Function Block in IEC 61499 intern?',
+            ['Execution Control Chart (ECC)', 'Klassen-Diagramm', 'Sequence Diagram', 'Petri-Netz'], 0,
+            'IEC 61499-1:2012 §6.2: Basic FB enthaelt ein ECC — Zustandsautomat mit Transitionen, die durch Events getriggert werden und Algorithmen aufrufen.'),
+        q('Welche Modell-Ebene umfasst in IEC 61499 das Mapping einer Application auf physische Geraete?',
+            ['Configuration', 'POU', 'Resource', 'Device'], 3,
+            'IEC 61499-1:2012 §4.4: Devices kapseln Resources; eine Application wird ueber das Device-Modell auf konkrete physische Knoten verteilt.'),
+        q('Welche FB-Variante in IEC 61499 dient als Schnittstelle zu Hardware oder Kommunikation?',
+            ['Composite FB', 'Service Interface FB (SIFB)', 'Adapter FB', 'Basic FB'], 1,
+            'IEC 61499-1:2012 §6.4: SIFB stellen Hardware-/Kommunikations-Schnittstellen bereit (I/O-Zugriff, Bus-Telegramme); werden vom Plattform-Anbieter geliefert.'),
+        q('Welche Open-Source-Plattform ist die verbreitete Referenzimplementierung der IEC 61499?',
+            ['TwinCAT', 'CODESYS', 'Eclipse 4DIAC (4diac-ide / FORTE)', 'TIA Portal'], 2,
+            'Eclipse 4DIAC (Foundation: 4diac-ide als Engineering, FORTE als Runtime) ist die offene Referenzplattform fuer IEC 61499.'),
+        q('Welcher industrielle Anbieter hat 2021 eine kommerzielle Plattform auf Basis von IEC 61499 (EcoStruxure Automation Expert) eingefuehrt?',
+            ['Schneider Electric', 'Mitsubishi', 'Siemens', 'Rockwell'], 0,
+            'Schneider Electric "EcoStruxure Automation Expert" (eingefuehrt 2021): kommerzielle IEC-61499-Plattform basierend auf nxtControl-Akquisition.'),
+        q('Was leistet eine WITH-Beziehung in IEC 61499?',
+            ['Definiert eine Vererbung', 'Realisiert eine Sicherheits-Ueberwachung', 'Verbindet zwei Devices', 'Koppelt einen Daten-Pin an einen Event-Pin, sodass die Daten beim Event als gueltig gelten'], 3,
+            'IEC 61499-1:2012 §6.1: WITH ordnet einer Datenleitung den Event zu, der die Gueltigkeit signalisiert — ohne WITH ist der Datenwert beim Event nicht zwingend frisch.')
+    ];
+
     const QUIZ_CTRL = [
         q('Wie lautet die Uebertragungsfunktion eines LTI-Zustandsraummodells?',
             ['$G(s)=B(sI-A)^{-1}C+D$', '$G(s)=C(sI-A)^{-1}B+D$', '$G(s)=(sI-A)^{-1}BC$', '$G(s)=A(sI-B)^{-1}C$'], 1,
@@ -265,31 +644,9 @@
             {
                 id: 'sps',
                 title: 'Kapitel 2 — SPS-Programmierung (IEC 61131-3 / IEC 61499)',
-                summary: 'Programmiersprachen IL, ST, LD, FBD, SFC; Programm-Organisations-Einheiten (POU); Funktionsbausteine; Echtzeit-Tasks; verteilte Steuerung mit IEC 61499.',
-                pages: [
-                    placeholderPage('IEC 61131-3 — Sprachen und Datenmodell', [
-                        'Strukturierter Text (ST), Funktionsbausteinsprache (FBD)',
-                        'Kontaktplan (KOP), Anweisungsliste (AWL, deprecated 3rd Ed)',
-                        'Ablaufsprache (AS, SFC) — Schritte, Transitionen, Aktionen',
-                        'Datentypen, Variablen, Geltungsbereiche'
-                    ]),
-                    placeholderPage('Programm-Organisations-Einheiten', [
-                        'Programme, Funktionsbausteine, Funktionen',
-                        'Wiederverwendung, Bibliotheken, Encapsulation',
-                        'Task-Konfiguration, Scan-Zyklen, Echtzeit-Garantien'
-                    ]),
-                    placeholderPage('Sicherheitsgerichtete Steuerung', [
-                        'IEC 61508 / IEC 62061 — SIL-Klassifizierung',
-                        'PLCopen Safety, Safety-Funktionsbloecke',
-                        'Diagnose, Fehlerreaktion, Validierung'
-                    ]),
-                    placeholderPage('Verteilte Steuerung mit IEC 61499', [
-                        'Funktionsbloecke, Ereignisse vs. Daten',
-                        'Application/Resource/Device-Struktur',
-                        'Vergleich zu IEC 61131-3, Industrie-4.0-Eignung'
-                    ])
-                ],
-                quiz: placeholderQuiz('SPS-Programmierung')
+                summary: 'Programmiersprachen ST, FBD, LD, SFC; Programm-Organisations-Einheiten (POU); Standard-Funktionsbausteine; Echtzeit-Tasks; sicherheitsgerichtete Steuerung nach IEC 61508 / 62061 / ISO 13849-1; verteilte ereignisgetriebene Steuerung mit IEC 61499.',
+                pages: [PAGE_SPS_LANG, PAGE_SPS_POU, PAGE_SPS_SAFETY, PAGE_SPS_61499],
+                quiz: QUIZ_SPS
             },
             {
                 id: 'fieldbus',

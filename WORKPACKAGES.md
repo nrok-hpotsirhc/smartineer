@@ -33,7 +33,7 @@ Pro Paket: ≥4 Lehrseiten (AGENTS §18.6) + ≥50 quellenbelegte MCQ (AGENTS §
 - **Aktion:** Feld `status: 'preparation'` aus Schulungs-Objekt entfernen, README/Card-Badge verifizieren, CACHE_VERSION bumpen.
 
 ### P-AUTO-02 — Master-ET Automation Kap. 2 "SPS / IEC 61131-3 / 61499"
-- **Status:** ready
+- **Status:** done (v31, Sitzung 2026-05-10)
 - **Datei:** `js/data/schulung_master_et_automation.js`
 - **Schwerpunkte:** IEC 61131-3 Ed. 3 (2013, OO-Erweiterung; LD/ST/FBD/IL/SFC), POU-Konzept, Tasking, IEC 61131-9 IO-Link, IEC 61499 (verteilte Function Blocks), IEC 61508 SIL/IEC 62061, Watchdogs, Determinismus.
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
@@ -127,8 +127,8 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Vorschlag (vom Agent gesetzt):** **P-AUTO-02** (Master-ET Automation Kap. 2 "SPS / IEC 61131-3 / 61499").
-> Begruendung: Master-ET Cybersec ist mit Kap. 6 (AI-Security, v30) komplett produktiv inkl. Status-Switch. Naechster Track ist Master-ET Automation; Kap. 2 (SPS / IEC 61131-3 / 61499) ist die fachliche Grundlage fuer Kap. 3 (Feldbus/TSN) und Kap. 5 (Robotik).
+> **Naechster Vorschlag (vom Agent gesetzt):** **P-AUTO-03** (Master-ET Automation Kap. 3 "Feldbus / Industrial Ethernet / TSN").
+> Begruendung: Kap. 2 (SPS / IEC 61131-3 / 61499, v31) ist produktiv. Kap. 3 schliesst inhaltlich direkt an (Kommunikation der in Kap. 2 programmierten Steuerungen) und ist Voraussetzung fuer Kap. 6 (Industrie 4.0 — RAMI/AAS/OPC UA bauen auf TSN/OPC-UA-Pub-Sub auf).
 
 ---
 
@@ -138,3 +138,4 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 - 2026-05-10: P-UI-AUTH-DEFAULTS-USER erledigt — Demo-User aus `auth-credentials.example.js` in `user/user` umbenannt, Login-Hinweistext in `app.jsx` an `admin/admin` und `user/user` angeglichen.
 - 2026-05-10: P-CYBERSEC-05 erledigt — Cybersec Kap. 5 "Risikomanagement und Compliance" produktiv ausgepflegt (4 Lehrseiten zu ISO/IEC 27001:2022 + Annex A, BSI IT-Grundschutz + ISO/IEC 27005:2022, EU-Regulatorik NIS2/CRA, Risiko-Bewertung CVSS v4.0/EPSS/KEV/FAIR/OCTAVE/ISO 31000; 50 quellenbelegte MCQ). CACHE_VERSION v28 → v29. Naechster Vorschlag: P-CYBERSEC-06.
 - 2026-05-10: P-CYBERSEC-06 + P-CYBERSEC-STATUS + P-UI-CONTRAST-FIX erledigt. Cybersec Kap. 6 "AI-Security und vertrauenswuerdige Systeme" produktiv (4 Lehrseiten zu Adversarial ML / Privacy-Modellschutz / LLM-Agentic-Sicherheit / MLOps-Governance; 50 quellenbelegte MCQ; Quellenanker u.a. Goodfellow 2015, Madry 2018, Carlini-Wagner 2017, Cohen 2019, Shokri 2017, Abadi 2016, Bonawitz 2017, OWASP LLM Top 10 v2025, NIST AI 600-1, NIST AI RMF 1.0, EU AI Act 2024/1689, ISO/IEC 42001:2023). `status: 'preparation'` von `master_et_cybersec` entfernt — Schulung jetzt vollstaendig produktiv. UI-Kontrast-Fix in Dark-Mode: `bg-amber-100` / `bg-emerald-100` mit Halbtransparenz-Hintergrund mappen, `text-blue-900` / `text-blue-800` auf `#bfdbfe` mappen, `border-blue-200` / `border-amber-200` ergaenzen. CACHE_VERSION v29 → v30. Naechster Vorschlag: P-AUTO-02.
+- 2026-05-10: P-AUTO-02 erledigt — Master-ET Automation Kap. 2 "SPS / IEC 61131-3 / 61499" produktiv ausgepflegt: 4 Lehrseiten (2.1 IEC 61131-3 Sprachen+Datenmodell+Software-Modell, 2.2 POU+Standard-FB+Tasking+Echtzeit, 2.3 Funktionale Sicherheit IEC 61508 / 62061:2021 / ISO 13849-1:2023 + PLCopen Safety v2.01, 2.4 IEC 61499:2012 verteilte ereignisgetriebene Steuerung + 4DIAC + EcoStruxure). 50 quellenbelegte MCQ mit Quellenanker pro `explanation` (IEC 61131-3:2013 inkl. Annex F+G, IEC 61499-1:2012, IEC 61508-2:2010 Tabellen 2/3 + SFF-Formel, IEC 62061:2021, ISO 13849-1:2023, PLCopen Safety TS Part 1 v2.01:2018, John/Tiegelkamp 2010, Vyatkin 2020, Heinrich 2021). `correct`-Verteilung balanciert auf [13,13,12,12] ueber A/B/C/D. CACHE_VERSION v30 → v31. Naechster Vorschlag: P-AUTO-03.
