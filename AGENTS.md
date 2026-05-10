@@ -775,4 +775,61 @@ const item = toItem(drillItem, { kind: 'schueler', classId, subject, idx });
 - Metadaten in `_legacy` schreiben — `_legacy` ist ein read-only Verweis auf das Originalobjekt, kein Schreibziel.
 - `id` aus `toItem` als persistenten Schluessel in `localStorage` verwenden — der Wert ist Best-Effort und kontextabhaengig. Fuer persistente Identitaet die `qid` aus `toItem` nutzen (oder direkt `stableQid(legacy)`).
 
+---
+
+## 23. Didaktisches Lehrseiten-Template (Fernstudium)
+
+Damit Master- und Medizin-Schulungen gleichmaessig studierbar sind und nicht je Kapitel didaktisch driften, gilt fuer alle Lehrseiten in `js/data/schulung_*.js` ab v38 das folgende Lehrseiten-Template (`P-STUDY-DIDACTIC-TEMPLATE`). Es konkretisiert §18.6 (HTML-Form) und ergaenzt §22 (Item-Metadaten).
+
+> **Geltungsbereich.** Pflicht fuer **neue** Lehrseiten in produktiven Master-Kapiteln (Cybersec, Automation) und in produktiven Medizin-Kapiteln. **Soll** fuer das Nachpflegen bestehender Seiten — bestehende Kapitel werden nicht massenhaft umgeschrieben, sondern bei jedem Top-up- oder Audit-Paket (P-CYBERSEC-01-TOPUP, P-AUTO-01-TOPUP, P-MED-AUDIT, …) inkrementell auf das Template gehoben. Kein Lesestand-Drift: keine Reihenfolge-Aenderung der Seiten, nur Inhaltsanreicherung pro Seite.
+>
+> **Nicht-Geltungsbereich.** Schueler-Track (§17) und Ingenieurs-Cheatsheets (§5 `formulas`) — beide haben eigene Didaktik-Regeln und brauchen das Template nicht.
+
+### 23.1 Pflicht-Bloecke pro Lehrseite (Reihenfolge)
+
+Eine vollstaendige Lehrseite hat acht Bloecke in dieser Reihenfolge:
+
+1. **Lernziele** — was die studierende Person nach dieser Seite *kann*. Operationalisierte Verben (Bloom: `erlaeutern`, `anwenden`, `analysieren`, `bewerten`, `entwerfen`). 2–5 Punkte. Empfohlenes Markup: `<blockquote><strong>Lernziele.</strong> Sie koennen (1) …, (2) …, (3) …</blockquote>`.
+2. **Vorwissen** — Verweis auf vorherige Kapitel/Seiten oder Standardlehrwerke; explizit benannt, nicht `siehe vorne`. Empfohlenes Markup: `<p><strong>Vorwissen.</strong> Kapitel 5.1 (ISMS), Grundbegriffe Wahrscheinlichkeit, …</p>`. 1 Satz oder kompakte Liste.
+3. **Kernkonzepte** — der Lehrtext im engeren Sinn. Untergliederung mit `<h4>` (z.B. `6.4.1`, `6.4.2`, …), Tabellen / Listen erlaubt (§18.6). Hier liegt der Hauptumfang.
+4. **Worked Example** — *mindestens ein* durchgerechnetes oder durchargumentiertes Beispiel mit Loesungsweg, nicht nur Endergebnis. Empfohlenes Markup: `<h4>Worked Example: …</h4>` gefolgt von Schritten als `<ol>` oder Pruefungsformular-Tabelle. Bei Mathe: KaTeX inline + abgesetzt. Bei Cases (Medizin/Compliance/IR): Anamnese / Rahmenbedingung -> Schritte -> Bewertung.
+5. **Selbstcheck** — 2–4 kurze Wissensfragen *im Lehrtext*, ohne Auswertung (Auswertung passiert via Kapitelquiz oder spaeter via P-LP-INLINE-CHECK). Empfohlenes Markup: `<h4>Selbstcheck</h4><ul><li>Frage 1?</li>…</ul>`. Lernziel-Bezug: jede Frage adressiert eines der Lernziele aus Block 1.
+6. **Typische Fehler** — was Studierende erfahrungsgemaess falsch machen, mit Korrektur. Empfohlenes Markup: `<h4>Typische Fehler</h4><ul><li><em>Fehler:</em> … <em>Korrekt:</em> …</li>…</ul>`. 2–5 Eintraege.
+7. **Transferaufgabe** — eine offene Aufgabe ohne Musterloesung im Text (Loesung erfolgt im Kapitel-Quiz, Capstone oder PBQ-Lab). Sie verbindet das Seiten-Thema mit einem realitaetsnahen Szenario (Industrie-/Klinik-/Anlagen-Kontext). Empfohlenes Markup: `<h4>Transferaufgabe</h4><p>…</p>`.
+8. **Quellen** — Quellenliste mit Jahr/Version/Paragraph. Empfohlenes Markup: `<p class="text-xs text-slate-500"><em>Quellen: …</em></p>`. Mindestanforderung: pro nicht-trivialer Aussage in Block 3/4 ist eine Quelle in Block 8 nachweisbar (siehe §8 / §18.5).
+
+### 23.2 HTML-Konventionen
+
+- Erlaubte Tags wie in §18.6: `<p>`, `<h3>`/`<h4>`, `<ul>/<ol>/<li>`, `<table>/<thead>/<tbody>/<tr>/<th>/<td>`, `<strong>`, `<em>`, `<code>`, `<blockquote>`. Plus `<details>/<summary>` fuer optional einklappbare Tiefenexkurse (rendert plain, KaTeX siehe P-UI-KATEX-DETAILS-TOGGLE).
+- Keine Inline-Styles, keine `<script>`, keine externen Bilder/SVGs.
+- KaTeX nur in Block 3, 4, 5: `$...$` inline, `$$...$$` abgesetzt, Backslashes verdoppeln.
+- Sprache Deutsch, Fachbegriffe ggf. englisch in Klammern (z.B. „Asset Administration Shell (AAS)").
+- Keine Emojis (AGENTS §12); Aufzaehlungs-Marker via `<ul>`/`<ol>`.
+
+### 23.3 Item-Metadaten (Verbindung zu §22)
+
+- Jede Lehrseite *kann* ein optionales Feld `lo` tragen (Lernziel-IDs aus dem Modulhandbuch, vgl. `docs/CURRICULUM-MATRIX.md`), z.B. `lo: ['aisec.governance.nist-rmf', 'aisec.governance.eu-ai-act']`.
+- Die `lo`-IDs der Quiz-Items eines Kapitels sollen Teilmenge der `lo`-IDs der Lehrseiten desselben Kapitels sein — sonst entsteht eine Quizfrage ohne abdeckende Lehrseite (Anti-Pattern fuer P-LP-FEEDBACK-LINKS).
+- Selbstcheck-Fragen in Block 5 sind *nicht* Quiz-Items im Sinne von §18.1 — sie tauchen nicht im `quiz`-Array auf, werden nicht gescored und brauchen kein `qid`.
+
+### 23.4 Erweiterungsregeln
+
+- **Neue Lehrseite anlegen:** acht Bloecke in der genannten Reihenfolge; bei sehr kurzen Seiten (< 250 Woerter Kernkonzepte) duerfen Block 4 und Block 7 zusammenfallen, alle anderen Bloecke bleiben Pflicht.
+- **Bestehende Lehrseite anreichern:** Bloecke einfach **ergaenzen**, nicht umsortieren — die Reader-Reihenfolge der Seiten in `chapters[*].pages` bleibt stabil (Lesestand-Drift, vgl. §11/§18.3).
+- **Kapitel-Status `production`:** wird nur gesetzt, wenn alle Lehrseiten des Kapitels alle acht Bloecke haben oder im Top-up-Paket explizit als „Block 4–7 nachzuziehen" markiert sind.
+- **CACHE_VERSION** bumpen, sobald eine Lehrseite inhaltlich erweitert wird (App-Shell-/Datenskript-Aenderung, §14a).
+
+### 23.5 Anti-Pattern
+
+- Lehrseite ohne Lernziele oder ohne Quellenblock — verstoesst gleich gegen §8 und §18.5.
+- Worked Example, das nur das Ergebnis nennt (ohne nachvollziehbaren Schritt-Weg) — keine Reaktivierung von Studienwissen.
+- Selbstcheck mit eingeblendeter Loesung im Lehrtext — entwertet das didaktische Format. Loesung gehoert ins Kapitel-Quiz oder spaeter in den Inline-Check (P-LP-INLINE-CHECK).
+- Transferaufgabe als verkappte Quizfrage im Lehrtext (z.B. „Welche der folgenden Antworten …") — die Aufgabe ist offen, nicht MCQ. MCQ gehoert ins `quiz`-Array.
+- Reihenfolge der Pflicht-Bloecke aendern, um „besser zu lesen" — der Reader laeuft konstant von oben nach unten; die Bloecke sind ein Pruefkatalog fuer Vollstaendigkeit, nicht eine Komposition.
+- Massen-Refactoring bestehender Seiten in einer Session — wuerde Lesestand-Drift und Diff-Review-Last erzeugen. Inkrementell pro Top-up-/Audit-Paket vorgehen.
+
+### 23.6 Referenz-Implementierung
+
+`PAGE_AI_GOVERNANCE` in `js/data/schulung_master_et_cybersec.js` (Cybersec Kap. 6.4 „MLOps-Sicherheit, NIST AI RMF, EU AI Act, ISO/IEC 42001") ist die exemplarische Lehrseite, die alle acht Bloecke in der vorgeschriebenen Reihenfolge fuehrt. Folgepakete (P-CYBERSEC-01-TOPUP, P-AUTO-01-TOPUP, P-MED-AUDIT, P-CYBERSEC-07/-08/-09, P-AUTO-05/-06/-07/-08/-09) verwenden diese Seite als Vorlage.
+
 
