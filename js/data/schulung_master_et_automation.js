@@ -1071,13 +1071,796 @@
             'Schroeder 2021 Kap. 14: Symmetrisches Optimum / Betrags-Optimum sind die etablierten analytischen Auslegungsverfahren fuer kaskadierte Antriebsregler.')
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 5 — Industrierobotik (PRODUKTIV)
+    // Quellen: Spong/Hutchinson/Vidyasagar "Robot Modeling and Control" 2nd
+    // ed. Wiley 2020; Siciliano/Sciavicco/Villani/Oriolo "Robotics: Modelling,
+    // Planning and Control" Springer 2010; Craig "Introduction to Robotics"
+    // 4th ed. Pearson 2018; Lynch/Park "Modern Robotics" Cambridge 2017;
+    // ISO 10218-1:2011 / ISO 10218-2:2011; ISO/TS 15066:2016; ISO 9283:1998;
+    // ROS 2 Humble/Iron LTS Doku 2024; MoveIt 2 Doku 2024; IFR World
+    // Robotics Report 2024.
+    // ----------------------------------------------------------------------
+
+    const PAGE_ROBOT_KIN = {
+        title: '5.1 Kinematik — DH-Konvention, Vorwaerts- und Rueckwaertskinematik',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) ein Manipulatormodell mit der modifizierten oder klassischen Denavit-Hartenberg-Konvention parametrieren, (2) die Vorwaertskinematik als Produkt homogener Transformationen aufstellen, (3) die inverse Kinematik analytisch fuer 6-DOF-Roboter mit spherical Wrist loesen, (4) Singularitaeten ueber die Jacobi-Matrix identifizieren und ihre Wirkung auf Bahnsteuerung erklaeren.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Lineare Algebra (Matrixinverse, Eigenwerte), homogene Transformationen, elementare Mehrkoerper-Kinematik. Voraussetzung: Bachelor-Modul "Robotik 1" oder Spong Kap. 2-3.</p>'
+
+            + '<h4>5.1.1 Denavit-Hartenberg-Parameter</h4>'
+            + '<p>Die <strong>klassische DH-Konvention</strong> (Denavit/Hartenberg 1955) beschreibt eine Gelenkverbindung mit vier Parametern $(a_i, \\alpha_i, d_i, \\theta_i)$: Linklaenge $a_i$, Linktwist $\\alpha_i$, Linkversatz $d_i$, Gelenkwinkel $\\theta_i$. Pro Gelenk ist genau einer dieser Parameter variabel: bei Drehgelenk $\\theta_i$, bei Schubgelenk $d_i$. Die homogene Transformation lautet:</p>'
+            + '<p>$$T_{i-1}^{i}(\\theta_i)=\\begin{bmatrix}\\cos\\theta_i & -\\sin\\theta_i\\cos\\alpha_i & \\sin\\theta_i\\sin\\alpha_i & a_i\\cos\\theta_i\\\\\\sin\\theta_i & \\cos\\theta_i\\cos\\alpha_i & -\\cos\\theta_i\\sin\\alpha_i & a_i\\sin\\theta_i\\\\0 & \\sin\\alpha_i & \\cos\\alpha_i & d_i\\\\0 & 0 & 0 & 1\\end{bmatrix}$$</p>'
+            + '<p>Die <strong>modifizierte DH-Konvention</strong> nach Craig (Craig 2018, Kap. 3) ordnet das Koordinatensystem an den proximalen Link an und ist in ROS/URDF-Workflows verbreiteter. Beide Konventionen sind aequivalent, duerfen aber innerhalb eines Modells nicht gemischt werden.</p>'
+
+            + '<h4>5.1.2 Vorwaertskinematik (FK)</h4>'
+            + '<p>Die Vorwaertskinematik liefert die Endeffektor-Pose $T_0^n$ als Produkt der Einzeltransformationen: $T_0^n=T_0^1 T_1^2 \\cdots T_{n-1}^n$. Fuer einen 6-DOF-Industrieroboter (z.B. KUKA KR 16, ABB IRB 1600) ergibt das eine geschlossene symbolische Formel; numerische Auswertung in $O(n)$ Matrixmultiplikationen.</p>'
+
+            + '<h4>5.1.3 Inverse Kinematik (IK)</h4>'
+            + '<p>Bei sechsachsigen Robotern mit <strong>spherical wrist</strong> (Achsen 4-5-6 schneiden sich im Punkt $W$) ist die IK <em>analytisch</em> entkoppelbar (Pieper 1968): Position des Wrist-Centers $W$ aus den ersten drei Gelenken, Orientierung aus den letzten drei. Es ergeben sich bis zu 8 reale Loesungen ("Schulter rechts/links", "Ellbogen oben/unten", "Wrist flip"). Bei nicht-spaerischen Geometrien (z.B. UR5e/UR10e mit Offset) wird numerisch via <strong>Damped Least Squares</strong> geloest: $\\Delta q=(J^T J+\\lambda^2 I)^{-1} J^T \\Delta x$ (Levenberg-Marquardt, Wampler 1986).</p>'
+
+            + '<h4>5.1.4 Jacobi-Matrix und Singularitaeten</h4>'
+            + '<p>Die geometrische Jacobi-Matrix $J(q)\\in\\mathbb{R}^{6\\times n}$ verknuepft Gelenkgeschwindigkeit mit Endeffektor-Twist: $\\dot{x}=J(q)\\dot{q}$. <strong>Singularitaet</strong> bei $\\det(J)=0$ bzw. Rangverlust. Drei klassische Faelle (Spong Kap. 4): (a) Wrist-Singularitaet (Achsen 4 und 6 kolinear), (b) Ellbogen-Singularitaet (Arm voll gestreckt), (c) Schulter-Singularitaet (Wrist auf Achse 1). In Singularitaeten divergieren Gelenkgeschwindigkeiten — Cartesian-Path-Bahnen mit konstanter Geschwindigkeit sind dann nicht ausfuehrbar.</p>'
+
+            + '<h4>Worked Example: 2R-Planar-Manipulator IK</h4>'
+            + '<p>Gegeben: 2R-Planar-Roboter, Linklaengen $\\ell_1=\\ell_2=0{,}3\\,\\text{m}$. Ziel-Endpunkt $(x,y)=(0{,}45,\\,0{,}15)\\,\\text{m}$. Finde $\\theta_1,\\theta_2$.</p>'
+            + '<ol>'
+            + '<li>Cosinussatz: $\\cos\\theta_2=\\dfrac{x^2+y^2-\\ell_1^2-\\ell_2^2}{2\\ell_1\\ell_2}=\\dfrac{0{,}2025+0{,}0225-0{,}09-0{,}09}{2\\cdot 0{,}09}=\\dfrac{0{,}045}{0{,}18}=0{,}25$.</li>'
+            + '<li>$\\theta_2=\\pm\\arccos(0{,}25)\\approx\\pm 75{,}5^\\circ$ (Ellbogen oben/unten).</li>'
+            + '<li>Wahl Ellbogen-unten: $\\theta_2\\approx -75{,}5^\\circ$. Mit $k_1=\\ell_1+\\ell_2\\cos\\theta_2$, $k_2=\\ell_2\\sin\\theta_2$:</li>'
+            + '<li>$\\theta_1=\\operatorname{atan2}(y,x)-\\operatorname{atan2}(k_2,k_1)=\\operatorname{atan2}(0{,}15,\\,0{,}45)-\\operatorname{atan2}(-0{,}29,\\,0{,}3775)\\approx 18{,}43^\\circ-(-37{,}6^\\circ)=56{,}03^\\circ$.</li>'
+            + '<li>Probe Vorwaertskinematik: $x=\\ell_1\\cos\\theta_1+\\ell_2\\cos(\\theta_1+\\theta_2)\\approx 0{,}45$, $y\\approx 0{,}15$. Stimmt.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche vier Parameter braucht die DH-Konvention pro Gelenk, und welcher davon ist bei einem Drehgelenk variabel?</li>'
+            + '<li>Wieso liefert die analytische IK eines 6-DOF-Roboters mit spherical wrist bis zu acht Loesungen?</li>'
+            + '<li>Warum divergiert die Gelenkgeschwindigkeit in einer Singularitaet, obwohl der Endeffektor-Twist beschraenkt ist?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Klassische und modifizierte DH-Konvention im selben URDF mischen. <em>Korrekt:</em> Genau eine Konvention konsequent durchziehen, Doku im URDF-Header festhalten.</li>'
+            + '<li><em>Fehler:</em> IK ueber $\\theta_2=\\arccos(\\cdot)$ ohne Vorzeichenfall. <em>Korrekt:</em> $\\pm\\arccos(\\cdot)$ und beide Konfigurationen pruefen, sonst Verlust einer realen Loesung.</li>'
+            + '<li><em>Fehler:</em> $J^{-1}$ direkt invertieren. <em>Korrekt:</em> Damped Least Squares oder SVD-basierte Pseudoinverse mit Manipulability-Check, sonst numerische Explosion in der Naehe von Singularitaeten.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Gegeben sei ein 6-DOF-Industrieroboter (KUKA KR 16-2, Reichweite 1.610 mm). Eine Pick-and-Place-Bahn fuehrt durch eine Wrist-Singularitaet. Beschreiben Sie zwei Strategien (eine bahnseitige, eine reglerseitige), um den Vorgang ohne Achs-Ueberdrehen auszufuehren — inklusive Begruendung anhand Manipulability-Index $w=\\sqrt{\\det(JJ^T)}$.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: Denavit/Hartenberg, J. Appl. Mech. 1955; Pieper, Stanford TR 1968; Wampler, IEEE T-SMC 1986; Spong/Hutchinson/Vidyasagar, Robot Modeling and Control, 2nd ed., Wiley 2020, Kap. 2-4; Siciliano et al., Robotics, Springer 2010, Kap. 2-3; Craig, Introduction to Robotics, 4th ed., Pearson 2018, Kap. 3-4; Lynch/Park, Modern Robotics, Cambridge 2017, Kap. 4-6.</em></p>'
+    };
+
+    const PAGE_ROBOT_DYN = {
+        title: '5.2 Dynamik und Bahnplanung — Lagrange/Newton-Euler, Trajektorien',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die Bewegungsgleichung $M(q)\\ddot q+C(q,\\dot q)\\dot q+g(q)=\\tau$ herleiten und ihre Bestandteile interpretieren, (2) Lagrange- und Newton-Euler-Verfahren gegenueberstellen, (3) Bahnen in Gelenk- und Kartesischem Raum mit Geschwindigkeits-/Beschleunigungs-Profilen planen, (4) Genauigkeitskennwerte nach ISO 9283 (Pose-Wiederholgenauigkeit, Bahnabweichung) anwenden.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Lagrange-Mechanik, Newton-Eulersche Mehrkoerperdynamik, Splines, Kapitel 5.1 (Kinematik). Empfohlene Lektuere: Spong Kap. 7-8.</p>'
+
+            + '<h4>5.2.1 Bewegungsgleichung</h4>'
+            + '<p>Die Manipulator-Dynamik in Standardform lautet $M(q)\\ddot q+C(q,\\dot q)\\dot q+g(q)+\\tau_f(\\dot q)=\\tau$, mit $M$ symmetrisch und positiv definit (Massentraegheit), $C$ Coriolis-/Zentrifugalmatrix (parametrierbar so, dass $\\dot M-2C$ schiefsymmetrisch ist — wichtig fuer passivitaetsbasierte Regler), $g$ Schwerkraftvektor und $\\tau_f$ Reibmodell (Coulomb + viskos + Stribeck).</p>'
+
+            + '<h4>5.2.2 Lagrange vs. Newton-Euler</h4>'
+            + '<p><strong>Lagrange:</strong> $\\frac{d}{dt}\\partial L/\\partial\\dot q-\\partial L/\\partial q=\\tau$ mit $L=T-V$. Liefert geschlossene symbolische Form, Aufwand $O(n^4)$ — gut fuer Reglersynthese, aber teuer fuer Online-Auswertung. <strong>Newton-Euler (NE)</strong> rekursiv (Luh/Walker/Paul 1980): Vorwaerts Geschwindigkeiten/Beschleunigungen, rueckwaerts Kraefte/Momente. Aufwand $O(n)$ — Standard in Echtzeit-Reglern (z.B. KUKA KRC, ABB IRC5).</p>'
+
+            + '<h4>5.2.3 Bahnplanung</h4>'
+            + '<p><strong>Gelenkraum-Bahnen</strong>: kubische Splines ($q(t)=a_0+a_1 t+a_2 t^2+a_3 t^3$) mit Randbedingungen Position/Geschwindigkeit; quintische Splines fuer C2-Stetigkeit der Beschleunigung; <strong>LSPB</strong> (Linear Segment with Parabolic Blend, Trapezprofil) fuer Achsen mit Geschwindigkeits- und Beschleunigungslimit. <strong>Kartesische Bahnen</strong> via SLERP fuer Quaternionen, Linearinterpolation fuer Position; Achtung Singularitaeten — vorher mit Manipulability-Check absichern.</p>'
+
+            + '<h4>5.2.4 Genauigkeitskennwerte (ISO 9283:1998)</h4>'
+            + '<p>ISO 9283:1998 normiert die Messung von Pose-Genauigkeit (AP), Pose-Wiederholgenauigkeit (RP), Bahn-Genauigkeit (AT) und Bahn-Wiederholgenauigkeit (RT). Tests werden mit definierter Last und Geschwindigkeit auf einer ISO-Pruefebene gefahren. Industrielle 6-DOF-Roboter erreichen typisch RP $\\le 0{,}05\\,\\text{mm}$ (Spezifikation Datenblatt KUKA KR 16: $\\pm 0{,}03\\,\\text{mm}$).</p>'
+
+            + '<h4>Worked Example: Trapezprofil-Auslegung</h4>'
+            + '<p>Gegeben Achse mit $v_{\\max}=2\\,\\text{rad/s}$, $a_{\\max}=10\\,\\text{rad/s}^2$, Bewegung von $q_0=0$ nach $q_f=1{,}0\\,\\text{rad}$.</p>'
+            + '<ol>'
+            + '<li>Beschleunigungszeit $t_a=v_{\\max}/a_{\\max}=0{,}2\\,\\text{s}$, dabei zurueckgelegter Weg $\\Delta q_a=\\tfrac{1}{2}a_{\\max}t_a^2=0{,}2\\,\\text{rad}$.</li>'
+            + '<li>Symmetrisches Profil: gleicher Weg in der Bremsphase $\\Delta q_a=0{,}2\\,\\text{rad}$. Konstantphase: $\\Delta q_c=q_f-2\\Delta q_a=0{,}6\\,\\text{rad}$, Dauer $t_c=\\Delta q_c/v_{\\max}=0{,}3\\,\\text{s}$.</li>'
+            + '<li>Gesamtzeit $T=2 t_a+t_c=0{,}7\\,\\text{s}$. Pruefung: $v_{\\max}$ wird erreicht, da $\\Delta q_a+\\Delta q_a< q_f$. Bei kuerzeren Bewegungen entartet das Profil zu einem Dreieck (kein Konstantsegment).</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Warum ist es vorteilhaft, $C(q,\\dot q)$ so zu parametrieren, dass $\\dot M-2C$ schiefsymmetrisch ist?</li>'
+            + '<li>Wann nutzt man rekursives Newton-Euler statt Lagrange — und wann nicht?</li>'
+            + '<li>Was misst die ISO-9283-Kenngroesse "RP" und worin unterscheidet sie sich von "AP"?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Linearinterpolation in Eulerwinkeln fuer Orientierungsbahnen. <em>Korrekt:</em> SLERP in Quaternionen, sonst Gimbal-Lock und ungleichfoermige Drehgeschwindigkeit.</li>'
+            + '<li><em>Fehler:</em> Trapezprofil ohne Pruefung, ob $v_{\\max}$ tatsaechlich erreicht wird. <em>Korrekt:</em> Wenn $2\\cdot \\tfrac{1}{2}a_{\\max}(v_{\\max}/a_{\\max})^2 > \\Delta q$, Dreieckprofil nutzen.</li>'
+            + '<li><em>Fehler:</em> Reibmodell weglassen, weil "klein". <em>Korrekt:</em> Coulomb-Reibung dominiert bei niedrigen Geschwindigkeiten und verzerrt Trackingfehler — mindestens Coulomb + viskos modellieren.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Eine kollaborative Schweisszelle fordert Bahn-Wiederholgenauigkeit $RT\\le 0{,}1\\,\\text{mm}$ bei $v=300\\,\\text{mm/s}$. Skizzieren Sie eine Messprozedur nach ISO 9283 inklusive (a) Pruefebene-Wahl, (b) Lastzustand, (c) Anzahl Wiederholungen, (d) Auswertung 3$\\sigma$, und benennen Sie zwei mechanische und zwei steuerungstechnische Hebel zur Verbesserung.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: Spong et al. 2020, Kap. 7-8; Siciliano et al. 2010, Kap. 7-9; Luh/Walker/Paul, J. Dyn. Syst. Meas. Control 1980; ISO 9283:1998; Lynch/Park 2017, Kap. 8-9.</em></p>'
+    };
+
+    const PAGE_ROBOT_SAFETY = {
+        title: '5.3 Sicherheit und Mensch-Roboter-Kollaboration — ISO 10218 / ISO/TS 15066',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die vier MRK-Betriebsarten nach ISO 10218 / ISO/TS 15066 abgrenzen, (2) Power-and-Force-Limiting-Grenzwerte fuer Koerperregionen anwenden, (3) eine Risikobeurteilung nach ISO 12100 / ISO 13849-1 fuer eine Roboterzelle aufsetzen, (4) Safety-PL/SIL fuer typische Schutzfunktionen bestimmen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Maschinenrichtlinie 2006/42/EG (kuenftig EU-Maschinenverordnung 2023/1230 ab 20.01.2027), Funktionale Sicherheit (Kapitel 2.3), Mehrkoerperdynamik (Kapitel 5.2). Empfohlene Lektuere: ISO 10218-1:2011, ISO/TS 15066:2016.</p>'
+
+            + '<h4>5.3.1 Vier MRK-Betriebsarten (ISO 10218-2:2011 §5.11; ISO/TS 15066:2016)</h4>'
+            + '<ul>'
+            + '<li><strong>Sicherheitsbewerteter ueberwachter Halt (Safety-Rated Monitored Stop, SRMS)</strong>: Roboter steht, Mensch darf in den Arbeitsraum; jede Bewegung loest Stopp aus.</li>'
+            + '<li><strong>Handfuehrung (Hand-Guiding)</strong>: Bediener fuehrt Roboter mit aktivem Zustimmtaster, Geschwindigkeit ueberwacht.</li>'
+            + '<li><strong>Geschwindigkeits- und Abstandsueberwachung (Speed and Separation Monitoring, SSM)</strong>: Sicherheitsabstand wird laufend gemessen (z.B. Laserscanner SICK microScan3, Photonenfeld), Geschwindigkeit bei Annaeherung reduziert.</li>'
+            + '<li><strong>Leistungs- und Kraftbegrenzung (Power-and-Force-Limiting, PFL)</strong>: Roboter beruehrt Mensch, aber Kontaktkraefte/-druecke bleiben unter biomechanischen Grenzwerten aus ISO/TS 15066:2016 Annex A (z.B. Stirn 130 N quasistatisch, 175 N transient; Hand 140/280 N).</li>'
+            + '</ul>'
+
+            + '<h4>5.3.2 Risikobeurteilung (ISO 12100:2010)</h4>'
+            + '<p>Iterativer Prozess: (1) Festlegung der Grenzen, (2) Gefaehrdungsidentifikation, (3) Risikoeinschaetzung (Schadensschwere x Eintrittswahrscheinlichkeit), (4) Risikobewertung, (5) Risikominderung nach STOP-Prinzip (Substitution, Technische, Organisatorische, Persoenliche). Ergebnis: Liste validierter Schutzmassnahmen + Restrisiken.</p>'
+
+            + '<h4>5.3.3 Performance Level (PL) / Safety Integrity Level (SIL)</h4>'
+            + '<p>ISO 13849-1:2023 ordnet Schutzfunktionen einen Required PL ($PL_r$ a-e) zu. PL kombiniert MTTFd (mittlere Zeit bis zum gefaehrlichen Ausfall), DCavg (Diagnosedeckung) und CCF (Common Cause Failures) zu einer Architektur-Kategorie (B, 1-4). IEC 62061:2021 nutzt SIL 1-3. Korrespondenz: $PL_d \\approx \\text{SIL 2}$, $PL_e \\approx \\text{SIL 3}$.</p>'
+            + '<p>Beispiel SRMS bei 6-DOF-Industrieroboter: typisch $PL_d$ Cat. 3 (zweikanalig, plausibilisiert), realisiert ueber zertifizierte Safety-CPU (z.B. Siemens S7-1500F, B&amp;R X20 Safety). Power-and-Force-Limiting bei Cobots erfordert $PL_d$ Cat. 3 (z.B. UR10e: zertifiziert nach ISO 10218-1:2011 mit TUEV-Nord).</p>'
+
+            + '<h4>Worked Example: PFL-Auslegung Stirn-Kontakt</h4>'
+            + '<p>Cobot mit effektiver Masse $m_R=4\\,\\text{kg}$ am Werkzeug, Geschwindigkeit $v=0{,}25\\,\\text{m/s}$, Werkstueck (Schraubendreher Spitze, gepolstert). Pruefe gegen ISO/TS 15066:2016 Annex A.3 — Stirn quasistatisch 130 N, transient 175 N.</p>'
+            + '<ol>'
+            + '<li>Effektive Masse Mensch-Roboter-System: $m_H=4{,}4\\,\\text{kg}$ (Stirn-Kopf, ISO/TS 15066 Tab. A.2). $m_\\text{eff}=\\dfrac{1}{1/m_R+1/m_H}=\\dfrac{1}{0{,}25+0{,}227}=2{,}10\\,\\text{kg}$.</li>'
+            + '<li>Maximale Kontaktenergie (worst case rein elastisch, Kontaktsteifigkeit $k=150\\,\\text{N/mm}=150{,}000\\,\\text{N/m}$ aus Tab. A.3 Stirn): $E=\\tfrac{1}{2}m_\\text{eff} v^2=\\tfrac{1}{2}\\cdot 2{,}10\\cdot 0{,}25^2=0{,}0656\\,\\text{J}$.</li>'
+            + '<li>Spitzenkraft: $F_\\max=v\\sqrt{m_\\text{eff}\\cdot k}=0{,}25\\cdot\\sqrt{2{,}10\\cdot 150000}=0{,}25\\cdot 561\\approx 140\\,\\text{N}$.</li>'
+            + '<li>Vergleich: 140 N transient liegt unter 175 N transient-Grenze fuer Stirn — zulaessig. <strong>Aber</strong>: Quasistatischer Folgekontakt &gt;130 N waere unzulaessig — daher Anwendung mit Force-Sensor oder Kontaktzeitbegrenzung absichern.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Wodurch unterscheiden sich SSM und PFL — und welche Betriebsart wird haeufig kombiniert?</li>'
+            + '<li>Welche drei Groessen gehen in die Bestimmung des erreichten PL nach ISO 13849-1 ein?</li>'
+            + '<li>Warum ist die effektive Masse $m_\\text{eff}$ kleiner als beide Einzelmassen $m_R$ und $m_H$?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> "Cobot ist sicher per Bauart". <em>Korrekt:</em> Sicherheit ist eine Eigenschaft der Anwendung, nicht des Roboters — Risikobeurteilung bleibt Pflicht (ISO 10218-2 §4.3).</li>'
+            + '<li><em>Fehler:</em> Quasistatische und transiente Grenzen verwechseln. <em>Korrekt:</em> Quasistatisch &lt;500 ms Druck, transient &lt;500 ms freier Schlag — beide Klassen aus ISO/TS 15066 Annex A einhalten.</li>'
+            + '<li><em>Fehler:</em> SSM-Sicherheitsabstand mit nominaler Roboter-Geschwindigkeit. <em>Korrekt:</em> Mit max. Spitzengeschwindigkeit + Reaktionszeit Steuerung + Bremsweg + Mess-Toleranz Laserscanner (ISO 13855:2010 Formeln).</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Eine bestehende KUKA-LBR-iiwa-Zelle (PFL-Cobot, Nutzlast 7 kg) soll mit einer neuen Spitzwerkzeug-Variante (Schraubendreher) betrieben werden. Begruenden Sie, welche zusaetzliche Sicherheitsmassnahme aus ISO/TS 15066 angemessen ist, wenn die effektive Werkstueck-Geometrie unter $1\\,\\text{cm}^2$ Kontaktflaeche faellt — und welche Norm explizit auf Druckwerte (Pa) statt Kraftwerte (N) verweist.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: ISO 10218-1:2011, ISO 10218-2:2011 (Industrial robots safety); ISO/TS 15066:2016 (Collaborative robots, biomechanical limits Annex A); ISO 12100:2010 (Risikobeurteilung); ISO 13849-1:2023 (PL); IEC 62061:2021 (SIL); ISO 13855:2010 (Sicherheitsabstaende); EU-Maschinenverordnung 2023/1230.</em></p>'
+    };
+
+    const PAGE_ROBOT_PROG = {
+        title: '5.4 Programmiersprachen und Frameworks — KRL, RAPID, URScript, ROS 2/MoveIt 2',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) herstellerspezifische Roboter-Sprachen (KRL, RAPID, URScript, KAREL) hinsichtlich Bewegungsbefehlen, Datentypen und Echtzeit-Eigenschaften vergleichen, (2) den ROS 2 Stack inkl. DDS, Lifecycle-Knoten und ros2_control beschreiben, (3) MoveIt 2 fuer Bahnplanung und Kollisionspruefung anwenden, (4) Offline-Programmierung mit Digital-Twin-Workflow integrieren.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kapitel 5.1 (Kinematik), Kapitel 5.2 (Bahnplanung), Grundkenntnisse Linux/Echtzeit-OS. Empfohlene Lektuere: ROS 2 Humble/Iron Doku 2024, MoveIt 2 Tutorial 2024, KUKA KSS-Doku 8.7, ABB RAPID Reference Manual 6.16.</p>'
+
+            + '<h4>5.4.1 Herstellersprachen im Vergleich</h4>'
+            + '<table><thead><tr><th>Sprache</th><th>Hersteller</th><th>Bewegung</th><th>Datentypen</th></tr></thead><tbody>'
+            + '<tr><td>KRL</td><td>KUKA</td><td>$\\texttt{PTP},\\texttt{LIN},\\texttt{CIRC}$ + $\\texttt{C\\_DIS}/\\texttt{C\\_VEL}$ Anweisungen</td><td>$\\texttt{POS},\\texttt{E6POS},\\texttt{FRAME}$</td></tr>'
+            + '<tr><td>RAPID</td><td>ABB</td><td>$\\texttt{MoveJ},\\texttt{MoveL},\\texttt{MoveC}$ + Zonenpunkte $\\texttt{z10}$ etc.</td><td>$\\texttt{robtarget},\\texttt{jointtarget},\\texttt{tooldata}$</td></tr>'
+            + '<tr><td>URScript</td><td>Universal Robots</td><td>$\\texttt{movej},\\texttt{movel},\\texttt{movep},\\texttt{servoj}$</td><td>$\\texttt{pose},\\texttt{q}$ (Listen)</td></tr>'
+            + '<tr><td>KAREL/TPP</td><td>FANUC</td><td>$\\texttt{J}/\\texttt{L}/\\texttt{C}$ Bewegungstypen</td><td>$\\texttt{POSITION},\\texttt{XYZWPR}$</td></tr>'
+            + '</tbody></table>'
+            + '<p>Determinismus: KRL/RAPID/URScript laufen auf zertifizierter Echtzeit-Steuerung (KUKA KRC, ABB IRC5/OmniCore, UR PolyScope), Zykluszeit Bahninterpolation typisch 12-4 ms. ROS 2 ist <em>nicht</em> per se hart-Echtzeit — fuer harte Echtzeit ist ros2_control mit Linux-PREEMPT_RT oder Xenomai noetig.</p>'
+
+            + '<h4>5.4.2 ROS 2 Architektur</h4>'
+            + '<p>ROS 2 (Robot Operating System 2) loest ROS 1 ab; LTS-Distributionen Humble Hawksbill (2022-2027) und Iron Irwini (2023-2024, Folgeversion Jazzy Jalisco 2024). Kernkonzepte: <strong>Knoten</strong> (Prozesse), <strong>Topics</strong> (Pub/Sub), <strong>Services</strong> (Request/Reply), <strong>Actions</strong> (langlaufende Goals + Feedback), <strong>Parameters</strong> (typisierter Konfigurationsraum), <strong>Lifecycle Nodes</strong> (deterministischer Zustandsautomat: unconfigured/inactive/active/finalized).</p>'
+            + '<p>Kommunikations-Layer: <strong>DDS</strong> (Data Distribution Service, OMG-Standard) mit QoS-Profilen (Reliability, Durability, History, Deadline). Standard-DDS in Humble: Eclipse Cyclone DDS oder eProsima Fast DDS. <strong>rmw</strong> abstrahiert die DDS-Wahl; <strong>rcl/rclcpp/rclpy</strong> sind die Sprach-Bindings.</p>'
+
+            + '<h4>5.4.3 ros2_control und MoveIt 2</h4>'
+            + '<p><strong>ros2_control</strong> definiert Hardware Interfaces, Controller (z.B. <code>JointTrajectoryController</code>, <code>ForwardCommandController</code>) und Controller Manager. URDF/SRDF beschreiben Kinematik, Kollisionsmodell und Gelenkgrenzen. <strong>MoveIt 2</strong> bietet OMPL-Planner (RRTConnect, RRT*, PRM), CHOMP/STOMP-Trajektorie-Optimierer, Kollisionspruefung via FCL und Inverse Kinematik via KDL/TRAC-IK. Standard-Workflow: PlanningScene-Update -&gt; MotionPlanRequest -&gt; Execute -&gt; ros2_control.</p>'
+
+            + '<h4>Worked Example: KRL vs. URScript Linearbewegung</h4>'
+            + '<p>Aufgabe: Linearbewegung von der aktuellen Pose nach $(x=600, y=200, z=400)$ mm in Werkzeug-Koord., Geschwindigkeit 0,25 m/s, Genauigkeit 1 mm.</p>'
+            + '<ol>'
+            + '<li><strong>KRL (KUKA KSS):</strong> <code>$VEL.CP=0.25; $APO.CDIS=1.0; LIN {X 600, Y 200, Z 400, A 0, B 0, C 0} C_DIS</code>. <code>$VEL.CP</code> ist Cartesian-Path-Geschwindigkeit, <code>$APO.CDIS</code> definiert Approximations-Distanz; <code>C_DIS</code> aktiviert sie fuer den naechsten Bewegungsbefehl.</li>'
+            + '<li><strong>URScript (UR10e):</strong> <code>movel(p[0.6, 0.2, 0.4, 0, 0, 0], a=0.5, v=0.25, r=0.001)</code>. Argumente: Ziel als Pose-Vektor in m/rad, Beschleunigung $a$, Geschwindigkeit $v$, Blend-Radius $r$.</li>'
+            + '<li>Aequivalente Semantik, andere Einheiten (mm vs m) und Approximations-Konzepte (Distance vs Blend Radius); beim Portieren aufpassen.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Worin unterscheidet sich ein ROS-2-<em>Action</em> von einem <em>Service</em>?</li>'
+            + '<li>Warum ist ROS 2 ohne PREEMPT_RT-Patch nicht hart-echtzeitfaehig — und welche Komponente uebernimmt die Echtzeit?</li>'
+            + '<li>Welcher MoveIt-2-Planner ist Standard fuer 6-DOF-Industrieroboter, und welche Eigenschaft macht ihn dafuer geeignet?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Bahnplanung mit ROS 2 ohne SRDF-Kollisionsmodell. <em>Korrekt:</em> Self-Collision-Matrix in SRDF pflegen, sonst plant MoveIt unzulaessige Bahnen oder verwirft alle Loesungen.</li>'
+            + '<li><em>Fehler:</em> KRL-Bewegungen ohne <code>C_DIS</code>/<code>C_VEL</code> verkettet — fuehrt zu Halten zwischen Segmenten und Taktzeit-Verlust. <em>Korrekt:</em> Approximations-Modus setzen, wenn Bahn nicht punktgenau sein muss.</li>'
+            + '<li><em>Fehler:</em> URScript <code>servoj</code> statt <code>movej</code> ohne stabilen High-Frequency-Datenstrom. <em>Korrekt:</em> <code>servoj</code> nur bei kontinuierlichem Set-Point-Strom (typisch 125-500 Hz) — sonst ruckelt der Roboter.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Eine bestehende KUKA-KRL-Pick-and-Place-Anwendung soll auf einen UR10e mit ROS 2 portiert werden. Skizzieren Sie die Migrationsschritte (Koordinatensystem, Bewegungsbefehle, Sicherheitsfunktionen, Echtzeit-Strategie) und benennen Sie zwei Aspekte, die <em>nicht</em> 1:1 portierbar sind und eigene Anwendungsentscheidungen erfordern.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: KUKA System Software KSS 8.7 Doku; ABB RAPID Reference Manual 6.16; Universal Robots URScript Manual 5.13; FANUC R-30iB KAREL/TPP Reference; ROS 2 Humble/Iron Doku 2024 (https://docs.ros.org/en/humble); MoveIt 2 Tutorial 2024; OMG DDS 1.4 Spezifikation; ros2_control Documentation 2024.</em></p>'
+    };
+
+    const QUIZ_ROBOT = [
+        // ---- Kinematik (1-12) ----
+        q('Welche vier Parameter beschreibt die klassische DH-Konvention pro Gelenk?',
+            ['$(a_i,\\alpha_i,d_i,\\theta_i)$ — Linklaenge, Linktwist, Linkversatz, Gelenkwinkel', '$(x,y,z,\\theta)$ — Position und Winkel', '$(m,I,c,k)$ — Masse und Steifigkeit', '$(P,I,D,T)$ — Reglerparameter'], 0,
+            'Denavit/Hartenberg, J. Appl. Mech. 1955; Spong et al. 2020 Kap. 3.'),
+        q('Wodurch unterscheidet sich die modifizierte DH-Konvention nach Craig von der klassischen?',
+            ['Sie ist mathematisch nicht aequivalent', 'Koordinatenursprung am proximalen Link statt am distalen', 'Sie gilt nur fuer Schubgelenke', 'Sie ersetzt $\\theta$ durch Quaternionen'], 1,
+            'Craig, Introduction to Robotics, 4th ed., Pearson 2018, Kap. 3.'),
+        q('Was liefert die Vorwaertskinematik $T_0^n$?',
+            ['Die Endeffektorpose im Basis-KS', 'Die Gelenkmomente', 'Die Reglerparameter', 'Die Massentraegheitsmatrix'], 0,
+            'Spong et al. 2020 Kap. 3.'),
+        q('Welche geometrische Bedingung erlaubt die analytische Loesung der inversen Kinematik nach Pieper?',
+            ['Sechs gleiche Linklaengen', 'Drei aufeinanderfolgende Achsen schneiden sich in einem Punkt (spherical wrist)', 'Alle Achsen parallel', 'Drei prismatische Gelenke'], 1,
+            'Pieper, Stanford TR 1968.'),
+        q('Wie viele reale Loesungen kann ein 6-DOF-Roboter mit spherical wrist im Allgemeinen haben?',
+            ['Genau 1', 'Genau 2', 'Bis zu 8', 'Bis zu 64'], 2,
+            'Spong et al. 2020 Kap. 4 (Schulter, Ellbogen, Wrist-Flip).'),
+        q('Was charakterisiert eine Wrist-Singularitaet bei einem 6-DOF-Industrieroboter?',
+            ['Achse 1 und Achse 6 senkrecht', 'Achse 4 und Achse 6 sind kolinear', 'Achse 2 senkrecht zu Achse 3', 'Roboter beruehrt Tisch'], 1,
+            'Spong et al. 2020 Kap. 4; KUKA-Wartungs-Doku.'),
+        q('Welche Methode loest IK numerisch in der Naehe von Singularitaeten stabil?',
+            ['Direkte Inversion $J^{-1}$', 'Damped Least Squares $\\Delta q=(J^TJ+\\lambda^2 I)^{-1}J^T \\Delta x$', 'Eulerwinkel-Linearisierung', 'Polynom-Approximation'], 1,
+            'Wampler, IEEE T-SMC 1986.'),
+        q('Welche Groesse ist Standard-Manipulability-Index nach Yoshikawa?',
+            ['$\\det(J)$', '$\\sqrt{\\det(JJ^T)}$', '$\\operatorname{trace}(J)$', '$\\|J\\|_\\infty$'], 1,
+            'Yoshikawa, Int. J. Robotics Research 1985.'),
+        q('Was beschreibt die geometrische Jacobi-Matrix $J(q)$?',
+            ['Massenmatrix', 'Verknuepfung Gelenkgeschwindigkeit-Endeffektor-Twist', 'Steuerbarkeit', 'Energiefunktional'], 1,
+            'Spong et al. 2020 Kap. 4.'),
+        q('Wann gilt: $\\det(J)=0$?',
+            ['Roboter ausgeschaltet', 'In einer Singularitaet (Rangverlust)', 'Bei jeder Bewegung', 'Nur bei prismatischen Robotern'], 1,
+            'Siciliano et al. 2010 Kap. 3.4.'),
+        q('Welche Aussage zur inversen Kinematik einer UR10e (kein spherical wrist) ist korrekt?',
+            ['Hat geschlossene analytische Form wie 6-DOF mit spherical wrist', 'Wird haeufig numerisch oder ueber Pieper-Erweiterungen geloest', 'Hat genau eine Loesung', 'Existiert nicht'], 1,
+            'Universal Robots URScript Manual 5.13; Hawkins, IK Solutions for UR Robots, TR 2013.'),
+        q('Was ist Voraussetzung dafuer, dass die Vorwaertskinematik exakt gilt?',
+            ['Roboter kalibriert (DH-Parameter mit Realgeometrie uebereinstimmend)', 'Roboter nicht eingeschaltet', 'Reine Steuerung ohne Rueckfuehrung', 'Reibungsfreiheit'], 0,
+            'ISO 9283:1998; KUKA-Kalibrationsleitfaden.'),
+
+        // ---- Dynamik / Bahnplanung (13-24) ----
+        q('Welche Form hat die Manipulator-Standardbewegungsgleichung?',
+            ['$M(q)\\ddot q+C(q,\\dot q)\\dot q+g(q)=\\tau$', '$\\tau=K_p e+K_d \\dot e$', '$\\dot x=Ax+Bu$', '$F=ma$'], 0,
+            'Spong et al. 2020 Kap. 7.'),
+        q('Welche Eigenschaft hat die Massenmatrix $M(q)$?',
+            ['Schiefsymmetrisch', 'Symmetrisch und positiv definit', 'Nilpotent', 'Diagonal'], 1,
+            'Spong et al. 2020 Kap. 7.'),
+        q('Warum ist die Wahl von $C(q,\\dot q)$ so, dass $\\dot M-2C$ schiefsymmetrisch ist, vorteilhaft?',
+            ['Halbiert die Rechenzeit', 'Ermoeglicht passivitaetsbasierte Reglerentwuerfe', 'Macht $M$ diagonal', 'Garantiert Linearitaet'], 1,
+            'Spong et al. 2020 Kap. 7.4 (Skew-Symmetry).'),
+        q('Welche Komplexitaet hat das rekursive Newton-Euler-Verfahren bei $n$ Achsen?',
+            ['$O(1)$', '$O(\\log n)$', '$O(n)$', '$O(n^4)$'], 2,
+            'Luh/Walker/Paul, J. Dyn. Syst. Meas. Control 1980.'),
+        q('Welche Komplexitaet hat die symbolische Lagrange-Form bei $n$ Achsen?',
+            ['$O(1)$', '$O(n)$', '$O(n^2)$', '$O(n^4)$'], 3,
+            'Spong et al. 2020 Kap. 7.'),
+        q('Was beschreibt das LSPB-Bahnprofil?',
+            ['Quintischer Spline', 'Linear segment with parabolic blend (Trapezprofil)', 'Sinusprofil', 'Random Walk'], 1,
+            'Siciliano et al. 2010 Kap. 8; Lynch/Park 2017 Kap. 9.'),
+        q('Wann entartet ein Trapezprofil zu einem Dreieckprofil?',
+            ['Wenn $v_{\\max}$ wegen kurzer Distanz nicht erreicht wird', 'Wenn $a_{\\max}=0$', 'Bei prismatischen Gelenken', 'Bei Singularitaeten'], 0,
+            'Siciliano et al. 2010 Kap. 8.4.'),
+        q('Welche Interpolation eignet sich fuer Orientierungen ueber Quaternionen?',
+            ['SLERP', 'Linearinterpolation Eulerwinkel', 'Diskrete Stuetzstellen', 'Polynom 7. Grades'], 0,
+            'Shoemake, SIGGRAPH 1985; Siciliano et al. 2010 Kap. 8.'),
+        q('Welche Norm definiert die Mess-Verfahren fuer Pose-Wiederholgenauigkeit (RP) bei Industrierobotern?',
+            ['ISO 9283:1998', 'IEC 62443-3-3', 'ISO 9001', 'ISO 13849-1'], 0,
+            'ISO 9283:1998 (Manipulating industrial robots — Performance criteria and related test methods).'),
+        q('Welche Groesse misst ISO 9283 mit "AP" (accuracy of pose)?',
+            ['Streuung um Mittelwert', 'Abweichung Mittelwert vom Soll', 'Reibung', 'Rauschen'], 1,
+            'ISO 9283:1998 §7.'),
+        q('Wodurch wird die Bahn-Wiederholgenauigkeit (RT) verschlechtert?',
+            ['Schwere Lasten + hohe Geschwindigkeit + dynamische Belastung der Gelenke', 'Kuehle Umgebung', 'PROFINET statt EtherCAT', 'IPv6'], 0,
+            'ISO 9283:1998; KUKA-Datenblatt KR 16-2.'),
+        q('Wann ist quintischer Spline kubischem vorzuziehen?',
+            ['Wenn C2-Stetigkeit der Beschleunigung gefordert ist', 'Wenn schneller berechnet werden soll', 'Bei prismatischen Gelenken', 'Im Stillstand'], 0,
+            'Siciliano et al. 2010 Kap. 8.'),
+
+        // ---- Sicherheit / MRK (25-36) ----
+        q('Welche vier MRK-Betriebsarten benennt ISO 10218-2:2011 / ISO/TS 15066:2016?',
+            ['SRMS, Hand-Guiding, SSM, PFL', 'PTP, LIN, CIRC, JOINT', 'STO, SS1, SS2, SOS', 'SIL 1-4'], 0,
+            'ISO 10218-2:2011 §5.11; ISO/TS 15066:2016.'),
+        q('Was bedeutet PFL?',
+            ['Profinet Functional Layer', 'Power-and-Force-Limiting', 'Pulse Frequency Logic', 'Process Failure Limit'], 1,
+            'ISO/TS 15066:2016.'),
+        q('Welche Norm liefert biomechanische Schwellenwerte (N, kPa) fuer Koerperregionen bei MRK?',
+            ['ISO 13849-1:2023', 'ISO/TS 15066:2016 Annex A', 'IEC 61131-3', 'IEC 62443'], 1,
+            'ISO/TS 15066:2016 Annex A.'),
+        q('Welche Groessen kombiniert ISO 13849-1:2023 zur Bestimmung des erreichten Performance Level?',
+            ['MTTFd, DCavg, CCF + Architektur (Kategorie B/1-4)', 'Nur MTBF', 'Nur DC', 'P, I, D'], 0,
+            'ISO 13849-1:2023 §4.5.'),
+        q('Welche grobe Korrespondenz gilt zwischen PL und SIL?',
+            ['$PL_d \\approx \\text{SIL 2}$, $PL_e \\approx \\text{SIL 3}$', '$PL_a \\approx \\text{SIL 4}$', 'Keine Korrespondenz', '$PL_e \\approx \\text{SIL 1}$'], 0,
+            'ISO 13849-1:2023 Annex K; IEC 62061:2021.'),
+        q('Wie wird ein Sicherheitsabstand bei SSM korrekt berechnet?',
+            ['Mit Nominalgeschwindigkeit', 'Mit max. Roboter-Spitzengeschwindigkeit + Reaktionszeit Steuerung + Bremsweg + Mess-Toleranz Sensor', 'Geometrisch nur', 'Auf 1 m fest'], 1,
+            'ISO 13855:2010 (Sicherheitsabstaende von oberen Gliedmassen).'),
+        q('Welche Verordnung loest die Maschinenrichtlinie 2006/42/EG ab?',
+            ['EU 2016/679 (DSGVO)', 'EU-Maschinenverordnung 2023/1230 ab 20.01.2027', 'EU 2022/2555 (NIS2)', 'EU 2024/1689 (AI Act)'], 1,
+            'Verordnung (EU) 2023/1230 vom 14.06.2023.'),
+        q('Welche Methode gehoert zur Risikobeurteilung nach ISO 12100?',
+            ['Iterative Risikoeinschaetzung -&gt; Risikominderung nach STOP', 'PID-Regelung', 'Kalman-Filter', 'OPC UA'], 0,
+            'ISO 12100:2010.'),
+        q('Was bedeutet "transient" vs. "quasistatisch" bei Kontaktkraefte in ISO/TS 15066?',
+            ['Transient = freier Schlag (&lt;500 ms), quasistatisch = anhaltender Klemm-/Druckkontakt', 'Transient = unbedeutend', 'Vertauscht', 'Identisch'], 0,
+            'ISO/TS 15066:2016 Annex A.'),
+        q('Welcher Stop wird bei einem zertifizierten Cobot fuer SRMS typisch genutzt (gemaess IEC 60204-1)?',
+            ['Category 0 — Antriebs-Sofort-Aus', 'Category 2 — geregelter Halt mit Energie an', 'Category 3 — manuell', 'Es gibt keinen Standard'], 1,
+            'IEC 60204-1:2016 §9.2.2.'),
+        q('Welche Schutzfunktion deckt typisch die "Safe Torque Off"-Funktion am Servo ab?',
+            ['IEC 61800-5-2 STO', 'IEC 60034 IE', 'IEC 61131-3', 'ISO 9001'], 0,
+            'IEC 61800-5-2:2016 §4.2.2.1 STO.'),
+        q('Welcher Aspekt wird bei kollaborativen Anwendungen mit kleiner Kontaktflaeche (z.B. Spitzwerkzeug) zusaetzlich relevant?',
+            ['Kontakt-Druck (Pa) statt nur Kraft (N)', 'IPv6', 'PROFINET-Klasse', 'OPC UA Pub/Sub'], 0,
+            'ISO/TS 15066:2016 Annex A.3 (Pressure-based limits).'),
+
+        // ---- Programmierung & Frameworks (37-50) ----
+        q('Welche Sprache ist herstellerseitiger Standard bei KUKA?',
+            ['KRL (KUKA Robot Language)', 'RAPID', 'URScript', 'KAREL'], 0,
+            'KUKA System Software KSS 8.7 Doku.'),
+        q('Welche Sprache ist herstellerseitiger Standard bei ABB?',
+            ['KRL', 'RAPID', 'URScript', 'KAREL'], 1,
+            'ABB RAPID Reference Manual 6.16.'),
+        q('Welche Sprache ist herstellerseitiger Standard bei Universal Robots?',
+            ['KRL', 'RAPID', 'URScript', 'KAREL'], 2,
+            'Universal Robots URScript Manual 5.13.'),
+        q('Welcher Bewegungsbefehl in RAPID erzeugt eine Linearbahn?',
+            ['MoveJ', 'MoveL', 'MoveC', 'MoveAbsJ'], 1,
+            'ABB RAPID Reference Manual 6.16.'),
+        q('Welcher KRL-Befehl erzeugt eine Linearbewegung?',
+            ['PTP', 'LIN', 'CIRC', 'WAIT'], 1,
+            'KUKA KSS 8.7 Doku.'),
+        q('Was beschreibt ein "Blend Radius" in URScript bzw. eine "Zonendaten" in RAPID?',
+            ['Pufferspeicher', 'Approximationsbereich, in dem benachbarte Bewegungssegmente kontinuierlich verbunden werden', 'Sicherheitsabstand', 'Kollisionsradius'], 1,
+            'Universal Robots URScript Manual; ABB RAPID Reference Manual.'),
+        q('Welche Kommunikations-Layer-Spezifikation nutzt ROS 2?',
+            ['MQTT', 'AMQP', 'OMG DDS (z.B. Cyclone DDS, Fast DDS)', 'CoAP'], 2,
+            'ROS 2 Humble Doku 2024; OMG DDS 1.4.'),
+        q('Welche LTS-Distribution von ROS 2 hat Support bis Mai 2027?',
+            ['Foxy Fitzroy', 'Galactic Geochelone', 'Humble Hawksbill', 'Crystal Clemmys'], 2,
+            'ROS 2 Distributions Doku 2024.'),
+        q('Welcher Lifecycle-Zustand erlaubt aktive Veroeffentlichung von Daten in ROS 2?',
+            ['unconfigured', 'inactive', 'active', 'finalized'], 2,
+            'ROS 2 Lifecycle Spec 2024 (REP-2002).'),
+        q('Welche Komponente in ros2_control verwaltet Controller-Lifecycles und Hardware Interfaces?',
+            ['Controller Manager', 'rosbag', 'tf2', 'rviz'], 0,
+            'ros2_control Documentation 2024.'),
+        q('Welcher Planner ist Standard-Default in MoveIt 2 fuer 6-DOF-Manipulatoren?',
+            ['RRTConnect (OMPL)', 'A*', 'Dijkstra', 'CHOMP zwingend'], 0,
+            'MoveIt 2 Tutorial 2024 (OMPL Planning).'),
+        q('Welche Kollisionspruefung-Bibliothek nutzt MoveIt 2?',
+            ['Bullet only', 'FCL (Flexible Collision Library)', 'PhysX', 'ODE'], 1,
+            'MoveIt 2 Doku 2024 (Collision Checking).'),
+        q('Wofuer wird die SRDF in MoveIt 2 genutzt?',
+            ['Hardware-Interfaces', 'Semantische Roboter-Beschreibung (Gruppen, Disable-Collisions, named poses)', 'DDS-QoS', 'URDF-Ersatz'], 1,
+            'MoveIt 2 Doku 2024 (SRDF).'),
+        q('Was ist die korrekte Aussage zu ROS 2 + harter Echtzeit?',
+            ['ROS 2 ist per Default hart-echtzeit', 'ROS 2 wird mit Linux PREEMPT_RT bzw. Xenomai + ros2_control fuer harte Echtzeit konfiguriert', 'ROS 2 ist nicht echtzeitfaehig', 'Nur Windows-Build erlaubt'], 1,
+            'ROS 2 Real-Time WG, Open Robotics Whitepaper 2023.')
+    ];
+
+    // ----------------------------------------------------------------------
+    // Kapitel 6 — Industrie 4.0 und Digital Twin (PRODUKTIV)
+    // Quellen: DIN SPEC 91345:2016 RAMI 4.0; IDTA "Asset Administration Shell
+    // Reading Guide" 2024 + IDTA Spezifikationen 01001/01002; ISO 23247-1
+    // bis -4:2021 (Digital Twin Manufacturing); IEC 62264-1:2013 (ISA-95);
+    // IEC 62443-3-3:2013 / -4-1:2018 / -4-2:2019; OPC UA Companion
+    // Specifications (UA for Devices, FX, Robotics 40010); Plattform
+    // Industrie 4.0 Whitepapers 2023/2024; Industrial Internet Consortium
+    // (IIC) IIRA 1.10 2022.
+    // ----------------------------------------------------------------------
+
+    const PAGE_I40_RAMI = {
+        title: '6.1 RAMI 4.0 und Verwaltungsschale (Asset Administration Shell)',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die drei RAMI-4.0-Achsen Architecture/Layers, Lifecycle/Value Stream und Hierarchy Levels einordnen, (2) Konzept und Aufbau der Asset Administration Shell (AAS) erklaeren, (3) typische Submodelle (Nameplate, Technical Data, Documentation) benennen, (4) AAS-Repraesentationen (Type 1 File, Type 2 Server, Type 3 P2P) gegeneinander abgrenzen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Grundbegriffe Industriekommunikation (Kapitel 3), OPC UA Information Modeling, ISA-95-Hierarchie. Empfohlene Lektuere: DIN SPEC 91345:2016, IDTA "AAS Reading Guide v3.0" 2024.</p>'
+
+            + '<h4>6.1.1 RAMI 4.0 (DIN SPEC 91345:2016)</h4>'
+            + '<p>Das Reference Architecture Model Industrie 4.0 spannt drei Achsen auf:</p>'
+            + '<ul>'
+            + '<li><strong>Architecture / Layers</strong> (vertikal): Asset, Integration, Communication, Information, Functional, Business — 6 Schichten von Hardware bis Geschaeftsmodell.</li>'
+            + '<li><strong>Lifecycle &amp; Value Stream</strong> (horizontal-1, IEC 62890): Type vs. Instance; Entwicklung -&gt; Wartung/Nutzung.</li>'
+            + '<li><strong>Hierarchy Levels</strong> (horizontal-2, IEC 62264 + IEC 61512 erweitert): Product, Field Device, Control Device, Station, Work Centers, Enterprise, <em>Connected World</em>.</li>'
+            + '</ul>'
+
+            + '<h4>6.1.2 Asset Administration Shell — Konzept</h4>'
+            + '<p>Die AAS ist die digitale Repraesentation eines Assets ueber den Lebenszyklus. Sie aggregiert <em>Submodelle</em> (Submodels) als typisierte Container fuer Eigenschaften (SubmodelElements: Property, MultiLanguageProperty, File, Reference, Operation, Capability). IDTA 01001-3 definiert das Metamodell, IDTA 01002 die XML/JSON/RDF/AAS-X-Serialisierungen.</p>'
+
+            + '<h4>6.1.3 Drei AAS-Repraesentationstypen</h4>'
+            + '<ul>'
+            + '<li><strong>Type 1 — File-based (Passive AAS)</strong>: AAS-X (ZIP) mit XML/JSON-Submodellen, statisch ausgetauscht (z.B. zur Inbetriebnahme).</li>'
+            + '<li><strong>Type 2 — Server-based (Active AAS)</strong>: AAS exposes REST/HTTP- oder OPC UA-Schnittstellen; Submodelle werden zur Laufzeit gelesen/geschrieben (IDTA 01005-1: AAS API).</li>'
+            + '<li><strong>Type 3 — Reactive AAS (I4.0-Interaction)</strong>: AAS kommunizieren P2P ueber I4.0-Sprache (Interaction-Pattern), z.B. fuer autonome Verhandlungen (Plug-and-Produce).</li>'
+            + '</ul>'
+
+            + '<h4>6.1.4 Standard-Submodelle</h4>'
+            + '<p>IDTA hat eine wachsende Liste kuratierter Submodelle veroeffentlicht (Stand 2024 ueber 30): Digital Nameplate (IDTA 02006), Technical Data (IDTA 02003), Documentation (IDTA 02002), Carbon Footprint (IDTA 02023), Time Series Data (IDTA 02008), HierarchicalStructures (IDTA 02011), Service Request Notification (IDTA 02022). Wer ein eigenes Submodell-Template definiert, sollte es ueber semanticId mit ECLASS oder IEC CDD verknuepfen.</p>'
+
+            + '<h4>Worked Example: Submodel "Digital Nameplate"</h4>'
+            + '<p>Aufgabe: Repraesentiere den ABB IRB 1600 als AAS-Submodell-Eintrag mit minimalen Pflichtfeldern aus IDTA 02006-3.</p>'
+            + '<ol>'
+            + '<li>Asset Identifier: <code>idShort: "Robot_IRB1600"</code>, globalAssetId: <code>https://abb.com/aas/IRB1600/SN-XYZ</code>.</li>'
+            + '<li>Submodel Digital Nameplate: <code>idShort: "Nameplate"</code>, semanticId aus IDTA 02006-3.</li>'
+            + '<li>Properties: ManufacturerName="ABB", ManufacturerProductDesignation="IRB 1600-1.45", SerialNumber="XYZ", YearOfConstruction="2024", URI of Operating Manual als File-Element.</li>'
+            + '<li>Konformitaet: Pflichtfelder gemaess IDTA 02006-3 §5 erfuellt; ECLASS-Referenz in semanticId.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche drei Achsen spannt RAMI 4.0 auf — und welche Norm liegt der Lifecycle-Achse zu Grunde?</li>'
+            + '<li>Wodurch unterscheidet sich eine Type-2-AAS von einer Type-1-AAS in der Implementierung?</li>'
+            + '<li>Wofuer dient die <em>semanticId</em> eines Submodel-Elements?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> AAS-Submodell ohne semanticId. <em>Korrekt:</em> Jedes Property erhaelt eine semanticId aus ECLASS/IEC CDD/IDTA — sonst kein Maschine-zu-Maschine-Verstaendnis.</li>'
+            + '<li><em>Fehler:</em> RAMI 4.0 mit ISA-95 verwechseln. <em>Korrekt:</em> RAMI integriert ISA-95 (Hierarchy-Achse) <em>und</em> Lifecycle <em>und</em> Layers — RAMI ist Obermenge.</li>'
+            + '<li><em>Fehler:</em> "Digital Twin = AAS". <em>Korrekt:</em> AAS ist eine Repraesentations-Schicht; Digital Twin (ISO 23247) ist die Lebenszyklus-Synchronisation Realsystem &lt;-&gt; Modell.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Eine Werkzeugmaschine soll AAS-konform an ein MES angebunden werden. Diskutieren Sie, ob Type 1, Type 2 oder Type 3 angemessen ist, und entwerfen Sie eine Submodell-Liste (3 Standard-IDTA-Submodelle plus 1 eigenes) zur Abdeckung von Stammdaten, Produktionsdaten und Wartungsmeldungen.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: DIN SPEC 91345:2016 (RAMI 4.0); IDTA "AAS Reading Guide" v3.0 2024; IDTA 01001-3 (AAS Metamodel); IDTA 01002-3 (Serialization); IDTA 01005-1 (AAS API); IDTA 02006-3 (Digital Nameplate); IEC 62890:2020 (Lifecycle Mgmt); Plattform Industrie 4.0 Whitepaper "Details of the Asset Administration Shell" 2023.</em></p>'
+    };
+
+    const PAGE_I40_DT = {
+        title: '6.2 Digital Twin nach ISO 23247 — Architektur, Synchronisation, Anwendungsfaelle',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Digital Twin von Digital Model und Digital Shadow abgrenzen, (2) die ISO-23247-Domains (User, Digital Twin, Device Communication, Observable Manufacturing Element) erklaeren, (3) Synchronisationsstrategien (Pull, Push, Streaming) bewerten, (4) typische Anwendungsfaelle (virtuelle Inbetriebnahme, Predictive Maintenance, OEE-Tracking) zuordnen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kapitel 6.1 (AAS), Kapitel 3 (OPC UA), Grundlagen Mehrkoerperdynamik (Kapitel 5.2). Empfohlene Lektuere: ISO 23247-1 bis -4:2021, Kritzinger et al. "Digital Twin in Manufacturing: A Categorical Literature Review", IFAC PapersOnLine 51(11), 2018.</p>'
+
+            + '<h4>6.2.1 Digital Twin Definition</h4>'
+            + '<p>Kritzinger et al. (2018) klassifizieren nach Synchronisationsgrad:</p>'
+            + '<ul>'
+            + '<li><strong>Digital Model</strong>: rein simuliert, keine Datenverbindung zum Realsystem.</li>'
+            + '<li><strong>Digital Shadow</strong>: Realsystem -&gt; Modell (One-Way), Modell folgt Realsystem.</li>'
+            + '<li><strong>Digital Twin</strong>: bidirektional, Modell beeinflusst Realsystem (Optimierung, Steuerung).</li>'
+            + '</ul>'
+            + '<p>ISO 23247-1:2021 definiert Digital Twin allgemeiner als "fit-for-purpose digital representation of an Observable Manufacturing Element with synchronization between the element and its digital representation".</p>'
+
+            + '<h4>6.2.2 ISO 23247 Vier-Domain-Architektur</h4>'
+            + '<ul>'
+            + '<li><strong>User Domain</strong>: Anwender (Engineer, Operator, MES, ERP).</li>'
+            + '<li><strong>Digital Twin Entity</strong>: Modelle, Daten, Services, Synchronisations-Logik.</li>'
+            + '<li><strong>Device Communication Entity</strong>: Datenakquise, Protokolle (OPC UA, MQTT, MTConnect, OPC UA FX).</li>'
+            + '<li><strong>Observable Manufacturing Element</strong>: das reale Asset (Roboter, Werkzeugmaschine, Linie, Werkstueck).</li>'
+            + '</ul>'
+
+            + '<h4>6.2.3 Synchronisationsstrategien</h4>'
+            + '<p>Pull-basiert (Modell pollt Asset, OPC UA Client-Server, Latenz typ. 100 ms-1 s), Push-basiert (Asset veroeffentlicht, OPC UA Pub/Sub mit MQTT/UDP, Latenz typ. 10-100 ms), Streaming/TSN (OPC UA FX + IEEE 802.1Q-TSN, Latenz &lt;1 ms — geeignet fuer Closed-Loop Echtzeit-Twin). Hochfrequenz Anwendungen (z.B. virtuelle Inbetriebnahme von Servoachsen) erfordern Streaming + Hardware-in-the-Loop-Synchronisation.</p>'
+
+            + '<h4>6.2.4 Anwendungsfaelle</h4>'
+            + '<ul>'
+            + '<li><strong>Virtuelle Inbetriebnahme</strong> (Siemens NX MCD, ANSYS Twin Builder, Microsoft Azure Digital Twins, Dassault 3DEXPERIENCE): SPS-Code wird vor Realanlage gegen Modell getestet (HiL/SiL).</li>'
+            + '<li><strong>Predictive Maintenance</strong>: Modell schaetzt Restlebensdauer (Bewegungslager, Schneidwerkzeuge) aus Streaming-Daten.</li>'
+            + '<li><strong>OEE-Tracking</strong>: Modell aggregiert Verfuegbarkeit/Leistung/Qualitaet aus Live-Daten + Soll-Plan.</li>'
+            + '<li><strong>Closed-Loop-Optimierung</strong>: Modell rechnet Set-Points zurueck zur Anlage (echter Twin nach Kritzinger).</li>'
+            + '</ul>'
+
+            + '<h4>Worked Example: Latenz-Budget Closed-Loop-Twin</h4>'
+            + '<p>Aufgabe: Ein Closed-Loop-Twin steuert eine Servoachse mit Zykluszeit $T_z=1\\,\\text{ms}$. Welcher Synchronisations-Layer ist erforderlich?</p>'
+            + '<ol>'
+            + '<li>Annahme: Modell-Berechnungszeit 200 us, Round-Trip Akquise + Set-Point 600 us bei Pub/Sub TSN.</li>'
+            + '<li>Pull-basiert (1-s-Polling) -&gt; offensichtlich unzulaessig.</li>'
+            + '<li>OPC UA Client-Server (typ. 100 ms) -&gt; um Faktor 100 zu langsam.</li>'
+            + '<li>OPC UA Pub/Sub MQTT (10-100 ms) -&gt; immer noch unzulaessig.</li>'
+            + '<li>OPC UA FX + TSN (Qbv-Scheduled Traffic, IEEE 802.1Qbv-2015) -&gt; Sub-Millisekunden-Latenz erreichbar; passt zum 1-ms-Budget.</li>'
+            + '<li>Resultat: Streaming/TSN ist Pflicht; Pull/Pub-Sub ueber MQTT scheidet aus.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Wodurch unterscheidet sich ein Digital Twin von einem Digital Shadow?</li>'
+            + '<li>Welche vier Domains nennt ISO 23247-1:2021?</li>'
+            + '<li>Welcher Synchronisations-Layer ist fuer Sub-Millisekunden-Anwendungen typisch erforderlich?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Predictive Maintenance ohne Modellvalidierung. <em>Korrekt:</em> Holdout-Datensatz und Drift-Monitoring sind Pflicht — sonst false positives / Vertrauensverlust.</li>'
+            + '<li><em>Fehler:</em> "Digital Twin = 3D-Visualisierung". <em>Korrekt:</em> Visualisierung ist eine UI-Schicht; Kern ist Synchronisation + Modell + Service-Layer (ISO 23247-2).</li>'
+            + '<li><em>Fehler:</em> MQTT als Closed-Loop-Layer fuer 1-ms-Achsen. <em>Korrekt:</em> OPC UA FX/TSN; MQTT eignet sich fuer 100-ms-Klasse.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Skizzieren Sie fuer eine Servoachse mit virtueller Inbetriebnahme eine ISO-23247-konforme Architektur mit (a) Auswahl Synchronisationsstrategie, (b) zwei kritischen Submodellen aus AAS, (c) zwei Validierungs-Metriken fuer das Modell und (d) einer Daten-Pipeline-Sicherheitsbetrachtung gemaess IEC 62443-3-3.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: ISO 23247-1 bis -4:2021 (Digital Twin Manufacturing); Kritzinger et al., IFAC PapersOnLine 51(11), 2018; Tao/Zhang, "Digital Twin Driven Smart Manufacturing", Elsevier 2019; Plattform Industrie 4.0 Whitepaper "Digital Twin and AAS" 2023; IEEE 802.1Qbv-2015.</em></p>'
+    };
+
+    const PAGE_I40_MES = {
+        title: '6.3 MES, ERP und Edge Computing — ISA-95, MTConnect, Container in OT',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die ISA-95-Hierarchieebenen L0-L4 zuordnen, (2) die ISA-95-Functional-Hierarchie mit den B2MML-Datenmodellen (Operations Definition, Schedule, Performance) verknuepfen, (3) MTConnect als Datenstandard fuer Werkzeugmaschinen einordnen, (4) Architektur-Optionen (Edge, Cloud, On-Prem) anhand Latenz, Sicherheit und Wartbarkeit waehlen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kapitel 6.1 (RAMI), Grundlagen Datenbanken/Schichtarchitektur, Kapitel 3 (Industrielle Kommunikation). Empfohlene Lektuere: IEC 62264-1:2013, ANSI/MESA B2MML v0700 (2023), MTConnect Standard 2.3 (2024).</p>'
+
+            + '<h4>6.3.1 ISA-95-Hierarchie (IEC 62264-1)</h4>'
+            + '<ul>'
+            + '<li><strong>L0</strong>: Physikalischer Prozess.</li>'
+            + '<li><strong>L1</strong>: Sensoren/Aktoren (E/A, Antriebe).</li>'
+            + '<li><strong>L2</strong>: Steuerung (SPS, DCS, SCADA).</li>'
+            + '<li><strong>L3</strong>: Manufacturing Operations Management — MES (Production, Quality, Maintenance, Inventory).</li>'
+            + '<li><strong>L4</strong>: Geschaeftsplanung &amp; Logistik — ERP.</li>'
+            + '</ul>'
+            + '<p>Zeit-Skalen: L0/L1 us-ms, L2 ms-s, L3 s-min, L4 min-Tage.</p>'
+
+            + '<h4>6.3.2 B2MML / MES-Funktionen</h4>'
+            + '<p>B2MML (Business to Manufacturing Markup Language, MESA) implementiert IEC 62264 in XML-Schemata. Kernobjekte: <em>OperationsDefinition</em>, <em>OperationsSchedule</em>, <em>OperationsPerformance</em>, <em>EquipmentInformation</em>, <em>MaterialInformation</em>. MES-typische L3-Funktionen: Auftragsfeinplanung, Materialverfolgung, Qualitaetsmanagement (z.B. SPC, Genealogie), Wartungsplanung, OEE-Berechnung.</p>'
+
+            + '<h4>6.3.3 MTConnect</h4>'
+            + '<p>MTConnect Standard v2.3 (2024) ist ein offener Datenstandard fuer Werkzeugmaschinen-Telemetrie (HTTP/REST, XML/JSON), urspruenglich aus der CNC-Welt. Kernkonzepte: Agent (sammelt Daten am Asset), Adapter (konvertiert Hersteller-Spezifika), Probe-/Current-/Sample-Endpoints. Komplementaer zu OPC UA: MTConnect ist primaer asset-orientiert und stark in CNC-Branche; OPC UA ist allgemeiner und Pub/Sub-faehig.</p>'
+
+            + '<h4>6.3.4 OEE-Kennzahlen</h4>'
+            + '<p>Overall Equipment Effectiveness $OEE=\\text{Verfuegbarkeit}\\times \\text{Leistung}\\times \\text{Qualitaet}$. Verfuegbarkeit $=t_\\text{operating}/t_\\text{planned}$; Leistung $=q_\\text{actual}/q_\\text{theoretical}$; Qualitaet $=q_\\text{good}/q_\\text{actual}$. World-Class-Niveau ueblich $\\ge 85\\%$ (Nakajima 1988); deutsche Industrie liegt im Schnitt 60-70 %.</p>'
+
+            + '<h4>6.3.5 Edge / Cloud / On-Prem</h4>'
+            + '<p>Edge: Container in OT (K3s, MicroK8s, Docker, Azure IoT Edge, AWS Greengrass) — typische Use Cases: Pre-Aggregation, Anomaly Detection, lokales ML-Inferencing. Sicherheits-Anforderung gemaess IEC 62443-3-3 SR 1.13 / SR 5.1: Container muessen authentifiziert &amp; signiert ausgerollt werden (z.B. Sigstore Cosign Keyless 2024). Cloud (AWS/Azure/GCP) fuer langfristige Daten und ML-Training, mit Datenklassifizierung (kein PII unbeabsichtigt exfiltrieren).</p>'
+
+            + '<h4>Worked Example: OEE-Berechnung</h4>'
+            + '<p>Anlage: 16 h geplante Schicht, 2 h ungeplanter Stillstand. Theoretische Taktzeit 30 s/Stueck; tatsaechlich 1.500 Stueck im 14-h-Lauf produziert. Davon 1.470 i.O.-Teile.</p>'
+            + '<ol>'
+            + '<li>Verfuegbarkeit: $A=14/16=0{,}875$ (87{,}5%).</li>'
+            + '<li>Leistung: theoretisch moeglich $14\\,\\text{h}\\cdot 3600/30=1.680$ Stueck. $P=1.500/1.680=0{,}893$.</li>'
+            + '<li>Qualitaet: $Q=1.470/1.500=0{,}980$.</li>'
+            + '<li>OEE $=0{,}875\\cdot 0{,}893\\cdot 0{,}980=0{,}766$ (76{,}6%).</li>'
+            + '<li>Bewertung: ueber Branchen-Mittel, unter World-Class — Hauptansatz Performance (Mikro-Stoerungen, Ruestung).</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche ISA-95-Ebene macht typischerweise Auftragsfeinplanung und OEE-Berechnung?</li>'
+            + '<li>Wodurch unterscheiden sich die Zeitscalen von L0/L1 und L4?</li>'
+            + '<li>Welche der drei OEE-Komponenten (A, P, Q) leidet typischerweise unter Mikro-Stoerungen und Ruestzeiten?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> ERP-Funktionalitaet auf L3 versuchen. <em>Korrekt:</em> ERP gehoert nach L4 (z.B. SAP S/4HANA), MES bleibt L3 — sonst Latenz- und Verantwortungs-Probleme.</li>'
+            + '<li><em>Fehler:</em> OEE-Verfuegbarkeit auf 24 h beziehen statt auf <em>geplante</em> Schicht. <em>Korrekt:</em> Definition Nakajima 1988 verwendet geplante Belegungszeit.</li>'
+            + '<li><em>Fehler:</em> Container in OT ohne signierte Images deployen. <em>Korrekt:</em> Cosign-Signaturpflicht + Admission-Controller (Kyverno/Sigstore Policy Controller) gemaess IEC 62443-3-3 SR 5.1.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Eine bestehende SCADA-Anbindung (L2) liefert OPC-UA-Daten in Sekundentakt. Skizzieren Sie eine Edge/Cloud-Architektur, die (a) lokale Anomaly-Detection (Edge), (b) Langzeit-Aggregation (Cloud) und (c) MES-Anbindung an L3 abdeckt, inklusive zwei Sicherheitsmassnahmen (IEC 62443) und einer OEE-Aggregations-Vorschrift.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: IEC 62264-1:2013 (ISA-95); ANSI/MESA B2MML v0700, 2023; MTConnect Standard 2.3, 2024; Nakajima, "Introduction to TPM", Productivity Press 1988; IEC 62443-3-3:2013; Sigstore Cosign Doku 2024; Microsoft Azure IoT Edge / AWS Greengrass Doku 2024.</em></p>'
+    };
+
+    const PAGE_I40_SEC = {
+        title: '6.4 OT-Sicherheit in Industrie 4.0 — IEC 62443, Zonen, Zertifikate',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die IEC-62443-Reihe nach Adressaten (Asset Owner, System Integrator, Product Supplier) abgrenzen, (2) Security Levels SL-T 1-4 anwenden, (3) Zonen-und-Conduit-Modell entwerfen, (4) Identitaets- und Zertifikatslebenszyklus in OPC UA / AAS-Anwendungen beschreiben.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kapitel 1 (Cybersec-Grundlagen falls verfuegbar), Kapitel 6.1-6.3, Public-Key-Infrastruktur. Empfohlene Lektuere: IEC 62443-3-2:2020, IEC 62443-3-3:2013, IEC 62443-4-1:2018, IEC 62443-4-2:2019.</p>'
+
+            + '<h4>6.4.1 IEC-62443-Familie und Adressaten</h4>'
+            + '<ul>'
+            + '<li>Teil 1 (Allgemein, Konzepte).</li>'
+            + '<li>Teil 2 (Programm-Anforderungen an <em>Asset Owner</em>).</li>'
+            + '<li>Teil 3 (System-Anforderungen an <em>System Integrator</em>): 3-2 Risikoanalyse + Zonen/Conduits, 3-3 System Security Requirements (SR/RE).</li>'
+            + '<li>Teil 4 (Komponenten-Anforderungen an <em>Product Supplier</em>): 4-1 Secure Development Lifecycle, 4-2 Component Security.</li>'
+            + '</ul>'
+
+            + '<h4>6.4.2 Security Levels (SL)</h4>'
+            + '<p>Vier Niveaus (IEC 62443-3-3:2013 §3): SL 1 (gegen casual misuse), SL 2 (intentional misuse mit einfachen Mitteln, low resources, generic skills), SL 3 (intentional misuse mit moderate resources, IACS-spezifischer skills), SL 4 (intentional misuse mit hohen Ressourcen, extended skills). Ein Asset Owner definiert SL-T (target), das Resultat aus Risikoanalyse; Komponenten/Systeme weisen SL-C (capability) nach.</p>'
+
+            + '<h4>6.4.3 Zonen-und-Conduit-Modell</h4>'
+            + '<p>IEC 62443-3-2:2020 verlangt Segmentierung in <em>Zonen</em> (Gruppen mit gleichen Sicherheitsanforderungen) und <em>Conduits</em> (kontrollierte Verbindungen zwischen Zonen). Beispielsegmentierung in einer Werkstattzelle:</p>'
+            + '<ul>'
+            + '<li><strong>Zone L0/L1 Field</strong>: SPS, Antriebe, Roboter — SL-T 3 ueblich.</li>'
+            + '<li><strong>Zone L2 Process</strong>: SCADA, HMIs — SL-T 2-3.</li>'
+            + '<li><strong>Zone L3 MES</strong>: MES, Historian — SL-T 2.</li>'
+            + '<li><strong>Zone L4 Enterprise</strong>: ERP — SL-T 1-2 (haeufig durch IT-Domaene abgedeckt).</li>'
+            + '<li><strong>Conduits</strong>: Firewalls, DMZ, OPC UA Reverse Connect, Data Diodes (z.B. Layer-1-Diode bei Critical Infrastructures gemaess BSI-Kritisanforderungen).</li>'
+            + '</ul>'
+
+            + '<h4>6.4.4 Identitaeten und Zertifikate (OPC UA)</h4>'
+            + '<p>OPC UA Part 2 (Security) verlangt fuer SecurityPolicy <em>Basic256Sha256</em>, <em>Aes128_Sha256_RsaOaep</em> oder <em>Aes256_Sha256_RsaPss</em> (Stand 2024). Anwendungs-Instanz-Zertifikate werden ueber GDS (Global Discovery Server, OPC UA Part 12) verwaltet — Lifecycle: Erzeugung, Auslieferung, Renewal, Revocation. PKI-Vertrauensanker idealerweise hardware-gebunden (Secure Element TPM 2.0, FIPS 140-3-Modul).</p>'
+
+            + '<h4>Worked Example: Zonen-Konzept Cobot-Zelle</h4>'
+            + '<p>Cobot-Zelle mit 1x Cobot, 1x Bildverarbeitung, 1x SPS, 1x SCADA-PC, 1x MES-Anbindung. Entwickle Zonen + SL-T.</p>'
+            + '<ol>'
+            + '<li>Zone "Field-Cobot" (Cobot, SPS, Bildverarbeitung): SL-T 3 (Manipulation an Cobot ist Safety-relevant). Conduit zur Zone Process via TLS 1.3 + Mutual Auth.</li>'
+            + '<li>Zone "Process" (SCADA-PC, HMI): SL-T 2-3. Conduit zur Zone MES via DMZ-Reverse-Proxy + OPC UA Pub/Sub.</li>'
+            + '<li>Zone "MES" (L3): SL-T 2. Conduit zur Enterprise via reverse-only firewall.</li>'
+            + '<li>Datendiode oder Reverse Connect, wenn Asset Owner kritisch (KRITIS) ist; Logging in zentralem SIEM (NIST SP 800-92).</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Wer ist Adressat von IEC 62443-4-1?</li>'
+            + '<li>Welche Differenz besteht zwischen SL-T und SL-C?</li>'
+            + '<li>Welche OPC-UA-SecurityPolicy ist 2024 Mindeststandard?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Conduit als reine Firewall-Regel umsetzen ohne Authentifizierung. <em>Korrekt:</em> Conduit umfasst Authentifizierung, Verschluesselung, Logging — nicht nur ACL.</li>'
+            + '<li><em>Fehler:</em> Default-Zertifikat des OPC-UA-Servers im Feld belassen. <em>Korrekt:</em> Per GDS verwaltete Application Instance Certificates mit endlicher Gueltigkeit + Renewal-Prozess.</li>'
+            + '<li><em>Fehler:</em> Annahme "Air-Gap reicht". <em>Korrekt:</em> Air-Gap bricht bei USB/Wartung/Updates; IEC 62443 verlangt Compensating Controls (auch fuer "isolierte" Anlagen).</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Eine OT-Anlage soll von einer Cloud-MES-Plattform (Public Cloud) Auftragsdaten erhalten und produktionsstandsdaten zurueckliefern. Entwickeln Sie eine Zonen-und-Conduit-Architektur mit (a) zwei Compensating Controls fuer den Internet-Conduit, (b) PKI-Strategie fuer OPC-UA-Endpoints und (c) Auswahl SL-T pro Zone gemaess IEC 62443-3-2.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: IEC 62443-3-2:2020 (Risk Assessment + Zones/Conduits); IEC 62443-3-3:2013 (System SR); IEC 62443-4-1:2018 (SDL); IEC 62443-4-2:2019 (Component); OPC UA Part 2:2022 (Security); OPC UA Part 12:2018 (GDS); BSI-Mindeststandard zur Zertifikatslebenszyklus 2023; NIST SP 800-92.</em></p>'
+    };
+
+    const QUIZ_I40 = [
+        // ---- RAMI / AAS (1-13) ----
+        q('Welche Norm definiert RAMI 4.0?',
+            ['DIN SPEC 91345:2016', 'IEC 61131-3', 'ISO 9001', 'IEEE 802.3'], 0,
+            'DIN SPEC 91345:2016.'),
+        q('Welche drei Achsen spannt RAMI 4.0 auf?',
+            ['Architecture/Layers, Lifecycle/Value Stream, Hierarchy Levels', 'X, Y, Z', 'OSI 1-3', 'P, I, D'], 0,
+            'DIN SPEC 91345:2016 §4.'),
+        q('Welche Norm liegt der Lifecycle-Achse zugrunde?',
+            ['IEC 62890', 'IEC 62264', 'IEC 61131-3', 'ISO 9001'], 0,
+            'IEC 62890:2020.'),
+        q('Wofuer steht AAS in Industrie 4.0?',
+            ['Asset Administration Shell', 'Active Auto Shutdown', 'Adaptive Antenna System', 'Automated Asset Schedule'], 0,
+            'IDTA AAS Reading Guide v3.0 2024.'),
+        q('Welche Spezifikation definiert das AAS-Metamodell?',
+            ['IDTA 01001-3', 'IEC 61131-3', 'ISO 9001', 'IEEE 802.1Q'], 0,
+            'IDTA 01001-3 (AAS Metamodel).'),
+        q('Welche AAS-Repraesentation kommuniziert ueber REST/HTTP zur Laufzeit?',
+            ['Type 1 (file-based, AAS-X)', 'Type 2 (server-based, active)', 'Type 3 (P2P)', 'Es gibt keine Repraesentationstypen'], 1,
+            'IDTA AAS Reading Guide v3.0 2024.'),
+        q('Welches Submodel-Element-Feld dient der semantischen Verknuepfung mit ECLASS oder IEC CDD?',
+            ['idShort', 'semanticId', 'displayName', 'parent'], 1,
+            'IDTA 01001-3 (Metamodel).'),
+        q('Welches Submodell beschreibt das Digitale Typenschild?',
+            ['IDTA 02006 Digital Nameplate', 'IDTA 02022 Service Request', 'IDTA 02023 Carbon Footprint', 'IDTA 02011 Hierarchical Structures'], 0,
+            'IDTA 02006-3 (Digital Nameplate).'),
+        q('Welche Aussage ist korrekt bezueglich AAS und Digital Twin?',
+            ['AAS und Digital Twin sind synonym', 'AAS ist Repraesentations-Schicht; Digital Twin (ISO 23247) ergaenzt um Synchronisation', 'AAS ersetzt Digital Twin', 'Beide werden in IEC 61131-3 definiert'], 1,
+            'IDTA Reading Guide 2024; ISO 23247-1:2021.'),
+        q('Wie viele Layer hat die Architektur-Achse von RAMI 4.0?',
+            ['3', '5', '6', '8'], 2,
+            'DIN SPEC 91345:2016: Asset, Integration, Communication, Information, Functional, Business.'),
+        q('Welche Hierarchie-Ebene erweitert ISA-95 in RAMI 4.0?',
+            ['Connected World', 'Internet 4.0', 'Cloud Sphere', 'Hyper Scale'], 0,
+            'DIN SPEC 91345:2016 (Hierarchy Levels Achse).'),
+        q('Welcher AAS-Repraesentationstyp eignet sich fuer statisch ausgetauschte Inbetriebnahme-Daten?',
+            ['Type 1 (file-based)', 'Type 2 (active)', 'Type 3 (reactive)', 'Type 4 (legacy)'], 0,
+            'IDTA Reading Guide 2024.'),
+        q('Wer veroeffentlicht die kuratierten AAS-Submodelle?',
+            ['Industrial Digital Twin Association (IDTA)', 'IEEE', 'ISO TC 184', 'OWASP'], 0,
+            'IDTA Submodel Templates 2024.'),
+
+        // ---- Digital Twin / ISO 23247 (14-25) ----
+        q('Welche ISO normiert Digital Twin in Manufacturing?',
+            ['ISO 27001', 'ISO 23247-1 bis -4:2021', 'ISO 9001', 'IEC 61131-3'], 1,
+            'ISO 23247-1:2021.'),
+        q('Wie viele Domains definiert ISO 23247-1?',
+            ['Zwei', 'Drei', 'Vier', 'Sieben'], 2,
+            'ISO 23247-1:2021 §6.'),
+        q('Wodurch unterscheidet sich Digital Shadow von Digital Twin nach Kritzinger 2018?',
+            ['Shadow ist bidirektional, Twin nur One-Way', 'Shadow ist One-Way (Real-&gt;Modell), Twin ist bidirektional', 'Sind synonym', 'Shadow nutzt MQTT, Twin OPC UA'], 1,
+            'Kritzinger et al., IFAC PapersOnLine 51(11), 2018.'),
+        q('Welcher Layer ermoeglicht Sub-Millisekunden-Synchronisation?',
+            ['Pull-Polling', 'OPC UA Client-Server', 'OPC UA Pub/Sub MQTT', 'OPC UA FX + IEEE 802.1Qbv-TSN'], 3,
+            'IEEE 802.1Qbv-2015; OPC UA FX (UA Part 80 / Companion Spec).'),
+        q('Was ist ein "Observable Manufacturing Element" gemaess ISO 23247?',
+            ['Datenbank', 'Reales Asset, das durch Digital Twin abgebildet wird', 'Software-Modul', 'IT-Server'], 1,
+            'ISO 23247-1:2021.'),
+        q('Welcher Use Case ist klassisch ein Digital Twin (echter Twin nach Kritzinger)?',
+            ['Manuelle 3D-Visualisierung', 'Closed-Loop-Optimierung mit Modellrueckwirkung auf Realsystem', 'Statisches CAD-Modell', 'Excel-Bericht'], 1,
+            'Kritzinger 2018.'),
+        q('Welche Synchronisationslatenz ist typisch fuer OPC UA Pub/Sub MQTT?',
+            ['&lt;1 ms', '10-100 ms', '1-2 s', 'Mehr als 1 min'], 1,
+            'OPC UA Part 14:2022; MQTT 5.0 OASIS 2019.'),
+        q('Welche Validierung ist fuer Predictive-Maintenance-Modelle Pflicht?',
+            ['Holdout-Datensatz und Drift-Monitoring', 'Nur Trainingsdaten', 'Keine', 'Visuelle Inspektion'], 0,
+            'Kritzinger 2018; ISO/IEC 5338:2023 (AI System Lifecycle).'),
+        q('Wofuer steht "MTConnect"?',
+            ['Steuerungs-Bus', 'Offener Telemetrie-Standard fuer Werkzeugmaschinen', 'Datenbank', 'Sicherheitsstandard'], 1,
+            'MTConnect Standard v2.3, 2024.'),
+        q('Welche Komponente in MTConnect liefert die Daten?',
+            ['Agent', 'Master', 'Broker', 'Worker'], 0,
+            'MTConnect Standard v2.3 §4.'),
+        q('Was misst die OEE-Komponente "Leistung"?',
+            ['Verhaeltnis tatsaechliche zu theoretischer Stueckzahl', 'Verhaeltnis i.O.-Teile zu Gesamt', 'Verhaeltnis Operating- zu Planungszeit', 'Energieeffizienz'], 0,
+            'Nakajima 1988.'),
+        q('Welche OEE-Komponente leidet typischerweise unter Mikro-Stoerungen und Geschwindigkeitsverlusten?',
+            ['Verfuegbarkeit', 'Leistung', 'Qualitaet', 'Verbrauch'], 1,
+            'Nakajima 1988.'),
+
+        // ---- ISA-95 / MES / Edge (26-37) ----
+        q('Welche Norm definiert ISA-95 / IEC 62264?',
+            ['IEC 62264-1:2013', 'ISO 9001', 'IEC 61131-3', 'ISO 27001'], 0,
+            'IEC 62264-1:2013.'),
+        q('Welche Ebene macht im ISA-95-Modell typisch Auftragsfeinplanung?',
+            ['L0', 'L1', 'L3 (MES)', 'L5'], 2,
+            'IEC 62264-1:2013.'),
+        q('Welche Ebene macht typischerweise Geschaeftsplanung und ERP?',
+            ['L0', 'L2', 'L3', 'L4'], 3,
+            'IEC 62264-1:2013.'),
+        q('Was ist B2MML?',
+            ['XML-Schema-Familie zur Implementierung von IEC 62264', 'Bus-System', 'Datenbankprotokoll', 'AAS-Submodell'], 0,
+            'ANSI/MESA B2MML v0700, 2023.'),
+        q('Welche Zeit-Skala ist typisch fuer L0/L1?',
+            ['us-ms', 's-min', 'min-Stunden', 'Tage'], 0,
+            'IEC 62264-1 (Time scales).'),
+        q('Welche Container-Engine wird fuer leichtgewichtiges Edge-K8s genutzt?',
+            ['Wine', 'K3s / MicroK8s', 'Bash', 'Excel'], 1,
+            'Rancher K3s / Canonical MicroK8s Doku 2024.'),
+        q('Welche Anforderung aus IEC 62443-3-3 verlangt signierte Container-Images bzw. authentifizierte Software-Auslieferung?',
+            ['SR 1.13 (Access Control: Software/Configuration)', 'SR 7.6', 'SR 5.1', 'SR 1.13 + SR 5.1 (Integrity + Software/Config)'], 3,
+            'IEC 62443-3-3:2013 (System Requirements Integrity / Access Control).'),
+        q('Welche Werkzeuge eignen sich fuer Container-Image-Signaturen?',
+            ['Sigstore Cosign Keyless 2024', 'OpenSSL nur', 'GPG fest', 'Keine'], 0,
+            'Sigstore Cosign Doku 2024.'),
+        q('Welche typische OEE-Berechnung gilt?',
+            ['$OEE=A+P+Q$', '$OEE=A\\cdot P\\cdot Q$', '$OEE=A/P\\cdot Q$', '$OEE=Q^A$'], 1,
+            'Nakajima 1988.'),
+        q('Welche Anlage ist typischer Anwendungsfall fuer MTConnect?',
+            ['CNC-Werkzeugmaschine', 'Notebook', 'PROFIBUS-PA-Druckmessumformer', 'Smart Watch'], 0,
+            'MTConnect Standard v2.3 §1 Scope.'),
+        q('Wofuer steht "Genealogie" im MES?',
+            ['Stammbaum eines Mitarbeiters', 'Rueckverfolgbarkeit eines Werkstuecks (Material/Charge/Schritte)', 'Kostenstellen', 'Backup'], 1,
+            'IEC 62264-3:2016 (MES-Aktivitaeten).'),
+        q('Welche Ebene macht typischerweise SCADA-Funktionalitaeten?',
+            ['L0', 'L2', 'L3', 'L4'], 1,
+            'IEC 62264-1:2013 (Hierarchy).'),
+
+        // ---- OT-Sicherheit / IEC 62443 (38-50) ----
+        q('Welcher Adressat ist primaer fuer IEC 62443-4-1 zustaendig?',
+            ['Asset Owner', 'System Integrator', 'Product Supplier', 'Auditor'], 2,
+            'IEC 62443-4-1:2018.'),
+        q('Was definiert IEC 62443-3-3?',
+            ['System Security Requirements (SR/RE)', 'AAS-Metamodell', 'OEE-Berechnung', 'OPC UA Pub/Sub'], 0,
+            'IEC 62443-3-3:2013.'),
+        q('Wodurch unterscheidet sich SL-T (target) von SL-C (capability)?',
+            ['SL-T = Soll aus Risikoanalyse, SL-C = Faehigkeit eines Systems/Komponente', 'Sind synonym', 'SL-T &lt; SL-C immer', 'Nur SL-T existiert'], 0,
+            'IEC 62443-3-3:2013 §3.'),
+        q('Was umfasst ein "Conduit" im IEC-62443-Modell?',
+            ['Eine reine Firewall-Regel', 'Eine kontrollierte Verbindung mit Authentifizierung, Verschluesselung und Logging zwischen Zonen', 'Ein VLAN', 'Eine Datenbank-Tabelle'], 1,
+            'IEC 62443-3-2:2020 §6.'),
+        q('Welche OPC-UA-SecurityPolicy ist 2024 Mindeststandard?',
+            ['None (sec=0)', 'Basic128Rsa15 (deprecated)', 'Basic256Sha256 oder Aes-Sha256-Profile', 'Basic256 (deprecated)'], 2,
+            'OPC UA Part 2:2022 + OPC Foundation Security Update 2023.'),
+        q('Welcher Standard regelt OPC UA Application Instance Certificates Management?',
+            ['OPC UA Part 12 (GDS)', 'IEC 61131-3', 'IEEE 802.1Q', 'ISO 9001'], 0,
+            'OPC UA Part 12:2018.'),
+        q('Welche Aussage ist korrekt zur Air-Gap-Annahme?',
+            ['Air-Gap bietet 100 % Schutz', 'Air-Gap bricht regelmaessig durch USB/Wartung/Updates; Compensating Controls noetig', 'Nicht in IEC 62443 abgedeckt', 'Erlaubt SL 4 ohne weitere Massnahmen'], 1,
+            'IEC 62443-3-3:2013; BSI-Industrieempfehlung 2023.'),
+        q('Welcher Zone-SL-T ist typisch fuer Field-Level (SPS, Antrieb, Roboter)?',
+            ['SL-T 1', 'SL-T 2-3', 'SL-T 3', 'SL-T 4 immer'], 2,
+            'IEC 62443-3-2:2020 (Risk-based determination).'),
+        q('Welche Anforderung adressiert SR 5.1 in IEC 62443-3-3?',
+            ['Information Confidentiality', 'Network Segmentation', 'Restricted Data Flow / Network Segmentation', 'Audit Logging'], 2,
+            'IEC 62443-3-3:2013 §10.'),
+        q('Welche Massnahme ist klassisches Beispiel fuer Compensating Control bei kritischer OT-Anlage?',
+            ['Data Diode (Layer-1 unidirektional)', 'Default-Zertifikat lassen', 'WLAN ohne Verschluesselung', 'PROFIBUS ohne Schutz'], 0,
+            'BSI Mindeststandard kritische Infrastrukturen 2023.'),
+        q('Wofuer steht "GDS" in OPC UA?',
+            ['Global Discovery Server', 'General Data Store', 'Generic Display Service', 'Generic Diagnostic Set'], 0,
+            'OPC UA Part 12:2018.'),
+        q('Welche Technologie eignet sich fuer hardware-gebundene Vertrauensanker im Feldgeraet?',
+            ['Plain-Text-Datei', 'TPM 2.0 / FIPS 140-3-Modul / Secure Element', 'USB-Stick', 'Default-Passwort'], 1,
+            'TCG TPM 2.0 Library 2019; FIPS 140-3:2019.'),
+        q('Welche IEC-62443-Teilnorm verlangt Risikoanalyse + Zonen-/Conduit-Modellierung?',
+            ['IEC 62443-3-2:2020', 'IEC 62443-4-2:2019', 'IEC 61131-3', 'ISO 9001'], 0,
+            'IEC 62443-3-2:2020.')
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_automation',
         code: 'MA-ET Automation',
         name: 'Master Elektrotechnik — Automatisierungstechnik',
         short: 'MA-ET Automation',
         desc: 'Vertiefungsstudium Elektrotechnik mit Fokus Automatisierungstechnik: fortgeschrittene Regelungstechnik, SPS-Programmierung nach IEC 61131-3 / 61499, Feldbusse und OPC UA, Antriebs- und Leistungselektronik, Industrierobotik, Industrie 4.0 und Digital Twin.',
-        status: 'preparation',
         chapters: [
             {
                 id: 'control',
@@ -1110,58 +1893,16 @@
             {
                 id: 'robotics',
                 title: 'Kapitel 5 — Industrierobotik',
-                summary: 'Kinematik (DH-Konvention), Dynamik (Lagrange, Newton-Euler), Bahnplanung, Sensorintegration, Mensch-Roboter-Kollaboration nach ISO/TS 15066, KRL/RAPID-Programmierung.',
-                pages: [
-                    placeholderPage('Kinematik', [
-                        'Denavit-Hartenberg-Konvention, Vorwaerts-Kinematik',
-                        'Inverse Kinematik analytisch und numerisch',
-                        'Singularitaeten, Konfigurationsraum'
-                    ]),
-                    placeholderPage('Dynamik und Bahnplanung', [
-                        'Lagrange- und Newton-Euler-Formalismus',
-                        'Bahnplanung in Gelenk- und Kartesischem Raum',
-                        'Glaettung, Kollisionsvermeidung'
-                    ]),
-                    placeholderPage('Sicherheit und Kollaboration', [
-                        'ISO 10218-1/-2, ISO/TS 15066:2016',
-                        'Sicherheitsbewerteter ueberwachter Halt, Power-and-Force-Limiting',
-                        'Risikobeurteilung kollaborativer Anwendungen'
-                    ]),
-                    placeholderPage('Programmiersprachen und Frameworks', [
-                        'KUKA KRL, ABB RAPID, FANUC TPP, Universal Robots URScript',
-                        'ROS / ROS 2, Real-Time mit ros2_control',
-                        'Offline-Programmierung, digitaler Zwilling'
-                    ])
-                ],
-                quiz: placeholderQuiz('Industrierobotik')
+                summary: 'Kinematik (DH-Konvention, Vorwaerts-/Rueckwaertskinematik, Singularitaeten), Dynamik (Lagrange, Newton-Euler), Bahnplanung in Gelenk- und Kartesischem Raum, Mensch-Roboter-Kollaboration nach ISO 10218 / ISO/TS 15066:2016, herstellerspezifische Programmiersprachen (KRL, RAPID, URScript, KAREL/TPP), ROS 2 + MoveIt 2.',
+                pages: [PAGE_ROBOT_KIN, PAGE_ROBOT_DYN, PAGE_ROBOT_SAFETY, PAGE_ROBOT_PROG],
+                quiz: QUIZ_ROBOT
             },
             {
                 id: 'i40',
                 title: 'Kapitel 6 — Industrie 4.0 und Digital Twin',
-                summary: 'RAMI 4.0 Referenzarchitektur, Verwaltungsschale (Asset Administration Shell), Digital Twin nach ISO 23247, MES/ERP-Integration, OEE-Kennzahlen, Edge/Cloud-Architekturen.',
-                pages: [
-                    placeholderPage('RAMI 4.0 und Verwaltungsschale', [
-                        'DIN SPEC 91345 — RAMI-4.0-Achsen',
-                        'Asset Administration Shell (AAS) Spezifikation 2024',
-                        'Submodelle, Identifikation, Interoperabilitaet'
-                    ]),
-                    placeholderPage('Digital Twin', [
-                        'ISO 23247 — Digital-Twin-Framework fuer Manufacturing',
-                        'Modellfidelitaet, Synchronisation, Anwendungsfaelle',
-                        'Tools: Siemens NX MCD, ANSYS Twin Builder, Microsoft Azure DT'
-                    ]),
-                    placeholderPage('MES / ERP / Edge', [
-                        'IEC 62264 / ISA-95 — Hierarchie L0-L4',
-                        'OEE-Kennzahlen (Verfuegbarkeit, Leistung, Qualitaet)',
-                        'Edge-Computing-Architekturen, Container in OT (K3s, Docker)'
-                    ]),
-                    placeholderPage('Schnittmengen mit Cyber-Security', [
-                        'IEC 62443 in I4.0-Anwendungen',
-                        'Identitaeten und Vertrauensanker (PKI, SE)',
-                        'Lifecycle-Sicherheit: Inbetriebnahme, Betrieb, Decommission'
-                    ])
-                ],
-                quiz: placeholderQuiz('Industrie 4.0')
+                summary: 'RAMI 4.0 (DIN SPEC 91345), Verwaltungsschale (Asset Administration Shell, IDTA-Spezifikationen 2024), Digital Twin nach ISO 23247:2021, ISA-95 / IEC 62264 Hierarchie L0-L4, MTConnect, OEE-Kennzahlen, Edge-/Cloud-Architekturen sowie OT-Sicherheit nach IEC 62443.',
+                pages: [PAGE_I40_RAMI, PAGE_I40_DT, PAGE_I40_MES, PAGE_I40_SEC],
+                quiz: QUIZ_I40
             }
         ]
     });

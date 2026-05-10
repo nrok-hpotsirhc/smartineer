@@ -128,20 +128,20 @@ Pro Paket: ≥4 Lehrseiten (AGENTS §18.6) + ≥50 quellenbelegte MCQ (AGENTS §
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
 
 ### P-AUTO-05 — Master-ET Automation Kap. 5 "Robotik / Kinematik / Cobot"
-- **Status:** ready
+- **Status:** done (v47, Sitzung 2026-05-10)
 - **Datei:** `js/data/schulung_master_et_automation.js`
 - **Schwerpunkte:** Denavit-Hartenberg, direkte/inverse Kinematik, Lagrange-Dynamik, Jacobi-Matrix + Singularitaeten, ISO 10218-1/-2:2011, ISO/TS 15066:2016 (HRC-Grenzwerte), ROS 2 Humble/Iron, MoveIt 2, ISO 9283 (Genauigkeitskennwerte).
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
 
 ### P-AUTO-06 — Master-ET Automation Kap. 6 "Industrie 4.0 / Digital Twin"
-- **Status:** ready
+- **Status:** done (v47, Sitzung 2026-05-10)
 - **Datei:** `js/data/schulung_master_et_automation.js`
 - **Schwerpunkte:** RAMI 4.0, Asset Administration Shell (AAS, IDTA Specs 2024), Verwaltungsschale Submodelle, ISO 23247 (Digital Twin Manufacturing), ISA-95 / IEC 62264, MTConnect, Plattform Industrie 4.0 / IIC, Edge-Cloud-Continuum.
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
 
 ### P-AUTO-STATUS — `master_et_automation` auf `status: 'production'`
-- **Status:** blocked: P-AUTO-05, P-AUTO-06
-- **Aktion:** `status: 'preparation'` entfernen, README/Card-Badge pruefen, CACHE_VERSION bumpen.
+- **Status:** done (v47, Sitzung 2026-05-10)
+- **Aktion:** `status: 'preparation'` entfernt, README/Card-Badge geprueft, CACHE_VERSION gebumpt.
 
 ### P-AUTO-01-TOPUP — Kap. 1 "Fortgeschrittene Regelungstechnik" auf 50 MCQ bringen
 - **Status:** done (v44, 2026-05-10)
@@ -559,12 +559,14 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Batch-Anker (vom Agent gesetzt):** **P-AUTO-05** (Master-ET Automation Kap. 5 "Robotik und Bahnsteuerung") — entblockt P-AUTO-STATUS und schliesst zusammen mit P-AUTO-06 die letzte fehlende Saeule der Automation-Strecke. Alternativ-Anker: **P-CYBERSEC-CAPSTONE** zur Komplettierung der Cybersec-Strecke (Kap. 1-9 sind seit dieser Sitzung produktiv).
-> Begruendung: Cybersec-Curriculum ist mit P-CYBERSEC-09 jetzt bei 9/9 Kapiteln und der Quellenanker-Audit ist mit v46 technisch geschlossen (`--strict-sources` gruen). Logischer naechster Hebel ist Automation-Entblockung. P-AUTO-05 (Robotik, ROS 2 / MoveIt 2 / ISO 10218 / IFR World Robotics) ist ein eigenstaendiges Master-Kapitel und fuellt einen Sitzungs-Slot weitgehend allein; kompatible Quick-Wins duerfen nur ergaenzt werden, wenn das Session-Budget nach Validierung reicht.
+> **Naechster Batch-Anker (vom Agent gesetzt):** **P-CYBERSEC-CAPSTONE** (Master-Capstone Cyber-Security) — mit Cybersec 9/9 Kapiteln + Automation 6/6 Kapiteln + Quellenanker-Audit (v46) sind beide Master-Strecken inhaltlich vollstaendig. Capstone schliesst die Cybersec-Strecke didaktisch ab (Architekturbewertung + Threat Model + Runbook + Review-Fragen). Alternativ-Anker: **P-AUTO-CAPSTONE** (Automation-Capstone). Spaeter folgen P-LP-EXAM-MODE (Pruefungsmodus-Architektur) und P-MED-AUDIT (Leitlinien-Aktualitaet).
+> Begruendung: Beide Master-Curricula sind seit Sitzung 2026-05-10 produktiv und auf `status: 'production'`. Die naechste hochwertige Eskalation ist nicht ein weiteres Inhalts-Top-up, sondern der pruefungsnahe Capstone-Schritt — bringt didaktischen Mehrwert pro Sessionbudget am hoechsten. Inhaltliche Top-ups (P-AUTO-LABS, P-AUTO-07/08/09, P-CAT-*) bleiben ready und sind kompatible Quick-Wins, falls ein Capstone-Batch Restbudget freilaesst.
 
 ---
 
 ## F) Aenderungs-Historie dieser Datei
+
+- 2026-05-10: P-AUTO-05 + P-AUTO-06 + P-AUTO-STATUS erledigt — Master-ET Automation Kap. 5 "Industrierobotik" und Kap. 6 "Industrie 4.0 und Digital Twin" produktiv ausgepflegt; je 4 Lehrseiten nach AGENTS-§23-Template (8 Pflichtbloecke pro Seite) + je 50 quellenbelegte MCQ. Kap. 5: Kinematik/DH/IK/Singularitaeten (Denavit-Hartenberg 1955, Pieper 1968, Wampler 1986, Yoshikawa 1985, Spong et al. 2020), Dynamik/Bahnplanung (Luh/Walker/Paul 1980, Siciliano 2010, Lynch/Park 2017, ISO 9283:1998), Sicherheit/MRK (ISO 10218-1/-2:2011, ISO/TS 15066:2016 Annex A, ISO 12100:2010, ISO 13849-1:2023, IEC 62061:2021, ISO 13855:2010, EU-VO 2023/1230, IEC 61800-5-2 STO), Programmierung (KRL/RAPID/URScript/KAREL, ROS 2 Humble/Iron, ros2_control, MoveIt 2, OMG DDS, FCL). Kap. 6: RAMI 4.0/AAS (DIN SPEC 91345:2016, IDTA 01001-3 / 01002 / 01005 / 02006 / 02022, IEC 62890:2020), Digital Twin (ISO 23247-1 bis -4:2021, Kritzinger 2018, IEEE 802.1Qbv-2015), MES/Edge (IEC 62264-1:2013, ANSI/MESA B2MML 2023, MTConnect 2.3:2024, Nakajima 1988, Sigstore Cosign 2024), OT-Sicherheit (IEC 62443-3-2:2020, -3-3:2013, -4-1:2018, -4-2:2019, OPC UA Part 2:2022 + Part 12:2018, TPM 2.0, FIPS 140-3:2019). `status: 'preparation'` aus `master_et_automation` entfernt — Schulung jetzt vollstaendig produktiv (6/6 Kapiteln). Validierung: `node --check` gruen, `node tools/validate.js --strict-sources` exit 0. CACHE_VERSION v46 → v47. Naechster Batch-Anker: P-CYBERSEC-CAPSTONE.
 
 - 2026-05-10: P-STUDY-QA-SOURCE-AUDIT + P-ARCH-STRICT-SOURCE-VALIDATION erledigt — Quellenanker-Warnungen aus `node tools/validate.js` von 887 auf 0 reduziert. Betroffene Dateien: `schulung_starter.js` (492), `schulung_securityx.js` (135), `schulung_allgemeinmedizin.js` (123), `schulung_master_et_cybersec.js` (76), `schulung_master_et_automation.js` (61). Fehlende Quellenanker werden nun ueber `ensureSourceAnchor(...)` sichtbar an Quiz-Erklaerungen angehaengt; neun Cybersec-Sonderfaelle wurden einzeln mit Quellenankern zu Sigstore/SLSA, DSGVO Art. 32, MITRE ATT&CK AD-Techniken, Microsoft Protected Users, SigmaHQ und Sysmon/LSASS versehen. Neues Audit-Log: `docs/QA-SOURCE-AUDIT.md`. Validator erweitert: `node tools/validate.js --strict-sources` eskaliert fehlende Quellenanker zu blockierenden Fehlern; AGENTS §13 nutzt den Strict-Mode als Standard. Validierung: `node --check` fuer geaenderte JS-Dateien gruen, `node tools/validate.js --strict-sources` exit 0. CACHE_VERSION v45 → v46. Naechster Batch-Anker bleibt P-AUTO-05; P-MED-AUDIT bleibt als tiefer fachlicher Medizin-/Leitlinien-Audit bewusst offen.
 - 2026-05-10: Initiale Anlage. Definiert A) Master-Kapitel, B) 100/Kategorie, C) Medizin-Audit, D) UI-Bugs. Nach Sitzung mit P-UI-CHEATSHEET-COLLAPSE / P-UI-LOGIN-TRIM / Cybersec Kap. 4 (Kap. 4 wurde ohne Paket-ID gefahren und ist im Status-Report v28 als done dokumentiert).
