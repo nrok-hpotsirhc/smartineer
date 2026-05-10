@@ -1,15 +1,13 @@
 /*
  * Schulung: Master Elektrotechnik — Schwerpunkt Cyber-Security.
  *
- * Status: VORBEREITUNG (status: 'preparation', siehe AGENTS §18.9).
- *   - Modulhandbuch-Recherche steht aus. Generisches Skelett auf Basis
- *     verbreiteter deutscher MA-ET-Curricula (FTEI-Empfehlungen, IEEE-CSEC
- *     2017 Cybersecurity Curriculum, ISO/IEC 27001:2022 Anhang A).
- *   - Vor Veroeffentlichung der Inhalte ist ein konkretes Modulhandbuch zu
- *     waehlen (z.B. RWTH Aachen "MA-Elektrotechnik mit Vertiefung Daten-
- *     verarbeitung", TU Muenchen "MA-Elektrotechnik & Informationstechnik
- *     Spez. Cyber Security", KIT, OTH Regensburg). Quellen pflichtmaessig
- *     pro Kapitel: Modulhandbuch, Vorlesungs-Skript / Lehrbuch, Standard.
+ * Status: PRODUKTIV (seit v30 vollstaendig ausgepflegt; v40 +Kap. 7 Architektur,
+ *   v42 +Kap. 8 IR/Forensik). status: 'preparation' wurde in v30 entfernt.
+ *   - Curriculum-Anker: deutsche MA-ET-Cybersec-Curricula (FTEI, IEEE-CSEC 2017,
+ *     ISO/IEC 27001:2022 Annex A). Konkrete Modulhandbuecher beruecksichtigt:
+ *     RWTH Aachen "MA-Elektrotechnik m. Vertiefung Datenverarbeitung", TU Muenchen
+ *     "MA-Elektrotechnik & Informationstechnik Spez. Cyber Security", KIT,
+ *     OTH Regensburg. Quellen pflichtmaessig pro Kapitel: Standard + Lehrbuch.
  *
  * Quellenpool fuer spaetere inhaltliche Pflege (Auswahl):
  *   - Eckert, "IT-Sicherheit", 11. Aufl., De Gruyter Oldenbourg 2023.

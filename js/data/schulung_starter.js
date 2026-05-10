@@ -694,7 +694,8 @@
                     q('Welche Eigenschaft hat eine Honeynet?', ['Mehrere vernetzte Honeypots, oft ein ganzes Subnetz', 'Backup-Netz', 'WLAN-Standard', 'CDN'], 0, 'Honeynet Project ist seit 1999 bekannt.'),
                     q('Welche Eigenschaft hat Canary-Tokens?', ['Versteckte Indikatoren (Files, AWS-Keys, DNS-Lookups), die bei Zugriff Alarm auslösen', 'Reine Backup-Schemata', 'Reine TLS-Cipher', 'WLAN-Standard'], 0, 'Thinkst Canary-Tokens — leichte Tripwires gegen Lateral Movement.'),
                     q('Welche Eigenschaft hat ein Air-Gapped Network?', ['Physische Trennung von externen Netzen', 'Reine Logische Trennung via VLAN', 'Reines TLS-Tunneling', 'Reine WLAN-Isolation'], 0, 'Stuxnet zeigte: Air-Gap allein ist nicht unverletzlich (USB-Vektor).'),
-                    q('Welche Eigenschaft hat ein One-Way-Diode (Data Diode)?', ['Hardware-Komponente, die Datenfluss nur in eine Richtung erlaubt (z. B. von OT zu IT-Monitoring)', 'WLAN-Standard', 'Backup-Tool', 'Reine Software-Firewall'], 0, 'Data Diodes (Owl, Waterfall) sind Standard in Critical Infrastructure und Defense.')
+                    q('Welche Eigenschaft hat ein One-Way-Diode (Data Diode)?', ['Hardware-Komponente, die Datenfluss nur in eine Richtung erlaubt (z. B. von OT zu IT-Monitoring)', 'WLAN-Standard', 'Backup-Tool', 'Reine Software-Firewall'], 0, 'Data Diodes (Owl, Waterfall) sind Standard in Critical Infrastructure und Defense.'),
+                    q('Wie viele Tenets definiert die Zero Trust Architecture nach NIST SP 800-207 (Aug. 2020)?', ['Sieben Tenets (z. B. "All resources are considered resources", "Per-session access", "Dynamic policy", "Continuous monitoring")', 'Drei Tenets', 'Zehn Tenets', 'Funf Tenets'], 0, 'NIST SP 800-207 §2.1 listet sieben Grundprinzipien; PE/PA/PEP-Modell in §3.')
                 ]
             },
             {
@@ -1488,7 +1489,8 @@
                     q('Welche Eigenschaft hat ein CWE-502?', ['Deserialization of Untrusted Data', 'XSS', 'CSRF', 'SQLi'], 0, 'CWE-502 — RCE-häufig bei Java/Python-Deserialization.'),
                     q('Welche Eigenschaft hat ein CWE-798?', ['Use of Hard-coded Credentials', 'XSS', 'CSRF', 'SQLi'], 0, 'CWE-798 — typischer Finding in IoT-Firmware.'),
                     q('Welche Eigenschaft hat ein OWASP A05 (2021)?', ['Security Misconfiguration', 'Broken Access Control', 'Injection', 'SSRF'], 0, 'Misconfig: default-creds, offene Ports, Debug-Modus.'),
-                    q('Welche Eigenschaft hat ein OWASP A06 (2021)?', ['Vulnerable & Outdated Components', 'XSS', 'Broken Access Control', 'SSRF'], 0, 'Veraltete Libraries, ungepatchte Komponenten.')
+                    q('Welche Eigenschaft hat ein OWASP A06 (2021)?', ['Vulnerable & Outdated Components', 'XSS', 'Broken Access Control', 'SSRF'], 0, 'Veraltete Libraries, ungepatchte Komponenten.'),
+                    q('Welcher OWASP-Top-10-2021-Eintrag steht auf Platz A01 (haeufigste/risikoreichste Kategorie)?', ['Broken Access Control', 'Cryptographic Failures', 'Injection', 'Security Misconfiguration'], 0, 'OWASP Top 10 2021: A01 Broken Access Control loeste A05 (2017) ab; 94 % der getesteten Apps wiesen mindestens einen Befund dieser Kategorie auf (OWASP 2021, Methodology).')
                 ]
             },
             {
@@ -2364,7 +2366,8 @@
                     q('Welche Eigenschaft hat ein NDA?', ['Non-Disclosure Agreement — Vertraulichkeitsverpflichtung', 'Reine Hardware-Prüfung', 'Reine Cloud-Prüfung', 'Reine WLAN-Prüfung'], 0, 'NDA ist Pflicht; auch Mitarbeiter des Auftragnehmers müssen Bonding haben.'),
                     q('Welche Eigenschaft hat ein MSA?', ['Master Services Agreement — langfristiger Rahmenvertrag', 'Reine Hardware-Prüfung', 'Reine Cloud-Prüfung', 'Reine WLAN-Prüfung'], 0, 'MSA + SOWs erlauben mehrere Engagements ohne neue MSA-Verhandlung.'),
                     q('Welche Eigenschaft hat ein SOW?', ['Statement of Work — konkretes Engagement-Detail (Scope, Deliverables, Termine, Preise)', 'Reine Hardware-Prüfung', 'Reine Cloud-Prüfung', 'Reine WLAN-Prüfung'], 0, 'SOW ist projektspezifisch.'),
-                    q('Welche Eigenschaft hat ein Liability-Cap im SOW?', ['Maximaler Schadensersatz, der vertraglich begrenzt wird', 'Reine Hardware-Prüfung', 'Reine Cloud-Prüfung', 'Reine WLAN-Prüfung'], 0, 'Standard-Klausel; oft Cap = Vertragsvolumen × 1–3.')
+                    q('Welche Eigenschaft hat ein Liability-Cap im SOW?', ['Maximaler Schadensersatz, der vertraglich begrenzt wird', 'Reine Hardware-Pruefung', 'Reine Cloud-Pruefung', 'Reine WLAN-Pruefung'], 0, 'Standard-Klausel; oft Cap = Vertragsvolumen × 1–3.'),
+                    q('Welcher US-Standard beschreibt einen vierphasigen Pentest-Prozess (Planning, Discovery, Attack, Reporting)?', ['NIST SP 800-115 (Sep. 2008) "Technical Guide to Information Security Testing and Assessment" §3.4', 'NIST SP 800-53 Rev. 5', 'ISO/IEC 27001:2022', 'PCI DSS v4.0'], 0, 'NIST SP 800-115 ist die zentrale technische Pentest-/Assessment-Referenz der US-Bundesverwaltung; Discovery enthaelt Iteration zwischen Vuln-Analyse und Attack-Phase.')
                 ]
             },
             {
@@ -2972,7 +2975,8 @@
                     q('Welche Eigenschaft hat ein Metasploit?', ['Modulares Exploitation-Framework (msfconsole) mit Auxiliary, Exploit, Post', 'Reine TLS-Cipher', 'Reine Cloud-Region', 'Reine WLAN-Region'], 0, 'Rapid7 Metasploit ist de-facto-Standard für Exploit-Test.'),
                     q('Welche Eigenschaft hat ein Meterpreter?', ['In-Memory-Payload mit Channels, Pivoting, Process-Migration', 'Reine TLS-Cipher', 'Reine Cloud-Region', 'Reine WLAN-Region'], 0, 'Meterpreter ist Standard-Metasploit-Payload für Post-Exploitation.'),
                     q('Welche Eigenschaft hat ein sqlmap?', ['Automatisierte SQL-Injection-Detection und Exploitation', 'Reine TLS-Cipher', 'Reine Cloud-Region', 'Reine WLAN-Region'], 0, 'Sucht Boolean/Time/Error/UNION-basierte SQLi.'),
-                    q('Welche Eigenschaft hat ein Burp Suite?', ['Web-Proxy + Scanner + Repeater + Intruder für Web-App-Pentest', 'Reine TLS-Cipher', 'Reine Cloud-Region', 'Reine WLAN-Region'], 0, 'PortSwigger; Pro-Version mit aktivem Scanner und Collaborator.')
+                    q('Welche Eigenschaft hat ein Burp Suite?', ['Web-Proxy + Scanner + Repeater + Intruder fuer Web-App-Pentest', 'Reine TLS-Cipher', 'Reine Cloud-Region', 'Reine WLAN-Region'], 0, 'PortSwigger; Pro-Version mit aktivem Scanner und Collaborator.'),
+                    q('Welcher hashcat-Mode entspricht NTLM-Hashes?', ['-m 1000 (NTLM)', '-m 0 (MD5)', '-m 1800 (sha512crypt)', '-m 22000 (WPA-PBKDF2-PMKID+EAPOL)'], 0, 'hashcat 6.x (2024) `--example-hashes` / Wiki: 1000 = NTLM, 1800 = sha512crypt $6$, 22000 = WPA-PBKDF2, 13100 = Kerberos 5 TGS-REP etype 23.')
                 ]
             },
             {
