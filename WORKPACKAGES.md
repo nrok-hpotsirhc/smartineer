@@ -17,7 +17,7 @@
 Pro Paket: ≥4 Lehrseiten (AGENTS §18.6) + ≥50 quellenbelegte MCQ (AGENTS §18.4) mit Quellenanker pro `explanation`. Kein status-Switch auf `production` einzeln; erst wenn alle Kapitel der Schulung produktiv sind (Paket P-CYBERSEC-STATUS bzw. P-AUTO-STATUS).
 
 ### P-CYBERSEC-05 — Master-ET Cybersec Kap. 5 "Risikomanagement & Compliance"
-- **Status:** ready
+- **Status:** done (v29, Sitzung 2026-05-10)
 - **Datei:** `js/data/schulung_master_et_cybersec.js`
 - **Schwerpunkte:** ISO/IEC 27001:2022 + Annex A 93 Controls / 4 Themengruppen, ISO/IEC 27005:2022, BSI IT-Grundschutz-Kompendium 2024 (Bausteine), NIS2 EU 2022/2555 (Frist 17.10.2024), CRA EU 2024/2847 Art. 13, FIRST CVSS v4.0 (Nov. 2023), Open FAIR Body of Knowledge 2024, OCTAVE Allegro, ISO 31000:2018, CISA KEV, EPSS.
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ; CACHE_VERSION bumpen.
@@ -126,8 +126,8 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Vorschlag (vom Agent gesetzt):** **P-CYBERSEC-05** (Cybersec Kap. 5 Risikomanagement & Compliance).
-> Begruendung: Setzt die Master-ET-Cybersec-Schulung kontinuierlich fort; danach P-CYBERSEC-06; dann P-CYBERSEC-STATUS; anschliessend Switch auf Automation-Schiene.
+> **Naechster Vorschlag (vom Agent gesetzt):** **P-CYBERSEC-06** (Cybersec Kap. 6 AI-Security).
+> Begruendung: Letztes ausstehendes Kapitel der Master-ET-Cybersec-Schulung; danach P-CYBERSEC-STATUS (Switch auf `production`); anschliessend Wechsel auf die Automation-Schiene (P-AUTO-02).
 
 ---
 
@@ -135,3 +135,4 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 
 - 2026-05-10: Initiale Anlage. Definiert A) Master-Kapitel, B) 100/Kategorie, C) Medizin-Audit, D) UI-Bugs. Nach Sitzung mit P-UI-CHEATSHEET-COLLAPSE / P-UI-LOGIN-TRIM / Cybersec Kap. 4 (Kap. 4 wurde ohne Paket-ID gefahren und ist im Status-Report v28 als done dokumentiert).
 - 2026-05-10: P-UI-AUTH-DEFAULTS-USER erledigt — Demo-User aus `auth-credentials.example.js` in `user/user` umbenannt, Login-Hinweistext in `app.jsx` an `admin/admin` und `user/user` angeglichen.
+- 2026-05-10: P-CYBERSEC-05 erledigt — Cybersec Kap. 5 "Risikomanagement und Compliance" produktiv ausgepflegt (4 Lehrseiten zu ISO/IEC 27001:2022 + Annex A, BSI IT-Grundschutz + ISO/IEC 27005:2022, EU-Regulatorik NIS2/CRA, Risiko-Bewertung CVSS v4.0/EPSS/KEV/FAIR/OCTAVE/ISO 31000; 50 quellenbelegte MCQ). CACHE_VERSION v28 → v29. Naechster Vorschlag: P-CYBERSEC-06.
