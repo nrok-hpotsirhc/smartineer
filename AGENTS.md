@@ -167,6 +167,10 @@ Eine Aufgabe ist ein Objekt:
 - **Sprache**: Deutsch. Fachbegriffe ggf. englisch in Klammern.
 - **Einheiten** SI, mit `\\,` als schmaler Schutzraum: `9{,}81\\,\\text{m/s}^2`.
 
+### Optionale Lernplattform-Metadaten
+
+Aufgaben duerfen zusaetzlich die optionalen Felder `lo`, `bloom`, `difficulty`, `tags`, `source` tragen (siehe §22). Sie werden vom Renderer ignoriert und ueber den Adapter `toItem(...)` als kanonische Felder verfuegbar gemacht — Voraussetzung fuer kuenftige Pruefungs-/Mastery-Modi (P-LP-EXAM-MODE, P-LP-MASTERY) und kompetenzorientierte Auswertung.
+
 ---
 
 ## 6. Workflow: Neue Aufgabe hinzufügen
@@ -485,6 +489,8 @@ Pro Schulung eine Datei `js/data/schulung_<id>.js` als IIFE:
 
 Pflichtfelder pro Kapitel: `id`, `title`, `summary`, `pages` (≥ 1), `quiz` (≥ 50 Soll, ≥ 10 Mindest-Bootstrap).
 
+Quiz-Items duerfen zusaetzlich die optionalen Lernplattform-Metadaten `lo`, `bloom`, `difficulty`, `tags`, `source` tragen — siehe §22 (einheitliches Item-Schema, Adapter `toItem`). Diese Felder sind kompatibel mit MCQ, Sequence- und Cloze-Items.
+
 ### 18.2 UX-Vertrag (Buch-Navigation)
 
 - **Buchartiger Reader**: eine Seite pro Bildschirm, prev/next Buttons unten, fortlaufender Fortschrittsbalken.
@@ -655,5 +661,115 @@ Smartineer wird in **mobilen Agent-Sessions** weiterentwickelt. Damit jede Sessi
 
 - Mobile-Trigger: User schickt einen kurzen Prompt wie "neue Session bitte" oder nennt direkt ein Paket-Kuerzel. Der Agent sichtet `WORKPACKAGES.md`, waehlt deterministisch (kein Raten), bestaetigt das gewaehlte Paket im ersten Output-Satz und liefert am Ende den Roll-Forward + naechsten Vorschlag.
 - Keine Session ohne Update von `WORKPACKAGES.md`: auch eine reine Bugfix-Session muss mindestens ein Done-Eintrag und ggf. einen neuen P-UI-... Eintrag setzen.
+
+---
+
+## 22. Einheitliches Item-Schema (Training / Schulung / Schueler)
+
+Smartineer haelt drei getrennte Tracks (Ingenieurs-Training §5, Schulungen §18, Schueler §17) mit historisch unterschiedlich geformten Item-Objekten. Damit kuenftige Lernplattform-Mechaniken (Stable-QID, Pruefungs-/Mastery-Modus, kompetenzorientierte Auswertung, kapitelübergreifender Glossar/Crosslink, Daily-Mix) **einheitlich** auf alle drei Tracks zugreifen koennen, gibt es ein gemeinsames Laufzeit-Schema und einen Adapter `toItem(legacy, ctx)` in `js/app.jsx`.
+
+**Wichtig:** Es gibt **keine Massen-Migration** der Daten-Skripte. Die Datenformate aus §5 (Training: `{q, h, s}`) und §18.1 (Schulung: `{q, options, correct, explanation}` bzw. `{type:'sequence'|'cloze', ...}`) sowie §17.1 (Schueler: `{q, a}`) bleiben unveraendert die Quelle der Wahrheit. Der Adapter hebt sie zur Laufzeit auf das Schema; Renderer koennen wahlweise legacy oder unified zugreifen.
+
+### 22.1 Kanonische Item-Form
+
+```js
+{
+    id,           // Stable-Best-Effort-Referenz; die richtige stabile QID kommt mit P-ARCH-STABLE-QID
+    type,         // 'training' | 'mcq' | 'sequence' | 'cloze' | 'schueler'
+    stem,         // Frage-/Aufgabentext als HTML (entspricht Legacy `q`)
+    h, s,         // Training: Hinweis / Musterloesung (HTML)
+    a,            // Schueler: Musterantwort (Plain-Text, vergleicht via normalize())
+    options,      // MCQ: Antwortoptionen
+    correct,      // MCQ: Index | Sequence: Reihenfolge der Item-Indizes
+    explanation,  // MCQ / Sequence / Cloze: Quellenanker-Erlaeuterung
+    items,        // Sequence: zu sortierende Bloecke
+    blanks,       // Cloze: Liste { label, accept:[...] }
+    // Optionale Lernplattform-Metadaten (Pflege schrittweise; default-leer):
+    lo,           // Lernziel-ID (Modulhandbuch / Curriculum-Matrix), z.B. 'control.imc.equivalence'
+    bloom,        // Bloom-Stufe: 'remember' | 'understand' | 'apply' | 'analyze' | 'evaluate' | 'create'
+    difficulty,   // 'easy' | 'medium' | 'hard'  bzw. 'L1' | 'L2' | 'L3' (Training)
+    tags,         // string[] (Themen-/Standard-Tags), Default []
+    source,       // Quellenanker (Lehrbuch + Auflage + Paragraph; Standard + Version + Abschnitt)
+    _legacy       // Original-Objekt fuer Code-Pfade, die noch direkt auf Legacy-Felder zugreifen
+}
+```
+
+### 22.2 Adapter-Aufruf
+
+```js
+// Training:
+const item = toItem(task, { kind: 'training', catId, level: lvl, idx });
+
+// Schulung-Quiz:
+const item = toItem(quizItem, { kind: itype /* 'mcq' | 'sequence' | 'cloze' */, tid, cid, idx });
+
+// Schueler:
+const item = toItem(drillItem, { kind: 'schueler', classId, subject, idx });
+```
+
+`kind` ist optional — der Adapter erkennt den Typ sonst aus dem Shape (`type`-Feld, `options`/`a`/`h+s`).
+
+### 22.3 Beispiele pro Track
+
+**Training (`js/data/control.js`, L3 IMC-Aufgabe)** — Legacy `{q,h,s}` mit optionalen Metadaten:
+
+```js
+{
+    q: 'IMC: ... Gib den IMC-Regler $G_R$ und den klassischen Regler $G_C$ an.',
+    h: 'IMC-Regler: $G_R = G_S^{-1} F$ ...',
+    s: '... $$\\boxed{G_C(s)=...}$$',
+    lo: 'control.imc.equivalence',
+    bloom: 'apply',
+    difficulty: 'L3',
+    tags: ['imc', 'robust-control', 'tuning'],
+    source: 'Skogestad & Postlethwaite, Multivariable Feedback Control, 2nd ed., Wiley 2005, §2.4'
+}
+```
+
+**Schulung-MCQ (`js/data/schulung_master_et_cybersec.js`, Kap. 6, letztes Item)**:
+
+```js
+{
+    q: 'Welche Eigenschaft gehoert NICHT zu den "Trustworthy AI Characteristics" des NIST AI RMF 1.0?',
+    options: ['Profitable', 'Valid &amp; Reliable', 'Safe', 'Privacy-Enhanced'],
+    correct: 0,
+    explanation: 'NIST AI 100-1: ... "Profitable" gehoert nicht dazu.',
+    lo: 'aisec.governance.nist-rmf',
+    bloom: 'remember',
+    difficulty: 'easy',
+    tags: ['ai-security', 'governance', 'nist-ai-rmf'],
+    source: 'NIST AI 100-1, AI Risk Management Framework 1.0 (Jan. 2023), §3.2 Trustworthy AI Characteristics'
+}
+```
+
+**Schueler-Pool-Item (`js/data/schueler.js`, Klasse 4 Mathe, illustrativ)**:
+
+```js
+{
+    q: 'Eine Tafel Schokolade kostet 1,20 EUR. Wie viel kosten 7 Tafeln?',
+    a: '8.40',
+    lo: 'k4.mathe.sachaufgabe.multiplikation',
+    bloom: 'apply',
+    difficulty: 'easy',
+    tags: ['sachaufgabe', 'multiplikation', 'dezimalzahlen'],
+    source: 'Lehrplan Klasse 4 Bayern (LehrplanPLUS), Mathematik, Lernbereich 1.3'
+}
+```
+
+### 22.4 Erweiterungsregeln
+
+- **Optional, nicht verpflichtend.** Bestehende Items ohne Metadaten bleiben gueltig; der Adapter setzt fehlende Felder auf `undefined` (bzw. `tags = []`).
+- **Schrittweise Pflege.** Neue Items sollten Metadaten direkt mitliefern; alte Items werden im Rahmen von `P-STUDY-QA-SOURCE-AUDIT` und kapitel-spezifischen Top-up-Paketen rueckwirkend ergaenzt.
+- **`lo`-IDs** stammen aus `docs/CURRICULUM-MATRIX.md` (Modulhandbuch). Wenn die ID dort noch nicht existiert, dort zuerst eintragen.
+- **`source` ist Pflicht** in jeder Aufgabe, deren `lo` produktiv ist (Pruefungsmodus zeigt sie an). Bis dahin: jede neue Frage kriegt Quelle, sobald sie hinzugefuegt wird (siehe §8 / §18.5).
+- **Keine Reihenfolge-Aenderung** beim Hinzufuegen von Metadaten (gleiche Regel wie §11 / §18.3): Felder *am bestehenden Objekt* ergaenzen, nicht das Objekt im Array verschieben.
+- **Stable-QID** (`P-ARCH-STABLE-QID`) ersetzt spaeter die Hilfs-`id` aus `toItem` durch einen content-Hash. Bis dahin nicht auf das `id`-Format verlassen — es kann in zukuenftigen Sitzungen angepasst werden.
+
+### 22.5 Anti-Pattern
+
+- Adapter umgehen und gleichzeitig das Datenformat aendern — fuehrt zu Doppelmigration. Adapter ist die einzige Brücke.
+- Pflichtfelder eines Tracks (z.B. `q`/`h`/`s` im Training, `correct` in MCQ) durch Adapter-Felder ersetzen. Legacy-Felder bleiben primaer.
+- Metadaten in `_legacy` schreiben — `_legacy` ist ein read-only Verweis auf das Originalobjekt, kein Schreibziel.
+- `id` aus `toItem` als persistenten Schluessel in `localStorage` verwenden — der Wert ist Best-Effort und wird mit `P-ARCH-STABLE-QID` neu definiert.
 
 

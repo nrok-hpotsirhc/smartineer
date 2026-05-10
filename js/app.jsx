@@ -271,6 +271,70 @@ function categoryStats(cat, isSolved) {
     return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
 }
 
+// ---------------------------------------------------------------- Einheitliches Item-Schema
+// Kanonische Laufzeit-Form fuer Training-Aufgaben, Schulungen-Quizfragen und Schueler-Drill-Items.
+// Siehe AGENTS.md §22. Daten-Skripte werden NICHT migriert — der Adapter hebt Legacy-Items
+// `{q,h,s}` (Training) bzw. `{q,options,correct,explanation}` / `{type:'sequence'|'cloze',...}`
+// (Schulung) bzw. `{q,a}` (Schueler) zur Laufzeit auf das einheitliche Schema:
+//   { id, type, stem, h?, s?, a?, options?, correct?, explanation?, items?, blanks?,
+//     lo?, bloom?, difficulty?, tags, source?, _legacy }
+// Optionale Metadaten (`lo`, `bloom`, `difficulty`, `tags`, `source`) werden — sofern am
+// Legacy-Item gesetzt — durchgereicht; fehlen sie, bleiben sie `undefined` (bzw. `tags = []`).
+function toItem(legacy, ctx) {
+    if (!legacy) return null;
+    const c = ctx || {};
+    const kind = c.kind || (
+        Array.isArray(legacy.options) ? 'mcq'
+            : (legacy.type === 'sequence' || legacy.type === 'cloze') ? legacy.type
+            : (typeof legacy.h === 'string' || typeof legacy.s === 'string') ? 'training'
+            : (typeof legacy.a === 'string') ? 'schueler'
+            : 'unknown'
+    );
+    // Type explizit aus Legacy oder Kontext ableiten:
+    const type = legacy.type
+        || (kind === 'mcq' ? 'mcq'
+            : kind === 'training' ? 'training'
+            : kind === 'schueler' ? 'schueler'
+            : kind);
+    // Stabile Referenz-ID (best-effort; vollstaendige Stable-QID folgt in P-ARCH-STABLE-QID):
+    let id = legacy.id;
+    if (!id) {
+        if (c.kind === 'training' || type === 'training') {
+            id = `t|${c.catId || '?'}|${c.level != null ? c.level : '?'}|${c.idx != null ? c.idx : '?'}`;
+        } else if (c.tid || c.cid) {
+            id = `s|${c.tid || '?'}|${c.cid || '?'}|${c.idx != null ? c.idx : '?'}`;
+        } else if (c.kind === 'schueler') {
+            id = `k|${c.classId || '?'}|${c.subject || '?'}|${c.idx != null ? c.idx : '?'}`;
+        } else {
+            id = `?|${c.idx != null ? c.idx : '?'}`;
+        }
+    }
+    return {
+        id,
+        type,
+        stem: legacy.q,
+        // Training-Felder
+        h: legacy.h,
+        s: legacy.s,
+        // Schueler-Feld
+        a: legacy.a,
+        // MCQ / PBQ-Felder
+        options: legacy.options,
+        correct: legacy.correct,
+        explanation: legacy.explanation,
+        items: legacy.items,
+        blanks: legacy.blanks,
+        // Optionale Lernplattform-Metadaten (siehe AGENTS §22):
+        lo: legacy.lo,
+        bloom: legacy.bloom,
+        difficulty: legacy.difficulty,
+        tags: Array.isArray(legacy.tags) ? legacy.tags : [],
+        source: legacy.source,
+        // Original fuer Code, der noch direkt auf Legacy-Felder zugreift:
+        _legacy: legacy
+    };
+}
+
 // ---------------------------------------------------------------- Nav
 const NAV_ICONS = {
     dashboard: (
@@ -622,7 +686,14 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
     const [showSolution, setShowSolution] = useState(false);
     useEffect(() => { setShowHint(false); setShowSolution(false); }, [catId, lvl, idx]);
 
-    const ref = useKaTeX([catId, lvl, idx, task && task.q, showHint, showSolution]);
+    // Einheitliches Item-Schema (siehe AGENTS §22). Verhalten unveraendert: Stem/Hint/Solution
+    // werden ueber den Adapter gelesen, der Legacy-Felder `q`/`h`/`s` 1:1 auf `stem`/`h`/`s` mappt.
+    const item = toItem(task, { kind: 'training', catId, level: lvl, idx });
+    const stem = item ? item.stem : (task && task.q);
+    const hintHtml = item ? item.h : (task && task.h);
+    const solutionHtml = item ? item.s : (task && task.s);
+
+    const ref = useKaTeX([catId, lvl, idx, stem, showHint, showSolution]);
     const solved = isSolved(catId, lvl, idx);
 
     if (!task) {
@@ -634,7 +705,7 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
     }
 
     return (
-        <div ref={ref}>
+        <div ref={ref} data-item-id={item ? item.id : undefined}>
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div></div>
                 <div className="flex items-center gap-2">
@@ -647,7 +718,7 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
             <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 p-6 rounded-xl border border-slate-200 mb-6 task-fade" key={`${catId}-${lvl}-${idx}`}>
                 <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Aufgabe</h4>
                 <div className="text-base md:text-lg text-slate-800 math-block min-h-[60px]"
-                    dangerouslySetInnerHTML={{ __html: task.q }} />
+                    dangerouslySetInnerHTML={{ __html: stem }} />
             </div>
 
             <div className="flex flex-wrap gap-3 mb-6">
@@ -670,13 +741,13 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
             {showHint && (
                 <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-lg slide-in">
                     <h4 className="text-sm font-bold text-amber-800 mb-1">Formel / Ansatz</h4>
-                    <div className="text-amber-900 math-block" dangerouslySetInnerHTML={{ __html: task.h }} />
+                    <div className="text-amber-900 math-block" dangerouslySetInnerHTML={{ __html: hintHtml }} />
                 </div>
             )}
             {showSolution && (
                 <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-xl slide-in">
                     <h4 className="text-sm font-bold text-emerald-800 uppercase tracking-wide mb-3 border-b border-emerald-200 pb-2">Musterlösung &amp; Rechenweg</h4>
-                    <div className="text-emerald-900 math-block" dangerouslySetInnerHTML={{ __html: task.s }} />
+                    <div className="text-emerald-900 math-block" dangerouslySetInnerHTML={{ __html: solutionHtml }} />
                 </div>
             )}
         </div>
@@ -1651,6 +1722,10 @@ function Schulungen({ auth, onGoToOptionen }) {
         const item = quizSet[quizIdx];
         if (!item) { setStage('chapters'); return null; }
         const itype = quizItemType(item);
+        // Einheitliches Item-Schema (siehe AGENTS §22). `unifiedItem.stem` mappt 1:1 auf `item.q`;
+        // andere Felder werden aus Stabilitaetsgruenden weiterhin direkt vom Legacy-Item gelesen.
+        const qref = quizRefs[quizIdx] || {};
+        const unifiedItem = toItem(item, { kind: itype, tid: qref.tid, cid: qref.cid, idx: qref.idx });
         const canSubmit = isInputComplete(item, quizInput);
 
         const moveSeq = (from, to) => {
@@ -1685,9 +1760,9 @@ function Schulungen({ auth, onGoToOptionen }) {
                     <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-2 transition-all duration-500"
                         style={{ width: `${(quizIdx / quizSet.length) * 100}%` }}></div>
                 </div>
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 task-fade" key={quizIdx}>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 task-fade" key={quizIdx} data-item-id={unifiedItem ? unifiedItem.id : undefined}>
                     <div className="text-base md:text-lg font-bold text-slate-900 mb-5 math-block"
-                        dangerouslySetInnerHTML={{ __html: item.q }} />
+                        dangerouslySetInnerHTML={{ __html: unifiedItem ? unifiedItem.stem : item.q }} />
 
                     {itype === 'mcq' && (
                         <div className="flex flex-col gap-2 mb-5">
