@@ -2461,6 +2461,8 @@
         html: ''
             + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die vier Funktionen des NIST AI RMF 1.0 erlaeutern, (2) die Risikoklassen des EU AI Act und Inkrafttreten-Fristen nennen, (3) ISO/IEC 42001:2023 als zertifizierungsfaehiges AI-Managementsystem einordnen, (4) MLOps-Pipeline-Risiken auf konkrete Controls abbilden.</blockquote>'
 
+            + '<p><strong>Vorwissen.</strong> Kapitel 5 (Risikomanagement nach ISO/IEC 27001:2022, ISO 31000:2018, CVSS v4.0/EPSS), Kapitel 6.1–6.3 (Adversarial ML, Privacy-Modellschutz, OWASP LLM Top 10 v2025); Grundbegriffe MLOps (Daten-Lineage, Feature Store, Model Registry, Drift-Detection); EU-Gesetzgebungslogik (Verordnung vs. Richtlinie, Inkrafttreten vs. Geltung).</p>'
+
             + '<h4>6.4.1 NIST AI Risk Management Framework 1.0</h4>'
             + '<p>NIST AI 100-1 "AI RMF 1.0" (Januar 2023) ist freiwillig und definiert vier Kern-Funktionen ("Core"):</p>'
             + '<table><thead><tr><th>Funktion</th><th>Inhalt</th></tr></thead><tbody>'
@@ -2508,7 +2510,38 @@
             + '</tbody></table>'
             + '<p>Querschnitt: SBOM/<strong>AIBOM</strong> (CycloneDX 1.6 hat AI/ML-Erweiterung), Sigstore-Signaturen, Reproducible Builds und Provenance nach SLSA Level 3+ analog zu klassischen Build-Pipelines (siehe Kap. 4 und Kap. 5).</p>'
 
-            + '<p class="text-xs text-slate-500"><em>Quellen: NIST AI 100-1 "AI RMF 1.0" (Jan. 2023); NIST AI 600-1 (Juli 2024); Verordnung (EU) 2024/1689 ueber KI ("AI Act", Amtsblatt L 12.07.2024); ISO/IEC 42001:2023 (AIMS); ISO/IEC 23894:2023 (AI Risk Management); ISO/IEC 22989:2022 (AI Concepts &amp; Terminology); CEN-CENELEC JTC 21 Standardisation Request M/593 (2023); CycloneDX 1.6 ML-BOM (2024); SLSA v1.0.</em></p>'
+            + '<h4>Worked Example: Klassifikation eines klinischen Bildanalyse-Systems unter EU AI Act</h4>'
+            + '<p>Ein Krankenhaus betreibt ein CNN-basiertes Triage-System fuer Roentgen-Thorax-Aufnahmen, das auffaellige Befunde priorisiert. Trainingsdaten kommen aus drei Klinikketten; Inferenz laeuft on-prem. Welche Pflichten greifen?</p>'
+            + '<ol>'
+            + '<li><em>Geltungsbereich pruefen.</em> Medizinprodukt im Sinne MDR 2017/745 -> faellt unter Anhang I des AI Act -> Hochrisiko-System (Art. 6 Abs. 1).</li>'
+            + '<li><em>Anbieter-/Betreiberrolle.</em> Das Krankenhaus ist hier <strong>Betreiber</strong> (deployer) und nicht Anbieter; primaer gelten Art. 26 (Pflichten der Betreiber). Wuerde das Modell intern weiterentwickelt und unter eigenem Namen in Verkehr gebracht, wuerde aus dem Betreiber ein Anbieter (Art. 25 Abs. 1).</li>'
+            + '<li><em>Pflichten.</em> Risikomanagement-System (Art. 9), Daten-Governance (Art. 10) inkl. Bias-Tests gegen Klinikketten-Verteilung, technische Dokumentation (Art. 11), Logging (Art. 12), Transparenz fuer das medizinische Personal (Art. 13), menschliche Aufsicht (Art. 14, Vier-Augen-Prinzip beim Triagieren), Genauigkeit/Robustheit/Cybersicherheit (Art. 15), Konformitaetsbewertung + CE, Post-Market-Monitoring.</li>'
+            + '<li><em>QMS-Optionen.</em> ISO/IEC 42001:2023 + ISO 13485 (Medizinprodukte) erfuellen den groessten Teil von Art. 17 / Art. 9. Datenschutz-Folgenabschaetzung (DSGVO Art. 35) parallel — kein Bestandteil des AI Act, aber Pflicht.</li>'
+            + '<li><em>MLOps-Controls aus 6.4.4.</em> Daten-Lineage je Klinik, signierte Modellartefakte, Drift-Detection auf Geraetewechsel und Aufnahmeprotokolle (KS-Test der Pixel-Statistik), Champion/Challenger im Schatten-Deployment, Lifecycle-Policy fuer abgeloeste Modelle. NIST AI RMF 1.0 strukturiert die vier Kern-Funktionen (Govern/Map/Measure/Manage) entlang dieses Lifecycle.</li>'
+            + '</ol>'
+            + '<p><em>Ergebnis.</em> Hochrisiko, Krankenhaus als Betreiber mit Aufsicht-/Logging-Pflichten; Pflichtnachweise vorzugsweise ueber kombiniertes ISO/IEC 42001 + ISO 13485 + DSGVO-DPIA + CE-Konformitaetsbewertung; technische Stuetze durch NIST AI RMF + MLOps-Controls aus 6.4.4.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche vier Funktionen bilden den Core des NIST AI RMF 1.0, und welche davon adressiert primaer Lieferketten-/Drittanbieter-Themen?</li>'
+            + '<li>Ab welchem Datum gelten die GPAI-Pflichten des EU AI Act, und welcher Compute-Schwellwert macht ein GPAI-Modell per Default zu einem Modell mit systemischem Risiko?</li>'
+            + '<li>Welche Beziehung besteht zwischen ISO/IEC 42001:2023 und Art. 17 EU AI Act, und warum ist das keine automatische Konformitaetsvermutung?</li>'
+            + '<li>Welcher MLOps-Control adressiert Concept Drift in der Operations-Stufe, und welche statistischen Verfahren sind dafuer typisch?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> NIST AI RMF mit ISO/IEC 42001 gleichsetzen. <em>Korrekt:</em> NIST AI RMF ist freiwilliges Framework ohne Zertifizierung, ISO/IEC 42001 ist ein zertifizierungsfaehiges Managementsystem nach Annex-SL.</li>'
+            + '<li><em>Fehler:</em> AI-Act-Inkrafttreten (1.8.2024) mit Geltung der Hochrisiko-Pflichten verwechseln. <em>Korrekt:</em> Geltung der Hochrisiko-Pflichten gestaffelt — Hauptanwendung ab 2.8.2026, Anhang-I-Produkte erst ab 2.8.2027.</li>'
+            + '<li><em>Fehler:</em> ISO/IEC 42001-Zertifikat als „presumed conformity" fuer den AI Act behandeln. <em>Korrekt:</em> Konformitaetsvermutung gilt erst, wenn harmonisierte Normen ueber CEN-CENELEC JTC 21 publiziert sind.</li>'
+            + '<li><em>Fehler:</em> MLOps als reines DevOps mit ML-Bibliothek behandeln. <em>Korrekt:</em> Daten- und Modell-Artefakte erfordern eigene Stufen (Daten-Governance, Modell-Registry, Drift-Detection, Decommissioning).</li>'
+            + '<li><em>Fehler:</em> Trustworthy-AI-Characteristics als geschlossene Norm-Anforderung lesen. <em>Korrekt:</em> Es sind freiwillige Eigenschaften aus NIST AI 100-1 — die EU-AI-Act-Pflichten nach Art. 9–15 sind verbindlich.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ein mittelstaendischer Maschinenbauer plant einen LLM-basierten Service-Assistenten, der seinen Aussendiensttechnikern Reparatur-Empfehlungen gibt. Trainingsdaten sind interne Service-Tickets der letzten 10 Jahre, das Modell laeuft als verwaltetes Cloud-Endpoint mit RAG auf einer internen Wissensbasis. Skizzieren Sie (a) die Einordnung unter dem EU AI Act inkl. Begruendung, (b) das passende Managementsystem-Setup (ISO/IEC 27001 + 42001 + 23894), (c) die wichtigsten MLOps-Controls aus 6.4.4 mit Begruendung, (d) drei konkrete Vorfall-Szenarien und ihre Detektion. Loesungsskizzen werden im Kapitel-Quiz und in der Capstone-Aufgabe (P-CYBERSEC-CAPSTONE) eingeuebt.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST AI 100-1 "AI RMF 1.0" (Jan. 2023); NIST AI 600-1 (Juli 2024); Verordnung (EU) 2024/1689 ueber KI ("AI Act", Amtsblatt L 12.07.2024); ISO/IEC 42001:2023 (AIMS); ISO/IEC 23894:2023 (AI Risk Management); ISO/IEC 22989:2022 (AI Concepts &amp; Terminology); CEN-CENELEC JTC 21 Standardisation Request M/593 (2023); CycloneDX 1.6 ML-BOM (2024); SLSA v1.0; MDR (EU) 2017/745.</em></p>'
     };
 
     const QUIZ_AI = [
