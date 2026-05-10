@@ -2813,12 +2813,21 @@
              'NIST FIPS 197',
              'IEC 62443-4-1'], 0,
             'CycloneDX 1.6 (Mai 2024) erweitert das BOM-Modell um ML-Komponenten (Modell, Trainingsdaten, Metriken).'),
-        q('Welche Eigenschaft gehoert NICHT zu den "Trustworthy AI Characteristics" des NIST AI RMF 1.0?',
-            ['Profitable',
-             'Valid &amp; Reliable',
-             'Safe',
-             'Privacy-Enhanced'], 0,
-            'NIST AI 100-1: Trustworthy-AI-Eigenschaften sind Valid &amp; Reliable, Safe, Secure &amp; Resilient, Accountable &amp; Transparent, Explainable &amp; Interpretable, Privacy-Enhanced, Fair (with harmful bias managed) — "Profitable" gehoert nicht dazu.')
+        // Letztes Item dieses Pools mit optionalen Metadaten gemaess AGENTS §22 (einheitliches Item-Schema).
+        // Funktional aequivalent zu `q(...)`: derselbe Shape `{ q, options, correct, explanation }`,
+        // ergaenzt um `lo`, `bloom`, `difficulty`, `tags`, `source` (werden vom bestehenden Renderer ignoriert
+        // und stehen ueber `toItem(item, ...)` als kanonische Felder zur Verfuegung).
+        {
+            q: 'Welche Eigenschaft gehoert NICHT zu den "Trustworthy AI Characteristics" des NIST AI RMF 1.0?',
+            options: ['Profitable', 'Valid &amp; Reliable', 'Safe', 'Privacy-Enhanced'],
+            correct: 0,
+            explanation: 'NIST AI 100-1: Trustworthy-AI-Eigenschaften sind Valid &amp; Reliable, Safe, Secure &amp; Resilient, Accountable &amp; Transparent, Explainable &amp; Interpretable, Privacy-Enhanced, Fair (with harmful bias managed) — "Profitable" gehoert nicht dazu.',
+            lo: 'aisec.governance.nist-rmf',
+            bloom: 'remember',
+            difficulty: 'easy',
+            tags: ['ai-security', 'governance', 'nist-ai-rmf'],
+            source: 'NIST AI 100-1, AI Risk Management Framework 1.0 (Jan. 2023), §3.2 Trustworthy AI Characteristics'
+        }
     ];
 
     window.SCHULUNGEN.list.push({

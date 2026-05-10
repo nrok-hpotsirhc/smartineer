@@ -192,7 +192,14 @@
                 {
                     q: 'IMC (Internal Model Control): Strecke $G_S(s)$ minimalphasig, Wunsch-Filterzeitkonstante $\\lambda$. Gib den IMC-Regler $G_R$ und den äquivalenten klassischen Regler $G_C$ an.',
                     h: 'IMC-Regler: $G_R = G_S^{-1} F$ mit $F(s)=1/(1+\\lambda s)^n$. Klassisch: $G_C=G_R/(1-G_R G_S)$.',
-                    s: 'Filterordnung $n$ so wählen, dass $G_R$ kausal ist (Zähler-grad $\\le$ Nenner-grad).<br>$G_R=G_S^{-1}\\cdot\\dfrac{1}{(1+\\lambda s)^n}$.<br>Äquivalenz: $G_C(s)=\\dfrac{G_R(s)}{1-G_R(s)G_S(s)}=\\dfrac{1}{G_S(s)\\,((1+\\lambda s)^n-1)}$.<br>Vorteil: ein einziger Tuning-Parameter $\\lambda$ (Trade-off Performance vs. Robustheit). Für $\\lambda\\to 0$: aggressives Verhalten; für $\\lambda\\to\\infty$: weiches Verhalten.<br>$$\\boxed{G_C(s)=\\dfrac{1}{G_S(s)\\,((1+\\lambda s)^n-1)}}$$'                }
+                    s: 'Filterordnung $n$ so wählen, dass $G_R$ kausal ist (Zähler-grad $\\le$ Nenner-grad).<br>$G_R=G_S^{-1}\\cdot\\dfrac{1}{(1+\\lambda s)^n}$.<br>Äquivalenz: $G_C(s)=\\dfrac{G_R(s)}{1-G_R(s)G_S(s)}=\\dfrac{1}{G_S(s)\\,((1+\\lambda s)^n-1)}$.<br>Vorteil: ein einziger Tuning-Parameter $\\lambda$ (Trade-off Performance vs. Robustheit). Für $\\lambda\\to 0$: aggressives Verhalten; für $\\lambda\\to\\infty$: weiches Verhalten.<br>$$\\boxed{G_C(s)=\\dfrac{1}{G_S(s)\\,((1+\\lambda s)^n-1)}}$$',
+                    // Beispiel optionaler Metadaten gemaess AGENTS §22 (einheitliches Item-Schema):
+                    lo: 'control.imc.equivalence',
+                    bloom: 'apply',
+                    difficulty: 'L3',
+                    tags: ['imc', 'robust-control', 'tuning'],
+                    source: 'Skogestad & Postlethwaite, Multivariable Feedback Control, 2nd ed., Wiley 2005, §2.4'
+                }
             ]
         ]
     };
