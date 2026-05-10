@@ -4137,6 +4137,482 @@
         }
     ];
 
+    // ===== Kapitel 9 — Offensive Security und Security Testing (P-CYBERSEC-09, v45) =====
+
+    const PAGE_OFFSEC_METHOD = {
+        title: '9.1 Pentest-Methodik (NIST SP 800-115, PTES, OWASP WSTG, Engagement Rules)',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) den vier-phasigen Pentest-Prozess nach NIST SP 800-115 (Sep. 2008) §3.4 benennen und gegenueber PTES v1.0 (2014) und OWASP WSTG v4.2 (2020) abgrenzen, (2) Black-Box-, Grey-Box- und White-Box-Tests in Auftrag und Tiefe unterscheiden, (3) ein Rules-of-Engagement-Dokument anhand von Scope, Out-of-Scope, Test-Fenster, Eskalationspfad, Datenklassifikation und Notfallabbruch entwerfen, (4) zwischen Vulnerability Assessment, Penetration Test und Red-Team-Engagement begruenden, (5) ethische und rechtliche Leitplanken (BSI „Praxis-Leitfaden IS-Penetrationstests" 2023, § 202c StGB, ISO/IEC 19011:2018, CRA Verordnung (EU) 2024/2847) anwenden.</blockquote>'
+            + '<p><strong>Vorwissen.</strong> Kapitel 5 (Risikomanagement nach ISO/IEC 27005:2022), Kapitel 8 (IR-Lifecycle), Grundbegriffe Netzwerktopologie und Active Directory.</p>'
+
+            + '<h4>9.1.1 Vier Phasen nach NIST SP 800-115</h4>'
+            + '<ol>'
+            + '<li><strong>Planning.</strong> Auftrag, Scope, ROE, Datenklassifikation, Eskalation. Zwingend schriftlich vom Auftraggeber autorisiert (sonst § 202c StGB).</li>'
+            + '<li><strong>Discovery.</strong> Passive (OSINT) und aktive Aufklaerung (Port-Scan, Service-Enumeration, Schwachstellen-Scan).</li>'
+            + '<li><strong>Attack.</strong> Verifikation und kontrollierte Ausnutzung (Gaining Access, Escalating Privileges, System Browsing, Installing Tools), iterativ.</li>'
+            + '<li><strong>Reporting.</strong> Befunde, CVSS-Scoring, Empfehlungen, Executive Summary, technische Details. Zwingend reversibel vor Abgabe (Cleanup-Liste).</li>'
+            + '</ol>'
+
+            + '<h4>9.1.2 Methodik-Vergleich</h4>'
+            + '<table><thead><tr><th>Quelle</th><th>Phasen</th><th>Fokus</th></tr></thead><tbody>'
+            + '<tr><td>NIST SP 800-115 (2008)</td><td>4</td><td>Allgemein, behoerden-tauglich</td></tr>'
+            + '<tr><td>PTES v1.0 (2014)</td><td>7 (Pre-Engagement, Intel, Threat Modeling, Vuln Analysis, Exploitation, Post-Exploitation, Reporting)</td><td>Pentest-Industrie-Standard</td></tr>'
+            + '<tr><td>OWASP WSTG v4.2 (2020)</td><td>10 Test-Klassen mit Test-IDs (WSTG-INFO/CONF/IDNT/ATHN/ATHZ/SESS/INPV/ERRH/CRYP/BUSL/CLNT)</td><td>Web-Anwendung</td></tr>'
+            + '<tr><td>OSSTMM 3 (2010)</td><td>4 Channel × 17 Module mit RAV-Score</td><td>Audit-Methode</td></tr>'
+            + '<tr><td>MITRE ATT&amp;CK Enterprise v16 (2024)</td><td>14 Tactics (TA0001–TA0040)</td><td>Adversary Emulation</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>9.1.3 Test-Tiefen und Auftragsformen</h4>'
+            + '<ul>'
+            + '<li><strong>Vulnerability Assessment.</strong> Breit, automatisiert, ohne Verifikation. Output: Schwachstellen-Liste mit CVSS-Scoring.</li>'
+            + '<li><strong>Penetration Test.</strong> Verifikation und kontrollierte Ausnutzung definierter Schwachstellen, time-boxed, Scope-eng.</li>'
+            + '<li><strong>Red Team.</strong> Ziel-orientiert (z.B. „Domain-Admin in 2 Wochen, ohne SOC-Detection"), ATT&amp;CK-basierte Adversary Emulation, mit Detection-/Response-Pruefung.</li>'
+            + '<li><strong>Purple Team.</strong> Iterative Zusammenarbeit Red ↔ Blue mit definierten Atomic-Tests (MITRE Atomic Red Team / Caldera).</li>'
+            + '</ul>'
+            + '<p>Black-Box: kein Vorwissen. Grey-Box: Test-Konto und Architektur-Dokumentation. White-Box: Source-Code und Architektur-Reviews. Tiefe und Kostenrahmen steigen Black → Grey → White; das ROI-Maximum liegt fuer kuerzere Engagements typischerweise im Grey-Box.</p>'
+
+            + '<h4>9.1.4 Rules of Engagement (ROE) — Pflichtbestandteile</h4>'
+            + '<ol>'
+            + '<li>In-Scope-Liste mit IP-Bereichen, FQDNs, Cloud-Tenants, Test-Konten.</li>'
+            + '<li>Out-of-Scope explizit (Produktions-DB-Dumps, Social-Engineering, DoS, OT/SIS).</li>'
+            + '<li>Test-Fenster (Datum, Zeitzone, „silent" / „loud").</li>'
+            + '<li>Notfall-Eskalationspfad (24/7-Rufnummer, „Stop-Test"-Regel).</li>'
+            + '<li>Datenhandling: keine Klartext-Zugangsdaten exfiltrieren, sensible Funde verschluesselt ablegen, 30-Tage-Loeschung.</li>'
+            + '<li>Reporting-Format und Distribution (Verschluesselung, Empfaenger).</li>'
+            + '<li>Rechtliche Klauseln: Auftragsbeschreibung als Einverstaendnis im Sinne § 202c StGB; bei US-Cloud zusaetzlich Provider-Genehmigung (AWS Penetration Testing Policy 2023, Microsoft Penetration Testing Rules of Engagement, Google Cloud VRP).</li>'
+            + '</ol>'
+
+            + '<h4>Worked Example: Kick-off-Meeting fuer Grey-Box-Pentest</h4>'
+            + '<p>Ausgangslage: Mittelstaendischer Maschinenbauer, Web-Shop und CRM, NIS-2 „wichtige Einrichtung" (Anhang II.5). Ziel: Grey-Box-Pentest, 10 PT, 2 Wochen Test-Fenster.</p>'
+            + '<ol>'
+            + '<li><strong>Scope-Workshop (T-14 Tage).</strong> Komponenten: Magento-Shop (FQDN), CRM-API (FQDN), Identity-Provider (Entra ID Tenant-ID). Test-Konten: 1 Kunde, 1 Innendienst, 1 Admin-Read-Only.</li>'
+            + '<li><strong>Out-of-Scope.</strong> Production-Payment-Provider, Social-Engineering, DoS-/Brute-Force ausserhalb des Test-Fensters.</li>'
+            + '<li><strong>ROE.</strong> 24/7-Rufnummer SOC-MSSP, „Stop-Test" Trigger bei Produktions-Stoerung > 10 min, automatischer Test-Abbruch bei Trigger eines konkret benannten EDR-Alerts.</li>'
+            + '<li><strong>Datenhandling.</strong> Findings im S3-Bucket mit KMS-CMK des Auftraggebers, 30-Tage-Loeschung; keine PII in Logs/Reports.</li>'
+            + '<li><strong>Reporting.</strong> Executive Summary + technischer Anhang mit CVSS v4.0, MITRE-Mapping, Replay-Schritten, Mitigation-Empfehlungen.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche zwei Punkte im ROE entscheiden, ob ein Pentest legal ist?</li>'
+            + '<li>Wann ist ein Vulnerability-Assessment besser als ein Pentest — und wann umgekehrt?</li>'
+            + '<li>Welcher Punkt aus NIST SP 800-115 §3.4 wird in der Praxis am haeufigsten unterschaetzt?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Pentest ohne schriftliche Auftraggeber-Genehmigung. <em>Korrekt:</em> ohne ROE-Unterschrift kein Test (StGB-Risiko).</li>'
+            + '<li><em>Fehler:</em> Cloud-Pentest ohne Provider-Notice. <em>Korrekt:</em> AWS/Azure/GCP haben eigene Policies, ohne Notice droht Account-Suspend und Vertragsverletzung.</li>'
+            + '<li><em>Fehler:</em> Phase 4 (Reporting) wird auf den letzten Tag geschoben. <em>Korrekt:</em> Findings werden lebend dokumentiert; Phase 4 ist eigentliche Wertschoepfung.</li>'
+            + '<li><em>Fehler:</em> Red-Team-Engagement ohne Threat Intelligence. <em>Korrekt:</em> ohne Adversary-Profile (z.B. ATT&amp;CK-Group) wird Red-Team zum besseren Pentest, nicht zur Adversary Emulation.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ein KRITIS-pflichtiger Energieversorger (NIS-2 wesentliche Einrichtung) plant erstmals Penetrationstests in seiner OT-Umgebung. Skizzieren Sie (a) die rechtlichen Leitplanken, (b) ein zweistufiges Vorgehen (IT-OT-DMZ vor Process-LAN), (c) die ROE-Sonderregeln fuer SIS/Safety-Funktionen, (d) das Reporting-Modell mit Zustaendigkeit Werksleitung / CISO / BNetzA.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-115 (Sep. 2008) §§3.4 / 4.1; PTES Technical Guidelines v1.0 (2014); OWASP Web Security Testing Guide v4.2 (2020); OSSTMM 3 (2010); MITRE ATT&amp;CK Enterprise v16 (2024); BSI „Ein Praxis-Leitfaden fuer IS-Penetrationstests" Version 5 (2023); § 202c StGB; AWS Penetration Testing Policy (2023); Verordnung (EU) 2024/2847 (Cyber Resilience Act) Art. 13.</em></p>'
+    };
+
+    const PAGE_OFFSEC_WEB = {
+        title: '9.2 Web- und API-Security (OWASP Top 10 2021 / OWASP API Top 10 2023 / ASVS 4.0.3 / WSTG v4.2)',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) OWASP Top 10 2021 (A01–A10) und OWASP API Top 10 2023 (API1–API10) gegenueberstellen, (2) ASVS 4.0.3 Level 1/2/3 als Pruefkriterienkatalog einsetzen, (3) die Klassen Injection, Broken Access Control, SSRF, Deserialization und Authentication-Bugs an konkreten Beispielen erkennen und mitigieren, (4) WSTG-Test-IDs (z.B. WSTG-ATHN-04, WSTG-INPV-05) gezielt fuer Test-Cases und Reports verwenden, (5) eine kombinierte SAST/DAST/IAST-Strategie skizzieren.</blockquote>'
+            + '<p><strong>Vorwissen.</strong> Kapitel 4 (S-SDLC, OWASP), Kapitel 1 (TLS 1.3 / Krypto-Grundlagen), Grundbegriffe HTTP/REST/GraphQL.</p>'
+
+            + '<h4>9.2.1 OWASP Top 10 2021</h4>'
+            + '<table><thead><tr><th>ID</th><th>Risiko</th><th>Schwerpunkt</th></tr></thead><tbody>'
+            + '<tr><td>A01</td><td>Broken Access Control</td><td>IDOR, Force Browsing, vertikale/horizontale Privilege Escalation</td></tr>'
+            + '<tr><td>A02</td><td>Cryptographic Failures</td><td>fehlende TLS, schwache Algorithmen, Hash-statt-KDF</td></tr>'
+            + '<tr><td>A03</td><td>Injection</td><td>SQLi, NoSQLi, OS-Command-Injection, LDAPi</td></tr>'
+            + '<tr><td>A04</td><td>Insecure Design</td><td>fehlende Threat Models, fehlende Geschaeftslogik-Checks</td></tr>'
+            + '<tr><td>A05</td><td>Security Misconfiguration</td><td>Default-Creds, verbose Errors, offene Cloud-Buckets</td></tr>'
+            + '<tr><td>A06</td><td>Vulnerable / Outdated Components</td><td>Log4Shell-artige Supply-Chain-Bugs</td></tr>'
+            + '<tr><td>A07</td><td>Identification &amp; Auth Failures</td><td>fehlendes MFA, Session-Fixation, schwache Reset-Flows</td></tr>'
+            + '<tr><td>A08</td><td>Software &amp; Data Integrity Failures</td><td>unsignierte Updates, unsichere Deserialisierung</td></tr>'
+            + '<tr><td>A09</td><td>Security Logging &amp; Monitoring Failures</td><td>fehlende Audit-Trails, Logging-Bypass</td></tr>'
+            + '<tr><td>A10</td><td>SSRF</td><td>Server-Side Request Forgery (z.B. Metadata-Endpunkte)</td></tr>'
+            + '</tbody></table>'
+            + '<p>OWASP-Methodologie: Top 10 2021 entstand auf Basis von 8 Datenquellen mit ueber 500.000 Anwendungen und einer Branchen-Survey; die Liste sortiert nach Inzidenzrate, nicht nach reiner Gefaehrdung.</p>'
+
+            + '<h4>9.2.2 OWASP API Security Top 10 2023</h4>'
+            + '<ul>'
+            + '<li><strong>API1 BOLA</strong> — Broken Object Level Authorization (klassische IDOR auf API-Ebene).</li>'
+            + '<li><strong>API2 Broken Authentication</strong> — schwache JWT, fehlende Refresh-Token-Rotation.</li>'
+            + '<li><strong>API3 Broken Object Property Level Authorization</strong> — Mass Assignment / Excessive Data Exposure.</li>'
+            + '<li><strong>API4 Unrestricted Resource Consumption</strong> — fehlendes Rate-Limit, GraphQL-Query-Tiefe.</li>'
+            + '<li><strong>API5 BFLA</strong> — Broken Function Level Authorization (Admin-Endpoint per Verb-Tampering).</li>'
+            + '<li><strong>API6 Unrestricted Access to Sensitive Business Flows</strong> — Bot-Misbrauch von Workflows (Voucher, Tickets).</li>'
+            + '<li><strong>API7 SSRF</strong> — siehe A10.</li>'
+            + '<li><strong>API8 Security Misconfiguration</strong> — siehe A05.</li>'
+            + '<li><strong>API9 Improper Inventory Management</strong> — Schatten-/Zombie-APIs, alte Versionen erreichbar.</li>'
+            + '<li><strong>API10 Unsafe Consumption of APIs</strong> — Vertrauen in Drittanbieter-APIs ohne Output-Validierung.</li>'
+            + '</ul>'
+
+            + '<h4>9.2.3 ASVS 4.0.3 als Pruefkatalog</h4>'
+            + '<p>ASVS hat 14 Kapitel (V1–V14) und drei Levels: L1 fuer Standard-Risiko (entspricht Top-10-Mitigation), L2 fuer sensible Anwendungen (Standard fuer die meisten Business-Apps), L3 fuer hochsensible (Banken, Gesundheits-IT, kritische OT-Bedienung). Pro Kontroll-ID (z.B. V2.1.7 — Passwort-Pruefung gegen Pwned-Passwords) ist eine Pruefanleitung enthalten — ASVS ist damit der Bruecken-Standard zwischen Top 10 (Risiko-Liste) und WSTG (Test-Anleitung).</p>'
+
+            + '<h4>9.2.4 SAST / DAST / IAST / SCA / Fuzzing</h4>'
+            + '<table><thead><tr><th>Klasse</th><th>Sicht</th><th>Typische Funde</th></tr></thead><tbody>'
+            + '<tr><td>SAST</td><td>Source-Code, statisch</td><td>Injection-Sinks, schwache Krypto-API, Tainting-Pfade</td></tr>'
+            + '<tr><td>DAST</td><td>Binary, dynamisch (laufende App)</td><td>Reflektive XSS, Auth-Bypass, Header-Issues</td></tr>'
+            + '<tr><td>IAST</td><td>Instrumentierung im Laufzeitkern</td><td>Kombi: Pfad-Coverage + Sink-Reaktion, weniger False Positives</td></tr>'
+            + '<tr><td>SCA</td><td>Manifeste, Lockfiles</td><td>Bekannte CVEs in Abhaengigkeiten, Lizenz-Risiken</td></tr>'
+            + '<tr><td>Fuzzing</td><td>Eingaben mit Mutation/Generierung</td><td>Crashes, Speicherfehler, Logik-Bugs</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>Worked Example: SSRF mit Cloud-Metadata</h4>'
+            + '<p>Ausgangslage: Web-App nimmt eine URL als „Bild-Import"-Parameter und ruft sie serverseitig ab.</p>'
+            + '<ol>'
+            + '<li><strong>Hypothese.</strong> A10 SSRF; Test-IDs WSTG-INPV-19 (SSRF) und WSTG-CLNT-12.</li>'
+            + '<li><strong>Test.</strong> URL <code>http://169.254.169.254/latest/meta-data/iam/security-credentials/</code> (AWS IMDSv1) — bei IMDSv1 antwortet die Instanz mit einem temporaeren AWS-Schluesselpaar.</li>'
+            + '<li><strong>Verifikation.</strong> Mit den Tokens <code>aws sts get-caller-identity</code> aufrufen → Bestaetigt Privilegien-Auspraegung der IAM-Rolle der Instanz.</li>'
+            + '<li><strong>Befund.</strong> A10 SSRF + A05 Misconfiguration (IMDSv1 statt IMDSv2). CVSS v4.0 typischerweise 8.x je nach Rollenrechten.</li>'
+            + '<li><strong>Fix.</strong> IMDSv2-Pflicht (Token-Hop-Limit 1), Egress-Allowlist, URL-Schema-Whitelist, kein direkter HTTP(S)-Request aus Web-Workern auf 169.254.169.254 / 100.100.100.200 / link-local-Bereiche.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welcher Top-10-Eintrag ist in den Statistiken am inzidenzstaerksten und warum?</li>'
+            + '<li>Wann reicht ASVS L1 nicht aus — und welcher Level deckt regulierte Branchen ab?</li>'
+            + '<li>Welche zwei Befund-Klassen sind klassisch DAST-blind und brauchen SAST/IAST?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> SQLi-Schutz ueber Blacklist statt Prepared Statements. <em>Korrekt:</em> Parametrisierte Statements / ORM-Bindings; Blacklists sind grundsaetzlich unsicher.</li>'
+            + '<li><em>Fehler:</em> Authorization-Checks nur im UI. <em>Korrekt:</em> Server-seitige Pruefung pro API-Aufruf; UI-Hide ist keine Sicherheit (BOLA / BFLA).</li>'
+            + '<li><em>Fehler:</em> JWT mit „alg: none" akzeptieren oder „kid"-Trick erlauben. <em>Korrekt:</em> Algorithmus serverseitig fest verankert, Schluessel-IDs gegen Whitelist gepruefen (RFC 8725 BCP).</li>'
+            + '<li><em>Fehler:</em> CORS „*"-Header in Auth-Endpoints. <em>Korrekt:</em> Origin-Whitelist; bei Cookies <code>SameSite=Strict</code> oder <code>Lax</code>, niemals <code>None</code> ohne <code>Secure</code>.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ein FinTech-Startup will eine API-First-Architektur (REST + GraphQL) gegen API Top 10 2023 absichern. Entwerfen Sie (a) eine Test-Pyramide mit SAST/DAST/IAST/SCA/Fuzzing, (b) ASVS-L2-Mappings auf API1–API10, (c) eine Detection-Strategie fuer API-Misconfiguration in CI/CD, (d) ein Bug-Bounty-Programmprofil (Scope, Out-of-Scope, Safe-Harbour, Bounty-Tiers nach CVSS v4.0).</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: OWASP Top 10:2021; OWASP API Security Top 10:2023; OWASP ASVS 4.0.3 (2022); OWASP WSTG v4.2 (2020); OWASP Cheat Sheet Series 2024; RFC 8725 „JSON Web Token Best Current Practices" (Feb. 2020); RFC 9457 „Problem Details for HTTP APIs" (Jul. 2023); AWS IMDSv2-Doku 2024; PortSwigger Web Security Academy 2024; OWASP Top 10 LLM v2025 (Querverweis fuer KI-Schnittstellen).</em></p>'
+    };
+
+    const PAGE_OFFSEC_AD = {
+        title: '9.3 Active Directory: Angriffspfade und Tiering',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Kerberos-Pre-Authentication, TGT/TGS und PAC erklaeren, (2) Kerberoasting (T1558.003), AS-REP-Roasting (T1558.004), Pass-the-Hash (T1550.002), Pass-the-Ticket (T1550.003), Golden/Silver Ticket (T1558.001/.002) als ATT&amp;CK-Techniken einordnen, (3) BloodHound-Pfade lesen und priorisieren, (4) das Microsoft Tier-Modell / Enterprise Access Model auf eine konkrete AD-Domaene anwenden, (5) LAPS, Protected Users, Authentication Policy Silos, Tier-0-Indicators, Privileged Access Workstations als Mitigations einsetzen.</blockquote>'
+            + '<p><strong>Vorwissen.</strong> Kapitel 1 (Kerberos / TLS), Kapitel 7 (IAM-Grundlagen), Grundbegriffe Windows-Domaenenadministration.</p>'
+
+            + '<h4>9.3.1 Kerberos-Grundlagen</h4>'
+            + '<p>Kerberos v5 (RFC 4120) verwendet symmetrische Verschluesselung. Eine AS-Anfrage liefert nach Pre-Authentication ein TGT, das mit dem KRBTGT-Schluessel signiert ist. Mit dem TGT fordert der Client beim TGS Service-Tickets an; der Service entschluesselt das ST mit dem NT-Hash seines Service-Account-Passworts. Der PAC enthaelt Gruppenmitgliedschaften und ist die haeufigste Quelle fuer Authorization-Bypaesse (z.B. PetitPotam / PrintNightmare-Kette zu PAC-Manipulation).</p>'
+
+            + '<h4>9.3.2 Klassische Angriffspfade</h4>'
+            + '<table><thead><tr><th>Technik</th><th>ATT&amp;CK</th><th>Voraussetzung</th><th>Effekt</th></tr></thead><tbody>'
+            + '<tr><td>Kerberoasting</td><td>T1558.003</td><td>Service-Account mit SPN, schwacher Pwd</td><td>Offline-Crack des NT-Hashs aus dem RC4-/AES-verschluesselten ST</td></tr>'
+            + '<tr><td>AS-REP-Roasting</td><td>T1558.004</td><td>Konto mit „Do not require Kerberos preauthentication"</td><td>Offline-Crack ohne Pre-Auth</td></tr>'
+            + '<tr><td>Pass-the-Hash</td><td>T1550.002</td><td>NTLM-Hash eines Kontos</td><td>Authentifizierung ohne Klartextpasswort</td></tr>'
+            + '<tr><td>Pass-the-Ticket</td><td>T1550.003</td><td>Gestohlenes TGT/ST</td><td>Wiederverwendung gueltigen Tickets</td></tr>'
+            + '<tr><td>Golden Ticket</td><td>T1558.001</td><td>KRBTGT-Hash</td><td>Beliebige TGT-Erzeugung, vollstaendige Domain-Compromise</td></tr>'
+            + '<tr><td>Silver Ticket</td><td>T1558.002</td><td>NT-Hash eines Service-Accounts</td><td>Service-spezifische ST-Faelschung</td></tr>'
+            + '<tr><td>DCSync</td><td>T1003.006</td><td>„Replicate Directory Changes"-Recht</td><td>Hash-Dump aller Konten via MS-DRSR</td></tr>'
+            + '<tr><td>Unconstrained Delegation</td><td>T1558</td><td>Konto mit TrustedForDelegation</td><td>Cache aller TGTs auf Hop, klassischer Tier-0-Pfad</td></tr>'
+            + '<tr><td>Resource-Based Constrained Delegation (RBCD)</td><td>T1134.005</td><td>Schreibrecht auf msDS-AllowedToActOnBehalfOfOtherIdentity</td><td>Lokale Privilege Escalation per S4U2Self/S4U2Proxy</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>9.3.3 BloodHound-Pfadanalyse</h4>'
+            + '<p>BloodHound (SpecterOps) modelliert AD-Beziehungen als Graph; Edges wie <code>MemberOf</code>, <code>AdminTo</code>, <code>HasSession</code>, <code>GenericAll</code>, <code>WriteDacl</code>, <code>AddKeyCredentialLink</code> erlauben Pfadberechnung „beliebiger Benutzer → Domain Admin". Wichtig: Die Tier-0-Definition (alles, was die Domain ueber Authentication/Replication direkt kompromittieren kann) muss explizit getaggt werden, sonst werden Pfade falsch interpretiert (z.B. AD CS, Backup-Operatoren, Hyper-V-Hosts der DCs).</p>'
+
+            + '<h4>9.3.4 AD CS — ESC1–ESC8</h4>'
+            + '<p>Will Schroeder &amp; Lee Christensen, „Certified Pre-Owned" (2021), klassifizieren 8 Misconfigurations rund um Active Directory Certificate Services:</p>'
+            + '<ul>'
+            + '<li><strong>ESC1.</strong> Template erlaubt Subject Alternative Name (SAN) durch Antragsteller → Identitaets-Spoof, beliebiger UPN moeglich.</li>'
+            + '<li><strong>ESC2.</strong> Template mit Any-Purpose-EKU.</li>'
+            + '<li><strong>ESC3.</strong> Enrollment Agent ohne Restriktion.</li>'
+            + '<li><strong>ESC4.</strong> Template ACL erlaubt Schreibrechte auf das Template selbst (Write-DACL).</li>'
+            + '<li><strong>ESC6.</strong> EditFlags <code>EDITF_ATTRIBUTESUBJECTALTNAME2</code> auf der CA gesetzt.</li>'
+            + '<li><strong>ESC8.</strong> NTLM-Relay an HTTP-Endpoint der CA (Mai 2021, MS-Patch KB5005413).</li>'
+            + '</ul>'
+            + '<p>Mitigation: Manage Templates, Disable EDITF_ATTRIBUTESUBJECTALTNAME2, EPA / SMB-Signing, Channel Binding, AD CS Web-Endpoints auf HTTPS mit Channel Binding.</p>'
+
+            + '<h4>9.3.5 Tier-Modell und Enterprise Access Model</h4>'
+            + '<p>Microsoft hat das klassische 3-Tier-Modell (T0 = AD/Forest-Steuerung, T1 = Server, T2 = Workstations) 2020 zum Enterprise Access Model erweitert (Privileged Access, Control Plane, Management Plane, Data/Workload Plane, User Access). Kernregel: keine Anmeldung von tieferer in hoehere Vertrauensebene mit denselben Credentials, dedizierte Privileged Access Workstations (PAW), Just-in-Time-Privilegien (Microsoft PIM / 3rd-Party-PAM).</p>'
+
+            + '<h4>Worked Example: Pfad „Domain User" → „Domain Admin"</h4>'
+            + '<ol>'
+            + '<li>OSINT/Recon: <code>SharpHound</code>-Collection mit DCOnly-Filter, BloodHound-Import.</li>'
+            + '<li>Quick-Win: Suche nach Konten mit „Do not require Kerberos preauthentication" → AS-REP-Roasting → Hashcat (Mode 18200).</li>'
+            + '<li>SPN-Inventar via <code>setspn -Q */*</code> → Kerberoasting → Hashcat (Mode 13100), Suche nach schwachen Service-Accounts.</li>'
+            + '<li>Mit gewonnenem Service-Account: BloodHound-Edge zum Tier-1-Server (z.B. SQL Server).</li>'
+            + '<li>Auf SQL-Server: lokale Privilege Escalation, Memory-Dump (LSASS), Pass-the-Hash auf Tier-1-Operations-Konten.</li>'
+            + '<li>Bei Erreichen eines Tier-0-Adjacent-Hosts (z.B. Backup-Server mit DCSync-Berechtigung) → DCSync → KRBTGT-Hash → Golden Ticket.</li>'
+            + '<li><strong>Reversible Massnahmen.</strong> Ticket-Cache leeren, Test-Konten loeschen, KRBTGT-Reset zweimal binnen 10 h beim Auftraggeber initiieren — der Pfad gilt erst nach KRBTGT-Doppel-Reset als geschlossen.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Wann ist Kerberoasting relevanter als AS-REP-Roasting?</li>'
+            + '<li>Warum reicht ein einfacher KRBTGT-Reset nicht zur Bereinigung eines Golden-Ticket-Vorfalls?</li>'
+            + '<li>Welche zwei Indikatoren weisen auf einen Tier-0-Adjacenz-Host hin, der oft uebersehen wird?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Service-Accounts mit SPN bekommen 12-stellige Passwoerter. <em>Korrekt:</em> ≥ 25 Zeichen oder Group Managed Service Accounts (gMSA, automatischer Roll alle 30 Tage).</li>'
+            + '<li><em>Fehler:</em> AdminCount-Konten ohne Authentication Policy Silos. <em>Korrekt:</em> Protected Users + Silos verhindern NTLM/Delegation und beschraenken Anmeldungen auf Tier-0-Hosts.</li>'
+            + '<li><em>Fehler:</em> AD CS „Web Enrollment" mit Default-Template laufen lassen. <em>Korrekt:</em> ESC1/ESC8-Audit fahren, EPA und Channel Binding aktivieren.</li>'
+            + '<li><em>Fehler:</em> Domain Admins fuer Software-Installationen verwenden. <em>Korrekt:</em> dedizierte Tier-1-/Tier-2-Konten, PAW-Workstations.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Sie erhalten den Auftrag, fuer eine 5000-User-Domaene ein Tier-0-Audit durchzufuehren. Skizzieren Sie (a) ein Inventar der Tier-0-Adjacent-Assets (DCs, AD CS, AAD-Connect, Backup-Server, Hypervisor, MFA-Server, ADFS, Privileged-Access-Workstation), (b) die fuenf wichtigsten BloodHound-Queries, (c) die Quick-Wins der ersten 30 Tage (LAPS, Protected Users, AS-REP-Preauth, KRBTGT-Reset-Plan), (d) die Detektionsregeln auf DCs (Event ID 4769 mit RC4, Event ID 4662 DCSync, ATT&amp;CK T1003.006).</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: RFC 4120 „The Kerberos Network Authentication Service (V5)" (Jul. 2005); MITRE ATT&amp;CK Enterprise v16 (2024) T1558/T1550/T1003.006/T1134.005; SpecterOps BloodHound Doku 2024; Will Schroeder &amp; Lee Christensen, „Certified Pre-Owned: Abusing Active Directory Certificate Services" (SpecterOps White Paper, Jun. 2021); Microsoft „Enterprise Access Model" (2020/2024); Microsoft „Securing Privileged Access" Reference Guide 2024; KB5005413 „Mitigating NTLM Relay Attacks on Active Directory Certificate Services" (Mai 2021); BSI „Active Directory Hardening" Empfehlung Mai 2024; CISA AA23-263A „#StopRansomware" (2023).</em></p>'
+    };
+
+    const PAGE_OFFSEC_REDTEAM = {
+        title: '9.4 Adversary Emulation, Purple Teaming, Reporting und Recht',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Adversary Emulation, Red Team und Penetration Test trennscharf abgrenzen, (2) MITRE Caldera, Atomic Red Team und MITRE D3FEND in einem Purple-Team-Programm einsetzen, (3) ein Pentest-Reporting nach NIST SP 800-115 §6, BSI-Praxisleitfaden Version 5 (2023) und CVSS v4.0 (2023) strukturieren, (4) die rechtlichen Rahmenbedingungen § 202c StGB, EU CRA (Verordnung (EU) 2024/2847), DSGVO Art. 32 und „Vertragspentest" einordnen, (5) Bug-Bounty-Programme mit Safe-Harbour-Klauseln nach CISA Disclosure-Empfehlungen 2023 entwerfen.</blockquote>'
+            + '<p><strong>Vorwissen.</strong> Seiten 9.1–9.3, Kapitel 8 (Detection in SIEM/EDR), Kapitel 5 (Risikomanagement, CVSS).</p>'
+
+            + '<h4>9.4.1 Begriffsabgrenzung</h4>'
+            + '<table><thead><tr><th>Format</th><th>Ziel</th><th>Erfolgsmass</th></tr></thead><tbody>'
+            + '<tr><td>Pentest</td><td>Schwachstellen identifizieren und verifizieren</td><td>Anzahl/Kritikalitaet der Findings, Coverage des Scopes</td></tr>'
+            + '<tr><td>Red Team</td><td>Ziel erreichen (Crown Jewels), Detection-/Response-Reife pruefen</td><td>Time-to-Detection, Time-to-Containment</td></tr>'
+            + '<tr><td>Adversary Emulation</td><td>Konkretes Threat-Actor-Profil nachstellen (z.B. APT29 / FIN7)</td><td>Coverage gegen Threat-Profil, MITRE-ATT&amp;CK-Heatmap</td></tr>'
+            + '<tr><td>Purple Team</td><td>Iterative Verbesserung Detection ↔ Attack</td><td>Atomic-Test-Pass-Rate, Detection-Engineering-Backlog</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>9.4.2 Werkzeuge</h4>'
+            + '<ul>'
+            + '<li><strong>MITRE Caldera (v5, 2024).</strong> Open-source Adversary-Emulation-Plattform, plugin-basiert, ATT&amp;CK-mapped, Operator/Agent-Modell.</li>'
+            + '<li><strong>Atomic Red Team (Red Canary, fortlaufend gepflegt).</strong> YAML-basierte Test-Bibliothek pro Technik.</li>'
+            + '<li><strong>MITRE D3FEND v1.0 (2023).</strong> Defensive-Counter-Mapping zu ATT&amp;CK.</li>'
+            + '<li><strong>BloodHound CE / Enterprise (2024).</strong> Pfadanalyse fuer AD/Azure AD/Tier-0.</li>'
+            + '<li><strong>Sliver / Mythic / Cobalt Strike.</strong> C2-Frameworks; im legalen Pentest mit Lizenz und Detection-Markern.</li>'
+            + '</ul>'
+
+            + '<h4>9.4.3 Reporting-Aufbau</h4>'
+            + '<ol>'
+            + '<li><strong>Executive Summary.</strong> Risiko-Kernsatz fuer das Management; max. 1 Seite, ohne Tool-Namen.</li>'
+            + '<li><strong>Methodik &amp; Scope.</strong> NIST 800-115-Phasen, ROE, Test-Fenster.</li>'
+            + '<li><strong>Findings.</strong> Pro Befund: Beschreibung, Reproduktionsschritte, CVSS v4.0, MITRE-Mapping, Beweis-Screenshots, Empfehlung, Verantwortliche, Aufwandsschaetzung.</li>'
+            + '<li><strong>Strategische Empfehlungen.</strong> Programm-Massnahmen (Detection-Lift, Identity-Hygiene, Patch-Strategie).</li>'
+            + '<li><strong>Anhang.</strong> Affected Systems, Logs, Cleanup-Liste, Verschluesselung, Aufbewahrung 30 Tage.</li>'
+            + '</ol>'
+            + '<p>CVSS v4.0 (Nov. 2023) ersetzt bei Bedarf v3.1; charakteristisch sind die neuen „Subsequent System"- und „Threat"-Metriken; CISA empfiehlt fuer KEV-Tracking weiterhin v3.1, fuer Pentest-Reports v4.0 mit klarem Versionshinweis.</p>'
+
+            + '<h4>9.4.4 Rechtsrahmen</h4>'
+            + '<ul>'
+            + '<li><strong>§ 202c StGB.</strong> „Hackerparagraph"; legitime Pentests benoetigen Auftrag und ROE als Tatbestandsausschluss.</li>'
+            + '<li><strong>DSGVO Art. 32.</strong> Stand der Technik, ggf. inkl. Pentests; Test-Daten muessen pseudonymisiert/synthetisch sein.</li>'
+            + '<li><strong>NIS-2 (Richtlinie (EU) 2022/2555) Art. 21.</strong> Risikomanagement-Massnahmen incl. „Sicherheitsbewertungen", die regelmaessige Pentests rechtfertigen.</li>'
+            + '<li><strong>Cyber Resilience Act (Verordnung (EU) 2024/2847) Art. 13.</strong> Hersteller mit „Wichtige Produkte mit digitalen Elementen" muessen Schwachstellenbehandlung inkl. Sicherheitstests dokumentieren; Anwendungsbeginn 11.12.2027 (mit Uebergangsfristen).</li>'
+            + '<li><strong>Coordinated Vulnerability Disclosure (CVD).</strong> ISO/IEC 29147:2018, ISO/IEC 30111:2019, CISA Vulnerability Disclosure Policy Template (2023).</li>'
+            + '</ul>'
+
+            + '<h4>9.4.5 Bug-Bounty-Programme</h4>'
+            + '<p>Empfohlene Struktur (analog zu HackerOne / Bugcrowd Standardvorlagen 2024): klare Scope-Liste, Out-of-Scope (DoS, Social Engineering, physisch), Safe-Harbour-Klausel (z.B. <code>DOJ Framework for Vulnerability Disclosure 2017</code> / CISA-Empfehlung), Severity-/Bounty-Matrix nach CVSS v4.0, Disclosure-Frist (i.d.R. 90 Tage, NIST SP 800-216 Rev. 1, 2023), Mediations-Pfad.</p>'
+
+            + '<h4>Worked Example: Purple-Team-Sprint zu „Credential-Access"</h4>'
+            + '<ol>'
+            + '<li><strong>Tag 0.</strong> Threat-Hypothese: APT29-aehnliche Credential-Access-Kette (T1003.001 LSASS, T1558.003 Kerberoasting, T1078 Valid Accounts).</li>'
+            + '<li><strong>Tag 1.</strong> Atomic-Red-Team-Tests fuer T1003.001 (Mimikatz, comsvcs.dll-Methode, ProcDump) auf Test-Endpoint; Detection in EDR pruefen.</li>'
+            + '<li><strong>Tag 2.</strong> Detection-Lift: Sigma-Regel fuer „Access to LSASS by Non-Whitelisted Process", D3FEND-Counter „D3-PSEP Process Self-Modification Detection", Validierung durch Caldera-Run.</li>'
+            + '<li><strong>Tag 3.</strong> Kerberoasting-Test (T1558.003), Detection auf Event ID 4769 mit Encryption Type 0x17 (RC4) und Service-Account-Liste.</li>'
+            + '<li><strong>Tag 4.</strong> Dokumentation: Coverage-Heatmap, Atomic-Pass-Rate, Detection-Engineering-Backlog. Folge-Sprint zu T1078 / Conditional Access geplant.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche zwei Erfolgsmassstaebe trennen Red Team von Pentest?</li>'
+            + '<li>Welche CVSS-Version verwenden Sie 2026 fuer einen Pentest-Report — und welche fuer KEV-Tracking?</li>'
+            + '<li>Was ist die Funktion einer Safe-Harbour-Klausel im Bug-Bounty-Programm?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Red-Team-Output liest sich wie ein Pentest-Report. <em>Korrekt:</em> Fokus auf Detection-/Response-Reife (TTD/TTC) statt auf Schwachstellen-Liste.</li>'
+            + '<li><em>Fehler:</em> Adversary Emulation ohne ATT&amp;CK-Mapping. <em>Korrekt:</em> jedes Test-Item explizit mit Technique-ID und Sub-Technique versehen.</li>'
+            + '<li><em>Fehler:</em> CVSS-Scoring ohne Environmental-Metriken. <em>Korrekt:</em> Environmental-Anteil ist gerade in OT/Compliance-relevanten Setups oft hoeher als Base.</li>'
+            + '<li><em>Fehler:</em> Cleanup-Liste fehlt. <em>Korrekt:</em> jede Aktion (Konto, Persistenz, Test-Datei, RBCD-Eintrag, Schedule-Task) wird im Report dokumentiert und reversibel zurueckgebaut.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Konzipieren Sie ein 12-Monats-Purple-Team-Programm fuer eine kontoeroffnungs-intensive Bank. Liefern Sie (a) den Threat-Profile-Katalog (FIN-/APT-Akteure mit Mapping), (b) Quartalssprints mit Schwerpunkten Identity / Cloud / OT-Schnittstelle / Endpoint, (c) Reporting-Schnittstelle CISO ↔ Aufsichtsrat ↔ BaFin (MaRisk AT 7.2), (d) KPIs (Time-to-Detection, Atomic-Pass-Rate, Detection-Engineering-Backlog).</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-115 (Sep. 2008) §6; NIST SP 800-216 Rev. 1 „Recommendations for Federal Vulnerability Disclosure Guidelines" (Mai 2023); CVSS v4.0 (FIRST, Nov. 2023); ISO/IEC 29147:2018; ISO/IEC 30111:2019; CISA „Coordinated Vulnerability Disclosure Process" (2023); MITRE Caldera v5 (2024); MITRE Atomic Red Team Repo (Red Canary 2024); MITRE D3FEND v1.0 (2023); MITRE ATT&amp;CK Enterprise v16 (2024); BSI „Praxis-Leitfaden fuer IS-Penetrationstests" Version 5 (2023); Verordnung (EU) 2024/2847 (CRA); Richtlinie (EU) 2022/2555 (NIS-2) Art. 21; § 202c StGB; HackerOne/Bugcrowd Standard-Templates 2024; Microsoft „Securing Privileged Access" Reference 2024.</em></p>'
+    };
+
+    const QUIZ_OFFSEC = [
+        // --- Pool 1: Methodik / Recht / Begriffe (12) ---
+        { q: 'Welcher Standard definiert vier Phasen Planning / Discovery / Attack / Reporting fuer Pentests?',
+            options: ['ISO/IEC 27001:2022', 'NIST SP 800-115 (Sep. 2008)', 'PCI DSS v4.0', 'COBIT 2019'], correct: 1,
+            explanation: 'NIST SP 800-115 „Technical Guide to Information Security Testing and Assessment" (Sep. 2008), §3.4 / §6 beschreibt den vier-phasigen Pentest-Prozess.' },
+        { q: 'Welcher Pentest-Industrie-Leitfaden definiert sieben Phasen inkl. Threat Modeling und Post-Exploitation?',
+            options: ['OSSTMM 3', 'PTES Technical Guidelines v1.0 (2014)', 'OWASP WSTG v4.2', 'NIST SP 800-115'], correct: 1,
+            explanation: 'PTES (Penetration Testing Execution Standard) Technical Guidelines v1.0 (2014) listet sieben Phasen inkl. Pre-Engagement, Threat Modeling, Vulnerability Analysis, Post-Exploitation und Reporting.' },
+        { q: 'Welcher OWASP-Leitfaden enthaelt Test-IDs wie WSTG-ATHN-04 und WSTG-INPV-19?',
+            options: ['OWASP ASVS 4.0.3', 'OWASP WSTG v4.2 (2020)', 'OWASP SAMM 2.0', 'OWASP MASVS'], correct: 1,
+            explanation: 'OWASP Web Security Testing Guide v4.2 (2020) ist nach Test-Klassen INFO/CONF/IDNT/ATHN/ATHZ/SESS/INPV/ERRH/CRYP/BUSL/CLNT mit fortlaufenden IDs strukturiert.' },
+        { q: 'Welche Norm definiert den ISMS-konformen Coordinated-Vulnerability-Disclosure-Prozess auf Hersteller-Seite?',
+            options: ['ISO/IEC 29147:2018', 'ISO/IEC 30111:2019', 'beide ergaenzen sich (29147 extern, 30111 intern)', 'ISO/IEC 27035-1:2023'], correct: 2,
+            explanation: 'ISO/IEC 29147:2018 regelt die externe CVD-Schnittstelle, ISO/IEC 30111:2019 den internen Vulnerability-Handling-Prozess; sie werden zusammen referenziert.' },
+        { q: 'Welcher deutsche Strafrechtsparagraph wird bei Pentests durch eine schriftliche Auftraggeber-Genehmigung tatbestandlich entkraeftet?',
+            options: ['§ 263 StGB', '§ 202c StGB', '§ 303a StGB', '§ 109a StGB'], correct: 1,
+            explanation: '§ 202c StGB (Vorbereiten des Ausspaehens und Abfangens von Daten) wird durch Auftrag und ROE typischerweise nicht erfuellt; relevante Kommentar-Literatur Schoenke/Schroeder 30. Aufl. (2023).' },
+        { q: 'Was unterscheidet einen Red-Team-Auftrag inhaltlich von einem Pentest?',
+            options: ['Red Team nutzt nur Open-Source-Tools', 'Red Team ist ziel-orientiert (Crown Jewels) und prueft Detection-/Response-Reife', 'Red Team braucht keinen Auftrag', 'Pentest darf keine Privilege Escalation versuchen'], correct: 1,
+            explanation: 'Red Team verfolgt ein Ziel (z.B. Domain Admin / Datenexfiltration) gegen ein Detection-/Response-Setup; Erfolgsmass sind TTD / TTC, nicht Anzahl Findings (NIST SP 800-115 §2.4 / MITRE Adversary Emulation Plans).' },
+        { q: 'Welche CVSS-Version ist seit November 2023 der aktuelle FIRST-Standard?',
+            options: ['CVSS v3.0 (2015)', 'CVSS v3.1 (2019)', 'CVSS v4.0 (Nov. 2023)', 'CVSS v5.0'], correct: 2,
+            explanation: 'FIRST hat CVSS v4.0 am 1. Nov. 2023 veroeffentlicht; v3.1 bleibt parallel verbreitet, insbesondere in CISA KEV-Tracking.' },
+        { q: 'Welche Rolle hat der Incident Commander in einem Red-Team-Engagement?',
+            options: ['Technische Ausfuehrung der Angriffe', 'Steuerung, Eskalation und „Stop-Test"-Entscheidungen', 'Reporting-Schreiben', 'Detection-Engineering'], correct: 1,
+            explanation: 'Der IC trifft Entscheidungen, kommuniziert mit Auftraggeber und kann das Engagement abbrechen — analog zu Incident Response (NIST SP 800-61 r2 §3).' },
+        { q: 'Welcher EU-Rechtsakt verlangt von Herstellern „Wichtiger Produkte mit digitalen Elementen" eine systematische Schwachstellenbehandlung mit Sicherheitstests?',
+            options: ['DSGVO', 'NIS-1', 'Verordnung (EU) 2024/2847 (Cyber Resilience Act)', 'eIDAS 2.0'], correct: 2,
+            explanation: 'Verordnung (EU) 2024/2847 (CRA, in Kraft 11.12.2024, Anwendungsbeginn 11.12.2027) Art. 13 / Anhang I verpflichtet Hersteller zu Vulnerability-Handling, inkl. Sicherheitstests.' },
+        { q: 'Welche Klausel im Bug-Bounty-Programm schuetzt Forschende vor strafrechtlicher Verfolgung bei „good-faith"-Tests?',
+            options: ['NDA', 'Indemnification', 'Safe-Harbour-Klausel', 'Force Majeure'], correct: 2,
+            explanation: 'Eine Safe-Harbour-Klausel (CISA „Vulnerability Disclosure Policy Template" 2023, DOJ „Framework for Vulnerability Disclosure" 2017) verspricht Verzicht auf strafrechtliche/zivilrechtliche Schritte bei Einhaltung des Programmrahmens.' },
+        { q: 'Welche Disclosure-Frist empfiehlt NIST SP 800-216 Rev. 1 (Mai 2023) als Standard?',
+            options: ['7 Tage', '30 Tage', '45 Tage', '90 Tage'], correct: 3,
+            explanation: 'NIST SP 800-216 Rev. 1 (Mai 2023) §3 nennt 90 Tage als typischen Standard, abweichende Fristen muessen begruendet werden.' },
+        { q: 'Welche Cloud-Pentest-Notice ist 2024 fuer AWS Pflicht?',
+            options: ['Vorab-Genehmigung pro Test', 'Beachten der „AWS Penetration Testing Policy" inkl. erlaubter und verbotener Aktivitaeten', 'AWS untersagt jeden Pentest', 'Nur ueber Marketplace-Anbieter erlaubt'], correct: 1,
+            explanation: 'AWS „Penetration Testing Policy" (Stand 2023/2024): bestimmte Service-Tests ohne Vorab-Genehmigung erlaubt, DoS/DDoS/DNS-Zone-Walking weiterhin verboten.' },
+
+        // --- Pool 2: Web/API (14) ---
+        { q: 'Welcher Eintrag steht in OWASP Top 10:2021 auf Platz A01?',
+            options: ['Cryptographic Failures', 'Injection', 'Broken Access Control', 'SSRF'], correct: 2,
+            explanation: 'A01:2021 — Broken Access Control wurde aus Position A05:2017 gehoben; Inzidenzrate ueber 90 % der getesteten Anwendungen (OWASP Methodology 2021).' },
+        { q: 'Welcher Eintrag in OWASP Top 10:2021 ersetzt das alte „XML External Entities (XXE)"?',
+            options: ['A03 Injection (XXE wurde dort eingegliedert)', 'A05 Security Misconfiguration', 'A02 Cryptographic Failures', 'A06 Vulnerable and Outdated Components'], correct: 0,
+            explanation: 'OWASP Top 10:2021: XXE wurde in A03:2021 Injection eingegliedert.' },
+        { q: 'Welcher Eintrag ist NEU in OWASP Top 10:2021?',
+            options: ['Insecure Design (A04)', 'Broken Authentication', 'Cross-Site Scripting (eigener Eintrag)', 'Cross-Site Request Forgery'], correct: 0,
+            explanation: 'A04:2021 Insecure Design wurde 2021 als neue Kategorie eingefuehrt; XSS wurde in A03 Injection integriert.' },
+        { q: 'Welche OWASP-Liste fokussiert API-spezifische Risiken (BOLA, BFLA, Mass Assignment)?',
+            options: ['OWASP Top 10:2021', 'OWASP API Security Top 10:2023', 'OWASP MASVS', 'OWASP ASVS L1'], correct: 1,
+            explanation: 'OWASP API Security Top 10:2023 definiert API1 BOLA, API2 Broken Authentication, API3 Broken Object Property Level Authorization (Mass Assignment / Excessive Data Exposure).' },
+        { q: 'Welche Schwachstellen-Klasse ist die haeufigste in API-Pentests laut OWASP API 2023?',
+            options: ['Rate-Limit-Probleme', 'Broken Object Level Authorization (BOLA / IDOR)', 'JWT-Algorithm-Confusion', 'Verbose Errors'], correct: 1,
+            explanation: 'API1:2023 BOLA (alte Bezeichnung: IDOR auf API-Ebene) bleibt #1 — Authorization-Pruefungen pro Objekt fehlen oft komplett.' },
+        { q: 'Welcher RFC ist BCP fuer JSON Web Tokens (JWT)?',
+            options: ['RFC 7519', 'RFC 7515', 'RFC 8725 „JWT Best Current Practices" (Feb. 2020)', 'RFC 6749'], correct: 2,
+            explanation: 'RFC 8725 (Feb. 2020) ist die JWT-BCP; verlangt u.a. Algorithmus-Whitelisting, „none" verbieten, „kid"-Validierung gegen Whitelist.' },
+        { q: 'Welche ASVS-Stufe ist fuer Anwendungen mit „high-value" Daten (z.B. Banking, Health) der Soll-Standard?',
+            options: ['L1', 'L2', 'L3', 'es gibt keine Stufen'], correct: 2,
+            explanation: 'OWASP ASVS 4.0.3: L3 ist „high-value, high-assurance"; L2 ist Standard fuer Business-Apps; L1 ist Mindeststandard.' },
+        { q: 'Welche Schwachstelle ermoeglicht via SSRF Zugriff auf Cloud-Metadata-Endpunkte (169.254.169.254 / 100.100.100.200)?',
+            options: ['A03 Injection', 'A06 Vulnerable Components', 'A10 SSRF (OWASP Top 10:2021)', 'A07 Auth Failures'], correct: 2,
+            explanation: 'A10:2021 SSRF wird haeufig genutzt, um IMDS-Endpunkte zu kontaktieren; AWS IMDSv1-Anfaelligkeit ist die klassische Eskalation zur IAM-Rolle.' },
+        { q: 'Welche AWS-Konfiguration mitigiert SSRF gegen IMDS?',
+            options: ['EC2-Stop / Start', 'IMDSv2 mit Hop-Limit 1 + Token-Pflicht', 'CloudTrail aktivieren', 'Public IP entfernen'], correct: 1,
+            explanation: 'AWS IMDSv2 (Token-Pflicht, Hop-Limit 1, PUT statt GET) verhindert die meisten SSRF-Wege auf 169.254.169.254 (AWS Doku 2024).' },
+        { q: 'Welche Kombination aus Pruefverfahren ist fuer eine moderne CI/CD-Pipeline empfohlen?',
+            options: ['Nur DAST', 'Nur SAST', 'SAST + DAST + SCA, optional IAST und Fuzzing', 'Manuelle Code-Reviews ohne Tools'], correct: 2,
+            explanation: 'SAST (Code), DAST (laufende App), SCA (Komponenten/CVE), IAST (Instrumentierung), Fuzzing (Eingabe-Mutation) sind komplementaer (OWASP DevSecOps Guideline 2023).' },
+        { q: 'Welche HTTP-Header-Konfiguration ist fuer CSRF-Schutz neuer Cookies Standard?',
+            options: ['SameSite=None ohne Secure', 'SameSite=Lax oder Strict, plus Secure', 'kein SameSite, dafuer HttpOnly', 'nur Domain-Attribut'], correct: 1,
+            explanation: 'IETF draft-west-cookie-incrementalism / RFC 6265bis (2024): SameSite=Lax/Strict + Secure; SameSite=None nur mit Secure.' },
+        { q: 'Welche Schwachstelle erlaubt einem Angreifer, JSON-Felder zu setzen, die das Backend fuer privilegierte Operationen nutzt (z.B. is_admin=true)?',
+            options: ['SSRF', 'Mass Assignment / API3:2023', 'Broken Object Authorization', 'Verbose Errors'], correct: 1,
+            explanation: 'API3:2023 (Broken Object Property Level Authorization, frueher Mass Assignment) — Frameworks binden JSON-Felder ungefiltert an interne Modell-Properties.' },
+        { q: 'Welche Maßnahme reduziert das Risiko von Deserialisierungs-Angriffen am effektivsten?',
+            options: ['Try/Catch um Deserializer', 'Vermeidung unsicherer Format/-Klassen-Whitelist (z.B. nur DTO-Schemas, kein Java-Native, kein pickle)', 'Hash der Eingabe', 'Base64-Encoding'], correct: 1,
+            explanation: 'A08:2021 Software/Data Integrity: sichere Formate (JSON-Schema, Protobuf), Klassen-/Type-Whitelisting; native Object Streams meiden. Java-spezifisch: Look-Ahead-Deserialisierung / JEP 290 (jdk.serialFilter).' },
+        { q: 'Welche Vorschrift fordert in der EU bei sensiblen Anwendungen „Stand der Technik" inkl. regelmaessiger Sicherheitsbewertungen?',
+            options: ['eIDAS 1.0', 'DSGVO Art. 32', 'CRA Art. 5', 'GDPR Art. 17'], correct: 1,
+            explanation: 'DSGVO Art. 32 verpflichtet Verantwortliche und Auftragsverarbeiter zu „Verfahren zur regelmaessigen Ueberpruefung, Bewertung und Evaluierung der Wirksamkeit" — i.d.R. interpretiert inkl. Pentests.' },
+
+        // --- Pool 3: Active Directory / Kerberos / AD CS (12) ---
+        { q: 'Welche ATT&amp;CK-Technique-ID beschreibt Kerberoasting?',
+            options: ['T1003.001', 'T1558.003', 'T1550.002', 'T1110.003'], correct: 1,
+            explanation: 'MITRE ATT&amp;CK Enterprise v16 (2024) T1558.003 „Steal or Forge Kerberos Tickets: Kerberoasting".' },
+        { q: 'Welche Voraussetzung ist fuer AS-REP-Roasting noetig?',
+            options: ['Service-Account mit SPN', 'Konto mit „Do not require Kerberos preauthentication" gesetzt', 'lokale Admin-Rechte auf dem DC', 'Kerberos-Trust zwischen Forests'], correct: 1,
+            explanation: 'AS-REP-Roasting (T1558.004) funktioniert nur, wenn Pre-Authentication fuer das Konto deaktiviert ist (UF_DONT_REQUIRE_PREAUTH).' },
+        { q: 'Welcher Schluessel macht ein Golden Ticket moeglich?',
+            options: ['NT-Hash des Domain-Admin-Kontos', 'KRBTGT-Account-Hash', 'Computer-Account-Hash des DCs', 'Backup-Operator-Hash'], correct: 1,
+            explanation: 'Golden Ticket (T1558.001) faelscht TGTs mithilfe des KRBTGT-Hashes; Mimikatz „kerberos::golden". Bereinigung erfordert KRBTGT-Doppel-Reset binnen 10 h.' },
+        { q: 'Was ist „DCSync"?',
+            options: ['Replikation zwischen DCs ueber DNS', 'Missbrauch des „Replicating Directory Changes"-Rechts via MS-DRSR-Protokoll zum Hash-Dump', 'Backup-Mechanismus', 'PAM-Funktion'], correct: 1,
+            explanation: 'T1003.006 „OS Credential Dumping: DCSync" — DRSGetNCChanges ueber MS-DRSR; protokolliert mit Event ID 4662 mit dem entsprechenden GUID.' },
+        { q: 'Welche Mitigation verhindert Pass-the-Hash am wirksamsten auf Workstations?',
+            options: ['regelmaessiger Passwort-Reset', 'LAPS (Local Administrator Password Solution) + Restricted Admin / Credential Guard', 'BitLocker', 'AppLocker'], correct: 1,
+            explanation: 'LAPS (Microsoft, integriert ab Windows 11/Server 2019 R2) randomisiert lokale Admin-Passwoerter; Credential Guard (VBS) schuetzt LSASS gegen Mimikatz-aehnliche Auslese.' },
+        { q: 'Welcher AD-CS-Misconfiguration-Code beschreibt ein Template, das einen Subject Alternative Name durch den Antragsteller erlaubt?',
+            options: ['ESC1', 'ESC4', 'ESC6', 'ESC8'], correct: 0,
+            explanation: '„Certified Pre-Owned" (Schroeder/Christensen, SpecterOps Whitepaper Jun. 2021): ESC1 = beliebiger SAN durch Antragsteller → Identitaets-Spoof; ESC8 = NTLM-Relay an HTTP-Endpoint der CA.' },
+        { q: 'Welche AD-CS-Misconfiguration adressiert KB5005413 (Mai 2021) primaer?',
+            options: ['ESC1', 'ESC8 (NTLM-Relay an HTTP-Endpoint der CA)', 'ESC4', 'ESC6'], correct: 1,
+            explanation: 'KB5005413 „Mitigating NTLM Relay Attacks on Active Directory Certificate Services" (Mai 2021) — EPA / Channel Binding fuer Web-Enrollment, AD-CS-Web-Endpoints HTTPS.' },
+        { q: 'Welche Microsoft-Empfehlung 2020/2024 erweitert das klassische 3-Tier-Modell?',
+            options: ['Zero Trust Maturity Model', 'Enterprise Access Model mit Privileged / Control / Management / Data / User Access', 'NIST CSF 2.0', 'CISA Zero Trust Architecture'], correct: 1,
+            explanation: 'Microsoft „Enterprise Access Model" (2020/2024) ergaenzt Tier-0..2 um Cloud-/Workload-/User-Access-Planes und Privileged Access Workstations.' },
+        { q: 'Welche Detection-Quelle ist fuer Kerberoasting am praegnantesten?',
+            options: ['Event ID 4624', 'Event ID 4769 mit Encryption Type 0x17 (RC4) auf Service-Accounts', 'Event ID 4732', 'Event ID 4776'], correct: 1,
+            explanation: 'Event ID 4769 (Kerberos Service Ticket Operations) mit Ticket Encryption Type 0x17 (RC4-HMAC) ist klassischer Kerberoasting-Indikator (Sigma-Regel <code>win_kerberoasting</code>, SigmaHQ 2024).' },
+        { q: 'Welche Detection-Quelle ist fuer DCSync charakteristisch?',
+            options: ['Event ID 4624', 'Event ID 4776', 'Event ID 4662 mit Permissions GUID „Replicating Directory Changes" auf einem nicht-DC-Konto', 'Event ID 4768'], correct: 2,
+            explanation: 'Event ID 4662 protokolliert DS-Object-Access; das DRS-Replikations-GUID auf einem Konto ohne DC-Charakter (Entity ist kein DC) ist klassischer DCSync-IOC.' },
+        { q: 'Was bewirkt die AD-Gruppe „Protected Users" fuer Mitglieder?',
+            options: ['hoehere RDP-Performance', 'Erzwingt nur Kerberos AES, kein NTLM, kein Constrained Delegation, kein Cached-Credential', 'Lokale Admin-Rechte', 'MFA-Erzwingung'], correct: 1,
+            explanation: 'Microsoft Doku „Protected Users Security Group": kein NTLM, kein Digest, kein CredSSP-Default, kein Unconstrained/Constrained-Delegation, AES-only Kerberos, kein langlebiger Cache.' },
+        { q: 'Welche zwei Aktionen sind fuer Bereinigung eines Golden-Ticket-Vorfalls noetig?',
+            options: ['Einmaliger KRBTGT-Reset', 'Zweimaliger KRBTGT-Reset binnen ~10 Stunden, plus Tier-0-Audit aller Adjacent-Hosts', 'Domain-Rebuild', 'KRBTGT-Reset reicht nicht, nur Forest-Recovery'], correct: 1,
+            explanation: 'Microsoft „How to use the krbtgt account password reset script" (2018, weiterhin gueltig): zweimaliger Reset >10 h, anschliessend Adjacent-Tier-0-Audit; ein einzelner Reset laesst aktive Tickets gueltig.' },
+
+        // --- Pool 4: Adversary Emulation / Tools / Reporting / Frameworks (12) ---
+        { q: 'Welche Plattform ist eine open-source Adversary-Emulation-Plattform mit ATT&amp;CK-Mapping und Operator-/Agent-Modell?',
+            options: ['Metasploit Framework', 'MITRE Caldera v5 (2024)', 'Cobalt Strike', 'Empire'], correct: 1,
+            explanation: 'MITRE Caldera v5 (2024) ist eine ATT&amp;CK-mapped Plugin-Plattform fuer Adversary Emulation und Purple Teaming.' },
+        { q: 'Welche YAML-basierte Test-Bibliothek (Red Canary) bildet einzelne ATT&amp;CK-Techniken ab?',
+            options: ['Atomic Red Team', 'MITRE D3FEND', 'OWASP ZAP', 'Sigma'], correct: 0,
+            explanation: 'Atomic Red Team (Red Canary, fortlaufend gepflegt 2024) bildet pro Technik einen Atomic-Test als YAML; Pendant zu Caldera-Operationen.' },
+        { q: 'Welcher Knowledge-Graph dient als defensives Counter-Mapping zu MITRE ATT&amp;CK?',
+            options: ['NIST CSF 2.0', 'MITRE D3FEND v1.0 (2023)', 'CIS Controls v8', 'CAPEC'], correct: 1,
+            explanation: 'MITRE D3FEND v1.0 (Mai 2023) liefert defensive Techniken als Counter-Mapping zu ATT&amp;CK-Tactics.' },
+        { q: 'Welche Detection-Sprache ist 2024 De-facto-Standard fuer SIEM-uebergreifende Detection-Engineering?',
+            options: ['YARA', 'Sigma (SigmaHQ)', 'Snort', 'Suricata'], correct: 1,
+            explanation: 'Sigma (SigmaHQ, fortlaufend gepflegt) ist log-quellenuebergreifend und konvertiert mittels „sigmac"/„pySigma" auf SIEM-spezifische Queries.' },
+        { q: 'Welches Pentest-Framework rueckte 2020/2021 als Open-Source-Alternative zu Cobalt Strike auf?',
+            options: ['BloodHound', 'Sliver (Bishop Fox)', 'Nmap', 'Nessus'], correct: 1,
+            explanation: 'Sliver (Bishop Fox, seit 2020, weiterentwickelt 2024) ist ein modernes Open-Source-C2-Framework in Go; alternative zu Cobalt Strike, mit mTLS / WireGuard / Mythic-Kompatibilitaet.' },
+        { q: 'Welche Methode misst die Detection-Reife im Purple Team am direktesten?',
+            options: ['Anzahl Findings', 'Time-to-Detection (TTD) und Time-to-Containment (TTC) je ATT&amp;CK-Technique', 'CVSS-Mittelwert', 'Anzahl Tools im Stack'], correct: 1,
+            explanation: 'TTD/TTC sind die Standard-Reifekennzahlen im Purple Teaming (MITRE Adversary Emulation Plans 2023, SANS „Continuous Adversary Emulation" 2024).' },
+        { q: 'Welche Reporting-Komponente ist fuer das Management essenziell?',
+            options: ['Reproduktionsschritte', 'Executive Summary (max. 1 Seite, ohne Tool-Namen)', 'CVSS-Vektor', 'ATT&amp;CK-IDs'], correct: 1,
+            explanation: 'NIST SP 800-115 §6 / BSI-Praxisleitfaden Version 5 (2023): Executive Summary ist Pflicht, Tool-Namen sind im Mgmt-Teil unerwuenscht.' },
+        { q: 'Welche CVSS-v4.0-Neuerung erweitert die Bewertung um nachgelagerte Systeme?',
+            options: ['Temporal-Metriken', '„Subsequent System"-Metriken (SC, SI, SA)', 'Threat-Severity-Multiplier', 'Compliance-Override'], correct: 1,
+            explanation: 'CVSS v4.0 (Nov. 2023) ergaenzt Subsequent-System-Auswirkungen (Confidentiality/Integrity/Availability auf weitere Systeme); zusaetzlich neue Threat-Metriken (Exploit Maturity).' },
+        { q: 'Welche EU-Richtlinie verpflichtet wesentliche Einrichtungen u.a. zu „Sicherheitsbewertungen", was regelmaessige Pentests rechtfertigt?',
+            options: ['eIDAS 1.0', 'NIS-2 (Richtlinie (EU) 2022/2555) Art. 21', 'Datenschutz-GVO Art. 35', 'CRA Art. 6'], correct: 1,
+            explanation: 'Richtlinie (EU) 2022/2555 (NIS-2) Art. 21 Abs. 2 lit. f und g verlangen u.a. Sicherheitsbewertungen, Cyber-Hygiene und Awareness — typischerweise inkl. Pentests.' },
+        { q: 'Welche EU-Verordnung tritt am 11.12.2027 in Anwendung und verlangt Hersteller-Vulnerability-Handling?',
+            options: ['eIDAS 2.0 (Verordnung (EU) 2024/1183)', 'CRA (Verordnung (EU) 2024/2847)', 'AI Act (Verordnung (EU) 2024/1689)', 'DORA (Verordnung (EU) 2022/2554)'], correct: 1,
+            explanation: 'Verordnung (EU) 2024/2847 (Cyber Resilience Act) trat am 10.12.2024 in Kraft; Hauptanwendungsbeginn 11.12.2027 (Art. 71); Reporting-Pflichten ab 11.09.2026.' },
+        { q: 'Welche Detection-Source ist fuer LSASS-Credential-Dumping (T1003.001) charakteristisch?',
+            options: ['Event ID 4624', 'EDR-Telemetrie auf „Process accessed lsass.exe with PROCESS_VM_READ"', 'Sysmon Event 1 nur', 'Event ID 4732'], correct: 1,
+            explanation: 'EDR-Detection ueber Process-Access-Telemetrie auf lsass.exe mit Speicherlese-Rechten ist Standard (Sysmon Event 10 mit GrantedAccess 0x1010/0x1410, Sigma <code>proc_access_win_lsass_dump.yml</code>).' },
+        { q: 'Welcher Begriff beschreibt Dokumentation und reversiblen Abbau aller Pentest-Spuren am Ende des Engagements?',
+            options: ['Cleanup', 'Decommissioning', 'Aftercare', 'Tear-down'], correct: 0,
+            explanation: 'NIST SP 800-115 §6 / BSI-Leitfaden: „Cleanup" — alle Persistenzen, Konten, Test-Dateien, RBCD-Eintraege werden dokumentiert und reversibel zurueckgebaut.' },
+
+        // --- 2 PBQ-Items (Sequence + Cloze) ---
+        { type: 'sequence',
+            q: 'Bringen Sie die Phasen eines Pentests nach NIST SP 800-115 §3.4 in die korrekte Reihenfolge.',
+            items: ['Discovery', 'Reporting', 'Planning', 'Attack'],
+            correct: [2, 0, 3, 1],
+            explanation: 'NIST SP 800-115 (Sep. 2008) §3.4: Planning → Discovery → Attack → Reporting. „Attack"-Iterationen sind moeglich, das Reporting bleibt die letzte Phase.' },
+        { type: 'cloze',
+            q: 'Vervollstaendigen Sie die typische Bereinigung eines Golden-Ticket-Vorfalls (Microsoft 2018/2024): KRBTGT-Reset muss ___-mal innerhalb von ~ ___ Stunden erfolgen; CVSS-Aktualstand fuer Pentest-Reports ist v ___.',
+            blanks: [
+                { label: 'KRBTGT-Reset-Anzahl', accept: ['2', 'zwei', 'zweimal', 'two'] },
+                { label: 'Stundenfenster', accept: ['10', '10h', '10 stunden'] },
+                { label: 'CVSS-Version', accept: ['4.0', 'v4.0', '4'] }
+            ],
+            explanation: 'Microsoft KRBTGT-Reset-Empfehlung: zweimaliger Reset binnen ~10 h (Replikationszyklus); CVSS v4.0 (FIRST, Nov. 2023) ist seit 2024 der aktuelle Standard fuer Pentest-Reports.' }
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_cybersec',
         code: 'MA-ET CyberSec',
@@ -4199,6 +4675,13 @@
                 summary: 'IR-Lifecycle nach NIST SP 800-61r2 und ISO/IEC 27035, Detection und Triage in SIEM/EDR/SOAR, digitale Forensik (NIST SP 800-86, ISO/IEC 27037/27041/27042/27043, ACPO Good Practice), Chain of Custody, Speicher-/Datentraegerforensik, Malware-Triage (statisch/dynamisch, MITRE ATT&CK, MISP/STIX/TAXII), Ransomware-Playbooks (CISA #StopRansomware), Lessons Learned.',
                 pages: [PAGE_IR_LIFECYCLE, PAGE_IR_DETECT, PAGE_IR_FORENSIK, PAGE_IR_MALWARE],
                 quiz: QUIZ_IR
+            },
+            {
+                id: 'offsec',
+                title: 'Kapitel 9 — Offensive Security und Security Testing',
+                summary: 'Pentest-Methodik (NIST SP 800-115, PTES, OWASP WSTG v4.2), Web-/API-Security (OWASP Top 10:2021, OWASP API Top 10:2023, ASVS 4.0.3), Active-Directory-Angriffspfade (Kerberoasting, AS-REP, PtH/PtT, Golden/Silver Ticket, AD CS ESC1–ESC8, Tier-Modell), Adversary Emulation und Purple Teaming (MITRE Caldera, Atomic Red Team, D3FEND), Reporting nach CVSS v4.0 sowie Recht (StGB § 202c, NIS-2 Art. 21, CRA Art. 13, ISO/IEC 29147/30111).',
+                pages: [PAGE_OFFSEC_METHOD, PAGE_OFFSEC_WEB, PAGE_OFFSEC_AD, PAGE_OFFSEC_REDTEAM],
+                quiz: QUIZ_OFFSEC
             }
         ]
     });
