@@ -209,7 +209,7 @@ function useAuth() {
     });
     const cfg = (typeof window !== 'undefined') ? window.SMARTINEER_AUTH : null;
     const login = useCallback((user, pass) => {
-        if (AUTH_TEMPORARILY_DISABLED) return { ok: false, error: 'Login ist temporaer deaktiviert.' };
+        if (AUTH_TEMPORARILY_DISABLED) return { ok: false, disabled: true, error: 'Login ist temporaer deaktiviert.' };
         if (!cfg || !cfg.users) return { ok: false, error: 'Auth-Konfiguration fehlt (js/auth-credentials.js).' };
         const u = cfg.users[user];
         if (!u || u.pass !== pass) return { ok: false, error: 'Benutzername oder Passwort falsch.' };
