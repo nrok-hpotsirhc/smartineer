@@ -5,6 +5,8 @@ Dieses Dokument richtet sich an **menschliche Entwickler** und **AI-Coding-Agent
 > **Lies dieses Dokument, bevor du Änderungen einreichst.**  
 > Bei Konflikten gilt: AGENTS.md > README.md > eigener Stil.
 
+> **Modellvorgabe für diesen Workspace:** Nur Claude Opus 4.7 verwenden.
+
 ---
 
 ## 0. Status-Report-Pflicht (verbindlich)
