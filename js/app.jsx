@@ -20,7 +20,7 @@ const SRS_INTERVALS_DAYS = [1, 3, 7, 16, 35, 70, 140]; // SM-2 lite, gestaffelt
 // DevTools sichtbar. Geeignet nur fuer leichten Zugang-Schutz im Bereich der
 // Schulungen, nicht fuer regulatorisch sensible Inhalte.
 const AUTH_KEY = 'smartineer_auth_v1'; // { user, role, since (ISO), expires (ISO) }
-const AUTH_TEMPORARILY_DISABLED = true; // TODO P-UI-LOGIN-REACTIVATE: Auth-Gate wieder aktivieren.
+const AUTH_TEMPORARILY_DISABLED = true; // TODO: P-UI-LOGIN-REACTIVATE — Auth-Gate wieder aktivieren.
 const VISIBLE_CATS_KEY = 'smartineer_visible_categories_v1'; // { [catId]: false } — Default: alle sichtbar
 const ADMIN_GLOBAL_KEY = 'smartineer_admin_global_v1'; // reserviert fuer kuenftige globale Settings
 
