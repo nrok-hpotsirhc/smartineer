@@ -1695,6 +1695,562 @@
             'ISO/IEC 27034 spezifiziert Application-Security-Anforderungen ergaenzend zu ISO 27001.')
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 5 — Risikomanagement und Compliance (PRODUKTIV)
+    // Quellen: DIN EN ISO/IEC 27001:2022 inkl. Anhang A; ISO/IEC 27002:2022
+    // (93 Controls in 4 Themengruppen); ISO/IEC 27005:2022 (Information
+    // security risk management); ISO 31000:2018 (Risk management — Guidelines);
+    // ISO/IEC 27004:2016 (Monitoring/Measurement); BSI-Standards 200-1, 200-2,
+    // 200-3, 200-4 (BCM, 2023); BSI IT-Grundschutz-Kompendium Edition 2024;
+    // Richtlinie (EU) 2022/2555 (NIS2, in Kraft 16.01.2023, Umsetzungsfrist
+    // 17.10.2024); Verordnung (EU) 2024/2847 (Cyber Resilience Act, CRA, im
+    // Amtsblatt 20.11.2024, Geltung 11.12.2027); BSI-Kritisverordnung
+    // (BSI-KritisV) 2021 + IT-SiG 2.0; FIRST CVSS v4.0 Specification (Nov.
+    // 2023); FIRST EPSS Model v3 (2023); CISA Binding Operational Directive
+    // 22-01 (Nov. 2021, Known Exploited Vulnerabilities Catalog); Open Group
+    // "Open FAIR Body of Knowledge" (O-RT, O-RA) Edition 2024; Caralli et al.
+    // "Introducing OCTAVE Allegro" CMU/SEI-2007-TR-012; NIST SP 800-30 r1
+    // (Risk Assessment, 2012); NIST SP 800-39 (Risk Management, 2011);
+    // ISACA COBIT 2019; ENISA Threat Landscape 2024.
+    // ----------------------------------------------------------------------
+
+    const PAGE_RISK_ISMS = {
+        title: '5.1 ISO/IEC 27001:2022 — ISMS-Aufbau und Annex A',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die Pflicht-Klauseln 4-10 der ISO/IEC 27001:2022 benennen, (2) den Statement-of-Applicability-Prozess erklaeren, (3) die 93 Controls aus Anhang A vier Themengruppen zuordnen, (4) Unterschiede zur Vorversion 2013 und die Transitionsfrist einordnen.</blockquote>'
+
+            + '<h4>5.1.1 Aufbau der Norm (High-Level Structure)</h4>'
+            + '<p>ISO/IEC 27001:2022 folgt der Annex-SL-Struktur, die fuer alle ISO-Managementsystem-Normen einheitlich gilt (auch ISO 9001, ISO 14001, ISO 22301, ISO 45001). Pflichtklauseln:</p>'
+            + '<table><thead><tr><th>Klausel</th><th>Titel</th><th>Kerninhalt</th></tr></thead><tbody>'
+            + '<tr><td>4</td><td>Kontext der Organisation</td><td>interne/externe Themen, interessierte Parteien, Geltungsbereich, ISMS-Festlegung</td></tr>'
+            + '<tr><td>5</td><td>Fuehrung</td><td>Verpflichtung der obersten Leitung, IS-Politik, Rollen und Verantwortlichkeiten</td></tr>'
+            + '<tr><td>6</td><td>Planung</td><td>Risikoeinschaetzung und -behandlung, IS-Ziele, Aenderungsplanung (Klausel 6.3 ist neu in 2022)</td></tr>'
+            + '<tr><td>7</td><td>Unterstuetzung</td><td>Ressourcen, Kompetenz, Bewusstsein, Kommunikation, dokumentierte Information</td></tr>'
+            + '<tr><td>8</td><td>Betrieb</td><td>Operative Planung, Risikobehandlungs-Plan, Umsetzung der Controls</td></tr>'
+            + '<tr><td>9</td><td>Bewertung der Leistung</td><td>Monitoring, internes Audit, Management Review</td></tr>'
+            + '<tr><td>10</td><td>Verbesserung</td><td>kontinuierliche Verbesserung, Korrekturmassnahmen (Reihenfolge 10.1/10.2 vertauscht ggue. 2013)</td></tr>'
+            + '</tbody></table>'
+            + '<p>Die Klauseln 4-10 sind <strong>verbindlich</strong>. Das uebergeordnete <em>Plan-Do-Check-Act (PDCA)</em>-Modell ist als Konzept beibehalten, wird in der 2022er Fassung aber nicht mehr explizit als verpflichtende Reihenfolge genannt.</p>'
+
+            + '<h4>5.1.2 Risikobehandlung und Statement of Applicability (SoA)</h4>'
+            + '<p>Klausel 6.1.2 verlangt einen dokumentierten <strong>Risikoeinschaetzungs-Prozess</strong> (Identifikation, Analyse, Bewertung) und Klausel 6.1.3 einen <strong>Risikobehandlungs-Prozess</strong> mit den vier Optionen <em>Modify (mitigate), Retain (accept), Avoid, Share (transfer)</em>. Auswahl der Controls erfolgt aus Anhang A (Default-Liste), darf jedoch ergaenzt werden.</p>'
+            + '<p>Das <strong>Statement of Applicability (SoA)</strong> dokumentiert je Anhang-A-Control: (a) ob anwendbar, (b) Begruendung der Auswahl bzw. des Ausschlusses, (c) Umsetzungsstatus. Ein SoA ohne Begruendung der Ausschluesse ist eine Major Non-Conformity in Audits.</p>'
+
+            + '<h4>5.1.3 Anhang A — 93 Controls in 4 Themengruppen</h4>'
+            + '<p>Annex A in ISO/IEC 27001:2022 verweist auf den vollstaendigen Control-Katalog der ISO/IEC 27002:2022 mit <strong>93 Controls</strong> (vorher: 114 Controls in 14 Bereichen). Strukturreform 2022:</p>'
+            + '<table><thead><tr><th>Themengruppe</th><th>Praefix</th><th>Anzahl</th></tr></thead><tbody>'
+            + '<tr><td>Organizational Controls</td><td>A.5</td><td>37</td></tr>'
+            + '<tr><td>People Controls</td><td>A.6</td><td>8</td></tr>'
+            + '<tr><td>Physical Controls</td><td>A.7</td><td>14</td></tr>'
+            + '<tr><td>Technological Controls</td><td>A.8</td><td>34</td></tr>'
+            + '</tbody></table>'
+            + '<p>Insgesamt <strong>11 neue Controls</strong> wurden gegenueber 2013 ergaenzt, u.a. <em>A.5.7 Threat intelligence</em>, <em>A.5.23 Information security for use of cloud services</em>, <em>A.5.30 ICT readiness for business continuity</em>, <em>A.7.4 Physical security monitoring</em>, <em>A.8.9 Configuration management</em>, <em>A.8.10 Information deletion</em>, <em>A.8.11 Data masking</em>, <em>A.8.12 Data leakage prevention</em>, <em>A.8.16 Monitoring activities</em>, <em>A.8.23 Web filtering</em>, <em>A.8.28 Secure coding</em>.</p>'
+            + '<p>Jeder Control hat in ISO/IEC 27002:2022 fuenf <strong>Attribute</strong>: <code>#Control type</code> (Preventive/Detective/Corrective), <code>#Information security properties</code> (CIA), <code>#Cybersecurity concepts</code> (Identify/Protect/Detect/Respond/Recover, NIST CSF-Kompatibilitaet), <code>#Operational capabilities</code> und <code>#Security domains</code>. Diese ermoeglichen eine flexible Sicht/Filterung des Katalogs.</p>'
+
+            + '<h4>5.1.4 Zertifizierungsprozess und Auditzyklus</h4>'
+            + '<p>Akkreditierte Zertifizierung erfolgt durch eine ISO/IEC 17021-1-akkreditierte Zertifizierungsstelle. Standardablauf:</p>'
+            + '<ol>'
+            + '<li><strong>Stage 1</strong> (Dokumenten-Pruefung, Readiness Review).</li>'
+            + '<li><strong>Stage 2</strong> (vor-Ort/On-Site, Implementierungs-Pruefung).</li>'
+            + '<li><strong>Surveillance Audits</strong> jaehrlich (Jahr 1, Jahr 2 nach Erstzertifizierung).</li>'
+            + '<li><strong>Re-Zertifizierung</strong> nach drei Jahren.</li>'
+            + '</ol>'
+            + '<p>Pflicht-Inputs des <strong>Management Reviews</strong> (Klausel 9.3.2): Status frueherer Massnahmen, Aenderungen externer/interner Themen, Feedback Stakeholder, Ergebnisse von Risikobehandlung, Audit-Ergebnisse, Erfuellung der IS-Ziele, Verbesserungsmoeglichkeiten.</p>'
+
+            + '<h4>5.1.5 Transitionsfrist 2013 -> 2022</h4>'
+            + '<p>IAF MD 26 (International Accreditation Forum Mandatory Document) legt die Migrationsperiode fest: zertifizierte Organisationen mussten bis spaetestens <strong>31. Oktober 2025</strong> auf ISO/IEC 27001:2022 umstellen. Nach diesem Datum verlieren Zertifikate auf Basis der 2013er-Fassung ihre Gueltigkeit.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: DIN EN ISO/IEC 27001:2022-11 (Anforderungen, Anhang A); DIN EN ISO/IEC 27002:2022-02 (93 Controls + Attribute); ISO/IEC 27000:2018 (Vokabular); IAF MD 26 Issue 4 (Transition zu 27001:2022); ISO/IEC 17021-1:2015 (Anforderungen an Zertifizierungsstellen).</em></p>'
+    };
+
+    const PAGE_RISK_BSI_27005 = {
+        title: '5.2 BSI IT-Grundschutz und ISO/IEC 27005:2022',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die BSI-Standards 200-1/200-2/200-3/200-4 abgrenzen, (2) Schutzbedarfsfeststellung und Maximumprinzip beschreiben, (3) den ISO/IEC 27005:2022 Risk-Assessment-Prozess durchlaufen, (4) Mapping BSI Grundschutz &harr; ISO 27001 darstellen.</blockquote>'
+
+            + '<h4>5.2.1 BSI-Standards 200-x</h4>'
+            + '<table><thead><tr><th>Standard</th><th>Titel</th><th>Inhalt</th></tr></thead><tbody>'
+            + '<tr><td>BSI 200-1</td><td>Managementsysteme fuer Informationssicherheit (ISMS)</td><td>allgemeine ISMS-Anforderungen, kompatibel zu ISO 27001</td></tr>'
+            + '<tr><td>BSI 200-2</td><td>IT-Grundschutz-Methodik</td><td>drei Vorgehensweisen: Basis-, Standard-, Kern-Absicherung</td></tr>'
+            + '<tr><td>BSI 200-3</td><td>Risikoanalyse auf Basis IT-Grundschutz</td><td>vereinfachte Risikoanalyse fuer hohen/sehr hohen Schutzbedarf</td></tr>'
+            + '<tr><td>BSI 200-4</td><td>Business Continuity Management (2023)</td><td>BCMS, abgeloest BSI 100-4 (2009); kompatibel zu ISO 22301</td></tr>'
+            + '</tbody></table>'
+            + '<p>Drei Vorgehensweisen aus 200-2:</p>'
+            + '<ul>'
+            + '<li><strong>Basis-Absicherung</strong> &mdash; schneller Einstieg, breit aber flach; nur Basis-Anforderungen aller Bausteine.</li>'
+            + '<li><strong>Kern-Absicherung</strong> &mdash; fokussiert auf "Kronjuwelen", besonders kritische Geschaeftsprozesse / Werte.</li>'
+            + '<li><strong>Standard-Absicherung</strong> &mdash; vollstaendiger Ansatz, ISO-27001-zertifizierungsfaehig auf Basis IT-Grundschutz.</li>'
+            + '</ul>'
+
+            + '<h4>5.2.2 IT-Grundschutz-Kompendium Edition 2024</h4>'
+            + '<p>Das Kompendium liefert pro Baustein eine Gefaehrdungslage und Anforderungen (Basis/Standard/erhoehter Schutzbedarf). Bausteinschichten:</p>'
+            + '<ul>'
+            + '<li><strong>ISMS</strong> (uebergeordnet)</li>'
+            + '<li><strong>ORP</strong> &mdash; Organisation und Personal</li>'
+            + '<li><strong>CON</strong> &mdash; Konzepte und Vorgehensweisen</li>'
+            + '<li><strong>OPS</strong> &mdash; Betrieb</li>'
+            + '<li><strong>DER</strong> &mdash; Detektion und Reaktion</li>'
+            + '<li><strong>APP</strong> &mdash; Anwendungen</li>'
+            + '<li><strong>SYS</strong> &mdash; IT-Systeme</li>'
+            + '<li><strong>IND</strong> &mdash; industrielle IT (OT)</li>'
+            + '<li><strong>NET</strong> &mdash; Netze und Kommunikation</li>'
+            + '<li><strong>INF</strong> &mdash; Infrastruktur</li>'
+            + '</ul>'
+            + '<p>Edition 2024 (Februar 2024) ergaenzt u.a. Cloud-Bausteine (OPS.2.2, OPS.2.3) und aktualisiert IND-Bausteine an IEC 62443.</p>'
+
+            + '<h4>5.2.3 Schutzbedarfsfeststellung</h4>'
+            + '<p>Drei Schutzbedarfskategorien (Klassen) je Schutzziel (Vertraulichkeit, Integritaet, Verfuegbarkeit):</p>'
+            + '<table><thead><tr><th>Kategorie</th><th>Schadensauswirkungen</th></tr></thead><tbody>'
+            + '<tr><td><strong>normal</strong></td><td>begrenzt und ueberschaubar</td></tr>'
+            + '<tr><td><strong>hoch</strong></td><td>betraechtlich</td></tr>'
+            + '<tr><td><strong>sehr hoch</strong></td><td>existenzbedrohend, katastrophal</td></tr>'
+            + '</tbody></table>'
+            + '<p>Vererbungsregeln:</p>'
+            + '<ul>'
+            + '<li><strong>Maximumprinzip</strong>: Schutzbedarf eines Zielobjekts ist mindestens der hoechste Schutzbedarf eines aufsetzenden Objekts.</li>'
+            + '<li><strong>Kumulationseffekt</strong>: viele Objekte mit normalem Schutzbedarf koennen kumuliert "hoch" ergeben.</li>'
+            + '<li><strong>Verteilungseffekt</strong>: redundant verteilte Daten koennen einzeln einen geringeren Schutzbedarf haben.</li>'
+            + '</ul>'
+            + '<p>Bei Schutzbedarf <em>hoch</em> oder <em>sehr hoch</em> wird zusaetzlich die <strong>Risikoanalyse nach BSI 200-3</strong> ueber die Standard-Anforderungen hinaus gefordert.</p>'
+
+            + '<h4>5.2.4 ISO/IEC 27005:2022 — Information Security Risk Management</h4>'
+            + '<p>ISO/IEC 27005:2022 ergaenzt 27001 mit konkreten Methoden. Prozess (Klausel 6 ff.):</p>'
+            + '<ol>'
+            + '<li><strong>Risk Identification</strong> &mdash; <em>Asset-based</em> (Wert &rarr; Bedrohung &rarr; Schwachstelle) oder <em>Event-based</em> (Szenario-zentriert).</li>'
+            + '<li><strong>Risk Analysis</strong> &mdash; Likelihood + Consequence &rarr; Risk Level. Qualitativ (Skala 1-5) oder quantitativ (FAIR, monetaer).</li>'
+            + '<li><strong>Risk Evaluation</strong> &mdash; Vergleich gegen Risiko-Akzeptanzkriterien.</li>'
+            + '<li><strong>Risk Treatment</strong> &mdash; vier Optionen: <em>Modify</em>, <em>Retain</em>, <em>Avoid</em>, <em>Share</em> (Transfer).</li>'
+            + '<li><strong>Risk Acceptance</strong> &mdash; Restrisiko (Residual Risk) durch Risikoeigner formell akzeptiert.</li>'
+            + '</ol>'
+            + '<p>Risikobehandlung produziert den <em>Risk Treatment Plan</em>; der Abgleich mit Anhang A der 27001 produziert das <em>Statement of Applicability</em>.</p>'
+
+            + '<h4>5.2.5 Mapping BSI IT-Grundschutz &harr; ISO/IEC 27001</h4>'
+            + '<p>Eine ISO-27001-Zertifizierung auf Basis IT-Grundschutz (Standard-Absicherung) wird vom BSI angeboten. Wesentliche Unterschiede:</p>'
+            + '<table><thead><tr><th>Aspekt</th><th>ISO 27001</th><th>BSI Grundschutz</th></tr></thead><tbody>'
+            + '<tr><td>Granularitaet</td><td>generisch, Auswahl der Controls offen</td><td>konkrete Anforderungen je Baustein</td></tr>'
+            + '<tr><td>Risikoansatz</td><td>frei waehlbar (qualitativ/quantitativ)</td><td>Schutzbedarf + Standard-Vorgehen, fuer hohen Schutzbedarf 200-3</td></tr>'
+            + '<tr><td>Geltungsbereich</td><td>Organisations-Scope frei</td><td>Informationsverbund</td></tr>'
+            + '<tr><td>Verbreitung</td><td>international</td><td>vor allem D-A-CH; KRITIS, Behoerden</td></tr>'
+            + '</tbody></table>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: BSI-Standard 200-1 v1.0 / 200-2 v1.0 / 200-3 v1.0 (Okt. 2017) / 200-4 v1.0 (Apr. 2023, BCM); BSI IT-Grundschutz-Kompendium Edition 2024 (Feb. 2024); ISO/IEC 27005:2022-10; BSI-Zertifizierung "ISO 27001 auf Basis von IT-Grundschutz" — Zertifizierungsschema 2024.</em></p>'
+    };
+
+    const PAGE_RISK_REGULATIONS = {
+        title: '5.3 EU-Regulatorik — NIS2, CRA und nationale Umsetzung',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Geltungsbereich und Fristen von NIS2 und CRA benennen, (2) Pflichten von Geschaeftsleitung und Hersteller einordnen, (3) Meldefristen bei Sicherheitsvorfaellen wiedergeben, (4) Ueberlapp und nationale Umsetzung in DE (KRITIS, IT-SiG 2.0) skizzieren.</blockquote>'
+
+            + '<h4>5.3.1 NIS2-Richtlinie (EU) 2022/2555</h4>'
+            + '<p>Die NIS2-Richtlinie ersetzt die NIS-Richtlinie 2016/1148. Wesentliche Eckdaten:</p>'
+            + '<ul>'
+            + '<li>Inkrafttreten: <strong>16. Januar 2023</strong>.</li>'
+            + '<li>Frist nationale Umsetzung: <strong>17. Oktober 2024</strong>.</li>'
+            + '<li>Richtlinie (nicht Verordnung) &mdash; Mitgliedstaaten muessen umsetzen (in DE: NIS-2-Umsetzungs- und Cybersicherheitsstaerkungsgesetz, NIS2UmsuCG, parlamentarisches Verfahren 2024-25).</li>'
+            + '</ul>'
+            + '<p>Geltungsbereich: <strong>18 Sektoren</strong>, geteilt in Anhang I (Sektoren mit hoher Kritikalitaet, z.B. Energie, Verkehr, Finanzen, Gesundheit, Wasser, digitale Infrastruktur, oeffentliche Verwaltung) und Anhang II (sonstige kritische Sektoren, z.B. Post, Abfall, Lebensmittel, Chemie, digitale Anbieter, Forschung).</p>'
+            + '<p>Klassifizierung der Einrichtungen nach <strong>Groessen-Schwelle</strong> (Beschaeftigte, Umsatz):</p>'
+            + '<table><thead><tr><th>Kategorie</th><th>Schwelle</th><th>Aufsicht</th></tr></thead><tbody>'
+            + '<tr><td><strong>wesentlich</strong> (essential)</td><td>gross (&ge;250 MA oder &gt;50 Mio EUR Umsatz) oder bestimmte Anhang-I-Sektoren unabhaengig von Groesse</td><td>ex ante (proaktive Aufsicht)</td></tr>'
+            + '<tr><td><strong>wichtig</strong> (important)</td><td>mittel (&ge;50 MA oder &gt;10 Mio EUR Umsatz) und kein wesentlicher Status</td><td>ex post (anlassbezogen)</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>5.3.2 NIS2 — Mindestmassnahmen (Art. 21)</h4>'
+            + '<p>Pflicht zur Umsetzung "geeigneter und verhaeltnismaessiger" technischer und organisatorischer Massnahmen, mindestens:</p>'
+            + '<ul>'
+            + '<li>Risikoanalyse-Konzepte und ISMS-Politik</li>'
+            + '<li>Vorfallbewaeltigung (Incident Response)</li>'
+            + '<li>Geschaeftskontinuitaet (BCM, Backup-Management, Krisenmanagement)</li>'
+            + '<li>Lieferketten-Sicherheit</li>'
+            + '<li>Sicherheit in Beschaffung, Entwicklung und Wartung</li>'
+            + '<li>Konzepte zur Bewertung der Wirksamkeit</li>'
+            + '<li>Cyberhygiene und Schulungen</li>'
+            + '<li>Kryptographie und Verschluesselung</li>'
+            + '<li>Personalsicherheit, Zugriffskontrolle, Asset Management</li>'
+            + '<li>Multi-Faktor-Authentisierung, sichere Sprach-/Video-/Text-Kommunikation</li>'
+            + '</ul>'
+
+            + '<h4>5.3.3 NIS2 — Meldepflichten (Art. 23)</h4>'
+            + '<p>Bei <em>erheblichen Sicherheitsvorfaellen</em> (signifikant beeintraechtigender Vorfall) gelten gestufte Meldefristen an die nationale CSIRT/zustaendige Behoerde:</p>'
+            + '<table><thead><tr><th>Frist</th><th>Inhalt</th></tr></thead><tbody>'
+            + '<tr><td><strong>24 Stunden</strong></td><td>Fruehwarnung (early warning), Hinweise auf moegliche rechtswidrige/boesartige Verursachung oder grenzueberschreitende Wirkung</td></tr>'
+            + '<tr><td><strong>72 Stunden</strong></td><td>Vorfallmeldung (incident notification) mit Erstbewertung, Schwere, Auswirkung, Indicators of Compromise</td></tr>'
+            + '<tr><td><strong>spaetestens 1 Monat</strong></td><td>Abschlussbericht (final report)</td></tr>'
+            + '</tbody></table>'
+            + '<p>Bei Bedarf werden Zwischenstandsberichte angefordert. Geschaeftsleitungen haften gemaess Art. 20 persoenlich fuer Compliance und muessen in Cybersecurity geschult sein.</p>'
+
+            + '<h4>5.3.4 Sanktionen unter NIS2 (Art. 34, Art. 36)</h4>'
+            + '<p>Mitgliedstaaten muessen mindestens vorsehen:</p>'
+            + '<ul>'
+            + '<li><strong>Wesentliche</strong> Einrichtungen: Bussgeld bis <strong>10 Mio EUR</strong> oder <strong>2&nbsp;%</strong> des weltweiten Vorjahres-Jahresumsatzes (jeweils hoeherer Wert).</li>'
+            + '<li><strong>Wichtige</strong> Einrichtungen: Bussgeld bis <strong>7 Mio EUR</strong> oder <strong>1{,}4&nbsp;%</strong> des weltweiten Vorjahres-Jahresumsatzes.</li>'
+            + '<li>Persoenliche Haftung der Geschaeftsleitung; Moeglichkeit der voruebergehenden Untersagung der Geschaeftsfuehrung.</li>'
+            + '</ul>'
+
+            + '<h4>5.3.5 Cyber Resilience Act — VO (EU) 2024/2847 (CRA)</h4>'
+            + '<p>Verordnung (direkte Geltung, keine Umsetzung noetig). Eckdaten:</p>'
+            + '<ul>'
+            + '<li>Veroeffentlichung im Amtsblatt: <strong>20. November 2024</strong>.</li>'
+            + '<li>Geltung der Hauptpflichten: <strong>11. Dezember 2027</strong> (36 Monate nach Inkrafttreten).</li>'
+            + '<li>Meldepflichten fuer aktiv ausgenutzte Schwachstellen: ab <strong>11. September 2026</strong>.</li>'
+            + '</ul>'
+            + '<p>Geltungsbereich: <em>Produkte mit digitalen Elementen (PDE)</em>, also Software- und Hardware-Produkte, deren bestimmungsgemaesse Verwendung eine direkte oder indirekte Datenverbindung umfasst.</p>'
+            + '<p>Drei Risikoklassen:</p>'
+            + '<table><thead><tr><th>Klasse</th><th>Konformitaet</th><th>Beispiele</th></tr></thead><tbody>'
+            + '<tr><td>Default (nicht-kritisch)</td><td>Selbstbewertung</td><td>Mehrheit der Smart-Home-Produkte</td></tr>'
+            + '<tr><td>Wichtige PDE Klasse I</td><td>Selbstbewertung mit harmonisierten Normen oder Notified Body</td><td>Passwort-Manager, Netzwerk-Mgmt-Tools, Boot-Manager</td></tr>'
+            + '<tr><td>Wichtige PDE Klasse II</td><td>Notified Body verpflichtend</td><td>Hypervisoren, Firewalls, HSMs, Smart Cards mit Sicherheitsfunktion</td></tr>'
+            + '<tr><td>Kritische PDE</td><td>Europaeisches Cybersicherheitszertifizierungsschema (z.B. EUCC) auf Stufe "high"</td><td>delegierter Rechtsakt der Kommission</td></tr>'
+            + '</tbody></table>'
+            + '<p><strong>Art. 13</strong> definiert die Pflichten der Hersteller: Cybersicherheit "by design and by default", Vulnerability Management ueber den gesamten <em>Support Period</em> (mindestens 5 Jahre, sofern Lebensdauer kuerzer entsprechend), kostenlose Sicherheits-Updates, technische Dokumentation, Konformitaetsbewertung, CE-Kennzeichnung, SBOM-Pflege.</p>'
+            + '<p><strong>Art. 14</strong> enthaelt die Meldepflichten: aktiv ausgenutzte Schwachstellen <strong>innerhalb 24 h</strong> als Frueh-Hinweis an ENISA und nationale CSIRT, <strong>72 h</strong>-Vorfallmeldung, Abschlussbericht innerhalb 14 Tage nach Bereitstellung der Sicherheitsmassnahme.</p>'
+
+            + '<h4>5.3.6 Nationale Umsetzung in Deutschland</h4>'
+            + '<ul>'
+            + '<li><strong>BSI-Gesetz (BSIG)</strong> i.V.m. <strong>BSI-Kritisverordnung (BSI-KritisV)</strong> regelt KRITIS-Betreiber.</li>'
+            + '<li><strong>IT-Sicherheitsgesetz 2.0 (IT-SiG 2.0, 2021)</strong> erweitert auf "Unternehmen im besonderen oeffentlichen Interesse" (UBI).</li>'
+            + '<li><strong>NIS2UmsuCG</strong>: Umsetzungsgesetz NIS2 in DE (Stand Mai 2025: parlamentarisches Verfahren noch nicht abgeschlossen, Frist 17.10.2024 wurde national verfehlt; EU-Vertragsverletzungsverfahren laufen).</li>'
+            + '<li>KRITIS-Sektoren in DE: Energie, Wasser, Ernaehrung, IT/TK, Gesundheit, Finanz/Versicherung, Transport/Verkehr, Siedlungsabfallentsorgung, Staat/Verwaltung, Medien/Kultur (KritisDachG-Entwurf 2024).</li>'
+            + '</ul>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: Richtlinie (EU) 2022/2555 (NIS2, ABl. L 333 vom 27.12.2022); Verordnung (EU) 2024/2847 (CRA, ABl. L vom 20.11.2024); BSI-Gesetz; BSI-KritisV (2021); IT-SiG 2.0 (Bundesgesetzblatt 2021 Teil I Nr. 25); ENISA Threat Landscape 2024; ENISA NIS2 Implementing Acts (Sektor-Schwellenwerte, 2024).</em></p>'
+    };
+
+    const PAGE_RISK_SCORING = {
+        title: '5.4 Risiko-Bewertung — CVSS v4.0, EPSS, KEV, FAIR, OCTAVE Allegro',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) den Aufbau von CVSS v4.0 erklaeren und gegen v3.1 abgrenzen, (2) EPSS und KEV als komplementaere Datenquellen einordnen, (3) den FAIR-Faktor-Baum aufstellen, (4) OCTAVE Allegro als asset-zentrierte Methode beschreiben, (5) ISO 31000:2018 Prinzipien wiedergeben.</blockquote>'
+
+            + '<h4>5.4.1 CVSS v4.0 (FIRST, November 2023)</h4>'
+            + '<p>Common Vulnerability Scoring System v4.0 ersetzt v3.1 (Juni 2019). Vier Metric-Gruppen:</p>'
+            + '<table><thead><tr><th>Gruppe</th><th>Inhalt</th><th>Pflicht?</th></tr></thead><tbody>'
+            + '<tr><td><strong>Base</strong></td><td>technische Eigenschaften der Schwachstelle, zeitlich invariant</td><td>ja</td></tr>'
+            + '<tr><td><strong>Threat</strong></td><td>aktuelle Exploit-Verfuegbarkeit (Exploit Maturity)</td><td>optional</td></tr>'
+            + '<tr><td><strong>Environmental</strong></td><td>organisations-spezifische Anpassung (Asset-Wert, kompensierende Controls)</td><td>optional</td></tr>'
+            + '<tr><td><strong>Supplemental</strong></td><td>Zusatz-Information (Safety, Recovery, Provider Urgency, Automatable, ...) — beeinflusst <em>nicht</em> den Score</td><td>optional</td></tr>'
+            + '</tbody></table>'
+            + '<p>Score-Varianten: <strong>CVSS-B</strong> (nur Base), <strong>CVSS-BT</strong> (Base+Threat), <strong>CVSS-BE</strong> (Base+Environmental), <strong>CVSS-BTE</strong> (alle drei). Empfehlung von FIRST: <em>nicht</em> nur den Base-Score zur Priorisierung verwenden.</p>'
+            + '<p>Wichtige Aenderungen zu v3.1:</p>'
+            + '<ul>'
+            + '<li>Neue Base-Metrik <strong>Attack Requirements (AT)</strong> ergaenzt Attack Complexity (AC).</li>'
+            + '<li>Aufspaltung von Impact in <strong>Vulnerable System Impact (VC/VI/VA)</strong> und <strong>Subsequent System Impact (SC/SI/SA)</strong>.</li>'
+            + '<li><strong>User Interaction (UI)</strong> mit feinerer Skala: None, Passive, Active.</li>'
+            + '<li><em>Scope</em> als Metrik entfaellt (durch VI/VA ↔ SI/SA-Trennung modelliert).</li>'
+            + '<li><em>Temporal</em>-Gruppe in <strong>Threat</strong> umbenannt; Remediation Level und Report Confidence entfallen.</li>'
+            + '</ul>'
+            + '<p>Severity-Bands wie in v3.1 unveraendert: 0.0 None, 0.1-3.9 Low, 4.0-6.9 Medium, 7.0-8.9 High, 9.0-10.0 Critical.</p>'
+
+            + '<h4>5.4.2 EPSS — Exploit Prediction Scoring System</h4>'
+            + '<p>FIRST EPSS Special Interest Group; aktuelles Modell <strong>v3</strong> (2023). EPSS liefert pro CVE eine Wahrscheinlichkeit zwischen 0 und 1, dass die Schwachstelle <strong>innerhalb der naechsten 30 Tage in freier Wildbahn ausgenutzt</strong> wird. Datenquellen: NVD, GreyNoise, AlienVault OTX, Honeypots, Exploit-DBs, Twitter/X-Mentions, GitHub-Trends. Modell: Gradient-Boosted-Trees mit zeitlich gewichteten Features. EPSS-Score und CVSS sind <strong>nicht redundant</strong>: CVSS misst Schwere, EPSS misst Wahrscheinlichkeit.</p>'
+
+            + '<h4>5.4.3 CISA KEV-Katalog</h4>'
+            + '<p>Cybersecurity and Infrastructure Security Agency (CISA, USA) pflegt seit November 2021 den <strong>Known Exploited Vulnerabilities Catalog</strong>. Aufnahmekriterien: (1) zugewiesene CVE, (2) glaubwuerdige Belege fuer aktive Ausnutzung, (3) klare Mitigation (Patch, Workaround). Grundlage ist <strong>Binding Operational Directive (BOD) 22-01</strong>: US-Bundesbehoerden muessen KEV-gelistete CVEs binnen vorgegebener Fristen patchen. KEV ergaenzt EPSS um Felddaten zu <em>tatsaechlich</em> ausgenutzten Schwachstellen.</p>'
+            + '<p>Empfohlene Triage-Logik (CISA "Stakeholder-Specific Vulnerability Categorization", SSVC): Entscheidung anhand von <em>Exploitation Status</em>, <em>Technical Impact</em>, <em>Automatable</em>, <em>Mission Prevalence</em>.</p>'
+
+            + '<h4>5.4.4 FAIR — Factor Analysis of Information Risk</h4>'
+            + '<p>Open Group "Open FAIR Body of Knowledge" (Edition 2024) standardisiert die quantitative, monetaere Risikoanalyse. Grundgleichung:</p>'
+            + '<p><strong>Risk = Loss Event Frequency (LEF) &times; Loss Magnitude (LM)</strong></p>'
+            + '<p>Faktor-Baum (verkuerzt):</p>'
+            + '<ul>'
+            + '<li><em>LEF</em> &larr; Threat Event Frequency (TEF) &times; Vulnerability (Vuln)</li>'
+            + '<li><em>TEF</em> &larr; Contact Frequency &times; Probability of Action</li>'
+            + '<li><em>Vuln</em> &larr; Threat Capability vs. Resistance Strength</li>'
+            + '<li><em>LM</em> &larr; Primary Loss + Secondary Loss (Productivity, Response, Replacement, Fines &amp; Judgments, Competitive Advantage, Reputation)</li>'
+            + '</ul>'
+            + '<p>FAIR liefert Verteilungen (Min, Most-Likely, Max), die ueber <strong>Monte-Carlo-Simulation</strong> aggregiert werden &mdash; Output: Loss-Exceedance-Curve in Geldeinheiten.</p>'
+
+            + '<h4>5.4.5 OCTAVE Allegro</h4>'
+            + '<p>Caralli, Stevens, Young, Wilson, CMU/SEI-2007-TR-012 (2007). Eine schlanke, asset-zentrierte, qualitative Methode, die in 8 Schritten 4 Phasen abdeckt:</p>'
+            + '<ol>'
+            + '<li>Risikomesskriterien aufstellen (Reputation, Finanz, Produktivitaet, Sicherheit, Recht).</li>'
+            + '<li>Informations-Assets profilieren.</li>'
+            + '<li>Information Asset Container identifizieren (technical, physical, people).</li>'
+            + '<li>Bedrohungs-Szenarien (Areas of Concern) entwickeln.</li>'
+            + '<li>Bedrohungs-Baum verfeinern.</li>'
+            + '<li>Risiken identifizieren.</li>'
+            + '<li>Risiken analysieren (Impact-Bewertung gegen Risikomesskriterien).</li>'
+            + '<li>Mitigation auswaehlen (Mitigate, Defer, Accept, Transfer).</li>'
+            + '</ol>'
+            + '<p>Im Vergleich: <em>FAIR</em> ist quantitativ-monetaer und eignet sich fuer Top-Management-Berichte; <em>OCTAVE Allegro</em> ist qualitativ und eignet sich fuer KMU sowie als Workshop-Format.</p>'
+
+            + '<h4>5.4.6 ISO 31000:2018 — Risk Management Principles</h4>'
+            + '<p>Generische Risikomanagement-Norm (kein zertifizierungsfaehiges Managementsystem). Kernaussagen:</p>'
+            + '<ul>'
+            + '<li><strong>Acht Prinzipien</strong>: Integrated, Structured and comprehensive, Customized, Inclusive, Dynamic, Best available information, Human and cultural factors, Continual improvement.</li>'
+            + '<li><strong>Framework</strong>: Leadership and commitment, Integration, Design, Implementation, Evaluation, Improvement.</li>'
+            + '<li><strong>Process</strong>: Communication and consultation, Scope/Context/Criteria, Risk assessment (Identification &rarr; Analysis &rarr; Evaluation), Risk treatment, Monitoring and review, Recording and reporting.</li>'
+            + '</ul>'
+            + '<p>ISO 31000 ist die methodische Klammer; <strong>ISO/IEC 27005:2022</strong> ist die fachliche Konkretisierung fuer Informations-Sicherheit; <strong>IEC 31010:2019</strong> liefert Methoden-Katalog (Bow-Tie, FMEA, HAZOP, Monte Carlo, Delphi, ...).</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: FIRST CVSS v4.0 Specification (Nov. 2023); FIRST CVSS v3.1 (Jun. 2019); FIRST EPSS Model v3 (2023); CISA Binding Operational Directive 22-01 (3.11.2021) und KEV-Katalog (laufend); CISA SSVC Decision Tree (2022); Open Group "Open FAIR Body of Knowledge" Ed. 2024 (Standards O-RT, O-RA); Caralli et al. CMU/SEI-2007-TR-012 (OCTAVE Allegro); ISO 31000:2018; IEC 31010:2019.</em></p>'
+    };
+
+    const QUIZ_RISK = [
+        // -- ISO/IEC 27001:2022 (10) --
+        q('Wie viele Controls enthaelt der Anhang A der ISO/IEC 27001:2022?',
+            ['93', '114', '133', '88'], 0,
+            'ISO/IEC 27001:2022 Anhang A bzw. ISO/IEC 27002:2022: 93 Controls — Reduktion gegenueber 114 in der 2013er-Fassung durch Konsolidierung.'),
+        q('In welche vier Themengruppen sind die Controls in ISO/IEC 27002:2022 unterteilt?',
+            ['Organizational, People, Physical, Technological',
+             'Preventive, Detective, Corrective, Recovery',
+             'Identify, Protect, Detect, Respond',
+             'Confidentiality, Integrity, Availability, Authenticity'], 0,
+            'ISO/IEC 27002:2022 §5-§8: A.5 Organizational (37), A.6 People (8), A.7 Physical (14), A.8 Technological (34).'),
+        q('Welches Dokument der ISO 27001 listet alle Anhang-A-Controls inkl. Begruendung der Auswahl bzw. Ausschluesse?',
+            ['Statement of Applicability (SoA)',
+             'Risk Treatment Plan',
+             'Risk Register',
+             'Information Security Policy'], 0,
+            'ISO/IEC 27001:2022 Klausel 6.1.3 d): SoA dokumentiert Anwendbarkeit, Begruendung und Implementationsstatus jedes Annex-A-Controls.'),
+        q('Welcher der folgenden Controls ist in der 2022er-Fassung NEU?',
+            ['A.5.7 Threat intelligence',
+             'A.5.1 Information security policies',
+             'A.6.1 Screening',
+             'A.8.1 User end point devices'], 0,
+            'ISO/IEC 27002:2022 fuehrt 11 neue Controls ein, u.a. A.5.7 Threat intelligence und A.8.28 Secure coding.'),
+        q('Wie viele Attribute ordnet ISO/IEC 27002:2022 jedem Control zu?',
+            ['Fuenf (Control type, IS properties, Cybersecurity concepts, Operational capabilities, Security domains)',
+             'Drei (CIA)',
+             'Vier (Plan, Do, Check, Act)',
+             'Zwei (Pflicht, Optional)'], 0,
+            'ISO/IEC 27002:2022 §4.2: jedes Control hat fuenf Attribute zur flexiblen Filterung/Sicht.'),
+        q('Welche der folgenden ist KEINE der vier Risikobehandlungs-Optionen nach ISO/IEC 27001:2022 / 27005:2022?',
+            ['Ignore', 'Modify (Mitigate)', 'Retain (Accept)', 'Avoid'], 0,
+            'ISO 27005:2022 §10: Modify, Retain, Avoid, Share. "Ignore" ist keine zulaessige Option — Risiken muessen formell behandelt oder akzeptiert werden.'),
+        q('Welche Pflicht-Klauseln muss eine ISO-27001:2022-konforme Organisation umsetzen?',
+            ['4 bis 10', '1 bis 10', '5 bis 12', 'nur Anhang A'], 0,
+            'ISO/IEC 27001:2022 Klauseln 4-10 sind verbindlich; Klauseln 1-3 sind Einleitung/Normverweise/Begriffe.'),
+        q('Wer ist nach ISO 27001 verpflichtet, das Restrisiko (residual risk) formell zu akzeptieren?',
+            ['Risk Owner (Risikoeigner)',
+             'Auditor',
+             'IT-Administrator',
+             'Datenschutzbeauftragter'], 0,
+            'ISO/IEC 27001:2022 Klausel 6.1.3 f) und 8.3: Genehmigung des Risikobehandlungs-Plans und Akzeptanz des Restrisikos durch den Risikoeigner.'),
+        q('Bis wann mussten zertifizierte Organisationen ihre Zertifizierung von ISO/IEC 27001:2013 auf 27001:2022 migrieren?',
+            ['31. Oktober 2025', '31. Dezember 2024', '17. Oktober 2024', 'Sofort (15. Oktober 2022)'], 0,
+            'IAF MD 26 Issue 4: drei-Jahres-Transition, Stichtag 31.10.2025.'),
+        q('Welche der folgenden ist KEINE Pflicht-Eingabe in das Management Review nach ISO 27001:2022 Klausel 9.3.2?',
+            ['Anzahl der entwickelten Source-Code-Zeilen',
+             'Status frueherer Massnahmen',
+             'Audit-Ergebnisse',
+             'Erfuellung der IS-Ziele'], 0,
+            'Klausel 9.3.2 listet u.a. Massnahmen-Status, externe/interne Aenderungen, Stakeholder-Feedback, Risiko-Ergebnisse, IS-Ziel-Erfuellung, Auditergebnisse — Codezeilen sind nicht relevant.'),
+
+        // -- BSI IT-Grundschutz (8) --
+        q('Welcher BSI-Standard beschreibt die IT-Grundschutz-Methodik mit den drei Vorgehensweisen Basis/Standard/Kern-Absicherung?',
+            ['BSI 200-2', 'BSI 200-1', 'BSI 200-3', 'BSI 200-4'], 0,
+            'BSI-Standard 200-2 (IT-Grundschutz-Methodik) definiert die drei Vorgehensweisen.'),
+        q('Welcher BSI-Standard liefert die vereinfachte Risikoanalyse fuer Schutzbedarf "hoch" oder "sehr hoch"?',
+            ['BSI 200-3', 'BSI 200-1', 'BSI 200-2', 'BSI 200-4'], 0,
+            'BSI-Standard 200-3 (Risikoanalyse auf Basis IT-Grundschutz) wird ueber die Standard-Anforderungen hinaus aktiviert, wenn Schutzbedarf hoch/sehr hoch ist.'),
+        q('Welcher BSI-Standard adressiert Business Continuity Management und ersetzt BSI 100-4?',
+            ['BSI 200-4 (2023)', 'BSI 200-1', 'BSI 200-2', 'BSI 100-3'], 0,
+            'BSI-Standard 200-4 BCM (April 2023, kompatibel zu ISO 22301) ersetzt 100-4 von 2009.'),
+        q('Wie viele Schutzbedarfskategorien definiert die BSI-Schutzbedarfsfeststellung?',
+            ['Drei (normal, hoch, sehr hoch)',
+             'Vier (gering, normal, hoch, sehr hoch)',
+             'Fuenf (1-5)',
+             'Zwei (kritisch, nicht-kritisch)'], 0,
+            'BSI-Standard 200-2: drei Kategorien je Schutzziel — normal, hoch, sehr hoch.'),
+        q('Welcher Vererbungseffekt liegt vor, wenn der Schutzbedarf eines Servers hoeher ausfaellt, weil viele normal-schutzbeduerftige Anwendungen auf ihm laufen?',
+            ['Kumulationseffekt',
+             'Maximumprinzip',
+             'Verteilungseffekt',
+             'Aggregationsprivileg'], 0,
+            'BSI 200-2: Kumulationseffekt — Akkumulation vieler "normaler" Werte ergibt insgesamt einen hoeheren Schutzbedarf.'),
+        q('Welche Bausteinschicht des IT-Grundschutz-Kompendiums adressiert industrielle IT (OT)?',
+            ['IND', 'SYS', 'NET', 'INF'], 0,
+            'IT-Grundschutz-Kompendium Edition 2024: Schicht IND (industrielle IT) bildet OT-spezifische Anforderungen ab, oft im Verbund mit IEC 62443.'),
+        q('Auf welcher Bausteinschicht liegen Anforderungen an Anwendungen?',
+            ['APP', 'SYS', 'OPS', 'CON'], 0,
+            'Schichten: ISMS, ORP, CON, OPS, DER, APP (Anwendungen), SYS (IT-Systeme), IND, NET, INF.'),
+        q('Welche Aussage zum Verhaeltnis BSI Grundschutz und ISO 27001 ist korrekt?',
+            ['Eine Zertifizierung "ISO 27001 auf Basis IT-Grundschutz" ist beim BSI moeglich',
+             'BSI Grundschutz ersetzt ISO 27001 international',
+             'BSI Grundschutz ist mit ISO 27001 inkompatibel',
+             'ISO 27001 ist eine Untermenge von BSI Grundschutz'], 0,
+            'BSI bietet das Zertifizierungsschema "ISO 27001 auf Basis IT-Grundschutz" — Standard-Absicherung erfuellt 27001-Anforderungen.'),
+
+        // -- ISO/IEC 27005:2022 (5) --
+        q('Welche Reihenfolge gibt ISO/IEC 27005:2022 fuer die Risikoeinschaetzung vor?',
+            ['Risk Identification → Risk Analysis → Risk Evaluation',
+             'Risk Treatment → Risk Identification → Risk Acceptance',
+             'Risk Avoidance → Risk Mitigation → Risk Acceptance',
+             'PDCA → Audit → Review'], 0,
+            'ISO/IEC 27005:2022 §7-§9: Identification, Analysis, Evaluation als drei aufeinanderfolgende Schritte.'),
+        q('Was ist nach ISO 27005:2022 der Unterschied zwischen "asset-based" und "event-based" Risk Identification?',
+            ['Asset-based: Werte→Bedrohungen→Schwachstellen; Event-based: Szenarien zentral',
+             'Asset-based: nur quantitativ; Event-based: nur qualitativ',
+             'Asset-based: nur fuer KMU; Event-based: nur fuer Konzerne',
+             'Asset-based: nur Hardware; Event-based: nur Software'], 0,
+            'ISO/IEC 27005:2022 §7.2: zwei zulaessige Ansaetze, mischbar; "asset-based" startet bei Werten, "event-based" bei Szenarien/Ereignissen.'),
+        q('Welche Methode ist KEINE explizite Risikobehandlungs-Option nach ISO 27005:2022?',
+            ['Outsourcing der Verantwortung an den Anwender',
+             'Modify (Mitigate)',
+             'Avoid (Vermeiden)',
+             'Share (Transfer/Versicherung)'], 0,
+            'ISO 27005:2022 §10: Modify, Retain, Avoid, Share — Verantwortung kann nicht an den Endnutzer abgewaelzt werden.'),
+        q('Wie wird das Risiko-Niveau in einer qualitativen Analyse typischerweise gebildet?',
+            ['Likelihood × Consequence (z.B. Skalen 1-5)',
+             'Asset-Wert × Anzahl Mitarbeiter',
+             'CVSS × EPSS',
+             'CVE-Nummer modulo 100'], 0,
+            'ISO 27005:2022 §8: Likelihood und Consequence werden zu einem Risk-Level kombiniert (Matrix oder Multiplikation).'),
+        q('Was bezeichnet ISO 27005:2022 als "Residual Risk"?',
+            ['Das nach Risikobehandlung verbleibende Risiko',
+             'Das urspruengliche Brutto-Risiko',
+             'Risiken, die ignoriert werden duerfen',
+             'Risiken aus alten Risikoregistern'], 0,
+            'Residual Risk = Restrisiko nach Anwendung der Risikobehandlungs-Massnahmen; muss vom Risikoeigner akzeptiert werden.'),
+
+        // -- ISO 31000:2018 (3) --
+        q('Wie viele Prinzipien definiert ISO 31000:2018 fuer das Risikomanagement?',
+            ['Acht', 'Sechs', 'Zehn', 'Zwoelf'], 0,
+            'ISO 31000:2018 §4: acht Prinzipien (Integrated, Structured and comprehensive, Customized, Inclusive, Dynamic, Best available information, Human and cultural factors, Continual improvement).'),
+        q('Welche Norm ist NICHT zertifizierungsfaehig (kein Managementsystem-Standard)?',
+            ['ISO 31000:2018', 'ISO/IEC 27001:2022', 'ISO 22301:2019', 'ISO 9001:2015'], 0,
+            'ISO 31000 gibt Leitlinien (Guidelines) und ist explizit nicht zertifizierungsfaehig — anders als 27001/22301/9001.'),
+        q('Welche Norm liefert einen Methoden-Katalog (Bow-Tie, FMEA, HAZOP, Monte Carlo, Delphi, ...) als Ergaenzung zu ISO 31000?',
+            ['IEC 31010:2019', 'ISO/IEC 27005:2022', 'ISO 22301:2019', 'ISO 19011:2018'], 0,
+            'IEC 31010:2019 "Risk management — Risk assessment techniques" liefert den Methoden-Werkzeugkasten.'),
+
+        // -- NIS2 (EU 2022/2555) (8) --
+        q('Bis wann mussten die EU-Mitgliedstaaten die NIS2-Richtlinie in nationales Recht umsetzen?',
+            ['17. Oktober 2024', '16. Januar 2023', '01. Januar 2025', '11. Dezember 2027'], 0,
+            'Richtlinie (EU) 2022/2555 Art. 41: Umsetzungsfrist 17.10.2024.'),
+        q('Welche Klassen von Einrichtungen unterscheidet NIS2?',
+            ['Wesentliche (essential) und wichtige (important)',
+             'Kritische und nicht-kritische',
+             'Anhang I, II und III',
+             'Klein, mittel, gross'], 0,
+            'NIS2 Art. 3: zwei Kategorien — wesentliche (Annex I + Groesse, oder unabhaengig von Groesse fuer ausgewaehlte Sektoren) und wichtige Einrichtungen.'),
+        q('Wie viele Sektoren erfasst NIS2 insgesamt (Anhang I + Anhang II)?',
+            ['18', '7', '11', '25'], 0,
+            'NIS2 Anhang I (Sektoren mit hoher Kritikalitaet) + Anhang II (sonstige kritische Sektoren) = 18 Sektoren.'),
+        q('Welche Frist gilt nach NIS2 Art. 23 fuer die Fruehwarnung (early warning) bei einem erheblichen Sicherheitsvorfall?',
+            ['24 Stunden', '72 Stunden', '1 Monat', '6 Stunden'], 0,
+            'Art. 23 Abs. 4 a): Fruehwarnung "unverzueglich, in jedem Fall innerhalb von 24 Stunden".'),
+        q('Welche Frist gilt nach NIS2 fuer die eigentliche Vorfallmeldung (incident notification) mit Erstbewertung?',
+            ['72 Stunden', '24 Stunden', '7 Tage', '14 Tage'], 0,
+            'Art. 23 Abs. 4 b): Vorfallmeldung "unverzueglich und in jedem Fall innerhalb von 72 Stunden".'),
+        q('Welcher Hoechstbetrag fuer Bussgelder gilt nach NIS2 Art. 34 fuer wesentliche Einrichtungen?',
+            ['10 Mio EUR oder 2&nbsp;% des weltweiten Vorjahresumsatzes',
+             '20 Mio EUR oder 4&nbsp;% des weltweiten Vorjahresumsatzes',
+             '5 Mio EUR fest',
+             '500.000 EUR fest'], 0,
+            'NIS2 Art. 34 Abs. 4: max(10 Mio EUR, 2&nbsp;% des weltweiten Vorjahresumsatzes) — der hoehere Wert.'),
+        q('Welche Massnahme ist NICHT explizit in NIS2 Art. 21 als Mindestmassnahme genannt?',
+            ['Werbeanzeigen-Sperre fuer Mitarbeiter',
+             'Risikoanalyse-Konzepte und ISMS-Politik',
+             'Multi-Faktor-Authentisierung',
+             'Lieferketten-Sicherheit'], 0,
+            'Art. 21 Abs. 2 zaehlt 10 Mindestmassnahmen auf; Werbeanzeigen-Sperre gehoert nicht dazu.'),
+        q('Wer haftet nach NIS2 Art. 20 persoenlich fuer die Compliance der Einrichtung?',
+            ['Mitglieder der Geschaeftsleitung (management body)',
+             'Datenschutzbeauftragter',
+             'Externe Berater',
+             'Compliance-Officer ohne Vertretungsmacht'], 0,
+            'Art. 20: Geschaeftsleitung muss Risikomassnahmen genehmigen, Umsetzung ueberwachen, persoenlich haften und Schulungen absolvieren.'),
+
+        // -- CRA (EU 2024/2847) (5) --
+        q('Welche Art von Rechtsakt ist der EU Cyber Resilience Act?',
+            ['Verordnung (direkt geltend)',
+             'Richtlinie (umsetzungspflichtig)',
+             'Empfehlung (unverbindlich)',
+             'Beschluss (Einzelfall)'], 0,
+            'VO (EU) 2024/2847 ist eine Verordnung — direkte Geltung ohne nationale Umsetzung.'),
+        q('Wann gelten die Hauptpflichten des CRA fuer Hersteller von Produkten mit digitalen Elementen?',
+            ['Ab 11. Dezember 2027',
+             'Sofort ab Veroeffentlichung 20.11.2024',
+             'Ab 17. Oktober 2024',
+             'Ab 11. September 2026'], 0,
+            'CRA Art. 71: Hauptpflichten 36 Monate nach Inkrafttreten — 11.12.2027.'),
+        q('Innerhalb welcher Frist muss ein Hersteller nach CRA Art. 14 eine aktiv ausgenutzte Schwachstelle als Frueh-Hinweis an ENISA und CSIRT melden?',
+            ['24 Stunden',
+             '72 Stunden',
+             '7 Tage',
+             '30 Tage'], 0,
+            'CRA Art. 14: Frueh-Hinweis innerhalb 24 h, Vorfallmeldung 72 h, Abschlussbericht 14 Tage nach Bereitstellung der Massnahme.'),
+        q('Welche Pflicht gehoert zu Art. 13 CRA (Pflichten der Hersteller)?',
+            ['Cybersicherheit "by design and by default" inkl. Vulnerability Management ueber den gesamten Support Period',
+             'CE-Kennzeichnung verboten',
+             'Keine Pflicht zur Bereitstellung von Sicherheitsupdates',
+             'Quellcode-Veroeffentlichung verpflichtend'], 0,
+            'Art. 13 CRA: Security-by-design, Vuln-Management ueber den Support Period (typisch &ge;5 Jahre), kostenlose Sicherheits-Updates, technische Doku, SBOM.'),
+        q('Welche Konformitaetsbewertung gilt fuer "Wichtige PDE Klasse II" nach CRA?',
+            ['Notified Body verpflichtend',
+             'Selbstbewertung ohne harmonisierte Norm',
+             'Nur freiwillig',
+             'EU-Cybersicherheitszertifizierung Stufe "high" verpflichtend'], 0,
+            'CRA Anhang III/IV: Klasse II (Hypervisoren, Firewalls, HSMs) erfordert verpflichtend einen Notified Body.'),
+
+        // -- CVSS v4.0 (5) --
+        q('Wann hat FIRST CVSS v4.0 veroeffentlicht?',
+            ['November 2023', 'Juni 2019', 'Maerz 2024', 'Dezember 2021'], 0,
+            'FIRST CVSS v4.0 Specification: Veroeffentlichung 1. November 2023; loest schrittweise v3.1 (Juni 2019) ab.'),
+        q('Welche Metric-Gruppen unterscheidet CVSS v4.0?',
+            ['Base, Threat, Environmental, Supplemental',
+             'Base, Temporal, Environmental',
+             'Base, Threat, Supplemental',
+             'Exploitability, Impact, Scope'], 0,
+            'CVSS v4.0: vier Gruppen — die Temporal-Gruppe wurde in "Threat" umbenannt und um "Supplemental" ergaenzt.'),
+        q('Welche Base-Metric ist NEU in CVSS v4.0 gegenueber v3.1?',
+            ['Attack Requirements (AT)',
+             'Attack Vector (AV)',
+             'Privileges Required (PR)',
+             'Confidentiality Impact (C)'], 0,
+            'CVSS v4.0 fuehrt "Attack Requirements (AT)" ergaenzend zu "Attack Complexity (AC)" ein.'),
+        q('Welche Aussage zur Scope-Metrik in CVSS v4.0 ist korrekt?',
+            ['Sie wurde entfernt; stattdessen unterscheidet v4.0 Vulnerable System Impact (VC/VI/VA) und Subsequent System Impact (SC/SI/SA)',
+             'Sie ist Pflicht und ersetzt Attack Vector',
+             'Sie wurde umbenannt in "Severity"',
+             'Sie kann zwischen 0 und 10 liegen'], 0,
+            'CVSS v4.0: Scope entfaellt; Impact-Trennung in Vulnerable System (VC/VI/VA) und Subsequent System (SC/SI/SA) modelliert das ehemalige Scope-Konzept.'),
+        q('Welche Score-Variante kombiniert Base + Threat + Environmental?',
+            ['CVSS-BTE',
+             'CVSS-B',
+             'CVSS-BT',
+             'CVSS-S'], 0,
+            'Notation der CVSS-v4.0-Spec: B (nur Base), BT (Base+Threat), BE (Base+Env.), BTE (alle drei).'),
+
+        // -- EPSS und KEV (3) --
+        q('Was misst der EPSS-Score?',
+            ['Wahrscheinlichkeit, dass eine CVE in den naechsten 30 Tagen in freier Wildbahn ausgenutzt wird',
+             'Schwere einer Schwachstelle',
+             'Anzahl der betroffenen Systeme weltweit',
+             'CVSS-Score normiert auf 0-1'], 0,
+            'FIRST EPSS Model v3 (2023): Wahrscheinlichkeit der Ausnutzung in den naechsten 30 Tagen, basierend auf u.a. NVD, GreyNoise, Honeypot- und Mention-Daten.'),
+        q('Welche Behoerde pflegt den Known Exploited Vulnerabilities Catalog?',
+            ['CISA (USA)', 'ENISA (EU)', 'BSI (DE)', 'NIST'], 0,
+            'CISA pflegt den KEV-Katalog seit November 2021 (BOD 22-01).'),
+        q('Welche Aussage beschreibt die Komplementaritaet von CVSS, EPSS und KEV korrekt?',
+            ['CVSS misst Schwere, EPSS Wahrscheinlichkeit, KEV liefert Felddaten zu tatsaechlich ausgenutzten Schwachstellen',
+             'Alle drei messen dasselbe (Schwere)',
+             'KEV ist nur eine Untermenge des EPSS',
+             'CVSS ersetzt EPSS und KEV'], 0,
+            'Standard-Triage-Logik: CVSS = Schweregrad; EPSS = Wahrscheinlichkeit; KEV = Beleg fuer aktive Ausnutzung.'),
+
+        // -- FAIR und OCTAVE Allegro (3) --
+        q('Welche Grundgleichung verwendet FAIR fuer das Risiko?',
+            ['Risk = Loss Event Frequency × Loss Magnitude',
+             'Risk = Threat × Asset Value',
+             'Risk = CVSS × EPSS',
+             'Risk = Likelihood + Consequence'], 0,
+            'Open FAIR Body of Knowledge (Open Group, Edition 2024): Risk = LEF × LM.'),
+        q('Welche Methode wird typischerweise zur Aggregation der FAIR-Verteilungen verwendet?',
+            ['Monte-Carlo-Simulation',
+             'Lineare Regression',
+             'Closed-Form-Loesung',
+             'Genetic Algorithms'], 0,
+            'FAIR liefert Min/ML/Max-Verteilungen, die ueber Monte-Carlo-Simulation zur Loss-Exceedance-Curve aggregiert werden.'),
+        q('Welche Charakterisierung trifft auf OCTAVE Allegro zu?',
+            ['Asset-zentriert, qualitativ, 8 Schritte (CMU/SEI 2007)',
+             'Quantitativ-monetaer mit Monte-Carlo (CMU/SEI 2007)',
+             'Bedrohungs-zentriert, basiert auf MITRE ATT&CK',
+             'Compliance-Methode fuer ISO 27001 (BSI 2017)'], 0,
+            'Caralli et al. CMU/SEI-2007-TR-012: OCTAVE Allegro ist asset-zentriert, qualitativ, 8 Schritte in 4 Phasen.')
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_cybersec',
         code: 'MA-ET CyberSec',
@@ -1734,31 +2290,9 @@
             {
                 id: 'risk',
                 title: 'Kapitel 5 — Risikomanagement und Compliance',
-                summary: 'ISO/IEC 27001:2022 ISMS, BSI-Grundschutz, NIS2-Richtlinie (EU 2022/2555), Cyber Resilience Act, Risikoanalyse-Methoden, Audits und Zertifizierung.',
-                pages: [
-                    placeholderPage('ISO/IEC 27001:2022 — ISMS-Aufbau', [
-                        'Plan-Do-Check-Act, Statement of Applicability',
-                        'Anhang A (93 Controls in 4 Themengruppen)',
-                        'Zertifizierungsprozess, interne Audits, Management Review'
-                    ]),
-                    placeholderPage('BSI IT-Grundschutz', [
-                        'Grundschutz-Kompendium 2024, Bausteinkonzept',
-                        'Schutzbedarfsfeststellung, Risikoanalyse',
-                        'Vergleich mit ISO 27001 (Mapping)'
-                    ]),
-                    placeholderPage('Regulatorik EU/DE', [
-                        'NIS2-Richtlinie (EU 2022/2555), Umsetzung in DE 2024-25',
-                        'Cyber Resilience Act (CRA, EU 2024/2847)',
-                        'KRITIS-Verordnung, IT-SiG 2.0',
-                        'EU AI Act (2024/1689) — Schnittmenge mit Security'
-                    ]),
-                    placeholderPage('Quantitative und qualitative Risikoanalyse', [
-                        'OCTAVE, FAIR (Factor Analysis of Information Risk)',
-                        'CVSS v4.0 und CISA KEV-Katalog',
-                        'Risk-Treatment-Optionen und Restrisiko'
-                    ])
-                ],
-                quiz: placeholderQuiz('Risikomanagement und Compliance')
+                summary: 'ISO/IEC 27001:2022 ISMS mit 93 Annex-A-Controls, BSI-Grundschutz Edition 2024, ISO/IEC 27005:2022 und ISO 31000:2018, EU-Regulatorik (NIS2 / CRA / KRITIS), CVSS v4.0, EPSS, CISA KEV, FAIR und OCTAVE Allegro.',
+                pages: [PAGE_RISK_ISMS, PAGE_RISK_BSI_27005, PAGE_RISK_REGULATIONS, PAGE_RISK_SCORING],
+                quiz: QUIZ_RISK
             },
             {
                 id: 'aisec',
