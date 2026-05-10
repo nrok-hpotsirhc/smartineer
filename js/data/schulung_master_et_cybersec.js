@@ -3456,6 +3456,689 @@
         }
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 8 — Incident Response, Forensik und Malware-Analyse (PRODUKTIV)
+    // Quellen: NIST SP 800-61 r2 "Computer Security Incident Handling Guide"
+    // (Aug. 2012, weiterhin gueltige Fassung; Public Draft r3 2024); NIST SP
+    // 800-86 "Guide to Integrating Forensic Techniques into Incident Response"
+    // (2006); NIST SP 800-184 "Guide for Cybersecurity Event Recovery" (2016);
+    // NIST SP 800-83 r1 "Guide to Malware Incident Prevention and Handling"
+    // (2013); ISO/IEC 27035-1:2023, 27035-2:2023, 27035-3:2020; ISO/IEC
+    // 27037:2012, 27041:2015, 27042:2015, 27043:2015 (Forensik-Reihe); MITRE
+    // ATT&CK Enterprise v15 (Apr. 2024) / v16 (Okt. 2024); D3FEND v1.0;
+    // CISA #StopRansomware Guide (Update Okt. 2023); ENISA "Good Practice
+    // Guide for Incident Management" (2023); BSI IT-Grundschutz DER.2.1
+    // (Behandlung von Sicherheitsvorfaellen, 2023); RFC 3227 (Evidence
+    // Collection); SANS DFIR Reading Room; The Pyramid of Pain (Bianco 2013);
+    // Lockheed Martin Cyber Kill Chain (2011); Diamond Model (Caltagirone
+    // et al. 2013); Eckert "IT-Sicherheit" 11. Aufl. 2023, Kap. 13.
+    // ----------------------------------------------------------------------
+
+    const PAGE_IR_LIFECYCLE = {
+        title: '8.1 Incident-Response-Lifecycle (NIST 800-61r2 / ISO 27035)',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die vier Phasen des NIST-IR-Lifecycle benennen und ihre Aktivitaeten den Phasen der ISO/IEC-27035-Reihe zuordnen, (2) den Unterschied zwischen <em>event</em>, <em>alert</em>, <em>incident</em> und <em>breach</em> sauber abgrenzen, (3) ein angemessenes Klassifikationsschema (Severity / Priority) fuer einen konkreten Vorfall ableiten, (4) die Rollen Incident Commander, Scribe, SME und Communications Lead in einem Krisenstab beschreiben, (5) den Wert von Lessons Learned als formalen Phase-4-Output begruenden.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kapitel 5 (ISMS, Risikomanagement nach ISO/IEC 27005:2022), Kapitel 6.4 (AI-Vorfaelle), Grundbegriffe Logging/Monitoring, IT-Grundschutz-Bausteine DER.1 (Detektion) und DER.2.1 (Behandlung von Sicherheitsvorfaellen, BSI 2023).</p>'
+
+            + '<h4>8.1.1 Begriffe und Abgrenzung</h4>'
+            + '<p>NIST SP 800-61r2 definiert ein <em>event</em> als jede beobachtbare Aktion in einem System oder Netzwerk und einen <em>computer security incident</em> als „a violation or imminent threat of violation of computer security policies, acceptable use policies, or standard security practices". ISO/IEC 27035-1:2023 unterscheidet zusaetzlich <em>information security event</em>, <em>information security incident</em> und <em>information security vulnerability</em> und stellt damit Schwachstellenmanagement explizit in den IR-Prozess ein.</p>'
+            + '<table><thead><tr><th>Begriff</th><th>Bedeutung</th><th>Beispiel</th></tr></thead><tbody>'
+            + '<tr><td>Event</td><td>beliebige beobachtbare Aktion</td><td>Login-Erfolg eines Servicekontos</td></tr>'
+            + '<tr><td>Alert</td><td>vom Detektionssystem hervorgehobenes Event</td><td>SIEM-Regel „impossible travel" loest aus</td></tr>'
+            + '<tr><td>Incident</td><td>bestaetigte Policy-Verletzung oder Bedrohung</td><td>kompromittiertes Konto mit nachgewiesener Datenexfiltration</td></tr>'
+            + '<tr><td>Breach</td><td>Incident mit bestaetigter Schutzziel-Verletzung; meldepflichtig gem. DSGVO Art. 33 / NIS-2</td><td>Abfluss personenbezogener Daten an externe IP</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>8.1.2 Die vier Phasen nach NIST SP 800-61r2</h4>'
+            + '<ol>'
+            + '<li><strong>Preparation.</strong> Aufbau des CSIRT/SOC, Runbooks, Werkzeuge (SIEM, EDR, Forensik-Workstation), Kommunikationsplan, Tabletop-Exercises, Asset-Inventar, Baselines. <em>Alles, was vor dem Vorfall passiert</em>.</li>'
+            + '<li><strong>Detection &amp; Analysis.</strong> Auswertung von Indikatoren (Precursor, Indicator), Triage, Scoping, initiale Klassifikation, Beweissicherung. Hier startet der „Incident Clock" und damit Meldefristen (NIS-2: 24 h Early Warning, 72 h Incident Notification, 1 Monat Final Report).</li>'
+            + '<li><strong>Containment, Eradication &amp; Recovery.</strong> Kurzfristige Eindaemmung (Netzsegment isolieren, Konto sperren), gefolgt von Eradikation (Malware entfernen, Persistenz brechen, Patches installieren) und Wiederherstellung aus vertrauenswuerdigen Backups inkl. Monitoring auf Rueckkehr.</li>'
+            + '<li><strong>Post-Incident Activity.</strong> Lessons-Learned-Workshop binnen 2 Wochen, Report (Timeline, Root Cause, IOC-Liste, Empfehlungen), Update von Runbooks/Detektionsregeln, Aufbewahrung der Beweise gemaess Aufbewahrungsrichtlinie.</li>'
+            + '</ol>'
+            + '<p>Wichtig: NIST betont, dass die Phasen <em>iterativ</em> sind — Detection &amp; Analysis kann waehrend Containment erneut aufgerufen werden, wenn neue Artefakte auftauchen (z. B. weitere kompromittierte Hosts).</p>'
+
+            + '<h4>8.1.3 Mapping NIST 800-61r2 ↔ ISO/IEC 27035</h4>'
+            + '<table><thead><tr><th>NIST 800-61r2</th><th>ISO/IEC 27035-1:2023</th></tr></thead><tbody>'
+            + '<tr><td>Preparation</td><td>Plan and Prepare</td></tr>'
+            + '<tr><td>Detection &amp; Analysis</td><td>Detection and Reporting; Assessment and Decision</td></tr>'
+            + '<tr><td>Containment / Eradication / Recovery</td><td>Responses</td></tr>'
+            + '<tr><td>Post-Incident Activity</td><td>Lessons Learnt</td></tr>'
+            + '</tbody></table>'
+            + '<p>ISO/IEC 27035-2:2023 vertieft Plan and Prepare (Rollen, Tools), 27035-3:2020 fokussiert auf ICT Incident Response Operations.</p>'
+
+            + '<h4>8.1.4 Klassifikation und Priorisierung</h4>'
+            + '<p>NIST 800-61r2 §3.2.6 empfiehlt eine Priorisierung anhand von <em>functional impact</em>, <em>information impact</em> und <em>recoverability effort</em>. Eine pragmatische 4-stufige Severity-Matrix (S1 kritisch, S2 hoch, S3 mittel, S4 niedrig) kombiniert beide Achsen mit der Zahl betroffener Assets und der Datensensitivitaet (z. B. PII, Geschaeftsgeheimnisse, OT-Sicherheitsfunktionen).</p>'
+
+            + '<h4>8.1.5 Rollen im Krisenstab</h4>'
+            + '<ul>'
+            + '<li><strong>Incident Commander (IC).</strong> Trifft Entscheidungen, weist Aufgaben zu, kommuniziert mit Geschaeftsleitung. <em>Nicht</em> die Person, die selbst forensisch arbeitet — Fokus auf Steuerung.</li>'
+            + '<li><strong>Scribe.</strong> Fuehrt eine durchgaengige Timeline (UTC), dokumentiert Entscheidungen und ihre Begruendung; entlastet IC und liefert die Grundlage fuer das Phase-4-Reporting.</li>'
+            + '<li><strong>Subject Matter Experts (SME).</strong> Endpoint-/Netzwerk-/Cloud-/OT-Experten; arbeiten in Workstreams.</li>'
+            + '<li><strong>Communications Lead.</strong> Kommuniziert mit Aufsichtsbehoerden (BSI, BfDI), Kunden, Presse; koordiniert mit Rechtsabteilung. Trennung von technischer und externer Kommunikation ist zwingend.</li>'
+            + '</ul>'
+
+            + '<h4>Worked Example: Phishing-induzierter Mailbox-Kompromittierung (BEC)</h4>'
+            + '<p>Ausgangslage: Ein SIEM-Alert meldet „neue Inbox-Rule, die alle Mails von <code>finanz@</code> nach <code>RSS-Feeds</code> verschiebt", auf Konto <code>kfm@firma.de</code>, IP-Anomalie aus Lagos. Phishing-E-Mail vom Vortag bestaetigt.</p>'
+            + '<ol>'
+            + '<li><strong>Detection &amp; Analysis (T+0 bis T+30 min).</strong> Triage: Konto kompromittiert, Inbox-Rule ist klassisches BEC-IOC (MITRE ATT&amp;CK T1564.008). Severity = S2 (hoch): finanzkritischer Workflow betroffen, kein Datenabfluss bestaetigt. IC ernannt, Scribe startet UTC-Timeline.</li>'
+            + '<li><strong>Containment (T+30 min bis T+90 min).</strong> Conditional-Access-Block des Kontos, Sessions invalidieren (Revoke-AzureADUserAllRefreshToken), Inbox-Rule entfernen, MFA-Methoden zuruecksetzen. <em>Kein</em> Passwort-Reset vor Logsicherung — sonst gehen Login-Telemetriedaten verloren.</li>'
+            + '<li><strong>Eradication (T+90 min bis T+6 h).</strong> M365 UAL/Audit-Log fuer 90 Tage exportieren, Mail-Trace, gesendete Mails (besonders an externe Empfaenger) pruefen, ggf. Empfaenger informieren. Phishing-Mail per Defender for Office 365 ZAP zurueckziehen.</li>'
+            + '<li><strong>Recovery (T+6 h bis T+24 h).</strong> Konto reaktivieren (neue MFA-Faktoren, Passwort), 14 Tage erweitertes Monitoring.</li>'
+            + '<li><strong>Post-Incident (T+1 Woche).</strong> Lessons Learned: neue Detektionsregel auf "MailItemsAccessed" ausserhalb Geschaeftszeiten, Phishing-Awareness-Refresh, Number Matching fuer MFA aktivieren, Conditional Access ohne Land/Geraet.</li>'
+            + '</ol>'
+            + '<p>Begruendung: Die Reihenfolge folgt NIST 800-61r2 §3 — erst Scoping (sonst zu enge oder zu weite Containment-Massnahmen), dann reversible vor irreversiblen Massnahmen (Token-Revocation vor Passwort-Reset).</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche zwei Phasen werden in der Praxis am haeufigsten unterschaetzt — und warum verursacht das Folgekosten?</li>'
+            + '<li>Warum ist die strikte Trennung zwischen Incident Commander und technischen Workstream-Leitern wichtig?</li>'
+            + '<li>Wann wird aus einem Incident ein meldepflichtiger Breach im Sinne der DSGVO Art. 33 — und wann zusaetzlich nach NIS-2 Art. 23?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> sofortiges Passwort-Reset bei BEC-Verdacht. <em>Korrekt:</em> erst Logs sichern und Sessions revoken, sonst gehen forensische Spuren verloren.</li>'
+            + '<li><em>Fehler:</em> Containment durch sofortiges Herunterfahren des Servers. <em>Korrekt:</em> Netzwerktrennung statt Power-Off, sonst Verlust fluechtiger Speicher (Order of Volatility, RFC 3227).</li>'
+            + '<li><em>Fehler:</em> Lessons Learned als optionales Nice-to-have. <em>Korrekt:</em> Phase 4 ist Pflicht — ohne sie wiederholt sich derselbe Vorfall mit hoher Wahrscheinlichkeit (Confer. ENISA Good Practice Guide 2023).</li>'
+            + '<li><em>Fehler:</em> Vermischung von Severity (technisch) und Priority (geschaeftlich). <em>Korrekt:</em> Severity beschreibt das Ausmass, Priority die Reaktionsdringlichkeit; ein S3-Vorfall an einem regulierten OT-Asset kann P1 sein.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ein produzierender Mittelstaendler (350 MA, NIS-2-Anwendungsbereich „wichtige Einrichtung") plant erstmals ein formales IR-Programm. Es existieren bereits ein SIEM (Splunk) und ein 8x5-SOC-Retainer eines MSSP. Skizzieren Sie (a) Rollen und Eskalationspfade, (b) die zwei wichtigsten Runbooks fuer die ersten 90 Tage, (c) die Schnittstelle zur Geschaeftsleitung inkl. Meldewegen Richtung BSI nach NIS-2, (d) wie Sie ein Tabletop-Exercise mit messbarem Ergebnis aufsetzen wuerden.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-61 r2 (Aug. 2012), §§2–3; ISO/IEC 27035-1:2023, 27035-2:2023; BSI IT-Grundschutz DER.2.1 (Edition 2023); ENISA „Good Practice Guide for Incident Management" (2023); RFC 3227 „Guidelines for Evidence Collection and Archiving" (2002); MITRE ATT&amp;CK T1564.008 „Hide Artifacts: Email Hiding Rules" (Enterprise v16, 2024); Richtlinie (EU) 2022/2555 (NIS-2), Art. 23.</em></p>'
+    };
+
+    const PAGE_IR_DETECT = {
+        title: '8.2 Detection &amp; Triage: SIEM, EDR, SOAR, MITRE ATT&amp;CK',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die Aufgaben von SIEM, EDR/XDR und SOAR voneinander abgrenzen, (2) MITRE ATT&amp;CK Tactics, Techniques und Sub-Techniques zuordnen und Coverage-Heatmaps lesen, (3) die Pyramid of Pain (Bianco 2013) anwenden, um Detektionsregeln nach Stoer-Wert zu priorisieren, (4) den Unterschied zwischen IOC, IOA und TTP erklaeren, (5) Threat-Intelligence-Feeds (MISP, STIX 2.1, TAXII 2.1) operationell einsetzen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Seite 8.1 (IR-Lifecycle), Kapitel 4 (Netzwerksicherheit, Segmentierung, NDR), Kapitel 6.3 (Logging-Architekturen).</p>'
+
+            + '<h4>8.2.1 Werkzeug-Stack im Ueberblick</h4>'
+            + '<table><thead><tr><th>Klasse</th><th>Hauptaufgabe</th><th>Typische Telemetrie</th></tr></thead><tbody>'
+            + '<tr><td>SIEM</td><td>Korrelation, Langzeitspeicherung, Compliance-Reporting</td><td>Logs (Syslog, WinEventLog, Cloud-Audit, Firewall, IDS)</td></tr>'
+            + '<tr><td>EDR/XDR</td><td>Endpoint-Telemetrie, Verhaltensdetektion, Response-Aktionen</td><td>Prozess-/Datei-/Netzwerk-Events, Memory, USB</td></tr>'
+            + '<tr><td>NDR</td><td>Netzwerk-Verhaltensanalyse</td><td>Flow, DPI, TLS-Metadaten, DNS</td></tr>'
+            + '<tr><td>SOAR</td><td>Orchestrierung, Playbook-Automation, Ticketing</td><td>API-Aufrufe in EDR/SIEM/IAM, Mail, Chat</td></tr>'
+            + '<tr><td>TIP</td><td>Threat-Intelligence-Plattform (z. B. MISP)</td><td>STIX/TAXII-Feeds, IOC-Listen</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>8.2.2 IOC, IOA, TTP — und die Pyramid of Pain</h4>'
+            + '<p>Bianco (2013) ordnet Detektionsartefakte nach dem Aufwand, den ein Angreifer hat, um sie zu aendern:</p>'
+            + '<ol>'
+            + '<li>Hash-Werte (trivial zu aendern)</li>'
+            + '<li>IP-Adressen (einfach)</li>'
+            + '<li>Domain-Namen (laestig)</li>'
+            + '<li>Netz-/Host-Artefakte (annoying)</li>'
+            + '<li>Tools (challenging)</li>'
+            + '<li>Tactics, Techniques &amp; Procedures — TTPs (tough)</li>'
+            + '</ol>'
+            + '<p>Folgerung: Detektionsregeln, die TTPs treffen (z. B. „LSASS-Speicherzugriff durch unbekannten Prozess" als Indikator fuer Credential Dumping, ATT&amp;CK T1003.001), wirken laenger als IOC-Listen. <em>Indicator of Compromise</em> (IOC) ist beobachtungsbasiert (war kompromittiert), <em>Indicator of Attack</em> (IOA) verhaltensbasiert (wird gerade angegriffen).</p>'
+
+            + '<h4>8.2.3 MITRE ATT&amp;CK in der Praxis</h4>'
+            + '<p>ATT&amp;CK Enterprise v16 (Okt. 2024) listet 14 Tactics (Reconnaissance bis Impact) und mehrere hundert Techniques/Sub-Techniques. Anwendung im SOC:</p>'
+            + '<ul>'
+            + '<li><strong>Coverage-Heatmap.</strong> Jede Detektionsregel und jeder Datenquellen-Onboarding-Zustand wird auf eine ATT&amp;CK-Technik gemappt; Luecken werden sichtbar.</li>'
+            + '<li><strong>Threat-informed Defense.</strong> Threat-Intel-Reports (z. B. CISA-Advisories) liefern TTPs gegnerischer Gruppen — die SOC-Strategie priorisiert deren Coverage.</li>'
+            + '<li><strong>Atomic Red Team / Caldera.</strong> Validierung der Detektion durch reproduzierbare Test-Prozeduren.</li>'
+            + '</ul>'
+            + '<p>D3FEND v1.0 (NSA-gefoerdert, MITRE) ergaenzt ATT&amp;CK um eine <em>defensive</em> Ontologie (Detect, Isolate, Deceive, Evict, Restore) und mappt Counter-Measures auf Techniques.</p>'
+
+            + '<h4>8.2.4 Threat Intelligence: STIX 2.1 und TAXII 2.1</h4>'
+            + '<p>STIX 2.1 (OASIS, Juni 2021) beschreibt CTI als typisierte Objekte (Indicator, Malware, Threat-Actor, Campaign, Attack-Pattern, Course-of-Action) mit Relationships (z. B. <code>indicates</code>, <code>uses</code>, <code>attributed-to</code>). TAXII 2.1 ist das HTTPS-/JSON-Protokoll fuer den Austausch (Collections, Channels). MISP (Malware Information Sharing Platform) ist die de-facto-Open-Source-TIP in EU-CSIRT-Communities (FIRST/CSIRTs Network).</p>'
+
+            + '<h4>8.2.5 Detection Engineering: Sigma und der Detection-as-Code-Ansatz</h4>'
+            + '<p>Sigma ist ein generisches YAML-Format fuer SIEM-Regeln, das in Splunk-SPL, Elastic-EQL/ES|QL, MS Sentinel-KQL, QRadar-AQL etc. uebersetzt wird. Detection-as-Code bedeutet: Regeln im Git, Code-Review, automatisiertes Testen mit Atomic Red Team, CI/CD-Pipeline fuer Deployment in das SIEM. Vorteil: Reproduzierbarkeit, Versionierung, Coverage-Reporting.</p>'
+
+            + '<h4>Worked Example: Triage eines EDR-Alerts „Suspicious LSASS Access"</h4>'
+            + '<p>Alert: <code>WerFault.exe</code> liest Speicher von <code>lsass.exe</code> auf Workstation <code>WS-7421</code>. ATT&amp;CK-Technik: T1003.001 (OS Credential Dumping: LSASS Memory).</p>'
+            + '<ol>'
+            + '<li><strong>False-Positive-Check (T+0 bis T+5 min).</strong> Gibt es einen passenden Crash? Liegt eine <code>.wer</code>-Datei in <code>%LOCALAPPDATA%\\CrashDumps</code> mit korrelierender Zeit? In diesem Fall: <em>nein</em>.</li>'
+            + '<li><strong>Kontext (T+5 bis T+15 min).</strong> Parent-Prozess von <code>WerFault</code>? Hier <code>cmd.exe</code> ohne korrespondierende User-Interaktion — ATT&amp;CK T1036.005 (Masquerading: Match Legitimate Name or Location). EDR liefert die Kommandozeile <code>WerFault -u -p &lt;PID lsass&gt; -s 1</code>: bekanntes Living-off-the-Land-Muster (LOLBAS).</li>'
+            + '<li><strong>Scoping (T+15 bis T+45 min).</strong> Welcher Benutzer? Welches Konto wurde verwendet? Anmeldungen mit dem gleichen Hash auf weiteren Hosts (Pass-the-Hash, T1550.002)?</li>'
+            + '<li><strong>Containment.</strong> Host isolieren (EDR Network-Containment), Konto sperren, Hash-IOC ueber XDR pivotieren.</li>'
+            + '<li><strong>Eskalation in Phase 8.1.2.</strong> S2-Incident-Bestaetigung; Forensik-Workstream startet Memory-Dump (siehe 8.3).</li>'
+            + '</ol>'
+            + '<p>Begruendung: Die Reihenfolge folgt dem Prinzip „cheapest checks first" — False-Positive-Filter vor teurem Forensik-Setup; gleichzeitig wird Containment erst nach Mini-Scoping ausgeloest, um Lateral Movement nicht zu uebersehen.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Warum sind Hash-basierte Regeln didaktisch sinnvoll, operationell aber niedrig priorisiert?</li>'
+            + '<li>Welche STIX-2.1-Objekttypen sind fuer eine Ransomware-Kampagne typischerweise relevant — und wie sind sie verknuepft?</li>'
+            + '<li>Wann liefert SOAR einen Mehrwert — und wann ist Automatisierung gefaehrlich?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Sigma-Regeln direkt im SIEM-UI editieren, ohne Versionierung. <em>Korrekt:</em> Detection-as-Code mit Git, PR-Review, CI-Tests gegen Atomic Red Team.</li>'
+            + '<li><em>Fehler:</em> alle ATT&amp;CK-Techniques gleichzeitig adressieren wollen. <em>Korrekt:</em> Threat-informed Defense — von tatsaechlichen Bedrohungsakteuren ausgehen (Sektoren, Geografie, CISA-Advisories).</li>'
+            + '<li><em>Fehler:</em> Verwechseln von „Datenquelle vorhanden" mit „Detektion vorhanden". <em>Korrekt:</em> Coverage misst sich an validierten Regeln, nicht am Onboarding-Status.</li>'
+            + '<li><em>Fehler:</em> IOC-Feeds blind als Block-Listen verwenden. <em>Korrekt:</em> Konfidenz, Quelle und Alterung beruecksichtigen; STIX-<code>confidence</code>- und <code>valid_until</code>-Felder respektieren.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ihr SOC erhaelt einen FIRST-/CSIRT-Bericht zu einer Ransomware-Gruppe „RansomX", die in den letzten 90 Tagen mittelstaendische Industrie in DACH angegriffen hat. Bekannte TTPs: Initial Access via Cisco-VPN-CVE, dann AdFind-Recon, dann Cobalt Strike, dann Ablage von <code>locker.exe</code> via SMB. Skizzieren Sie ein 5-Punkte-Detektionsprogramm: (1) ATT&amp;CK-Mapping, (2) konkrete Datenquellen, (3) drei Sigma-Regel-Ideen mit ATT&amp;CK-IDs, (4) Validierung via Atomic Red Team, (5) SOAR-Playbook fuer den ersten True-Positive.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: MITRE ATT&amp;CK Enterprise v15 (Apr. 2024) und v16 (Okt. 2024); MITRE D3FEND v1.0 (2024); Bianco „The Pyramid of Pain" (2013); OASIS STIX Version 2.1 (Juni 2021); OASIS TAXII Version 2.1 (Juni 2021); MISP Project (misp-project.org, 2024); Sigma-Project (github.com/SigmaHQ/sigma, 2024); LOLBAS Project (lolbas-project.github.io, 2024); CISA Joint Advisories (2023–2024).</em></p>'
+    };
+
+    const PAGE_IR_FORENSIK = {
+        title: '8.3 Digitale Forensik: NIST 800-86, ISO 27037–27043, Chain of Custody',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die vier forensischen Phasen Identifikation, Sicherung, Analyse, Praesentation nach NIST SP 800-86 erlaeutern, (2) die ISO/IEC-27037/-27041/-27042/-27043-Reihe und ihre jeweilige Funktion zuordnen, (3) den „Order of Volatility" nach RFC 3227 anwenden, (4) eine Beweissicherung mit Hash-Verifikation (SHA-256, doppelt) und nachvollziehbarer Chain of Custody durchfuehren, (5) zwischen <em>live response</em> und <em>dead-box</em>-Forensik begruenden.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Seite 8.1 (IR-Lifecycle), Kapitel 1 (Hash-Funktionen, FIPS 180-4 SHA-256), Grundbegriffe Dateisysteme (NTFS-MFT, ext4-Journal).</p>'
+
+            + '<h4>8.3.1 Forensik-Prozess (NIST SP 800-86)</h4>'
+            + '<ol>'
+            + '<li><strong>Collection.</strong> Identifikation, Beschriftung, Sicherung der Datentraeger; Schreibblocker; Image-Erstellung als Bit-fuer-Bit-Kopie (z. B. <code>dd</code>, <code>dc3dd</code>, <code>ewfacquire</code> nach E01/AFF4).</li>'
+            + '<li><strong>Examination.</strong> Vorbereitung der Daten, Filterung relevanter Artefakte (z. B. Carving via <code>foremost</code>/<code>scalpel</code>, Timeline mit Plaso/log2timeline).</li>'
+            + '<li><strong>Analysis.</strong> Beantwortung der investigativen Fragen (Wer, Was, Wann, Wie); Korrelation von Artefakten (Registry, Event-Logs, Browser-History).</li>'
+            + '<li><strong>Reporting.</strong> Schriftlicher Bericht mit Werkzeugversionen, Hashes, Limitationen; gerichtsfest formuliert.</li>'
+            + '</ol>'
+
+            + '<h4>8.3.2 ISO/IEC 27037 / 27041 / 27042 / 27043</h4>'
+            + '<table><thead><tr><th>Standard</th><th>Fokus</th></tr></thead><tbody>'
+            + '<tr><td>27037:2012</td><td>Identifikation, Sicherstellung, Sicherung, Transport digitaler Beweise</td></tr>'
+            + '<tr><td>27041:2015</td><td>Eignung von Untersuchungsmethoden (Validierung von Tools/Methoden)</td></tr>'
+            + '<tr><td>27042:2015</td><td>Analyse und Interpretation digitaler Beweise</td></tr>'
+            + '<tr><td>27043:2015</td><td>Rahmenwerk fuer Untersuchungsprinzipien und -prozesse</td></tr>'
+            + '</tbody></table>'
+            + '<p>27037 unterscheidet die Rollen DEFR (Digital Evidence First Responder) und DES (Digital Evidence Specialist) — DEFR sichert, DES analysiert.</p>'
+
+            + '<h4>8.3.3 Order of Volatility (RFC 3227)</h4>'
+            + '<p>Bei Live-Systemen wird in absteigender Fluechtigkeit gesammelt:</p>'
+            + '<ol>'
+            + '<li>CPU-Register, Cache</li>'
+            + '<li>Routing-Tabelle, ARP-Cache, Prozesstabelle, Kernel-Statistik, Speicher (RAM)</li>'
+            + '<li>temporaere Dateisysteme</li>'
+            + '<li>Festplatte</li>'
+            + '<li>Remote-Logs, Monitoring-Daten</li>'
+            + '<li>physische Konfiguration, Netzwerktopologie</li>'
+            + '<li>Archiv-Medien (Backups)</li>'
+            + '</ol>'
+            + '<p>Konsequenz: ein RAM-Dump (z. B. WinPMEM, AVML) <em>vor</em> einer Festplatten-Image-Erstellung; ein Power-Off als allererste Massnahme zerstoert Schluesselmaterial im Speicher (Disk-Encryption-Schluessel, Kerberos-Tickets, Mimikatz-relevante LSASS-Strukturen).</p>'
+
+            + '<h4>8.3.4 Chain of Custody und Hash-Verifikation</h4>'
+            + '<p>Jede Beweis-Uebergabe wird in einem Chain-of-Custody-Formular dokumentiert: Datum/Uhrzeit (UTC), uebergebende Person, uebernehmende Person, Beweis-ID, Hash-Werte (mindestens SHA-256, defensiv zusaetzlich SHA-1 oder MD5 fuer Tool-Kompatibilitaet), Aufbewahrungsort. Ein <em>doppeltes Hashing</em> (SHA-256 unmittelbar nach Acquisition und vor jeder Analyse-Sitzung) belegt Unveraenderlichkeit. NIST SP 800-86 §4.2 sowie ISO/IEC 27037 §5.4 verlangen die luegckenlose Dokumentation.</p>'
+            + '<p>Beispiel-Befehl fuer ein Linux-Disk-Image:</p>'
+            + '<p><code>dc3dd if=/dev/sdb of=case-2026-051-disk1.img hash=sha256 hashlog=case-2026-051.hashlog log=case-2026-051.log</code></p>'
+
+            + '<h4>8.3.5 Live Response vs. Dead-Box</h4>'
+            + '<table><thead><tr><th>Aspekt</th><th>Live Response</th><th>Dead-Box</th></tr></thead><tbody>'
+            + '<tr><td>System-Zustand</td><td>laeuft</td><td>ausgeschaltet, Image-basiert</td></tr>'
+            + '<tr><td>Vorteil</td><td>fluechtige Daten erfassbar</td><td>maximale Reproduzierbarkeit</td></tr>'
+            + '<tr><td>Nachteil</td><td>System wird minimal veraendert (Heisenberg-Effekt)</td><td>RAM, Schluessel, Sessions verloren</td></tr>'
+            + '<tr><td>Typischer Fall</td><td>verschluesseltes Volume, aktive Schadsoftware</td><td>klassische Strafverfolgung, abgeschalteter Server</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>8.3.6 Anti-Forensik und Gegenmassnahmen</h4>'
+            + '<p>Angreifer setzen <em>Timestomping</em> (T1070.006), <em>Log-Loeschung</em> (T1070.001), File-less-Techniken (T1059, T1218) und volume-shadow-Tampering ein. Defensive Mittel: Forwarding der Logs (Sysmon → SIEM), Append-only-Speicher (WORM, AWS S3 Object Lock), File-Integrity-Monitoring (Tripwire/AIDE), zentrale Speicherung kryptografischer Hashes.</p>'
+
+            + '<h4>Worked Example: Sicherung eines verdaechtigen Windows-Laptops</h4>'
+            + '<p>Auftrag: forensische Sicherung eines Laptops, der laut EDR Cobalt-Strike-Beacon-Aktivitaet zeigt. Drive ist BitLocker-verschluesselt; Geraet eingeschaltet, Benutzer angemeldet.</p>'
+            + '<ol>'
+            + '<li><strong>Vor-Ort (T+0).</strong> Foto des Bildschirms, Erfassung von Datum/Uhrzeit, Eintrag in Chain of Custody als Beweis E-2026-051-01.</li>'
+            + '<li><strong>RAM-Dump (T+5 min).</strong> WinPMEM &gt; <code>case-051-mem.aff4</code>. SHA-256 berechnen, in Hashlog speichern. Begruendung: Order of Volatility — RAM enthaelt potenziell BitLocker-FVEK, Beacon-Konfiguration, in-memory-Strings.</li>'
+            + '<li><strong>Live-Triage (T+20 min).</strong> Volatility 3 (Plugins <code>windows.pslist</code>, <code>windows.netscan</code>, <code>windows.malfind</code>) auf einer DES-Workstation; Hashes der Volatility-Version dokumentieren.</li>'
+            + '<li><strong>Power-Down (T+45 min).</strong> Hard-Power-Off (Stecker), <em>nicht</em> Shutdown — verhindert Anti-Forensik-Hooks im Shutdown-Pfad.</li>'
+            + '<li><strong>Disk-Image (T+60 min).</strong> Schreibblocker, <code>ewfacquire</code> nach E01 mit SHA-256-Hash-Stream.</li>'
+            + '<li><strong>Verifikation und Asservat.</strong> Doppelter SHA-256-Vergleich vor und nach Transport; Asservat-Box mit Siegel und CoC-Etikett.</li>'
+            + '</ol>'
+            + '<p>Begruendung: RAM vor Disk (RFC 3227), Hard-Power-Off vor Shutdown (Anti-Forensik-Risiken), schreibgeschuetzte Image-Erstellung mit Hash-Stream (ISO/IEC 27037 §5.4 Wiederholbarkeit, NIST SP 800-86 §4.2 Integritaet).</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Warum reicht eine logische Datei-Kopie (z. B. via <code>robocopy</code>) fuer die Strafverfolgung nicht?</li>'
+            + '<li>Welche Konsequenz hat ein vergessener RAM-Dump bei BitLocker-/LUKS-verschluesselten Systemen?</li>'
+            + '<li>Welche Pflichten leitet ISO/IEC 27037 fuer den DEFR ab — und was unterscheidet ihn vom DES?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Original-Datentraeger als Analyse-Medium nutzen. <em>Korrekt:</em> ausschliesslich auf Image arbeiten, Original im Asservat.</li>'
+            + '<li><em>Fehler:</em> nur MD5 als Hash. <em>Korrekt:</em> SHA-256 (FIPS 180-4); MD5 nur zusaetzlich, da kollisionsschwach.</li>'
+            + '<li><em>Fehler:</em> CoC-Eintraege erst nach Abschluss schreiben. <em>Korrekt:</em> jede Uebergabe in Echtzeit dokumentieren — sonst Beweiswert geschwaecht.</li>'
+            + '<li><em>Fehler:</em> Tool-Versionen nicht protokollieren. <em>Korrekt:</em> NIST SP 800-86 §6.4: Werkzeug + Version + Hash; ISO/IEC 27041 fordert Methodenvalidierung.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ihr Unternehmen wird von einem mutmasslich exfiltrierten Datensatz betroffen, der bei einer Ransomware-Leak-Site auftaucht. Sie sollen forensisch (a) den primaeren Initial-Access-Vektor klaeren, (b) Lateral Movement und Privilege Escalation rekonstruieren, (c) die Frage der DSGVO-Meldepflicht (Art. 33) belastbar mit Evidenz beantworten und (d) die Beweisfuehrung gerichtsfest fuer eine moegliche Strafanzeige nach §202c/§303a StGB aufbereiten. Skizzieren Sie die Forensik-Strategie inkl. Tool-Auswahl, Reihenfolge der Massnahmen und Reporting-Struktur.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-86 „Guide to Integrating Forensic Techniques into Incident Response" (2006); ISO/IEC 27037:2012, 27041:2015, 27042:2015, 27043:2015; RFC 3227 (2002); BSI „Leitfaden IT-Forensik" Version 1.0.1 (2011), aktualisiert in BSI-Mindeststandards 2023; SANS DFIR „Windows Forensic Analysis Poster" (2024); Volatility Foundation „Volatility 3" Documentation (volatilityfoundation.org, 2024); Plaso/log2timeline Project (2024); FIPS 180-4 (SHA-256, 2015).</em></p>'
+    };
+
+    const PAGE_IR_MALWARE = {
+        title: '8.4 Malware-Triage und Ransomware-Playbooks',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) statische und dynamische Malware-Triage abgrenzen und mit YARA-Regeln einsetzen, (2) eine sichere Sandbox-Umgebung beschreiben (isoliertes VLAN, Snapshot, Anti-Sandbox-Erkennung), (3) das CISA #StopRansomware-Playbook (Update Okt. 2023) in seinen drei Saeulen anwenden, (4) MITRE-ATT&amp;CK-Mapping fuer typische Ransomware-Kill-Chains aufstellen, (5) die Entscheidung Loesegeld zahlen vs. nicht zahlen unter rechtlichen, oekonomischen und ethischen Aspekten begruenden.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Seite 8.1 bis 8.3, Grundbegriffe PE-/ELF-Header, Verschluesselungsverfahren AES-256-GCM (Kapitel 1), Asymmetrische Krypto (RSA, ECC), Backup-Strategien (3-2-1).</p>'
+
+            + '<h4>8.4.1 Statische Triage</h4>'
+            + '<ul>'
+            + '<li><strong>Header-Analyse.</strong> PE-Header (DOS-Stub, NT-Header, Sections, Imports), ELF-Header, Mach-O. Tools: <code>pefile</code>, <code>readpe</code>, <code>radare2</code>, <code>Detect-It-Easy</code>.</li>'
+            + '<li><strong>Strings.</strong> ASCII/Unicode, URLs, Registry-Keys, Mutex-Namen, PDB-Pfade.</li>'
+            + '<li><strong>Hashing &amp; Imphashing.</strong> SHA-256 (eindeutige Identitaet), Imphash (Cluster verwandter Samples), SSDEEP/TLSH (Fuzzy-Hashing).</li>'
+            + '<li><strong>YARA.</strong> Regelsprache fuer Pattern-Matching; Beispiel-Strukturen siehe 8.4.4.</li>'
+            + '</ul>'
+
+            + '<h4>8.4.2 Dynamische Triage</h4>'
+            + '<p>Ausfuehrung in einer kontrollierten Sandbox (Cuckoo, CAPE, Joe Sandbox, ANY.RUN) mit Beobachtung von API-Calls, Datei-/Registry-Aenderungen, Netzwerk (DNS, HTTP, TLS-Metadaten). Anti-Sandbox-Techniken: Erkennung virtueller CPU-Features, MAC-OUIs, Maus-Inaktivitaet, Sleep-Tarpits — Gegenmassnahme: realistische Sandbox-Persona (echte Hardware, simulierte User-Interaktion).</p>'
+            + '<p><em>Sandbox-Sicherheit ist Pflicht:</em> dediziertes Air-gapped-VLAN, Snapshot-Reset, kein Schreibzugriff auf Produktionsnetze, keine Echt-Daten.</p>'
+
+            + '<h4>8.4.3 Ransomware-Kill-Chain (typisch, ATT&amp;CK-Mapping)</h4>'
+            + '<table><thead><tr><th>Phase</th><th>Beispiel-Technik</th><th>ATT&amp;CK-ID</th></tr></thead><tbody>'
+            + '<tr><td>Initial Access</td><td>Phishing mit ISO/HTM-Smuggling, Exposed RDP, VPN-CVE</td><td>T1566.001 / T1133 / T1190</td></tr>'
+            + '<tr><td>Execution</td><td>PowerShell, Rundll32, Cobalt-Strike-Beacon</td><td>T1059.001 / T1218.011 / T1071</td></tr>'
+            + '<tr><td>Persistence</td><td>Scheduled Task, Run-Key, Service</td><td>T1053.005 / T1547.001 / T1543.003</td></tr>'
+            + '<tr><td>Privilege Escalation</td><td>UAC-Bypass, Token-Manipulation</td><td>T1548.002 / T1134</td></tr>'
+            + '<tr><td>Defense Evasion</td><td>AMSI-Bypass, EDR-Tampering, Log-Clearing</td><td>T1562.001 / T1070.001</td></tr>'
+            + '<tr><td>Credential Access</td><td>LSASS-Dump, DCSync</td><td>T1003.001 / T1003.006</td></tr>'
+            + '<tr><td>Discovery</td><td>AdFind, BloodHound, SoftPerfect NetScan</td><td>T1018 / T1087</td></tr>'
+            + '<tr><td>Lateral Movement</td><td>SMB, WMI, PsExec</td><td>T1021.002 / T1021.006 / T1570</td></tr>'
+            + '<tr><td>Exfiltration</td><td>Rclone, MEGAsync, FTP</td><td>T1567.002 / T1048</td></tr>'
+            + '<tr><td>Impact</td><td>Verschluesselung mit AES-256 + RSA-2048-Wrapping; VSS-Loeschung; Boot-Loader-Manipulation</td><td>T1486 / T1490 / T1491</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>8.4.4 YARA-Beispiel und Einsatz</h4>'
+            + '<p>YARA-Regeln werden zentral im SIEM, EDR (z. B. via Velociraptor) und auf Mail-Gateways eingesetzt. Schluessel-Bestandteile: <code>meta</code> (Autor, Datum, Hash der Referenz-Probe), <code>strings</code> (Ascii/Hex/Regex), <code>condition</code> (Boolesche Logik). Empfohlen: Regeln mit <code>uint16(0) == 0x5A4D</code> (PE-Magic) auf Performance trimmen, falsche Positive durch Whitelisting, Tests gegen Goodware-Korpus.</p>'
+
+            + '<h4>8.4.5 CISA #StopRansomware-Playbook (Update Okt. 2023)</h4>'
+            + '<p>Drei Saeulen:</p>'
+            + '<ol>'
+            + '<li><strong>Preparation.</strong> Offline-/immutable-Backups (3-2-1-1-0-Regel), getrennte Admin-Konten, MFA, Patch-Management, Phishing-Awareness, Tabletop.</li>'
+            + '<li><strong>Response.</strong> Isolation betroffener Systeme (Netzwerk, nicht Power-Off), Forensik-Sicherung, Identifikation der Variante (z. B. ID Ransomware, No More Ransom Project), Wiederherstellung aus Backup, Behoerden-Kontakt (BSI, ZAC, ggf. FBI/IC3).</li>'
+            + '<li><strong>Recovery.</strong> Wiederaufbau auf gesaeuberter Infrastruktur, Tier-0/1/2-Strategie, Ueberwachung auf Wiederbefall (90 Tage), Lessons Learned.</li>'
+            + '</ol>'
+
+            + '<h4>8.4.6 Loesegeld zahlen?</h4>'
+            + '<p>Empfehlung von BSI, CISA, Europol und No More Ransom: <em>nicht zahlen</em>. Begruendung:</p>'
+            + '<ul>'
+            + '<li>keine Garantie fuer funktionierenden Decryptor (statistisch ~ 60–70 % der Decryptoren defizitaer);</li>'
+            + '<li>Re-Targeting innerhalb 12 Monaten signifikant erhoeht;</li>'
+            + '<li>Sanktionsrisiken (US-OFAC, EU-Sanktionslisten — Zahlung an gelistete Akteure ist strafbar);</li>'
+            + '<li>moralisches Hazard: Finanzierung des kriminellen Geschaeftsmodells.</li>'
+            + '</ul>'
+            + '<p>Eine Zahlung kann in Ausnahmefaellen erwogen werden (lebenskritische Infrastruktur, kein Backup, Existenzbedrohung) — dann zwingend mit anwaltlicher Pruefung gegen Sanktionslisten und in Abstimmung mit Behoerden.</p>'
+
+            + '<h4>Worked Example: Triage einer unbekannten <code>locker.exe</code></h4>'
+            + '<p>Sample <code>locker.exe</code>, SHA-256 <code>5e3a…b91c</code>, gefunden auf File-Server.</p>'
+            + '<ol>'
+            + '<li><strong>Statisch.</strong> SHA-256 + Imphash bestimmen, VirusTotal-Lookup (intern, nur Hash, nicht Datei — Sample-Leakage vermeiden!), <code>pefile</code> zeigt UPX-gepackten PE; entpacken in der Sandbox.</li>'
+            + '<li><strong>YARA.</strong> Hits gegen kuratierte Regeln (Yara-Forge, ReversingLabs); Treffer „Ransomware/LockBit"-Familie verstaerkt Hypothese.</li>'
+            + '<li><strong>Dynamisch.</strong> Cuckoo-Run in air-gapped-VLAN; beobachtet: Aufzaehlung lokaler Laufwerke, AES-256-Verschluesselung mit RSA-2048-Wrapping, VSS-Loeschung (<code>vssadmin delete shadows</code>), Drop einer Ransom-Note.</li>'
+            + '<li><strong>Containment-Empfehlung.</strong> sofortige Netzisolation, EDR-Hash-Block, FW-Block der C2-Domains, Backup-Trennung.</li>'
+            + '<li><strong>Behoerden.</strong> Meldung BSI/ZAC innerhalb 24 h (NIS-2), Pruefung DSGVO Art. 33.</li>'
+            + '</ol>'
+            + '<p>Begruendung: Stufenfolge folgt der „Triage-Pyramide" — billigste, am wenigsten invasiven Schritte zuerst (statisch, YARA), aufwaendige Sandbox-Schritte erst, wenn die ersten Schritte keine eindeutige Klassifikation liefern.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Warum sollte das Sample selbst nie hochgeladen werden, der Hash aber schon?</li>'
+            + '<li>Welche Schwaeche hat Imphash gegen moderne Loader-Familien — und welcher Fuzzy-Hash ist robuster?</li>'
+            + '<li>Welche Punkte des CISA-Playbooks adressieren <em>Vor</em>-Vorfall, welche <em>waehrend</em>?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Sandbox im Produktionsnetz. <em>Korrekt:</em> dediziertes Lab-VLAN, kein Routing in produktive Netze.</li>'
+            + '<li><em>Fehler:</em> Ransom-Note wegklicken und Server neu aufsetzen. <em>Korrekt:</em> erst forensisch sichern, dann wiederherstellen — sonst keine Antwort auf Initial-Access-Frage moeglich.</li>'
+            + '<li><em>Fehler:</em> Backups online im selben AD verfuegbar lassen. <em>Korrekt:</em> Offline-/immutable-Speicher (Tape, S3-Object-Lock-Compliance-Mode), Tier-0-Trennung der Backup-Admins.</li>'
+            + '<li><em>Fehler:</em> Decryptor unkontrolliert auf Produktivsystemen ausfuehren. <em>Korrekt:</em> Test auf isolierter Kopie eines Volumes; Bestaetigung durch CSIRT (z. B. nomoreransom.org).</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ein KMU (220 MA) ist von Ransomware betroffen: ESXi-Hosts und der File-Server sind verschluesselt; Hyperscaler-Backups via Veeam liegen ebenfalls vor, aber innerhalb des AD. Skizzieren Sie (a) die Reihenfolge der ersten 24 h gemaess CISA-Playbook, (b) die forensische Sicherungs-Strategie ohne Wiederherstellungs-Verzoegerung, (c) den Entscheidungsbaum „zahlen vs. nicht zahlen" inkl. rechtlicher und oekonomischer Kriterien, (d) drei Lessons Learned, die Sie nach Phase 4 verbindlich umsetzen wuerden.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: CISA „#StopRansomware Guide" Update Okt. 2023; NIST SP 800-83 r1 „Guide to Malware Incident Prevention and Handling" (2013); BSI „Ransomware: Erste-Hilfe-IT-Notfallkarte" und „Maßnahmenkatalog Ransomware" (2023); ENISA Threat Landscape 2023; MITRE ATT&amp;CK Enterprise v16 (Okt. 2024); No More Ransom Project (nomoreransom.org, 2024); YARA Documentation (yara.readthedocs.io, 4.5.x, 2024); Volatility/CAPE Sandbox Projects (2024); 3-2-1-1-0 Backup Rule (Veeam Best Practice 2023).</em></p>'
+    };
+
+    // Quiz Kapitel 8 — 50 MCQ + 1 Sequence + 1 Cloze (PBQ-Pflicht §18.4/§18.8)
+    const QUIZ_IR = [
+        // -- Lifecycle & Begriffe (10) --
+        q('Welche vier Phasen beschreibt NIST SP 800-61 r2?',
+            ['Preparation; Detection &amp; Analysis; Containment, Eradication &amp; Recovery; Post-Incident Activity',
+             'Identify, Protect, Detect, Respond',
+             'Plan, Do, Check, Act',
+             'Discover, Investigate, Remediate, Report'], 0,
+            'NIST SP 800-61 r2 §3 listet genau diese vier iterativen Phasen; das CSF (Identify/Protect/Detect/Respond/Recover) ist ein anderes Rahmenwerk.'),
+        q('Was unterscheidet ein <em>incident</em> von einem <em>event</em>?',
+            ['Ein Incident ist eine bestaetigte oder unmittelbar drohende Verletzung von Sicherheitsrichtlinien; ein Event ist jede beobachtbare Aktion',
+             'Events sind sicher, Incidents nicht',
+             'Incidents werden vom EDR erzeugt, Events vom SIEM',
+             'Incidents sind nur Datenabfluesse'], 0,
+            'NIST SP 800-61 r2 §2.1 definiert Incident als policy violation oder imminent threat thereof; jedes Incident ist ein Event, aber nicht umgekehrt.'),
+        q('Welche Rolle uebernimmt der Incident Commander (IC)?',
+            ['Steuerung, Entscheidung und Ressourcen-Allocation; selbst nicht im technischen Workstream',
+             'Forensische Sicherung der Datentraeger',
+             'Direkte Kommunikation mit Presse',
+             'Reverse-Engineering der Malware'], 0,
+            'ENISA Good Practice Guide 2023 und NIST 800-61 r2 §2.4 betonen Trennung Steuerung/Technik; Forensik/Reversing/Press sind eigene Rollen.'),
+        q('Welcher Begriff aus ISO/IEC 27035-1:2023 entspricht NIST-Phase „Post-Incident Activity"?',
+            ['Lessons Learnt',
+             'Plan and Prepare',
+             'Detection and Reporting',
+             'Responses'], 0,
+            'ISO/IEC 27035-1:2023 §6 mappt explizit Post-Incident auf „Lessons Learnt".'),
+        q('Welche Zeitvorgaben gelten unter NIS-2 (Richtlinie (EU) 2022/2555 Art. 23) fuer Meldungen wesentlicher Vorfaelle?',
+            ['24 h Frueh-Warnung, 72 h Incident-Notification, 1 Monat Final Report',
+             '1 h, 24 h, 7 Tage',
+             '72 h, 7 Tage, 30 Tage',
+             'kein verbindlicher Zeitrahmen'], 0,
+            'Richtlinie (EU) 2022/2555 (NIS-2) Art. 23 Abs. 4: 24h Early Warning, 72h Incident Notification, 1 Monat Final Report.'),
+        q('Eine S3-Severity (mittel) ist nicht automatisch P1-Priority. Warum?',
+            ['Severity beschreibt das technische Ausmass, Priority die geschaeftliche Reaktionsdringlichkeit; ein S3-Vorfall in regulierter OT-Umgebung kann P1 sein',
+             'P1 wird nur bei DSGVO-Bezug ausgeloest',
+             'Severity und Priority sind synonym',
+             'Priority ist nur fuer SLA-Reporting relevant'], 0,
+            'NIST 800-61 r2 §3.2.6 trennt funktionalen/informationsbezogenen Impact (Severity) von Reaktions-Priorisierung (Priority).'),
+        q('Welche Massnahme in der Containment-Phase ist meist <em>reversibel</em>?',
+            ['Token-/Session-Revocation',
+             'vollstaendige Neuinstallation',
+             'Loeschung des Datentraegers',
+             'physische Zerstoerung'], 0,
+            'Reversible Massnahmen werden bevorzugt zuerst durchgefuehrt (NIST 800-61 r2 §3.3.1 „Choosing a Containment Strategy").'),
+        q('Was beschreibt der Begriff <em>breach</em> im Vergleich zum <em>incident</em>?',
+            ['Ein Breach ist ein Incident mit bestaetigter Schutzziel-Verletzung und meist meldepflichtig',
+             'Breach und Incident sind Synonyme',
+             'Breach ist nur ein Datenabfluss aus Cloud-Speichern',
+             'Breach gilt nur fuer Insider-Vorfaelle'], 0,
+            'DSGVO (Verordnung (EU) 2016/679) Art. 4 Nr. 12 und gaengige IR-Literatur grenzen Breach (confirmed compromise) vom Incident ab; Meldepflicht entsteht typischerweise erst im Breach.'),
+        q('Welche Aktivitaet gehoert in die Phase <em>Preparation</em>?',
+            ['Tabletop-Exercises und Aufbau eines Asset-Inventars',
+             'Versand der Breach-Notification',
+             'Erstellung von Hash-Werten waehrend einer Beweissicherung',
+             'Wiederherstellung aus dem Backup'], 0,
+            'NIST SP 800-61 r2 §3.1: Preparation deckt alles ab, was vor dem Vorfall existieren muss — Werkzeuge, Runbooks, Uebungen, Inventar.'),
+        q('Welche Konsequenz hat ein fehlender oder schlechter Phase-4-Output (Lessons Learned)?',
+            ['Hohe Wiederholungswahrscheinlichkeit gleichartiger Vorfaelle und fehlende Detection-Verbesserung',
+             'Sofortiger Verlust der Zertifizierung',
+             'Strafrechtliche Haftung des CISO',
+             'Automatischer Versicherungsfall'], 0,
+            'ENISA Good Practice Guide 2023; NIST 800-61 r2 §3.4: ohne Lessons Learned kein Lerneffekt, kein Detection-Update, kein Runbook-Update.'),
+
+        // -- Detection / SIEM / EDR / SOAR (8) --
+        q('Was unterscheidet EDR von einem klassischen Antivirus?',
+            ['EDR liefert kontinuierliche Telemetrie, Verhaltensdetektion und Response-Aktionen, nicht nur signaturbasierte Erkennung',
+             'EDR erkennt nur Ransomware',
+             'EDR ersetzt das SIEM',
+             'EDR arbeitet ausschliesslich offline'], 0,
+            'Gartner-Definition (2013) und Eckert „IT-Sicherheit" 11. Aufl. 2023 Kap. 13: EDR fokussiert Telemetrie/Behavior/Response.'),
+        q('Welcher Stoer-Wert (Pyramid of Pain, Bianco 2013) ist am hoechsten?',
+            ['Tactics, Techniques &amp; Procedures (TTPs)',
+             'Hash-Werte',
+             'IP-Adressen',
+             'Domain-Namen'], 0,
+            'Bianco 2013: TTPs an der Spitze; aendert ein Angreifer TTPs, kostet ihn das den hoechsten Aufwand.'),
+        q('IOA vs. IOC — welche Aussage ist korrekt?',
+            ['IOA ist verhaltensbasiert (laufender Angriff), IOC ist beobachtungsbasiert (war kompromittiert)',
+             'IOA und IOC sind Synonyme',
+             'IOC sind nur Hashes, IOA nur IPs',
+             'IOC werden vom EDR erzeugt, IOA vom SIEM'], 0,
+            'CrowdStrike-/MITRE-Terminologie: IOA = Indicator of Attack (behavior), IOC = Indicator of Compromise (artifact).'),
+        q('MITRE ATT&amp;CK Enterprise v16 enthaelt wie viele Tactics auf oberster Ebene?',
+            ['14',
+             '7',
+             '21',
+             '40'], 0,
+            'ATT&amp;CK Enterprise v16 (Okt. 2024) listet 14 Tactics von Reconnaissance bis Impact.'),
+        q('Welche Aufgabe hat MITRE D3FEND?',
+            ['Defensive Ontologie (Detect, Isolate, Deceive, Evict, Restore) zu ATT&amp;CK',
+             'Ersatz fuer ATT&amp;CK',
+             'Compliance-Framework fuer NIS-2',
+             'CVE-Datenbank'], 0,
+            'D3FEND v1.0 (NSA-/MITRE-gefoerdert) ergaenzt ATT&amp;CK um die Verteidigerseite.'),
+        q('Was ist der Hauptzweck eines SOAR-Systems?',
+            ['Orchestrierung und Automatisierung von Reaktions-Playbooks ueber Tool-APIs',
+             'Langzeitspeicherung von Logs',
+             'Endpoint-Telemetrie-Erfassung',
+             'Schwachstellenscan'], 0,
+            'Gartner SOAR-Definition (2017): Security Orchestration, Automation and Response — Workflow-Engine.'),
+        q('STIX 2.1 ist ein Standard fuer ...',
+            ['strukturierten Austausch von Cyber Threat Intelligence (Objekte und Relationships)',
+             'Endpoint-Telemetrie-Format',
+             'Ransomware-Decryptor',
+             'Backup-Verschluesselung'], 0,
+            'OASIS STIX 2.1 (Juni 2021): typisierte CTI-Objekte mit Relationships; Transport via TAXII 2.1.'),
+        q('Welche Aussage zu Sigma-Regeln ist korrekt?',
+            ['Sigma ist ein generisches YAML-Format, das in SIEM-spezifische Abfragesprachen uebersetzt wird',
+             'Sigma ist ein proprietaeres Splunk-Format',
+             'Sigma ist nur fuer Windows-Logs anwendbar',
+             'Sigma ersetzt YARA'], 0,
+            'SigmaHQ-Project (github.com/SigmaHQ/sigma, 2024): vendor-neutrale Regelsprache, Konverter nach SPL/EQL/KQL/AQL etc.'),
+
+        // -- Threat Intel / TIP / IOC-Lifecycle (4) --
+        q('Welche Felder im STIX-2.1-Indicator-Objekt sind besonders wichtig fuer den IOC-Lifecycle?',
+            ['<code>valid_from</code>, <code>valid_until</code>, <code>confidence</code>',
+             '<code>severity</code>, <code>impact</code>, <code>category</code>',
+             '<code>email</code>, <code>phone</code>, <code>address</code>',
+             '<code>kex</code>, <code>kdf</code>, <code>aead</code>'], 0,
+            'STIX 2.1 §4: Indicator-Objekte tragen valid_from/valid_until und confidence; Aussagen ohne Alterung fuehren zu False-Positives.'),
+        q('Welche Plattform ist die de-facto-Open-Source-Threat-Intelligence-Plattform in EU-CSIRT-Communities?',
+            ['MISP',
+             'Splunk Enterprise Security',
+             'Palo Alto Cortex XSOAR',
+             'Carbon Black'], 0,
+            'MISP (Malware Information Sharing Platform, misp-project.org, 2024) wird von CIRCL/FIRST/CSIRTs Network gepflegt.'),
+        q('Warum sollten externe IOC-Feeds nicht ungeprueft als Block-Liste eingesetzt werden?',
+            ['Wegen False-Positives, fehlender Konfidenz, Alterung und potenzieller Kollateralschaeden',
+             'Weil sie zu wenig Eintraege enthalten',
+             'Weil STIX-Feeds verschluesselt sind',
+             'Weil sie ausschliesslich kommerziell sind'], 0,
+            'STIX-confidence/valid_until und SOC-Erfahrung (z. B. False-Positive-Lawine 2018 bei einem grossen Tier-1-Feed) belegen die Notwendigkeit der Triage.'),
+        q('Was ist der Hauptzweck des Diamond Models (Caltagirone et al. 2013)?',
+            ['Strukturiertes Modell fuer die Analyse einzelner Intrusions ueber Adversary, Capability, Infrastructure, Victim',
+             'Kommerzielle Bewertung von SIEM-Loesungen',
+             'Verschluesselungsstandard fuer CTI-Austausch',
+             'Backup-Strategie'], 0,
+            'Caltagirone, Pendergast, Betz 2013: vier Knoten (Adversary, Capability, Infrastructure, Victim) plus Meta-Features.'),
+
+        // -- Forensik (12) --
+        q('Welche Reihenfolge schreibt RFC 3227 (Order of Volatility) vor?',
+            ['CPU/Cache → Speicher (RAM) → temporaere FS → Festplatte → Remote-Logs → physische Konfiguration → Archive',
+             'Festplatte → RAM → CPU-Register',
+             'Backups → Disk → RAM',
+             'Disk → CPU-Register → RAM'], 0,
+            'RFC 3227 §2: fluechtige Daten zuerst.'),
+        q('Welcher Standard regelt Identifikation, Sicherstellung und Sicherung digitaler Beweise?',
+            ['ISO/IEC 27037:2012',
+             'ISO/IEC 27001:2022',
+             'ISO/IEC 27005:2022',
+             'ISO 9001:2015'], 0,
+            'ISO/IEC 27037:2012 ist der zentrale DEFR-Standard.'),
+        q('Welche Funktion hat ISO/IEC 27041:2015?',
+            ['Eignung und Validierung von Untersuchungsmethoden',
+             'Backup-Strategie',
+             'Schluesselmanagement',
+             'Cloud-Security-Controls'], 0,
+            'ISO/IEC 27041:2015 spezifiziert Methoden-/Tool-Validierung im forensischen Kontext.'),
+        q('Welche Hash-Funktion ist heute Mindeststandard fuer forensische Image-Verifikation?',
+            ['SHA-256 (FIPS 180-4)',
+             'MD5',
+             'CRC32',
+             'SHA-1'], 0,
+            'NIST SP 800-86 §4.2 und FIPS 180-4: SHA-256; MD5/SHA-1 nur defensiv ergaenzend.'),
+        q('Welche Konsequenz hat ein vergessener RAM-Dump bei einem BitLocker-/LUKS-verschluesselten System?',
+            ['Volume-Master-Key/FVEK kann verloren gehen, Disk-Inhalte bleiben verschluesselt',
+             'Keine Konsequenz, da ohnehin nicht entschluesselbar',
+             'BitLocker speichert den Schluessel im UEFI; Dump unnoetig',
+             'RAM-Dump ist forensisch irrelevant'], 0,
+            'NIST SP 800-86 §4.1.2 / SANS DFIR: Keys liegen im RAM; ohne Dump kein Zugriff bei verschluesselten Volumes ohne Recovery-Key.'),
+        q('Wofuer steht DEFR in ISO/IEC 27037?',
+            ['Digital Evidence First Responder',
+             'Digital Encrypted File Recovery',
+             'Distributed Evidence File Repository',
+             'Dynamic Endpoint Forensic Reader'], 0,
+            'ISO/IEC 27037:2012 §3.7: DEFR sichert Beweise vor Ort; DES analysiert.'),
+        q('Wann waehlt man <em>live response</em> statt <em>dead-box</em>-Forensik?',
+            ['Wenn fluechtige Artefakte (RAM, Sessions, Schluessel) erforderlich sind oder Encrypted Volumes aktiv sind',
+             'Bei Strafverfolgungsfaellen ist live response immer Pflicht',
+             'Wenn keine Schreibblocker verfuegbar sind',
+             'Niemals'], 0,
+            'NIST SP 800-86 §6.1: live response gezielt fuer fluechtige Daten; dead-box fuer maximale Reproduzierbarkeit.'),
+        q('Welche Aussage zur Chain of Custody (CoC) ist korrekt?',
+            ['Jede Uebergabe wird zeitnah mit Beweis-ID, Hashwerten und Personen dokumentiert',
+             'CoC ist nur bei strafrechtlichen Faellen erforderlich',
+             'CoC darf rueckwirkend ergaenzt werden',
+             'CoC ersetzt das forensische Image'], 0,
+            'ISO/IEC 27037 §5.4 und NIST SP 800-86 §4.2: CoC dokumentiert Integritaet und Nachvollziehbarkeit luegckenlos.'),
+        q('Welche Werkzeuge sind typische Memory-Acquisition-Tools fuer Windows bzw. Linux?',
+            ['WinPMEM (Windows) und AVML (Linux)',
+             '<code>ping</code> und <code>traceroute</code>',
+             'Veeam und Acronis',
+             'Splunk und QRadar'], 0,
+            'Velociraptor/WinPMEM (Windows) und Microsoft AVML (Linux) sind etablierte Tools fuer RAM-Akquisition; SANS DFIR Reading Room (2024).'),
+        q('Was loest ein <em>Hard Power-Off</em> (Stecker ziehen) gegenueber einem regulaeren Shutdown aus?',
+            ['Verhindert Anti-Forensik-Skripte, die im Shutdown-Pfad Spuren beseitigen koennten',
+             'Loescht den Datentraeger',
+             'Erzwingt einen RAM-Dump',
+             'Aktiviert BitLocker-Recovery'], 0,
+            'NIST SP 800-86 §6.1.2 / SANS DFIR Best Practice: Shutdown kann Anti-Forensik-Hooks ausfuehren; Hard-Power-Off vermeidet das.'),
+        q('Welcher Begriff beschreibt die Manipulation von Datei-Zeitstempeln?',
+            ['Timestomping (ATT&amp;CK T1070.006)',
+             'Token Theft',
+             'AMSI-Bypass',
+             'DCSync'], 0,
+            'MITRE ATT&amp;CK T1070.006 „Timestomp"; Anti-Forensik-Subtechnik.'),
+        q('Welches Tool erstellt eine forensische Timeline aus heterogenen Artefakten (Filesystem, Registry, EVTX)?',
+            ['Plaso/log2timeline',
+             'Wireshark',
+             'Burp Suite',
+             'Metasploit'], 0,
+            'Plaso/log2timeline (Project, 2024) ist Standard im DFIR-Workflow fuer Super-Timelines.'),
+
+        // -- Malware / Ransomware (10) --
+        q('Was ist ein <em>Imphash</em>?',
+            ['Hash der Import-Tabelle eines PE; clustert verwandte Samples',
+             'Hash der Datei',
+             'Hash der C2-Domain',
+             'Hash der digitalen Signatur'], 0,
+            'Mandiant/FireEye 2014: Imphash basiert auf Reihenfolge und Namen der Imports; nuetzlich fuer Family-Clustering, aber leicht zu manipulieren.'),
+        q('Welche der folgenden Sandboxen ist Open Source?',
+            ['Cuckoo / CAPE',
+             'ANY.RUN',
+             'Joe Sandbox',
+             'Hybrid Analysis (Falcon)'], 0,
+            'Cuckoo (mit dem aktiven Fork CAPE, 2024) ist Open Source; ANY.RUN/Joe/Falcon sind kommerziell.'),
+        q('Welche ATT&amp;CK-Sub-Technique beschreibt Credential Dumping aus dem LSASS-Prozess?',
+            ['T1003.001 OS Credential Dumping: LSASS Memory',
+             'T1059.001 PowerShell',
+             'T1486 Data Encrypted for Impact',
+             'T1190 Exploit Public-Facing Application'], 0,
+            'MITRE ATT&CK T1003.001 (Enterprise v16, 2024) ist die kanonische ID fuer LSASS-Memory-Dumping (Mimikatz, ProcDump-Missbrauch).'),
+        q('Wofuer steht das Akronym <em>VSS</em> im Ransomware-Kontext?',
+            ['Volume Shadow Copy Service — wird von Ransomware via <code>vssadmin delete shadows</code> entfernt',
+             'Vulnerability Scoring System',
+             'Virtual Switch Subsystem',
+             'Verified Secure Storage'], 0,
+            'MITRE ATT&CK T1490 „Inhibit System Recovery" (Enterprise v16, 2024); <code>vssadmin delete shadows</code> entfernt Schattenkopien zur Wiederherstellungs-Verhinderung.'),
+        q('Welche Backup-Regel verhaertet gegen Ransomware besonders effektiv?',
+            ['3-2-1-1-0: drei Kopien, zwei Medien, eine ausserhalb, eine offline/immutable, null Fehler in der Wiederherstellung',
+             '1-1-1-Regel',
+             'Keine, Backups helfen gegen Ransomware nicht',
+             'RAID-1'], 0,
+            'Veeam-Best-Practice 2023; CISA #StopRansomware Update 2023; klassische 3-2-1 ergaenzt um immutable + getestete Wiederherstellung.'),
+        q('Wie sollte bei einem unbekannten Sample mit VirusTotal umgegangen werden?',
+            ['Nur den Hash abfragen — Datei nicht hochladen, weil das Sample-Leakage ausloest',
+             'Datei sofort hochladen, um Schutz zu optimieren',
+             'Hash und Datei niemals abfragen',
+             'Datei nur in TLP:RED-Communities teilen'], 0,
+            'TLP-Konzept (FIRST 2022) und SOC-Best-Practice: Sample-Upload gibt das Sample frei und kann Angreifer warnen; Hash-Lookup ist sicher.'),
+        q('Welche Kombination beschreibt die typische Ransomware-Verschluesselung am besten?',
+            ['Hybrid: AES-256 fuer Dateiinhalt, asymmetrisches Wrapping (z. B. RSA-2048/4096) fuer den Datei-Schluessel',
+             'AES-128 fuer alles ohne Wrapping',
+             'Reines RSA-2048 ueber jede Datei',
+             'XOR mit konstantem Schluessel'], 0,
+            'Standard-Bauplan moderner Lockere (LockBit, BlackCat, Conti-Erbe): per-File-AES + RSA-Wrapping; Eckert „IT-Sicherheit" 11. Aufl. 2023, Kap. 13.'),
+        q('Was empfiehlt das CISA #StopRansomware-Playbook (Okt. 2023) im Kern?',
+            ['Preparation, Response, Recovery als drei Saeulen mit konkreten Massnahmen-Checklisten',
+             'Sofortzahlung als Standard',
+             'Forensik nach Wiederherstellung optional',
+             'Verzicht auf Behoerden-Kontakt'], 0,
+            'CISA/NSA/FBI/MS-ISAC Joint Playbook Update Okt. 2023.'),
+        q('Welche Position vertreten BSI und Europol zur Loesegeldzahlung?',
+            ['Grundsaetzlich nicht zahlen — Sanktionsrisiken, fehlende Decryptor-Garantie, Re-Targeting',
+             'Immer zahlen, um Daten zurueckzubekommen',
+             'Zahlung ist gesetzlich verpflichtend',
+             'Zahlung ist nur in der EU verboten'], 0,
+            'BSI-Empfehlung 2023, Europol/No-More-Ransom-Initiative, US-OFAC-Hinweis 2020/Update 2021.'),
+        q('Welche YARA-Best-Practice reduziert False-Positives am wirksamsten?',
+            ['Spezifische Strings/Conditions, Tests gegen Goodware-Korpus, klare <code>meta</code>-Felder',
+             'Moeglichst kurze, unspezifische Pattern',
+             'Nur Hash-Strings verwenden',
+             'Nur Dateinamen matchen'], 0,
+            'YARA Documentation 4.5.x (2024); FireEye/CrowdStrike „Writing Effective YARA Rules".'),
+
+        // -- Spezialfaelle, Recht, Reporting (6) --
+        q('DSGVO Art. 33 verpflichtet zur Meldung einer Datenschutzverletzung an die Aufsichtsbehoerde innerhalb ...',
+            ['72 Stunden nach Kenntnisnahme, sofern ein Risiko fuer Betroffene besteht',
+             '24 Stunden ohne Ausnahme',
+             '7 Tagen',
+             'kein zeitlicher Rahmen'], 0,
+            'DSGVO (Verordnung (EU) 2016/679) Art. 33 Abs. 1: 72 h ab Kenntnis; bei hohem Risiko zusaetzlich Information der Betroffenen nach Art. 34.'),
+        q('Welche Norm regelt die <em>Lessons-Learned</em>-Phase explizit als Outcome-Lieferant fuer das ISMS?',
+            ['ISO/IEC 27035-1:2023 §6 i. V. m. ISO/IEC 27001:2022 Anhang A.5.24/.27',
+             'IEC 62443-3-3',
+             'ISO 9001:2015',
+             'NIS-2 Anhang II'], 0,
+            'ISO/IEC 27035-1:2023 §6 verlangt Lessons Learnt als ISMS-Input; A.5.24/.27 (Information security incident management planning, learning) ergaenzen.'),
+        q('Wer ist <em>nicht</em> zwingend Teil des Krisenstabs?',
+            ['Externer Pressevertreter eines Wettbewerbers',
+             'Incident Commander',
+             'Communications Lead',
+             'Rechtsabteilung'], 0,
+            'Krisenstab ist intern; externe Wettbewerber gehoeren nicht in das Gremium (NIST 800-61 r2 §2.4 / ENISA 2023).'),
+        q('Welche Aussage zum BSI-Baustein DER.2.1 (Behandlung von Sicherheitsvorfaellen, Edition 2023) ist korrekt?',
+            ['Er ist im IT-Grundschutz Teil des Schichtmodells DER (Detektion und Reaktion) und definiert Pflichten und Empfehlungen entlang der IR-Phasen',
+             'Er regelt nur Backup-Strategien',
+             'Er ist NICHT mehr aktiv',
+             'Er ersetzt ISO/IEC 27001'], 0,
+            'BSI IT-Grundschutz-Kompendium 2023, Schicht DER, Baustein DER.2.1.'),
+        q('Welcher Bericht ist Phase-4-typischer Output?',
+            ['Incident-Report mit Timeline (UTC), Root Cause, IOC-Liste, MITRE-ATT&amp;CK-Mapping und Empfehlungen',
+             'Marketingbroschuere',
+             'Bilanz',
+             'Patentantrag'], 0,
+            'NIST SP 800-61 r2 §3.4.1 / SANS DFIR Reporting Templates: Standardstruktur eines Post-Incident-Reports.'),
+        q('Welche Eskalation ist bei einem bestaetigten OT-/ICS-Vorfall (z. B. Engineering-Workstation einer Anlage) regulatorisch besonders relevant?',
+            ['NIS-2-Meldung an die zustaendige nationale Behoerde plus IEC-62443-Kontext und ggf. KRITIS-/Sektor-CERT-Meldung',
+             'Nur DSGVO-Meldung',
+             'Nur interne Information',
+             'Nur Sales-Team informieren'], 0,
+            'NIS-2 Art. 23 fuer wesentliche/wichtige Einrichtungen; KRITIS-Verordnungen je Sektor; IEC 62443-Bezug fuer technische Tiefe.'),
+
+        // -- PBQ-Items (Sequence + Cloze) --
+        {
+            type: 'sequence',
+            q: 'Bringen Sie die Sicherungs-Schritte fuer einen eingeschalteten, BitLocker-verschluesselten Windows-Laptop in die korrekte forensische Reihenfolge (RFC 3227 / NIST SP 800-86).',
+            items: [
+                'Foto des Bildschirms, Eintrag in Chain of Custody',
+                'RAM-Dump erstellen (z. B. WinPMEM) und SHA-256 berechnen',
+                'Live-Triage mit Volatility 3 (pslist, netscan, malfind) auf DES-Workstation',
+                'Hard Power-Off (Stecker ziehen, kein Shutdown)',
+                'Datentraeger ausbauen, Schreibblocker, E01-Image mit Hash-Stream',
+                'Doppelter SHA-256-Vergleich vor und nach Transport, Asservat versiegeln'
+            ],
+            correct: [0, 1, 2, 3, 4, 5],
+            explanation: 'Reihenfolge folgt dem Order of Volatility (RFC 3227) und NIST SP 800-86 §6.1: erst dokumentieren, dann RAM, dann fluechtige Live-Artefakte, dann Hard Power-Off (Anti-Forensik-Hooks vermeiden), dann Disk-Image mit Schreibblocker, abschliessend doppelte Hash-Verifikation und Versiegelung — siehe Seite 8.3.'
+        },
+        {
+            type: 'cloze',
+            q: 'Vervollstaendigen Sie die NIS-2-Meldefristen (Richtlinie (EU) 2022/2555 Art. 23): Frueh-Warnung innerhalb von ___ Stunden, Incident-Notification innerhalb von ___ Stunden, Final Report innerhalb von ___ Monat(en).',
+            blanks: [
+                { label: 'Frueh-Warnung', accept: ['24', '24h', '24 stunden'] },
+                { label: 'Incident-Notification', accept: ['72', '72h', '72 stunden'] },
+                { label: 'Final Report', accept: ['1', 'einem', 'ein', '1 monat', 'ein monat'] }
+            ],
+            explanation: 'Richtlinie (EU) 2022/2555 (NIS-2) Art. 23 Abs. 4 lit. a–c: 24 h Early Warning, 72 h Incident Notification, 1 Monat Final Report. Die Fristen gelten fuer wesentliche und wichtige Einrichtungen.'
+        }
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_cybersec',
         code: 'MA-ET CyberSec',
