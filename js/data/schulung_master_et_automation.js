@@ -1855,6 +1855,391 @@
             'IEC 62443-3-2:2020.')
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 7 — Master-Capstone Automatisierungstechnik (PRODUKTIV)
+    // Referenz-Szenario: Vollautomatisierte Press-Montage-Linie mit Siemens
+    // S7-1500F (ProfiSafe), Beckhoff AX5000 EtherCAT-Servoachsen, ABB IRB
+    // 1600 Cobot mit SafeMove2, OPC UA FX TSN-Backbone, Edge-K3s mit AAS-
+    // Submodellen, MES-Anbindung nach ISA-95/IEC 62264-1, Predictive
+    // Maintenance via MTConnect.
+    // Quellen: IEC 61131-3:2013 Ed.3, IEC 61499-1:2012, IEC 61508-1..7:2010,
+    // ISO 13849-1:2023, IEC 62061:2021, IEC 61800-5-2:2016, ISO 10218-1/-2:2011,
+    // ISO/TS 15066:2016, DIN SPEC 91345:2016 (RAMI 4.0), IDTA 01001-3 (AAS
+    // Metamodel), ISO 23247-1..-4:2021 (Digital Twin Manufacturing), IEC
+    // 62264-1:2013 (ISA-95), ANSI/MESA B2MML v0700 (2023), MTConnect 2.3
+    // (2024), IEEE 802.1Qbv-2015, IEC 62443-3-2:2020/-3-3:2013, BSI Grund-
+    // schutz Edition 2024, VDI/VDE 3694:2014 (Lasten-/Pflichtenheft).
+    // ----------------------------------------------------------------------
+
+    const PAGE_CAP_AUTO_SCOPE = {
+        title: '7.1 Anlagen-Scope, Lastenheft und Stakeholder',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) eine Automatisierungs-Anlage in Subsysteme entlang der ISA-95-Hierarchie L0–L4 zerlegen, (2) ein Lastenheft nach VDI/VDE 3694:2014 strukturieren, (3) Stakeholder und Verantwortungsschnitt zwischen Maschinenbau, Steuerungstechnik, IT und Inbetriebnehmer definieren, (4) Akzeptanzkriterien fuer eine Werks-Abnahme (FAT/SAT) gemaess EN ISO 9001:2015 und VDI 2884 nachweisen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kap. 2 (SPS-Architektur), Kap. 3 (Feldbus-Determinismus), Kap. 4 (Antriebsauslegung), Kap. 5 (Robotik), Kap. 6 (ISA-95, AAS, Digital Twin).</p>'
+
+            + '<h4>7.1.1 Referenz-Anlage „PML-2"</h4>'
+            + '<p>Press-Montage-Linie eines Automotive-Zulieferers, Taktzeit 12 s, dreischichtig:</p>'
+            + '<ul>'
+            + '<li>Siemens S7-1500F (CPU 1518F-4 PN/DP) mit ProfiSafe ueber PROFINET IRT.</li>'
+            + '<li>Beckhoff AX5000 EtherCAT-Servoachsen mit STO/SS1/SLS (IEC 61800-5-2:2016).</li>'
+            + '<li>ABB IRB 1600 Cobot mit SafeMove2 nach ISO/TS 15066:2016.</li>'
+            + '<li>OPC UA FX (Edition 2022) TSN-Backbone (IEEE 802.1Qbv-2015).</li>'
+            + '<li>Edge-K3s-Cluster (zwei Nodes) mit AAS-Submodellen nach IDTA 01001-3 und IDTA 02006-3 (Digital Nameplate).</li>'
+            + '<li>MES nach ISA-95 Level 3 (IEC 62264-1:2013) ueber B2MML 2023, MTConnect 2.3:2024 fuer Predictive Maintenance.</li>'
+            + '<li>HMI auf WinCC Unified V18, Energiezaehler nach IEC 61557-12, ISO 50001-Datenfluss.</li>'
+            + '</ul>'
+
+            + '<h4>7.1.2 Lastenheft nach VDI/VDE 3694:2014</h4>'
+            + '<p>VDI/VDE 3694:2014 §5 strukturiert das Lastenheft in zehn Hauptkapitel; fuer den Capstone werden vier verdichtet:</p>'
+            + '<table><thead><tr><th>Kapitel</th><th>Inhalt</th><th>Akzeptanzkriterium</th></tr></thead><tbody>'
+            + '<tr><td>1. Anlagenfunktion</td><td>Prozessbeschreibung, Taktzeit, Variantenmix</td><td>Taktzeit &le; 12 s mit Cpk &ge; 1{,}33 (DIN ISO 22514-2:2017)</td></tr>'
+            + '<tr><td>2. Performance</td><td>OEE-Soll, Verfuegbarkeit, Qualitaet</td><td>OEE &ge; 0{,}85 nach Nakajima 1988</td></tr>'
+            + '<tr><td>3. Safety</td><td>Risikobeurteilung nach ISO 12100:2010, PL/SIL-Anforderungen</td><td>PL d / SIL 2 fuer Werker-Schutz; PL e / SIL 3 fuer Cobot-Stillsetzung</td></tr>'
+            + '<tr><td>4. Security</td><td>Zonen-/Conduit-Modell, IEC 62443-3-3 SL-T</td><td>SL-T 3 fuer Steuerungszone, SL-T 2 fuer Edge-Zone</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>7.1.3 Stakeholder und RACI</h4>'
+            + '<p>VDI 2884:2005 verlangt einen RACI-Matrix fuer FAT/SAT:</p>'
+            + '<ul>'
+            + '<li><strong>Werksleitung</strong> — Accountable (A) fuer Abnahme.</li>'
+            + '<li><strong>Maschinenbau (OEM)</strong> — Responsible (R) fuer mechanische Komponenten und EG-Konformitaetserklaerung (Maschinenrichtlinie 2006/42/EG, ab 20.01.2027 Maschinenverordnung (EU) 2023/1230).</li>'
+            + '<li><strong>Steuerungstechnik</strong> — R fuer SPS/HMI/Antriebe.</li>'
+            + '<li><strong>OT-IT-Integration</strong> — R fuer OPC UA, MES, Edge.</li>'
+            + '<li><strong>IT-Security/CISO</strong> — Consulted (C) fuer IEC 62443.</li>'
+            + '<li><strong>Betriebsrat</strong> — C/I fuer Cobot-Mitbestimmung (BetrVG §87 Abs. 1 Nr. 6).</li>'
+            + '<li><strong>TUEV/Pruefer</strong> — C fuer Sicherheitskonformitaet.</li>'
+            + '<li><strong>Instandhaltung</strong> — Informed (I) fuer Spare-Parts-Strategie.</li>'
+            + '</ul>'
+
+            + '<h4>Worked Example: Verantwortungsschnitt OPC UA Server</h4>'
+            + '<p>Wer ist verantwortlich fuer den OPC UA Server im PML-2-Edge? Der OEM liefert das Geraet mit OPC UA Server (Boundary „Werk-Tor"); die OT-IT-Integration konfiguriert SecurityPolicy, Zertifikate (GDS nach OPC UA Part 12:2018) und die AAS-Submodelle. CISO konsultiert das Sicherheitsprofil (Aes256-Sha256-RsaPss). MES-Team uebernimmt nur den Klient. Konflikt-Praevention: Schnittstellenbeschreibung im Lastenheft Kap. 4.7, Abnahme via SAT-Punkt 7.4.2.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche fuenf ISA-95-Level beruehrt die Referenz-Anlage PML-2?</li>'
+            + '<li>Welcher VDI/VDE-3694-Lastenheft-Punkt verlangt PL/SIL-Anforderungen?</li>'
+            + '<li>Welche EU-Verordnung loest die Maschinenrichtlinie 2006/42/EG ab — und ab wann gilt sie?</li>'
+            + '<li>Warum ist die OEE-Anforderung im Lastenheft objektiv messbar zu formulieren?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> „OEE &ge; 0{,}85" ohne Definition. <em>Korrekt:</em> OEE = A &middot; P &middot; Q mit jeweiligen Messverfahren nach Nakajima 1988 / VDI 3423:2011 (Verfuegbarkeit).</li>'
+            + '<li><em>Fehler:</em> Maschinenrichtlinie 2006/42/EG als „weiterhin gueltig" annehmen. <em>Korrekt:</em> Maschinenverordnung (EU) 2023/1230 trat am 19.07.2023 in Kraft und gilt ab 20.01.2027.</li>'
+            + '<li><em>Fehler:</em> Cobot-Einsatz ohne Mitbestimmung. <em>Korrekt:</em> Betriebsvereinbarung mit Betriebsrat nach BetrVG §87 Abs. 1 Nr. 6 ist Pflicht bei Leistungs-/Verhaltenskontrolle.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Erstellen Sie einen vergleichbaren Anlagen-Scope fuer eine Bottling-Line in der Lebensmittelindustrie. Welche Hygiene-Standards (EHEDG, HACCP) treten zusaetzlich auf? Welche RACI-Aenderungen ergeben sich, welche Lastenheft-Kapitel kommen hinzu?</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: VDI/VDE 3694:2014 §5 (Lasten-/Pflichtenheft); VDI 2884:2005 (Lifecycle-Costs und Abnahme); EN ISO 9001:2015 §8.5; DIN ISO 22514-2:2017 (Prozess-Faehigkeit Cpk); IEC 62264-1:2013 (ISA-95 Hierarchie); Maschinenverordnung (EU) 2023/1230 Art. 53; Nakajima „TPM Development Program" 1988; VDI 3423:2011 (Verfuegbarkeitsformeln); IEC 62443-3-3:2013 §3 (SL-T).</em></p>'
+    };
+
+    const PAGE_CAP_AUTO_RAMP = {
+        title: '7.2 Inbetriebnahme, Hochlauf und FAT/SAT',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) FAT/SAT-Strategie nach VDI 2884 und GMP-Anlehnung (V-Modell IQ/OQ/PQ) anwenden, (2) Inbetriebnahme-Reihenfolge nach IEC 60204-1:2016 §18 strukturieren, (3) Hochlauf-Risiken und „Mock-Mode"-Strategien einsetzen, (4) Achs-Inbetriebnahme nach IEC 61800-5-2:2016 mit STO-Prueffrist begruenden.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Lehrseite 7.1 (Lastenheft), Kap. 2 (SPS-Tasking), Kap. 4 (Antriebsregelkreise), Kap. 5 (Roboter-Kalibrierung).</p>'
+
+            + '<h4>7.2.1 V-Modell der Anlageninbetriebnahme</h4>'
+            + '<p>Analog zum GMP-V-Modell (Pharma, GAMP 5 Second Edition 2022) verwenden produzierende Werke ein Mapping:</p>'
+            + '<table><thead><tr><th>Phase</th><th>Aktivitaet</th><th>Pruefkriterium</th></tr></thead><tbody>'
+            + '<tr><td>URS</td><td>User Requirements (Lastenheft)</td><td>Stakeholder-Sign-off</td></tr>'
+            + '<tr><td>FS</td><td>Functional Specification (Pflichtenheft)</td><td>Funktionsblock-Mapping</td></tr>'
+            + '<tr><td>DS</td><td>Design Specification (Hardware/Software)</td><td>Schaltplaene, IO-Listen</td></tr>'
+            + '<tr><td>IQ</td><td>Installation Qualification</td><td>Verkabelung, Kennzeichnung nach IEC 60204-1:2016 §13</td></tr>'
+            + '<tr><td>OQ</td><td>Operational Qualification (FAT)</td><td>Funktionstests beim OEM</td></tr>'
+            + '<tr><td>PQ</td><td>Performance Qualification (SAT + Probelauf)</td><td>Taktzeit, OEE, Stoerstatistik</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>7.2.2 Inbetriebnahme-Reihenfolge nach IEC 60204-1:2016 §18</h4>'
+            + '<ol>'
+            + '<li>Sichtkontrolle, Isolations-/Schutzleiterpruefung (IEC 60204-1 §18.2).</li>'
+            + '<li>Spannungs-Pruefung mit 1000 V DC (§18.4).</li>'
+            + '<li>Residual-Strom-Test 30 mA (§18.5).</li>'
+            + '<li>Funktionstest aller Schutzeinrichtungen (Not-Halt nach IEC 60947-5-5).</li>'
+            + '<li>Antriebs-Inbetriebnahme: Encoder-Justage, Stromregler-Tuning (PI mit T_n = L_s/R_s), Drehzahlregler (T_n,n = 4 &middot; T_n,i).</li>'
+            + '<li>Bahnfreigabe in Schrittweise (Trockenlauf &rarr; Reduzierter Speed &rarr; Volllast).</li>'
+            + '</ol>'
+
+            + '<h4>7.2.3 Mock-Mode und Digital Commissioning</h4>'
+            + '<p>Virtuelle Inbetriebnahme nach VDI/VDE 3693:2016 verkuerzt die Anlauf-Phase: SPS-Code laeuft gegen ein FMU-Modell der Anlage (FMI 2.0/3.0, Modelica Association 2022). Vorteile: Bug-Erkennung „Shift-Left", Trainingsumgebung fuer Werker, kein Live-Risiko. Limit: Modelltreue (Reibung, Sensorrauschen).</p>'
+
+            + '<h4>7.2.4 STO-Prueffrist</h4>'
+            + '<p>IEC 61800-5-2:2016 §4.5 verlangt periodische STO-Funktionspruefung. Fuer PL d (ISO 13849-1:2023) gilt typisch T_proof = 1 Jahr (manuelle Pruefung) oder kontinuierliche Selbstpruefung durch das Drive. PFH_D-Wert ist im Antriebs-Datenblatt zu pruefen (z.B. AX5000: PFH_D = 1{,}5 &middot; 10<sup>-8</sup>/h, PL e, Cat. 4).</p>'
+
+            + '<h4>Worked Example: Achs-Inbetriebnahme</h4>'
+            + '<ol>'
+            + '<li>Encoder-Offset bestimmen: Stator-Strang mit 25 % Nennstrom bestromen, Polradlage-Offset auslesen (Beckhoff TwinCAT NC „Drive Manager" -> „Commutation").</li>'
+            + '<li>Strom-Regler tunen: Anti-Windup auf 110 % Nennstrom, T_n,i = L_s/R_s, K_p,i so dass Bandbreite 1 kHz.</li>'
+            + '<li>Drehzahl-Regler: T_n,n = 4 &middot; T_n,i, K_p,n via Symmetrisches Optimum.</li>'
+            + '<li>Lageregler: K_v = 1/(2 &middot; T_n,n) (Faustregel; bei vorgesteuerter Beschleunigung +20 %).</li>'
+            + '<li>STO-Test: Trigger ausloesen, Drehmoment-Abklingzeit messen, Soll &lt; 100 ms.</li>'
+            + '</ol>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche IQ/OQ/PQ-Phase wird beim OEM (vor Auslieferung) ausgefuehrt?</li>'
+            + '<li>Welche Pruefreihenfolge folgt aus IEC 60204-1:2016 §18 — Isolationspruefung vor oder nach Funktionstest?</li>'
+            + '<li>Welcher Vorteil ergibt sich durch virtuelle Inbetriebnahme nach VDI/VDE 3693:2016?</li>'
+            + '<li>Was bedeutet PFH_D fuer eine Sicherheitsfunktion mit PL e?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> SAT vor IQ durchfuehren. <em>Korrekt:</em> Installation Qualification ist Voraussetzung fuer OQ/SAT.</li>'
+            + '<li><em>Fehler:</em> STO ohne PFH_D-Pruefung „akzeptieren". <em>Korrekt:</em> PFH_D muss zu PL/SIL-Ziel passen (ISO 13849-1:2023 Tab. 5).</li>'
+            + '<li><em>Fehler:</em> Reglerkaskade „nach Gefuehl" tunen. <em>Korrekt:</em> Symmetrisches Optimum (Foellinger 11. Aufl. 2016) liefert nachvollziehbares Ergebnis.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Definieren Sie einen FAT-Testfall fuer den Cobot, der die Kraft-Begrenzung nach ISO/TS 15066:2016 nachweist. Welche Messmittel (Pilz PRMS, Force-Sensor), welche Akzeptanzschwelle bei Hand-/Stirn-Kontakt, welche Wiederholungsrate?</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: VDI 2884:2005; VDI/VDE 3693:2016 (Virtuelle Inbetriebnahme); GAMP 5 Second Edition (ISPE 2022); IEC 60204-1:2016 §13, §18; IEC 61800-5-2:2016 §4.5; ISO 13849-1:2023 §4; Foellinger „Regelungstechnik" 11. Aufl. 2016 (Symmetrisches Optimum); FMI 3.0 Specification (Modelica Association 2022); ISO/TS 15066:2016 Annex A.</em></p>'
+    };
+
+    const PAGE_CAP_AUTO_OEE = {
+        title: '7.3 Betrieb, OEE und Predictive Maintenance',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) OEE-Beitraege analytisch zerlegen, (2) Stoerstatistik nach Pareto und FMEA priorisieren, (3) Predictive-Maintenance-Datenfluesse via MTConnect 2.3 und MES (ISA-95 Level 3) modellieren, (4) Energieeffizienz nach ISO 50001:2018 messen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kap. 6 (MES/Edge, OEE-Formel, MTConnect), Kap. 4 (Antriebsverluste), DIN 69900 (Pareto/8D).</p>'
+
+            + '<h4>7.3.1 OEE-Dekomposition</h4>'
+            + '<p>OEE = A &middot; P &middot; Q nach Nakajima 1988:</p>'
+            + '<ul>'
+            + '<li>A = Betriebszeit / geplante Laufzeit.</li>'
+            + '<li>P = (Soll-Taktzeit &middot; Stueckzahl) / Betriebszeit.</li>'
+            + '<li>Q = Gutstueck / Gesamtstueck.</li>'
+            + '</ul>'
+            + '<p>Welt­klasse-OEE liegt typisch bei 0{,}85; PML-2 erreicht im Hochlauf 0{,}72. Differenz-Analyse zeigt: A = 0{,}90 (geplante Wartung), P = 0{,}88 (Mikro-Stops am Cobot), Q = 0{,}91 (Press-Fehler). Hebel mit groesstem Effekt: P (Cobot-Mikrostops via SafeMove2-Geschwindigkeitsanpassung).</p>'
+
+            + '<h4>7.3.2 FMEA und Pareto</h4>'
+            + '<p>FMEA (VDA Band 4 / AIAG-VDA FMEA Handbook 2019) bewertet Risiken mit Severity, Occurrence, Detection. Aktion-Prioritaetsmatrix (AP) loest die fruehere RPZ-Berechnung ab und verhindert Fehlinterpretation. Top-Pareto-Beitraege werden mit 8D-Methode (Ford 1987) abgearbeitet.</p>'
+
+            + '<h4>7.3.3 Predictive-Maintenance-Datenfluss</h4>'
+            + '<p>Schwingungsdaten der AX5000-Achsen werden via MTConnect 2.3:2024 (XML/REST oder MQTT-Mapping) zum Edge-K3s gestreamt. Dort laeuft ein XGBoost-Modell (Trainings-Pipeline monatlich, Kubeflow). Anomalie-Schwellen via Mahalanobis-Distanz, Drift-Erkennung via PSI (Population Stability Index &gt; 0{,}25 = Re-Training noetig). MES (ISA-95 L3) erhaelt nur Aggregate (B2MML 2023).</p>'
+
+            + '<h4>7.3.4 Energieeffizienz</h4>'
+            + '<p>ISO 50001:2018 verlangt EnPI (Energy Performance Indicators). Fuer PML-2: kWh / 1000 Stueck. Hebel: Wiedereinspeisung der Bremsenergie ueber den 4Q-Wechselrichter, AX5000 mit Twin-DC-Link. Wirkungsgradklasse IE4 (IEC 60034-30-1:2014) fuer Antriebe, IES2 fuer PDS (Power Drive Systems) nach IEC 61800-9-2:2017.</p>'
+
+            + '<h4>Worked Example: OEE-Hebel</h4>'
+            + '<p>OEE = 0{,}90 &middot; 0{,}88 &middot; 0{,}91 = 0{,}721. Zielwert 0{,}85 erreichen wir, wenn P von 0{,}88 auf 0{,}93 steigt (z.B. via reduzierter Cobot-Mikrostops): 0{,}90 &middot; 0{,}93 &middot; 0{,}91 = 0{,}762. Es bleibt eine Luecke; Q-Verbesserung von 0{,}91 auf 0{,}94 (Press-Fehler-Reduktion durch Predictive-Maintenance-Alarm vor Werkzeug-Verschleiss) ergibt 0{,}787. A-Steigerung von 0{,}90 auf 0{,}95 (Wartungsfenster verschieben in Wochenend-Nacht) liefert 0{,}831. Erst die Kombination aller drei Hebel erreicht 0{,}85.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche drei Faktoren bilden die OEE — und welcher hat in PML-2 den groessten Hebel?</li>'
+            + '<li>Wie unterscheiden sich AP (Action Priority) und RPZ in der FMEA?</li>'
+            + '<li>Welche Drift-Kennzahl wird in 7.3.3 fuer Re-Training verwendet?</li>'
+            + '<li>Welche IEC-Klasse beschreibt PDS-Wirkungsgrade?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> OEE als Single-Number ohne Dekomposition reporten. <em>Korrekt:</em> A/P/Q einzeln auswerten, sonst werden Hebel falsch priorisiert.</li>'
+            + '<li><em>Fehler:</em> AP-Werte als „neue RPZ" interpretieren. <em>Korrekt:</em> AP-Matrix klassifiziert in High/Medium/Low — keine Schwellenformel.</li>'
+            + '<li><em>Fehler:</em> Predictive-Maintenance-Modell ohne Drift-Monitoring betreiben. <em>Korrekt:</em> PSI/KS-Test oder Mahalanobis-Distanz periodisch ueberwachen (ISO/IEC 5259-1:2024 zu Datenqualitaet).</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Berechnen Sie EnPI fuer PML-2 (kWh / 1000 Stueck), wenn die Linie 24 h laeuft, 4500 Stueck/Tag fertigt und 380 kWh verbraucht. Wie viel Bremsenergie sparen Sie ein, wenn der 4Q-Wechselrichter 8 % rueckspeist? Beispiel-Loesung: 380 / 4{,}5 &approx; 84{,}4 kWh / 1000 Stueck; Einsparung 30{,}4 kWh/Tag.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: Nakajima „TPM Development Program" 1988; VDI 3423:2011; ISO 22400-2:2014 (KPI Manufacturing); AIAG-VDA FMEA Handbook 2019; ISO 50001:2018; IEC 60034-30-1:2014 (IE-Klassen); IEC 61800-9-2:2017 (IES-Klassen); MTConnect 2.3:2024; ISO/IEC 5259-1:2024.</em></p>'
+    };
+
+    const PAGE_CAP_AUTO_DT_HMI = {
+        title: '7.4 Digital Twin, HMI/MES-Integration und Abnahmeplan',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) ein Digital-Twin-Konzept nach ISO 23247-1..-4:2021 fuer PML-2 entwerfen, (2) HMI-Anforderungen nach VDI/VDE 3850-1:2014 ergonomisch belegen, (3) MES-Integration nach ISA-95 Level 2/3 und B2MML 2023 anbinden, (4) einen formalen Abnahmeplan (FAT/SAT/Probebetrieb) inkl. messbarer Kriterien aufsetzen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kap. 6 (RAMI 4.0 / AAS / Digital Twin), VDI/VDE 3850 (HMI), ISA-95/IEC 62264-1:2013.</p>'
+
+            + '<h4>7.4.1 Digital-Twin-Domains</h4>'
+            + '<p>ISO 23247-1:2021 §4 definiert vier Domains: <em>Observable Manufacturing Entity</em> (OME), <em>Digital Twin Manufacturing Domain</em> (DTM), <em>User Domain</em>, <em>Cross-System Domain</em>. Fuer PML-2:</p>'
+            + '<ul>'
+            + '<li>OME: Press, Cobot, Servoachsen, Pruefstation.</li>'
+            + '<li>DTM: Edge-K3s mit AAS-Submodellen + Simulation (FMU der Press-Dynamik).</li>'
+            + '<li>User Domain: HMI WinCC Unified, Mobile App fuer Instandhaltung.</li>'
+            + '<li>Cross-System: PLM, ERP, Energiemanagement (ISO 50001).</li>'
+            + '</ul>'
+
+            + '<h4>7.4.2 AAS-Submodelle</h4>'
+            + '<p>IDTA-Spezifikationen 2024 liefern wiederverwendbare Submodelle:</p>'
+            + '<ul>'
+            + '<li>IDTA 02006-3 „Digital Nameplate" — Typenschilddaten.</li>'
+            + '<li>IDTA 02022 „Energie-Effizienz" — kWh-Profile.</li>'
+            + '<li>IDTA 02014 „Capability" — Fertigungsfaehigkeiten.</li>'
+            + '<li>IDTA 02002 „TimeSeries" — Sensordaten.</li>'
+            + '</ul>'
+
+            + '<h4>7.4.3 HMI-Ergonomie</h4>'
+            + '<p>VDI/VDE 3850-1:2014 verlangt: max. 7 +/- 2 Informationsblocke pro Bildschirm (Miller 1956), Kontrastverhaeltnis mind. 7:1 (WCAG 2.2 AAA fuer kleine Schrift), Farbcodierung redundant (auch fuer Farbblind), Alarm-Priorisierung nach ISA-18.2:2016 §6 (high/medium/low).</p>'
+
+            + '<h4>7.4.4 MES-Integration</h4>'
+            + '<p>IEC 62264-3:2016 definiert 4 Geschaeftsprozesse fuer ISA-95 Level 3: <em>Production Operations Management</em>, <em>Maintenance</em>, <em>Quality</em>, <em>Inventory</em>. B2MML 2023 (XML-Schema) ueberbrueckt L3-L4 (ERP). Fuer PML-2 wird Production Schedule per B2MML „<code>ProductionSchedule</code>" empfangen, Production Performance retourniert.</p>'
+
+            + '<h4>7.4.5 Abnahmeplan</h4>'
+            + '<table><thead><tr><th>Phase</th><th>Dauer</th><th>Messbare Kriterien</th></tr></thead><tbody>'
+            + '<tr><td>FAT (beim OEM)</td><td>5 d</td><td>Funktionstest 100 %, Cycle Stress 1000 Zyklen ohne Fehler, Sicherheitsfunktionen 100 %</td></tr>'
+            + '<tr><td>SAT (im Werk)</td><td>3 d</td><td>Wiederholung FAT-Subset, Interface-Test zu MES, OPC UA Connectivity-Test</td></tr>'
+            + '<tr><td>Probebetrieb</td><td>10 d</td><td>OEE-Messung &ge; 0{,}80 (Lehrkurve), Stoer-Rate &lt; 5 /Schicht, MTBF &gt; 8 h</td></tr>'
+            + '<tr><td>Endabnahme</td><td>1 d</td><td>OEE &ge; 0{,}85 ueber 24 h, Sign-off durch Werksleitung</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>Worked Example: Schnittstellentest MES</h4>'
+            + '<p>Testszenario: MES sendet B2MML <code>ProductionSchedule</code> mit 3 Varianten &agrave; 500 Stueck. PML-2 Edge bestaetigt mit <code>ProductionPerformance</code>: tatsaechliche Stueckzahl, Anzahl Ausschuss, Energieverbrauch. Akzeptanzkriterium: Round-Trip &le; 200 ms, Schemata-Validierung 100 %, kein Datenverlust ueber 24 h.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche vier Domains definiert ISO 23247-1:2021?</li>'
+            + '<li>Welches AAS-Submodell beschreibt Typenschilddaten?</li>'
+            + '<li>Wie viele Informationsblocke pro HMI-Bildschirm empfiehlt VDI/VDE 3850-1:2014?</li>'
+            + '<li>Welche zwei B2MML-Nachrichten sind fuer den Production-Schedule-Roundtrip noetig?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Endabnahme ohne Probebetrieb. <em>Korrekt:</em> Probebetrieb (Burn-in) ist Pflicht — Fruehausfaelle treten ueberwiegend in den ersten 10 d auf (Badewannenkurve).</li>'
+            + '<li><em>Fehler:</em> AAS-Submodell selbst erfinden. <em>Korrekt:</em> Pruefen, ob es ein IDTA-Submodell gibt (2024 sind ueber 30 Submodelle standardisiert).</li>'
+            + '<li><em>Fehler:</em> HMI-Alarmflut. <em>Korrekt:</em> ISA-18.2:2016 §6 fordert Priorisierung und Limitierung (max. 1 hoehere Prioritaet / 10 min im Mittel).</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Erstellen Sie eine HMI-Bildschirm-Skizze fuer den Cobot-Status (Strommodus SRMS/Hand-Guiding/SSM/PFL, aktuelle Last, Kollisionsrisiko, OEE). Welche Farbcodierung, welche Alarm-Prioritaeten nach ISA-18.2? Welche Daten kommen via OPC UA, welche per B2MML?</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: ISO 23247-1..-4:2021; IDTA-Spezifikationen 01001-3 / 02002 / 02006-3 / 02014 / 02022 (2024); VDI/VDE 3850-1:2014; WCAG 2.2 (W3C Oct. 2023); ISA-18.2:2016; IEC 62264-3:2016 (ISA-95 Level 3 Activities); ANSI/MESA B2MML v0700 (2023); Miller „The Magical Number Seven, Plus or Minus Two" Psychological Review 63 (1956) 81–97.</em></p>'
+    };
+
+    const PAGE_CAP_AUTO_RUBRIC = {
+        title: '7.5 Bewertungsrubrik und Selbstbewertung',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) eine Automation-Capstone-Abgabe entlang einer 5-Dimensionen-Rubrik bewerten, (2) Bestehensregel und Gewichtung anwenden, (3) Selbstbewertungs-Workflow und Verbesserungs-Backlog ableiten.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Lehrseiten 7.1–7.4, ISO/IEC 17024:2012 (Personalzertifizierung als Methodik-Vorbild), Bloom-Revision (Anderson &amp; Krathwohl 2001).</p>'
+
+            + '<h4>7.5.1 Rubrik (5 Dimensionen)</h4>'
+            + '<table><thead><tr><th>Dimension</th><th>Pruefkriterium</th><th>Pflicht</th><th>Soll</th><th>Hervorragend</th></tr></thead><tbody>'
+            + '<tr><td>D1 Anlagen-Scope &amp; Lastenheft</td><td>VDI/VDE 3694:2014 Struktur, ISA-95 Mapping</td><td>10 Kapitel Lastenheft, RACI</td><td>plus messbare Akzeptanzkriterien (OEE, Cpk, PL/SIL, SL-T)</td><td>plus Lebenszyklus-Kosten nach VDI 2884:2005</td></tr>'
+            + '<tr><td>D2 Steuerung &amp; Antrieb</td><td>IEC 61131-3-Programmierung, Reglerkaskade, Safety</td><td>POU-Struktur, PI-Tuning, STO/SS1 Auswahl</td><td>plus IEC 61499-Variante, symmetrisches Optimum</td><td>plus formale Verifikation (UPPAAL/CPN) eines Safety-POU</td></tr>'
+            + '<tr><td>D3 Robotik &amp; Cobot</td><td>Kinematik, ISO 10218 / ISO/TS 15066</td><td>DH-Tabelle, ein MRK-Modus belegt</td><td>plus PFL-Auslegung mit Bio-Mech-Grenzen, ROS-2-/MoveIt-2-Konzept</td><td>plus Capability-AAS-Submodell IDTA 02014</td></tr>'
+            + '<tr><td>D4 Industrie 4.0 &amp; MES</td><td>AAS, Digital Twin, MES-Anbindung</td><td>4 AAS-Submodelle, ISO 23247 Domains, B2MML</td><td>plus Predictive-Maintenance-Pipeline, MTConnect 2.3</td><td>plus Edge-Sicherheit nach IEC 62443-3-3 SL-T 3</td></tr>'
+            + '<tr><td>D5 Kommunikation &amp; Abnahme</td><td>Abnahmeplan, Executive Summary, Lessons Learned</td><td>FAT/SAT/Probebetrieb + Summary &le; 1 Seite</td><td>plus Restrisiko-Akzeptanz, Mitbestimmungs-Workflow</td><td>plus formale Energie- und CO2-Bilanz (ISO 50001 / ISO 14067)</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>7.5.2 Bestehensregel</h4>'
+            + '<p>Wie im Cybersec-Capstone (Kap. 10 §10.5.2): alle Dimensionen mindestens „Pflicht", mindestens drei „Soll"; „bestanden mit Auszeichnung" benoetigt mindestens drei „Hervorragend" und alle uebrigen „Soll". Externer Pruefer (CISO oder Anlagen-Auditor eines anderen Standorts) ist Pflicht.</p>'
+
+            + '<h4>7.5.3 Selbstbewertungs-Workflow</h4>'
+            + '<ol>'
+            + '<li>Punktwerte pro Dimension vergeben (Pflicht=1, Soll=2, Hervorragend=3) und mit Belegen verlinken.</li>'
+            + '<li>Gap-Analyse und Konsolidierung mit dem Cybersec-Capstone (gemeinsames Backlog).</li>'
+            + '<li>Pro Dimension mit &le; 1 Punkt ein konkretes Backlog-Item mit Owner und Faelligkeit.</li>'
+            + '<li>Re-Review nach 30 d.</li>'
+            + '</ol>'
+
+            + '<h4>Worked Example: Selbstbewertung PML-2</h4>'
+            + '<ul>'
+            + '<li>D1 — Soll (2): Lastenheft + RACI + Akzeptanzkriterien fertig; Lebenszyklus-Kosten ausstehend.</li>'
+            + '<li>D2 — Soll (2): POU-Struktur + symmetrisches Optimum + STO; formale Verifikation offen.</li>'
+            + '<li>D3 — Pflicht (1): DH + ein MRK-Modus belegt; PFL-Bio-Mech-Auslegung ausstehend.</li>'
+            + '<li>D4 — Soll (2): AAS-Submodelle, ISO 23247, MTConnect; SL-T 3 ausstehend.</li>'
+            + '<li>D5 — Soll (2): Abnahmeplan + Summary + Mitbestimmung; CO2-Bilanz ausstehend.</li>'
+            + '<li>Summe 9/15 -> bestanden; D3 zur Nachbesserung.</li>'
+            + '</ul>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche Dimension verlangt formale Verifikation als „Hervorragend"-Kriterium?</li>'
+            + '<li>Welche zwei Dimensionen sind durch das Cybersec-Capstone-Backlog konsolidierbar?</li>'
+            + '<li>Welche Bestehensregel gilt fuer „bestanden mit Auszeichnung"?</li>'
+            + '<li>Warum ist der Pruefer organisatorisch unabhaengig?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> Punkte ohne Belege. <em>Korrekt:</em> Jede Punktwertung verlinkt auf Lastenheft-Kapitel, Lehrseite oder Anhang.</li>'
+            + '<li><em>Fehler:</em> Selbstbewertung durch das Projekt-Team. <em>Korrekt:</em> Vier-Augen-Prinzip durch externen Auditor.</li>'
+            + '<li><em>Fehler:</em> Rubrik als „Checklisten-Abhaken" verstehen. <em>Korrekt:</em> Rubrik prueft kompetenzorientiert (Bloom evaluate/create).</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Wenden Sie die Rubrik auf einen realen Anlagen-Abnahmebericht aus Ihrem Berufsalltag an. Wo liegen Sie unter „Pflicht"? Welche drei Backlog-Items mit Owner und Faelligkeit binnen 30 d ergeben sich?</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: ISO/IEC 17024:2012; ISO/IEC 27001:2022 §6.1.3 (Methodik-Vorbild fuer Risikoakzeptanz); NIST SP 800-160 Vol. 1 r1 (Nov. 2022) §3; Anderson &amp; Krathwohl „A Taxonomy for Learning, Teaching, and Assessing" (Longman 2001); BSI-Praxisleitfaden Version 5 (2023).</em></p>'
+    };
+
+    const QUIZ_CAP_AUTO = [
+        // --- Pool 1: Lastenheft &amp; Stakeholder (5) ---
+        q('Welche VDI-Richtlinie strukturiert das Lastenheft fuer Automatisierungsanlagen?',
+            ['VDI 2221', 'VDI/VDE 3694:2014', 'VDI 2206', 'VDI 2884:2005'], 1,
+            'VDI/VDE 3694:2014 „Lasten- und Pflichtenheft fuer Automatisierungstechnik" §5 strukturiert das Lastenheft in zehn Hauptkapitel.'),
+        q('Welche EU-Verordnung loest die Maschinenrichtlinie 2006/42/EG ab und ab wann gilt sie?',
+            ['Verordnung (EU) 2023/1230 ab 20.01.2027', 'Verordnung (EU) 2023/988 ab 13.12.2024', 'Verordnung (EU) 2017/745 ab 26.05.2021', 'Verordnung (EU) 2022/2554 ab 17.01.2025'], 0,
+            'Maschinenverordnung (EU) 2023/1230 Art. 53 — Inkrafttreten 19.07.2023, Anwendung ab 20.01.2027.'),
+        q('Welche ISA-95-Ebene umfasst MES?',
+            ['Level 1', 'Level 2', 'Level 3', 'Level 4'], 2,
+            'IEC 62264-1:2013 §4 — Level 3 ist „Manufacturing Operations Management" (MES).'),
+        q('Welches Gremium pflegt die AAS-Spezifikationen?',
+            ['IEC TC 65', 'ISO/IEC JTC 1 SC 41', 'IDTA (Industrial Digital Twin Association)', 'OPC Foundation'], 2,
+            'IDTA (gegruendet 2021) pflegt die AAS-Spezifikationen, z.B. IDTA 01001-3 „Specification of the Asset Administration Shell — Part 1: Metamodel".'),
+        q('Welche Pflichtinhalte verlangt VDI/VDE 3694:2014 Kapitel 4 (Security)?',
+            ['nur Passworte', 'Zonen-/Conduit-Modell + SL-T-Anforderungen nach IEC 62443', 'nur Antivirus', 'keine Vorgaben'], 1,
+            'VDI/VDE 3694:2014 Kap. 4 verlangt explizit IEC-62443-konforme Security-Anforderungen inkl. SL-T fuer jede Zone.'),
+
+        // --- Pool 2: Inbetriebnahme, FAT/SAT (5) ---
+        q('Welche IEC-Norm regelt elektrische Sicherheit von Maschinen?',
+            ['IEC 60204-1:2016', 'IEC 61131-3:2013', 'IEC 61800-5-2:2016', 'IEC 62443-3-3:2013'], 0,
+            'IEC 60204-1:2016 „Elektrische Ausruestung von Maschinen — Allgemeine Anforderungen" §18 listet die Inbetriebnahme-Pruefungen.'),
+        q('Welche GAMP-5-Phase entspricht der FAT?',
+            ['IQ (Installation Qualification)', 'OQ (Operational Qualification)', 'PQ (Performance Qualification)', 'URS (User Requirements)'], 1,
+            'GAMP 5 Second Edition (ISPE 2022): OQ wird typischerweise beim OEM als FAT abgewickelt; PQ ist der Probebetrieb im Zielwerk.'),
+        q('Welche Sicherheitsfunktion verhindert sicher den Drehmoment-Aufbau im Antrieb?',
+            ['SS1', 'SS2', 'STO', 'SLS'], 2,
+            'IEC 61800-5-2:2016 §4 — STO (Safe Torque Off) trennt den Energiefluss zum Motor; SS1 fuehrt zuerst geregeltes Bremsen aus und schaltet dann STO.'),
+        q('Welche Kennzahl bewertet die Wahrscheinlichkeit eines gefaehrlichen Ausfalls pro Stunde fuer eine Safety-Funktion?',
+            ['MTBF', 'PFH_D', 'MTTR', 'Cpk'], 1,
+            'ISO 13849-1:2023 Tab. 5 und IEC 62061:2021 Tab. 3 nutzen PFH_D (Probability of Dangerous Failure per Hour).'),
+        q('Welche VDI-Richtlinie regelt virtuelle Inbetriebnahme?',
+            ['VDI/VDE 3693:2016', 'VDI 2884:2005', 'VDI 3423:2011', 'VDI 2221'], 0,
+            'VDI/VDE 3693 Blatt 1:2016 „Virtuelle Inbetriebnahme — Modellarten und Glossar".'),
+
+        // --- Pool 3: OEE, Predictive Maintenance, Energie (5) ---
+        q('Welcher OEE-Faktor wird bei Mikro-Stops geschmaelert?',
+            ['Availability (A)', 'Performance (P)', 'Quality (Q)', 'OEE selber'], 1,
+            'Nakajima 1988: Mikro-Stops reduzieren die effektive Taktzeit -> Performance-Verlust. Availability sinkt nur bei langen Stillstaenden.'),
+        q('Welche FMEA-Methodik loest die klassische RPZ ab?',
+            ['Kepner-Tregoe', 'AP (Action Priority) Matrix nach AIAG-VDA FMEA Handbook 2019', 'PDCA', '8D'], 1,
+            'AIAG-VDA FMEA Handbook 2019 ersetzt RPZ durch eine 3-stufige AP-Matrix High/Medium/Low — keine multiplikative Bewertung.'),
+        q('Welcher Standard normiert manufacturing KPIs (inkl. OEE-Definitionen)?',
+            ['ISO 22400-2:2014', 'ISO 9001:2015', 'IEC 61131-3', 'ISO 14001'], 0,
+            'ISO 22400-2:2014 „Key performance indicators (KPIs) for manufacturing operations management — Definitions".'),
+        q('Welche IEC-Norm definiert die IES-Wirkungsgradklassen fuer Power Drive Systems (PDS)?',
+            ['IEC 60034-30-1:2014', 'IEC 61800-9-2:2017', 'IEC 61800-5-2:2016', 'ISO 50001:2018'], 1,
+            'IEC 61800-9-2:2017 §6 klassifiziert PDS in IES0/IES1/IES2; IEC 60034-30-1:2014 betrifft Motoren (IE1..IE4/IE5).'),
+        q('Welche Drift-Kennzahl signalisiert Re-Training-Bedarf in einer Predictive-Maintenance-Pipeline?',
+            ['Cpk', 'PSI (Population Stability Index) > 0{,}25', 'PFH_D', 'OEE'], 1,
+            'PSI > 0{,}25 ist eine etablierte Schwelle (Yurdakul/Naranjo 2018, „Statistical Process Control with Machine Learning"); kombiniert mit Mahalanobis-Distanz fuer multivariate Daten.'),
+
+        // --- Pool 4: Digital Twin, MES, HMI, Abnahme (5) ---
+        q('Welche vier Domains definiert ISO 23247-1:2021?',
+            ['Sensor, Aktor, Steuerung, HMI', 'OME, DTM, User, Cross-System', 'PLC, MES, ERP, Cloud', 'L0, L1, L2, L3'], 1,
+            'ISO 23247-1:2021 §4: Observable Manufacturing Entity (OME), Digital Twin Manufacturing Domain (DTM), User Domain, Cross-System Domain.'),
+        q('Welches IDTA-Submodell beschreibt Typenschilddaten?',
+            ['IDTA 02002', 'IDTA 02006-3 Digital Nameplate', 'IDTA 02014 Capability', 'IDTA 02022 Energy Efficiency'], 1,
+            'IDTA 02006-3 „Digital Nameplate for Industrial Equipment" (2024) standardisiert Typenschilddaten als AAS-Submodell.'),
+        q('Welche B2MML-Nachricht wird vom MES an die Anlage zur Auftragsuebergabe gesendet?',
+            ['ProductionPerformance', 'ProductionSchedule', 'OperationsDefinition', 'PersonnelDefinition'], 1,
+            'ANSI/MESA B2MML v0700 (2023): „<code>ProductionSchedule</code>" enthaelt geplante Auftraege; „<code>ProductionPerformance</code>" ist die Rueckmeldung.'),
+        q('Welche Norm regelt HMI-Alarmpriorisierung in der Prozessleittechnik?',
+            ['VDI/VDE 3850-1:2014', 'ISA-18.2:2016', 'IEC 62443-3-3:2013', 'ISO 9241-110:2020'], 1,
+            'ISA-18.2:2016 (= ANSI/ISA-18.2-2016) „Management of Alarm Systems for the Process Industries" §6 regelt Alarm-Prioritaeten und Limitierung.'),
+        q('Welche Probebetriebs-Akzeptanz gilt fuer PML-2 in der Lehrkurve?',
+            ['OEE &ge; 0{,}95', 'OEE &ge; 0{,}80, Stoerrate &lt; 5 / Schicht', 'OEE = 1{,}0', 'kein Wert noetig'], 1,
+            'Lehrseite 7.4.5: Probebetrieb mit Lehrkurve und Stoer-Statistik; Endabnahme erst nach OEE &ge; 0{,}85 ueber 24 h.')
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_automation',
         code: 'MA-ET Automation',
@@ -1903,6 +2288,13 @@
                 summary: 'RAMI 4.0 (DIN SPEC 91345), Verwaltungsschale (Asset Administration Shell, IDTA-Spezifikationen 2024), Digital Twin nach ISO 23247:2021, ISA-95 / IEC 62264 Hierarchie L0-L4, MTConnect, OEE-Kennzahlen, Edge-/Cloud-Architekturen sowie OT-Sicherheit nach IEC 62443.',
                 pages: [PAGE_I40_RAMI, PAGE_I40_DT, PAGE_I40_MES, PAGE_I40_SEC],
                 quiz: QUIZ_I40
+            },
+            {
+                id: 'capstone',
+                title: 'Kapitel 7 — Master-Capstone Automatisierungstechnik',
+                summary: 'Pruefungsnaher Abschluss-Block: Anlagen-Scope und Lastenheft nach VDI/VDE 3694:2014, Inbetriebnahme und FAT/SAT nach VDI 2884 + IEC 60204-1:2016 + GAMP 5 (2022), OEE-Dekomposition + Predictive Maintenance nach Nakajima 1988 + ISO 22400-2 + MTConnect 2.3, Digital Twin nach ISO 23247-1..-4:2021 + AAS-Submodelle (IDTA 2024) + ISA-95-/B2MML-Integration + HMI nach VDI/VDE 3850-1 + ISA-18.2:2016, Bewertungsrubrik mit Selbstbewertungs-Workflow.',
+                pages: [PAGE_CAP_AUTO_SCOPE, PAGE_CAP_AUTO_RAMP, PAGE_CAP_AUTO_OEE, PAGE_CAP_AUTO_DT_HMI, PAGE_CAP_AUTO_RUBRIC],
+                quiz: QUIZ_CAP_AUTO
             }
         ]
     });
