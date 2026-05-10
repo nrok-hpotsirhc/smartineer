@@ -3511,6 +3511,13 @@
                 summary: 'Zero Trust Architecture nach NIST SP 800-207 / 800-207A, Cloud Shared Responsibility und CSA CCM v4, Kubernetes-/Container-Hardening (NSA/CISA Guide v1.2, Pod Security Standards, Sigstore + SLSA + SBOM), IAM/PAM, Workload Identity (SPIFFE/SPIRE), Service-Mesh-Mikrosegmentierung.',
                 pages: [PAGE_ARCH_ZT, PAGE_ARCH_CLOUD, PAGE_ARCH_K8S, PAGE_ARCH_IAM],
                 quiz: QUIZ_ARCH
+            },
+            {
+                id: 'ir',
+                title: 'Kapitel 8 — Incident Response, Forensik und Malware-Analyse',
+                summary: 'IR-Lifecycle nach NIST SP 800-61r2 und ISO/IEC 27035, Detection und Triage in SIEM/EDR/SOAR, digitale Forensik (NIST SP 800-86, ISO/IEC 27037/27041/27042/27043, ACPO Good Practice), Chain of Custody, Speicher-/Datentraegerforensik, Malware-Triage (statisch/dynamisch, MITRE ATT&CK, MISP/STIX/TAXII), Ransomware-Playbooks (CISA #StopRansomware), Lessons Learned.',
+                pages: [PAGE_IR_LIFECYCLE, PAGE_IR_DETECT, PAGE_IR_FORENSIK, PAGE_IR_MALWARE],
+                quiz: QUIZ_IR
             }
         ]
     });

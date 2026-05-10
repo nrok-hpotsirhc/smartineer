@@ -76,7 +76,7 @@ Pro Paket: ≥4 Lehrseiten (AGENTS §18.6) + ≥50 quellenbelegte MCQ (AGENTS §
 - **Akzeptanz:** Neues Kapitel mit ≥4 Lehrseiten + ≥50 quellenbelegten MCQ; `index`/SW nur anpassen falls neue Datei noetig, sonst CACHE_VERSION bumpen.
 
 ### P-CYBERSEC-08 — Incident Response, Forensik und Malware-Analyse
-- **Status:** ready
+- **Status:** in-progress
 - **Datei:** `js/data/schulung_master_et_cybersec.js`
 - **Schwerpunkte:** NIST SP 800-61r2, ISO/IEC 27035, Chain of Custody, Speicher-/Datentraegerforensik, SIEM/EDR-Triage, Malware-Triage, Ransomware-Playbooks, Lessons Learned.
 - **Akzeptanz:** Neues Kapitel mit ≥4 Lehrseiten + ≥50 quellenbelegten MCQ sowie mindestens 2 Fall-/PBQ-Aufgaben.
