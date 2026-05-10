@@ -2923,6 +2923,539 @@
         }
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 7 — Security Architecture, Zero Trust, Cloud/Kubernetes-Security
+    // (PRODUKTIV, Paket P-CYBERSEC-07)
+    // Quellen: NIST SP 800-207 "Zero Trust Architecture" (Aug. 2020); NIST SP
+    // 800-207A "ZT Architecture Model for Access Control in Cloud-Native
+    // Applications" (Sep. 2023); NIST SP 800-63-3 (Digital Identity Guidelines,
+    // Rev. 4 Draft 2024); NIST SP 800-144 "Guidelines on Security and Privacy
+    // in Public Cloud Computing" (Dez. 2011); NIST SP 800-210 "General Access
+    // Control Guidance for Cloud Systems" (Juli 2020); NIST SP 800-190
+    // "Application Container Security Guide" (Sep. 2017); NIST SP 800-204C
+    // "Implementation of DevSecOps for a Microservices-based Application with
+    // Service Mesh" (Maerz 2022); NSA/CISA "Kubernetes Hardening Guide" v1.2
+    // (Aug. 2022); CIS Kubernetes Benchmark v1.9 (2024); CSA "Cloud Controls
+    // Matrix v4.0.10" (2024); CSA "Top Threats to Cloud Computing 2024
+    // (Pandemic Eleven)"; OWASP API Security Top 10 (2023); OWASP K8s Top 10
+    // (2022); MITRE ATT&CK Containers v15 (2024); MITRE ATT&CK Cloud v15;
+    // SLSA v1.0 (2023); CycloneDX 1.6 (2024); RFC 6749 (OAuth 2.0); RFC 9068
+    // (JWT Profile fuer OAuth 2.0 Access Tokens, 2021); OpenID Connect Core 1.0
+    // (incorp. 2014, latest errata 2023); FIPS 140-3 (2019).
+    // ----------------------------------------------------------------------
+
+    const PAGE_ARCH_ZT = {
+        title: '7.1 Zero Trust Architecture (NIST SP 800-207)',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die sieben Grundsaetze ("Tenets") aus NIST SP 800-207 nennen, (2) Policy Decision Point (PDP) und Policy Enforcement Point (PEP) im logischen Modell unterscheiden, (3) die drei Implementierungs-Ansaetze (ICA, EIG, MGC) gegeneinander abgrenzen, (4) typische Migrationsfehler vom Perimeter-Modell zur ZTA benennen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Klassisches Perimeter-/Defense-in-Depth-Modell, Identity- und Asset-Inventory aus Kap. 5 (ISO/IEC 27001:2022 A.5/A.8), Grundbegriffe IAM, Kapitel 4 (S-SDLC) fuer den Begriff "Resource".</p>'
+
+            + '<h4>7.1.1 Definition und Abgrenzung</h4>'
+            + '<p>NIST SP 800-207 (Aug. 2020) definiert <strong>Zero Trust (ZT)</strong> als Sammlung von Konzepten, die die Unsicherheit bei der Durchsetzung praeziser, "least-privilege"-basierter Zugriffsentscheidungen pro Anfrage in als kompromittiert geltenden Netzen minimieren. <strong>Zero Trust Architecture (ZTA)</strong> ist die konkrete Umsetzung in Komponenten, Workflows und Policies. Kernidee: <em>kein impliziter Vertrauenskredit aus Netz-Lokation</em> ("never trust, always verify"); jede Anfrage wird kontextabhaengig (Identitaet, Geraete-Posture, Sensitivitaet, Verhalten) erneut bewertet.</p>'
+
+            + '<h4>7.1.2 Sieben Tenets nach SP 800-207 §2.1</h4>'
+            + '<ol>'
+            + '<li>Alle Datenquellen und Compute-Dienste sind <em>Resources</em>.</li>'
+            + '<li>Jegliche Kommunikation wird unabhaengig vom Netzort gesichert.</li>'
+            + '<li>Zugriff auf einzelne Unternehmens-Ressourcen wird <em>per Session</em> entschieden.</li>'
+            + '<li>Die Entscheidung ist <em>dynamisch</em> auf Basis von Identitaet, Geraet, Verhalten, Umgebung.</li>'
+            + '<li>Das Unternehmen monitort und misst die Integritaet aller eigenen und assoziierten Assets.</li>'
+            + '<li>Authentifizierung und Autorisierung sind streng durchgesetzt, bevor Zugriff erteilt wird.</li>'
+            + '<li>Das Unternehmen sammelt so viel Information wie moeglich ueber Asset-Zustand, Netz-Infrastruktur und Kommunikation und nutzt sie zur Verbesserung der Security-Posture.</li>'
+            + '</ol>'
+
+            + '<h4>7.1.3 Logisches Kern-Modell: PDP/PEP</h4>'
+            + '<p>SP 800-207 §3.1 trennt die Zugriffslogik in drei logische Komponenten:</p>'
+            + '<ul>'
+            + '<li><strong>Policy Engine (PE)</strong>: trifft die Entscheidung "grant / deny / revoke" anhand einer Trust-Algorithm-Auswertung.</li>'
+            + '<li><strong>Policy Administrator (PA)</strong>: setzt die Entscheidung um (Token ausstellen, Verbindung oeffnen/schliessen).</li>'
+            + '<li><strong>Policy Enforcement Point (PEP)</strong>: erzwingt die Verbindung zwischen Subjekt und Resource. Liegt logisch vor jeder Resource.</li>'
+            + '</ul>'
+            + '<p>PE + PA bilden gemeinsam den <strong>Policy Decision Point (PDP)</strong>. Daten-Quellen fuer die Entscheidung: CDM-System (Continuous Diagnostics &amp; Mitigation), Threat-Intel, Activity-Logs, Identity-/Access-Management, PKI, SIEM, Branchen-Compliance.</p>'
+
+            + '<h4>7.1.4 Drei Implementierungs-Ansaetze (SP 800-207 §3.2)</h4>'
+            + '<table><thead><tr><th>Ansatz</th><th>Idee</th><th>Typische Technik</th></tr></thead><tbody>'
+            + '<tr><td><strong>Identity-Centric Approach (ICA)</strong></td><td>Identitaet ist primaerer Policy-Treiber</td><td>Conditional Access (Entra ID), SAML/OIDC mit Risiko-Signalen</td></tr>'
+            + '<tr><td><strong>Enhanced Identity Governance (EIG)</strong></td><td>ZT als Erweiterung etablierter IAM-Plattformen</td><td>RBAC + ABAC, dynamische Gruppen, Geraete-Compliance-Bedingungen</td></tr>'
+            + '<tr><td><strong>Micro-Segmentation</strong></td><td>L3/L4-/L7-Isolation pro Workload</td><td>Host-Firewall pro Workload, Service Mesh mTLS, SDN-Policies</td></tr>'
+            + '<tr><td><strong>Network Infrastructure / SDP (MGC)</strong></td><td>Software-Defined Perimeter, Single-Packet-Authorization</td><td>SDP-Gateways, ZTNA-Broker</td></tr>'
+            + '</tbody></table>'
+            + '<p>NIST SP 800-207A (Sep. 2023) ergaenzt das ZTA-Modell fuer Cloud-native Anwendungen mit <strong>Identity-Tier</strong>, <strong>Application/Workload-Tier</strong> und <strong>Service-Mesh-Tier</strong> als drei Durchsetzungsebenen.</p>'
+
+            + '<h4>Worked Example: PDP/PEP-Mapping fuer eine HR-Anwendung</h4>'
+            + '<p>Eine personalbezogene Web-App (HR-Tool) liegt in einem privaten Subnetz und wird ueber einen Cloud-Reverse-Proxy publiziert. Mitarbeitende sollen vom Firmen-Notebook und vom mobilen Endgeraet zugreifen koennen, externe Dienstleister nur per zeitlich begrenzter Genehmigung. Wie verteilt sich die Logik?</p>'
+            + '<ol>'
+            + '<li><em>PEP-Wahl.</em> Reverse-Proxy mit ZTNA-Modul vor der Anwendung; zusaetzlich service-mesh-internes mTLS zwischen API-Gateway und Backend (zwei kaskadierte PEPs).</li>'
+            + '<li><em>PDP-Daten.</em> IdP liefert Authentifizierung (OIDC), MDM liefert Geraete-Posture (Verschluesselung, Patch-Stand), CMDB liefert Sensitivitaet "personenbezogen", Risk-Engine liefert Reise-/Login-Anomalien.</li>'
+            + '<li><em>Trust-Algorithm.</em> Score-basiert: Identitaet * Geraet * Kontext &ge; Schwellwert; ungewoehnliche Geo-/Zeitkombinationen senken den Score, MFA-Step-up erforderlich.</li>'
+            + '<li><em>Session-Granularitaet.</em> Token mit kurzer Lebensdauer (15 min, RFC 9068), Re-Evaluation bei jeder API-Anfrage durch das Mesh; Revoke ueber zentrale Token-Liste.</li>'
+            + '<li><em>Logging.</em> Alle PEP-Entscheidungen mit Begruendung an SIEM (UEBA-Korrelation), Tenet 5/7.</li>'
+            + '</ol>'
+            + '<p><em>Ergebnis.</em> Zwei kaskadierte PEPs (Edge + Mesh) plus ein logischer PDP (PE + PA bei der Identity-Plattform). Die Migration ist ein klassischer EIG-Ansatz, ergaenzt um Mikrosegmentierung im Mesh.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche Komponente trifft im NIST-Modell die Entscheidung, welche setzt sie an der Resource durch?</li>'
+            + '<li>Warum reicht "VPN ins Unternehmensnetz" nicht als Zero-Trust-Implementierung?</li>'
+            + '<li>Welcher der drei Implementierungs-Ansaetze passt am besten zu einer Cloud-nativen Microservice-Anwendung mit Service Mesh?</li>'
+            + '<li>Welche Datenquellen versorgen die Policy Engine im Trust-Algorithm?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> "ZT = nur MFA und VPN ablosen". <em>Korrekt:</em> ZT verlangt zusaetzlich Resource-bezogene Policy, dynamische Bewertung pro Session und Telemetrie-getriebene Re-Evaluation (Tenets 3-5).</li>'
+            + '<li><em>Fehler:</em> Einzigen PEP an die Netzgrenze setzen ("Edge-Only-ZT"). <em>Korrekt:</em> SP 800-207 §3.1 fordert PEP <em>vor jeder Resource</em>; Mikrosegmentierung oder Mesh-mTLS sind Teil davon.</li>'
+            + '<li><em>Fehler:</em> Geraete-Posture nicht in den Trust-Algorithm einbinden. <em>Korrekt:</em> Tenet 5 fordert kontinuierliche Asset-Integritaets-Bewertung; ein nicht-gepatchtes Geraet darf trotz gueltiger Identitaet weniger Zugriff erhalten.</li>'
+            + '<li><em>Fehler:</em> ZTA mit ZTNA gleichsetzen. <em>Korrekt:</em> ZTNA (Zero Trust Network Access) ist ein <em>Produktkategorie</em>-Ansatz fuer Remote-Access; ZTA ist die ganze Architektur (auch innerhalb des Rechenzentrums).</li>'
+            + '<li><em>Fehler:</em> Lange Session-Tokens (24h+) als ZT-konform akzeptieren. <em>Korrekt:</em> Tenet 3 ("per Session"); typisch 5-15 min Access-Token mit Refresh-Flow (RFC 6749/9068).</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ein mittelstaendisches Maschinenbau-Unternehmen betreibt drei Standorte (DE/CZ/MX), eine SAP-S/4-HANA-Cloud-Edition und ein produktives OT-Netz (Kap. 3). Skizzieren Sie (a) den ZTA-Migrationspfad nach SP 800-207, (b) die drei aus Ihrer Sicht wichtigsten PEPs, (c) drei Datenquellen, die in den Trust-Algorithm einfliessen muessen, und (d) zwei Themen, die ZTA <em>nicht</em> loest und die zusaetzlich behandelt werden muessen. Loesungsskizze ueber Kapitel-Quiz, P-CYBERSEC-CAPSTONE und P-CYBERSEC-08.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-207 "Zero Trust Architecture" (Aug. 2020), §2.1 Tenets, §3 Logical Components; NIST SP 800-207A (Sep. 2023), §3 Cloud-Native ZTA; NIST SP 800-63-3/-4 Draft (Identity Assurance); CISA "Zero Trust Maturity Model" v2.0 (Apr. 2023); RFC 6749 §1.4, RFC 9068 §3.</em></p>'
+    };
+
+    const PAGE_ARCH_CLOUD = {
+        title: '7.2 Cloud-Sicherheits-Architektur und Shared Responsibility',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) das Shared-Responsibility-Modell fuer IaaS, PaaS und SaaS gegeneinander abgrenzen, (2) die zentralen Domaenen der CSA Cloud Controls Matrix v4.0.10 nennen, (3) die Aufgabe von CSPM und CWPP einordnen, (4) die "Pandemic Eleven" Top-Threats 2024 typischen Controls zuordnen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Kapitel 5 (ISO/IEC 27001:2022 ISMS, ISO/IEC 27017/27018), 7.1 (PDP/PEP-Modell); Grundbegriffe der Cloud-Service-Modelle (IaaS/PaaS/SaaS) nach NIST SP 800-145; Container- und Virtualisierungs-Grundlagen.</p>'
+
+            + '<h4>7.2.1 Shared Responsibility</h4>'
+            + '<p>Das Modell verteilt Sicherheitspflichten zwischen Cloud-Provider (CSP) und Kunden. NIST SP 800-144 §4 und CSA CCM v4 unterscheiden drei Grundtypen:</p>'
+            + '<table><thead><tr><th>Schicht</th><th>IaaS</th><th>PaaS</th><th>SaaS</th></tr></thead><tbody>'
+            + '<tr><td>Daten / Klassifikation</td><td>Kunde</td><td>Kunde</td><td>Kunde</td></tr>'
+            + '<tr><td>Zugriff / Identitaeten</td><td>Kunde</td><td>Kunde</td><td>Kunde (Provisionierung), CSP (Plattform)</td></tr>'
+            + '<tr><td>Anwendung</td><td>Kunde</td><td>Kunde (Code) / CSP (Runtime)</td><td>CSP</td></tr>'
+            + '<tr><td>OS / Middleware / Runtime</td><td>Kunde</td><td>CSP</td><td>CSP</td></tr>'
+            + '<tr><td>Hypervisor / Host / Netz</td><td>CSP</td><td>CSP</td><td>CSP</td></tr>'
+            + '<tr><td>Physische Infrastruktur</td><td>CSP</td><td>CSP</td><td>CSP</td></tr>'
+            + '</tbody></table>'
+            + '<p>Wichtig: <em>Daten und Identitaeten verbleiben immer beim Kunden</em>. Das ist die Hauptursache der "Pandemic Eleven"-Top-Threats (Misconfiguration, Insufficient IAM, Insecure APIs).</p>'
+
+            + '<h4>7.2.2 CSA Cloud Controls Matrix v4.0.10 (2024)</h4>'
+            + '<p>17 Domaenen, 197 Controls. Auswahl der wichtigsten Domaenen:</p>'
+            + '<ul>'
+            + '<li><strong>A&amp;A</strong> Audit &amp; Assurance</li>'
+            + '<li><strong>AIS</strong> Application &amp; Interface Security</li>'
+            + '<li><strong>BCR</strong> Business Continuity Mgmt &amp; Operational Resilience</li>'
+            + '<li><strong>CCC</strong> Change Control &amp; Configuration Management</li>'
+            + '<li><strong>CEK</strong> Cryptography, Encryption &amp; Key Management</li>'
+            + '<li><strong>DCS</strong> Datacenter Security</li>'
+            + '<li><strong>DSP</strong> Data Security &amp; Privacy Lifecycle Management</li>'
+            + '<li><strong>GRC</strong> Governance, Risk &amp; Compliance</li>'
+            + '<li><strong>IAM</strong> Identity &amp; Access Management</li>'
+            + '<li><strong>IPY</strong> Interoperability &amp; Portability</li>'
+            + '<li><strong>IVS</strong> Infrastructure &amp; Virtualization Security</li>'
+            + '<li><strong>LOG</strong> Logging &amp; Monitoring</li>'
+            + '<li><strong>SEF</strong> Security Incident Mgmt, E-Discovery &amp; Cloud Forensics</li>'
+            + '<li><strong>STA</strong> Supply Chain Mgmt, Transparency &amp; Accountability</li>'
+            + '<li><strong>TVM</strong> Threat &amp; Vulnerability Management</li>'
+            + '</ul>'
+            + '<p>CCM v4 ist Mapping-konform zu ISO/IEC 27001:2022, ISO/IEC 27017:2015, ISO/IEC 27018:2019, NIST SP 800-53 Rev. 5, PCI DSS v4 und BSI C5:2020 (mit Mapping-Tabellen).</p>'
+
+            + '<h4>7.2.3 CSPM, CWPP, CIEM, CNAPP</h4>'
+            + '<table><thead><tr><th>Tool-Kategorie</th><th>Aufgabe</th><th>Typische Findings</th></tr></thead><tbody>'
+            + '<tr><td><strong>CSPM</strong> Cloud Security Posture Management</td><td>Konfigurationsbewertung der Control Plane</td><td>Public-Bucket, fehlende Verschluesselung, offene SG, MFA-Luecken</td></tr>'
+            + '<tr><td><strong>CWPP</strong> Cloud Workload Protection Platform</td><td>Schutz von VMs/Containern/Serverless zur Laufzeit</td><td>Unbekannte Prozesse, Drift, CVEs, Container-Escapes</td></tr>'
+            + '<tr><td><strong>CIEM</strong> Cloud Infrastructure Entitlement Management</td><td>Berechtigungs-Right-Sizing</td><td>Nicht genutzte IAM-Permissions, Toxic Combinations</td></tr>'
+            + '<tr><td><strong>CNAPP</strong> Cloud-Native Application Protection</td><td>Konvergenz CSPM + CWPP + CIEM + IaC-Scan + Image-Scan</td><td>End-to-End-Risikopfade ueber Schichten</td></tr>'
+            + '</tbody></table>'
+            + '<p>Gartner praegte CNAPP 2021 als Konsolidierungs-Begriff; in der Praxis ist die Unterscheidung CSPM/CWPP didaktisch wichtig (Konfiguration vs. Laufzeit), aber Produkte verschwimmen.</p>'
+
+            + '<h4>7.2.4 Top Threats 2024 ("Pandemic Eleven")</h4>'
+            + '<p>CSA "Top Threats to Cloud Computing 2024":</p>'
+            + '<ol>'
+            + '<li>Misconfiguration &amp; inadequate Change Control</li>'
+            + '<li>Identity, Credential, Access &amp; Key Management</li>'
+            + '<li>Insecure Interfaces &amp; APIs</li>'
+            + '<li>Lack of Cloud Security Strategy/Architecture</li>'
+            + '<li>Insecure Software Development</li>'
+            + '<li>Unsecured Third-Party Resources</li>'
+            + '<li>System Vulnerabilities</li>'
+            + '<li>Accidental Cloud Data Disclosure</li>'
+            + '<li>Misconfiguration &amp; exploitation of Serverless / Container Workloads</li>'
+            + '<li>Organized Crime / Hackers / APT</li>'
+            + '<li>Cloud Storage Data Exfiltration</li>'
+            + '</ol>'
+
+            + '<h4>Worked Example: Public-Bucket-Vorfall in einer SaaS-Migration</h4>'
+            + '<p>Ein Hersteller migriert eine Service-Wissensdatenbank zu einer SaaS-Loesung mit S3-kompatiblem Object-Storage. Nach Migration entdeckt ein extern beauftragter Pentester einen oeffentlich lesbaren Bucket mit 12 GB Service-Reports inkl. Klarnamen. Wie ist das Ereignis nach CCM/Top-Threats einzuordnen und welche Controls greifen?</p>'
+            + '<ol>'
+            + '<li><em>Top-Threat-Klassifikation.</em> Threat 1 (Misconfiguration) und Threat 8 (Accidental Cloud Data Disclosure); typisch fuer CSP-Standardeinstellungen, die seit 2022 zwar block-public sind, in Migrationen aber oft umgangen werden.</li>'
+            + '<li><em>Verantwortung.</em> Shared Responsibility: Datenklassifikation und Bucket-Policy gehoeren zum Kunden-Anteil &mdash; CSP haftet hier nicht.</li>'
+            + '<li><em>Controls (CCM v4).</em> AIS-04 (Application Security Baseline), DSP-13 (Data Protection), IAM-09 (Privileged Access), LOG-12 (Audit Logs Protection), CCC-04 (Change Mgmt). Konkret: Block-Public-Access erzwingen, Bucket-Encryption (CEK-03), MFA-Delete, Server-Access-Logs.</li>'
+            + '<li><em>Detektion ex ante.</em> CSPM-Regel "S3 public read denied" + IaC-Scan (z.B. Checkov, tfsec) im PR-Workflow; CWPP nicht relevant (kein Workload-Compromise).</li>'
+            + '<li><em>Compliance-Pfad.</em> DSGVO Art. 33 Meldung 72h, ISO/IEC 27001 A.5.24/A.5.26 (Incident Mgmt), NIS2 Art. 23 (signifikanter Vorfall). Lessons-Learned in Change-Mgmt zurueckspielen.</li>'
+            + '</ol>'
+            + '<p><em>Ergebnis.</em> Misconfiguration als Hauptursache; Pflicht-Controls existieren in CCM v4, mussten aber in der Migrations-Pipeline durch CSPM/IaC-Scan automatisiert werden. Keine Verschiebung der Verantwortung an den CSP moeglich.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche Schicht im SaaS-Modell verbleibt zwingend in der Kundenverantwortung?</li>'
+            + '<li>Wofuer ist CSPM zustaendig, wofuer CWPP &mdash; und warum loest CSPM keine Container-Escape-Vorfaelle?</li>'
+            + '<li>Welche drei Top-Threats der "Pandemic Eleven" lassen sich primaer mit IaC-Scanning + CSPM verhindern?</li>'
+            + '<li>Welche CCM-Domaene adressiert Schluessel- und Verschluesselungs-Controls?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> "Cloud-Provider ist immer fuer Verschluesselung verantwortlich". <em>Korrekt:</em> Provider verschluesselt Speicher serverseitig, aber Schluesselmanagement (BYOK/HYOK) und Klassifikation bleiben Kunde &mdash; insbesondere fuer regulierte Daten (DSGVO, BSI C5).</li>'
+            + '<li><em>Fehler:</em> CSPM-Findings als End-Status interpretieren. <em>Korrekt:</em> CSPM liefert Konfigurations-Hygiene, nicht Laufzeit-Sichtbarkeit; CWPP/EDR ergaenzen.</li>'
+            + '<li><em>Fehler:</em> CCM und ISO/IEC 27001 als Alternativen behandeln. <em>Korrekt:</em> CCM mappt explizit auf ISO 27001/27017/27018, NIST SP 800-53 Rev. 5, PCI DSS v4 &mdash; sie ergaenzen sich.</li>'
+            + '<li><em>Fehler:</em> Multi-Cloud automatisch als sicherer einstufen. <em>Korrekt:</em> Multi-Cloud erhoeht Komplexitaet (CIEM-Sprawl, inkonsistente IAM-Modelle); Top-Threat 4 (fehlende Strategie) wird haeufiger.</li>'
+            + '<li><em>Fehler:</em> Serverless als "automatisch sicher" sehen. <em>Korrekt:</em> Top-Threat 9 listet Serverless explizit; Function-Berechtigungen, Eventquellen-Validation und Cold-Start-Secret-Handling sind Pflicht.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ein OT-naher Maschinenhersteller (Kap. 3) plant eine hybride Cloud-Architektur: Telemetrie ueber MQTT zu einem Cloud-IoT-Hub, Auswertung in Stream-Analytics, Visualisierung in einer SaaS-BI-Plattform. Definieren Sie (a) die Verantwortungsverteilung pro Schicht entlang Shared Responsibility, (b) drei Top-Threats mit hoechster Relevanz, (c) je ein konkretes CCM-v4-Control gegen jeden der drei Threats, (d) die Rolle von CSPM/CWPP/CIEM in der Architektur. Bewertung im Quiz und in P-CYBERSEC-CAPSTONE.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-145 (Cloud Definition, Sep. 2011); NIST SP 800-144 (Dez. 2011) §4 Service Models; NIST SP 800-210 (Juli 2020); CSA CCM v4.0.10 (2024); CSA "Top Threats to Cloud Computing &mdash; Pandemic Eleven 2024"; ISO/IEC 27017:2015; ISO/IEC 27018:2019; BSI C5:2020 Kriterienkatalog; Gartner CNAPP Definition (2021/2023 Update).</em></p>'
+    };
+
+    const PAGE_ARCH_K8S = {
+        title: '7.3 Kubernetes-, Container- und Image-Supply-Chain-Security',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) das Bedrohungsmodell einer Kubernetes-Plattform mit den vier Hauptangriffsflaechen (Control Plane, Worker, Network, Workload) beschreiben, (2) Pod Security Standards (Restricted/Baseline/Privileged) abgrenzen, (3) NSA/CISA Kubernetes Hardening Guide v1.2 (Aug. 2022) Kern-Empfehlungen nennen, (4) Image-Supply-Chain mit Sigstore + SLSA + SBOM einordnen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> Container-Grundlagen (cgroups, namespaces, seccomp, capabilities), 4.4 (Supply-Chain, SSDF), 7.1 (PDP/PEP), 7.2 (CWPP).</p>'
+
+            + '<h4>7.3.1 Bedrohungsmodell — vier Angriffsflaechen</h4>'
+            + '<table><thead><tr><th>Schicht</th><th>Typische Angriffe</th><th>MITRE ATT&amp;CK Containers</th></tr></thead><tbody>'
+            + '<tr><td>Control Plane (kube-apiserver, etcd, kubelet)</td><td>RBAC-Missbrauch, ungeschuetztes etcd, kube-apiserver mit anonymem Zugriff</td><td>T1610 Deploy Container, T1525 Implant Container Image</td></tr>'
+            + '<tr><td>Worker / Container Runtime</td><td>Container Escape (CVE-2022-0492, CVE-2024-21626 "Leaky Vessels"), priv. Container</td><td>T1611 Escape to Host</td></tr>'
+            + '<tr><td>Network</td><td>Pod-zu-Pod ohne NetworkPolicy, Ingress-Bypass, exponierter kubelet:10250</td><td>T1046 Network Service Discovery</td></tr>'
+            + '<tr><td>Workload / Image</td><td>Vulnerable Base-Image, Hard-coded Secrets, Backdoored Image</td><td>T1525 Implant Image</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>7.3.2 Pod Security Standards (Kubernetes 1.25+)</h4>'
+            + '<p>Loest die alten PodSecurityPolicies (entfernt in 1.25) ab. Drei Profile, durchgesetzt vom <em>PodSecurity Admission Controller</em>:</p>'
+            + '<ul>'
+            + '<li><strong>Privileged</strong>: keine Restriktionen; nur fuer System-Workloads.</li>'
+            + '<li><strong>Baseline</strong>: bekannte Privilege-Eskalationen verboten (kein hostNetwork, keine hostPath ausser zugelassene, keine privilegierten Container).</li>'
+            + '<li><strong>Restricted</strong>: Best-Practices fuer Anwendungs-Workloads &mdash; runAsNonRoot, allowPrivilegeEscalation=false, capabilities drop ALL, seccompProfile RuntimeDefault, readOnlyRootFilesystem empfohlen.</li>'
+            + '</ul>'
+            + '<p>Pro Namespace per Label gesetzt: <code>pod-security.kubernetes.io/enforce: restricted</code>, plus warn/audit-Modi.</p>'
+
+            + '<h4>7.3.3 NSA/CISA Kubernetes Hardening Guide v1.2 (Aug. 2022) — Kernpunkte</h4>'
+            + '<ol>'
+            + '<li><strong>Pod-Sicherheit:</strong> Non-root, ReadOnlyRootFS, no privileged, seccomp/AppArmor; Pod Security Standards Restricted.</li>'
+            + '<li><strong>Network Separation:</strong> NetworkPolicies (default-deny + explizite allow), Encryption-in-Transit (mTLS via Service Mesh), kein flat Pod-Netz.</li>'
+            + '<li><strong>Authentication / Authorization:</strong> RBAC mit least privilege; ClusterRole nur wenn unvermeidlich; Service-Account-Tokens per Audience scoped.</li>'
+            + '<li><strong>Logging / Audit:</strong> kube-apiserver Audit Policy "Metadata"+; Logs ausserhalb des Clusters speichern (SIEM).</li>'
+            + '<li><strong>Upgrade-Strategie:</strong> regelmaessige Patches, automatisierte CIS-Benchmarks v1.9.</li>'
+            + '<li><strong>Threat Detection:</strong> Falco / KubeArmor / Tetragon; Anomalien Pod-zu-Pod, Process-Tree.</li>'
+            + '</ol>'
+
+            + '<h4>7.3.4 Image-Supply-Chain (SLSA + Sigstore + SBOM)</h4>'
+            + '<table><thead><tr><th>Stufe</th><th>Forderung</th><th>Tool/Beispiel</th></tr></thead><tbody>'
+            + '<tr><td>SLSA Level 1</td><td>Build-Skript dokumentiert, Provenance generiert</td><td>GitHub-Actions-Workflow + slsa-github-generator</td></tr>'
+            + '<tr><td>SLSA Level 2</td><td>Versioning + signierte Provenance vom Builder</td><td>Cosign sign-blob mit OIDC-Token</td></tr>'
+            + '<tr><td>SLSA Level 3</td><td>Gehosteter, isolierter Build, Source/Build-Provenance nicht-faelschbar</td><td>SLSA-konforme Builder-Plattform mit Hardware Root-of-Trust</td></tr>'
+            + '<tr><td>SLSA Level 4</td><td>Two-person Reviews, hermetische, reproducible Builds</td><td>Bazel + Reproducible-Builds, hermetic-toolchain</td></tr>'
+            + '</tbody></table>'
+            + '<p><strong>Sigstore</strong>: Cosign signiert OCI-Images mit ephemeralen Keys aus Fulcio (OIDC-CA), Eintrag im Rekor-Transparency-Log. Verifikation in Kubernetes ueber Admission-Controller (z.B. <em>policy-controller</em>, <em>Kyverno verifyImages</em>, <em>Connaisseur</em>).</p>'
+            + '<p><strong>SBOM</strong>: SPDX 2.3 oder CycloneDX 1.6, generiert mit Syft/Anchore Grype/Trivy; SBOM als OCI-Artefakt neben dem Image (cosign attach sbom). Abgleich gegen CISA KEV / NVD-CVE im CWPP-Pfad.</p>'
+
+            + '<h4>Worked Example: Restricted-Profile fuer eine Java-Microservice-Plattform</h4>'
+            + '<p>Ein Team migriert eine Java-Spring-Boot-Anwendung von einer privilegierten Tomcat-VM in einen K8s-Cluster und soll Pod Security Standards "restricted" einhalten. Welche Aenderungen sind noetig?</p>'
+            + '<ol>'
+            + '<li><em>Image.</em> Distroless Base-Image (gcr.io/distroless/java17), nicht-root User (UID 65532), keine Shell -&gt; reduziert Capabilities.</li>'
+            + '<li><em>SecurityContext.</em> <code>runAsNonRoot: true</code>, <code>runAsUser: 65532</code>, <code>allowPrivilegeEscalation: false</code>, <code>capabilities.drop: [ALL]</code>, <code>readOnlyRootFilesystem: true</code>, <code>seccompProfile.type: RuntimeDefault</code>.</li>'
+            + '<li><em>Volumes.</em> Schreibbarer EmptyDir nur fuer /tmp und /var/cache/spring; kein hostPath.</li>'
+            + '<li><em>Network.</em> Default-Deny NetworkPolicy im Namespace; explizite Egress-Regel zu DB-Subnetz und Egress-Proxy fuer externe APIs.</li>'
+            + '<li><em>Supply Chain.</em> Image-Build mit slsa-github-generator (SLSA L3), Cosign-Signatur ueber GitHub-OIDC, SBOM-Anhang; Cluster-Admission via Kyverno verifyImages mit Public-Key/Identity-Pinning.</li>'
+            + '<li><em>Beobachtung.</em> Falco-Regel "exec into container" fuer Audit; kube-apiserver Audit-Policy auf RequestResponse fuer den Namespace.</li>'
+            + '</ol>'
+            + '<p><em>Ergebnis.</em> Restricted-Profile durchsetzbar, Supply-Chain ueber SLSA L3 + Cosign + SBOM abgedeckt; Detektion ueber Falco-Regelwerk und kube-apiserver-Audit.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welche vier Angriffsflaechen unterscheidet das K8s-Bedrohungsmodell?</li>'
+            + '<li>Welche Felder im SecurityContext sind im Pod-Security-Standard "restricted" Pflicht?</li>'
+            + '<li>Welche Rolle hat Rekor in Sigstore, und welcher Schritt ersetzt klassische langlebige Signing-Keys?</li>'
+            + '<li>Warum ersetzt eine NetworkPolicy keinen Service-Mesh-mTLS und umgekehrt?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> "Containers haben eigene Kernels, also sicher". <em>Korrekt:</em> Container teilen den Host-Kernel; Escapes nutzen Kernel-Bugs (CVE-2024-21626) oder Misconfigurations (privileged, hostPID).</li>'
+            + '<li><em>Fehler:</em> RBAC-ClusterRole "edit" fuer Anwender. <em>Korrekt:</em> Least Privilege; pro Team Namespace-scoped Role mit nur den noetigen Verben.</li>'
+            + '<li><em>Fehler:</em> Image-Tags wie <code>:latest</code> in Production-Manifesten. <em>Korrekt:</em> Pinning auf SHA256-Digest <code>image@sha256:...</code> + Cosign-Verifikation; sonst kein Replay-Schutz.</li>'
+            + '<li><em>Fehler:</em> Pod-Security-Policies verwenden. <em>Korrekt:</em> PSP entfernt in 1.25; Pod Security Standards + Admission oder externer Policy-Controller (Kyverno, OPA Gatekeeper).</li>'
+            + '<li><em>Fehler:</em> kubelet Port 10250 ohne Authn/Authz. <em>Korrekt:</em> Anonymous-Auth disabled, Webhook-Authz aktiviert; Worker nicht direkt aus dem Internet erreichbar.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ihr Cluster wird von zwei Teams genutzt (App-Team A in Namespace <em>finance</em>, App-Team B in Namespace <em>logistics</em>). Skizzieren Sie (a) das RBAC-Modell mit Rollen / RoleBindings, (b) drei NetworkPolicies pro Namespace (default-deny + zwei Allow), (c) die Pod-Security-Standard-Konfiguration je Namespace, (d) drei konkrete Falco-/Tetragon-Regeln fuer Anomalie-Detektion. Loesungen werden im Quiz und P-CYBERSEC-08 (IR/Forensik) eingeuebt.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NSA/CISA "Kubernetes Hardening Guide" v1.2 (Aug. 2022); CIS Kubernetes Benchmark v1.9 (2024); Kubernetes Pod Security Standards (k8s.io, Stand 1.30); NIST SP 800-190 "Application Container Security" (Sep. 2017); SLSA v1.0 Specification (2023); Sigstore Cosign Documentation (2024); MITRE ATT&amp;CK for Containers v15 (2024); CycloneDX 1.6, SPDX 2.3.</em></p>'
+    };
+
+    const PAGE_ARCH_IAM = {
+        title: '7.4 IAM, PAM, Secrets-Management und Mikrosegmentierung',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) RBAC, ABAC und ReBAC unterscheiden und ein passendes Modell auswaehlen, (2) Privileged Access Management (PAM) mit Just-in-Time- und Session-Recording-Anforderungen einordnen, (3) Secrets-Management-Patterns (zentral, Just-in-Time, Workload Identity) gegeneinander abgrenzen, (4) Mikrosegmentierung im Service Mesh (mTLS, AuthZ-Policies) umsetzen.</blockquote>'
+
+            + '<p><strong>Vorwissen.</strong> 7.1 (Tenets, PDP/PEP), 7.2 (CIEM), 7.3 (Service Account Tokens, Workload Identity), Kapitel 1 (Asymmetrische Kryptographie, X.509), Kapitel 5 (ISO/IEC 27001:2022 A.5.15-A.5.18, A.8.2-A.8.5).</p>'
+
+            + '<h4>7.4.1 Authentifizierungs- und Autorisierungs-Modelle</h4>'
+            + '<table><thead><tr><th>Modell</th><th>Idee</th><th>Beispiel</th></tr></thead><tbody>'
+            + '<tr><td><strong>RBAC</strong></td><td>Rollen buendeln Permissions, Subjekte werden Rollen zugewiesen</td><td>Active Directory Groups, K8s ClusterRole/RoleBinding</td></tr>'
+            + '<tr><td><strong>ABAC</strong></td><td>Policies werten Attribute (Subjekt, Objekt, Aktion, Kontext) aus</td><td>OPA/Rego, AWS IAM Conditions, XACML 3.0</td></tr>'
+            + '<tr><td><strong>ReBAC</strong></td><td>Beziehungen als Graph; Autorisierung folgt Kanten</td><td>Google Zanzibar, OpenFGA, SpiceDB</td></tr>'
+            + '<tr><td><strong>PBAC</strong></td><td>Policy-as-Code-Engine zentralisiert Entscheidungen (Mischform)</td><td>OPA, Cedar (AWS Verified Permissions, 2023)</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>7.4.2 Authentifizierung — OAuth 2.0, OIDC, Passkeys</h4>'
+            + '<ul>'
+            + '<li><strong>OAuth 2.0</strong> (RFC 6749): Authorization-Framework, vier Flows; Authorization-Code-Flow mit PKCE (RFC 7636) ist heute Standard auch fuer Native/SPAs.</li>'
+            + '<li><strong>OIDC</strong> (OpenID Connect Core 1.0): ID-Token (JWT) auf OAuth aufgesetzt; Standard-Claims sub, iss, aud, exp, iat, nonce.</li>'
+            + '<li><strong>JWT-Profile fuer Access-Tokens</strong> (RFC 9068, 2021): standardisiert <code>typ: at+jwt</code>, Pflicht-Claims sub, iss, aud, exp, scope.</li>'
+            + '<li><strong>WebAuthn/FIDO2 (Passkeys)</strong>: Phishing-resistente MFA gemaess NIST SP 800-63-3 AAL3-Anforderung; ersetzt zunehmend SMS-OTP/TOTP.</li>'
+            + '<li><strong>SAML 2.0</strong>: aelterer SSO-Standard, weiter relevant fuer Enterprise-SaaS; mit OIDC oft parallel betrieben.</li>'
+            + '</ul>'
+
+            + '<h4>7.4.3 Privileged Access Management (PAM)</h4>'
+            + '<p>NIST SP 800-53 Rev. 5 AC-2(7), AC-6, AC-17(9) und ISO/IEC 27001:2022 A.5.15/A.8.2 fordern dedizierten Schutz privilegierter Konten. Kernfunktionen einer PAM-Plattform:</p>'
+            + '<ul>'
+            + '<li><strong>Vault</strong>: zentraler Tresor fuer Privileged-Credentials, automatische Rotation.</li>'
+            + '<li><strong>Just-in-Time (JIT)</strong>: temporaere Mitgliedschaft in privilegierten Gruppen (z.B. Entra PIM, AWS IAM Identity Center Permission Sets, GCP Privileged Access Manager 2024).</li>'
+            + '<li><strong>Session Recording / Proxy</strong>: Bastion mit RDP-/SSH-Aufzeichnung, Befehlsfilter; Beweissicherung fuer Forensik (Kap. 8).</li>'
+            + '<li><strong>MFA-Step-up</strong>: zusaetzliche Authentifizierung beim Eintritt in privilegierten Kontext.</li>'
+            + '<li><strong>Approval-Workflow</strong>: Vier-Augen-Prinzip fuer kritische Aktionen (z.B. KMS-Schluessel-Loeschung, IAM-Role-Zuweisung).</li>'
+            + '</ul>'
+
+            + '<h4>7.4.4 Secrets-Management und Workload Identity</h4>'
+            + '<table><thead><tr><th>Pattern</th><th>Beschreibung</th><th>Beispiel</th></tr></thead><tbody>'
+            + '<tr><td><strong>Statische Secrets</strong></td><td>Hard-coded oder in <code>.env</code></td><td>Anti-Pattern; Quelle vieler Vorfaelle (Top-Threat 2/3)</td></tr>'
+            + '<tr><td><strong>Zentraler Tresor</strong></td><td>Pull aus Vault/AWS Secrets Manager/Azure Key Vault</td><td>HashiCorp Vault KV2, AWS Secrets Manager mit Rotation-Lambdas</td></tr>'
+            + '<tr><td><strong>Just-in-Time Credentials</strong></td><td>Credentials werden bei Anfrage erzeugt und nach TTL invalidiert</td><td>Vault Database Secret Engine</td></tr>'
+            + '<tr><td><strong>Workload Identity</strong></td><td>Workload erhaelt Identitaet aus Plattform; kein Secret im Code</td><td>SPIFFE/SPIRE (CNCF), Azure Workload Identity, AWS IRSA, GCP Workload Identity Federation</td></tr>'
+            + '</tbody></table>'
+            + '<p><strong>SPIFFE</strong> (Secure Production Identity Framework For Everyone): standardisiert Workload-Identitaet als <em>SPIFFE ID</em> (URI-Form <code>spiffe://trust-domain/path</code>) und liefert sie als <strong>SVID</strong> (X.509 oder JWT). <strong>SPIRE</strong> ist die Referenz-Implementierung; CNCF-Graduated 2022.</p>'
+
+            + '<h4>7.4.5 Mikrosegmentierung und Service Mesh</h4>'
+            + '<p>Im Service Mesh (Istio, Linkerd, Cilium ServiceMesh) durchsetzen Sidecars/Ambient-Proxies pro Workload:</p>'
+            + '<ul>'
+            + '<li><strong>mTLS by default</strong>: gegenseitige Authentifizierung von Workloads; Identitaet ueber SPIFFE-IDs.</li>'
+            + '<li><strong>AuthZ-Policy</strong>: Layer-7-Regeln (HTTP-Methode, Pfad, Header, JWT-Claim) pro Service.</li>'
+            + '<li><strong>Egress-Kontrolle</strong>: erlaubte externe Ziele explizit (ServiceEntry/HTTPEgressGateway).</li>'
+            + '<li><strong>Telemetrie</strong>: einheitliche Spans/Logs fuer alle Aufrufe -&gt; Tenet 7.</li>'
+            + '</ul>'
+            + '<p>Damit kombiniert das Service Mesh die Tenets aus 7.1 mit konkreten Cloud-Native-Mechanismen.</p>'
+
+            + '<h4>Worked Example: PAM + Workload Identity fuer ein DB-Backup-Tool</h4>'
+            + '<p>Ein Backup-Job liest naechtlich aus einer Postgres-Production-DB und schreibt nach Object Storage. Heute liegt das Datenbank-Passwort in einer Kubernetes-Secret-Ressource und ein Service-Account-Schluessel fuer den Object-Storage-Zugriff im Container-Image. Wie wird das nach 7.4 sauber umgesetzt?</p>'
+            + '<ol>'
+            + '<li><em>Workload Identity statt Image-Key.</em> Der Pod erhaelt ueber Workload Identity Federation eine kurzlebige Identitaet (X.509-SVID via SPIRE); Object-Storage-Bucket-Policy haengt <em>an dieser Identitaet</em>, nicht an einem Service-Account-Key.</li>'
+            + '<li><em>JIT-DB-Credential.</em> Vault Database Secret Engine erzeugt bei Job-Start eine temporaere DB-Rolle (lease 30 min, kein Login danach); Vault-Auth ueber denselben SVID per JWT-Auth-Method.</li>'
+            + '<li><em>Privilegierter Wartungs-Pfad.</em> DBAs kommen ueber PAM-Bastion mit JIT-Mitgliedschaft in <em>db-ops</em>; Session-Recording aktiviert; MFA-Step-up Pflicht.</li>'
+            + '<li><em>Audit.</em> Vault liefert Audit-Log mit Anforderer-SVID; Object-Storage-Access-Log korreliert ueber dieselbe Identitaet; PAM-Recording in WORM-Storage.</li>'
+            + '<li><em>Mesh.</em> Egress-Gateway erlaubt Pod nur Verbindung zu Postgres-FQDN und Object-Storage-Endpoint (default-deny sonst).</li>'
+            + '</ol>'
+            + '<p><em>Ergebnis.</em> Keine statischen Secrets im Image, keine langlebigen DB-Passwoerter, privilegierte Wartung mit JIT + Recording, Mesh als zusaetzlicher PEP.</p>'
+
+            + '<h4>Selbstcheck</h4>'
+            + '<ul>'
+            + '<li>Welches AuthZ-Modell passt zu komplexen Beziehungs-Strukturen (z.B. Document-Sharing wie in Google Docs)?</li>'
+            + '<li>Was unterscheidet Just-in-Time-Privilegien (PIM/PAM) von dauerhafter Mitgliedschaft in privilegierten Gruppen?</li>'
+            + '<li>Wie eliminiert Workload Identity die Notwendigkeit, Service-Account-Keys im Container-Image zu hinterlegen?</li>'
+            + '<li>Welche Aufgaben uebernimmt ein Service Mesh, die eine reine NetworkPolicy nicht abdeckt?</li>'
+            + '</ul>'
+
+            + '<h4>Typische Fehler</h4>'
+            + '<ul>'
+            + '<li><em>Fehler:</em> SMS-OTP als Phishing-resistente MFA bewerten. <em>Korrekt:</em> NIST SP 800-63-3/-4 stuft SMS-OTP nicht als AAL3 ein; Phishing-Resistenz erfordert WebAuthn/FIDO2 oder PIV/CAC.</li>'
+            + '<li><em>Fehler:</em> "Vault loest alle Secret-Probleme automatisch". <em>Korrekt:</em> Ohne Workload-Identity-Authentifizierung (AppRole, JWT-Auth, SPIFFE) verschiebt Vault nur das Bootstrapping-Problem.</li>'
+            + '<li><em>Fehler:</em> Privileged Access Management mit MFA gleichsetzen. <em>Korrekt:</em> PAM = JIT-Privilegien + Session-Recording + Approval + Vault; MFA ist nur ein Baustein.</li>'
+            + '<li><em>Fehler:</em> Implicit Flow fuer SPAs verwenden. <em>Korrekt:</em> OAuth 2.0 Security BCP (RFC 8252 / draft-ietf-oauth-security-topics) untersagt Implicit Flow; Authorization-Code-Flow mit PKCE ist Standard.</li>'
+            + '<li><em>Fehler:</em> Service-Mesh-mTLS fuer den Service-zu-Service-Pfad nur auf <em>permissive</em> stellen und nie wechseln. <em>Korrekt:</em> Migrationsplan zu <em>strict</em> mit Telemetrie-Pruefung; sonst keine echte ZT-Durchsetzung.</li>'
+            + '</ul>'
+
+            + '<h4>Transferaufgabe</h4>'
+            + '<p>Ein Konzern fuehrt ein zentrales Plattform-Engineering ein (3 Cloud-Tenants, 12 Teams, 80 Anwendungen). Skizzieren Sie (a) das IAM-Modell entlang RBAC + ABAC + ReBAC, (b) den PAM-Prozess fuer Cloud-Admin-Aktionen mit JIT/Approval/Recording, (c) die Secrets-Management-Strategie inkl. Workload Identity, (d) die Service-Mesh-Konfiguration zur Mikrosegmentierung. Loesung im Kapitel-Quiz und P-CYBERSEC-CAPSTONE.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-63-3 / Draft Rev. 4 (Digital Identity Guidelines, 2024); NIST SP 800-53 Rev. 5 (Sep. 2020) AC-Familie; ISO/IEC 27001:2022 Annex A (A.5.15-A.5.18, A.8.2-A.8.5); RFC 6749 (OAuth 2.0); RFC 7636 (PKCE); RFC 9068 (JWT Access Token Profile, 2021); OpenID Connect Core 1.0 (errata set 2, 2023); IETF "OAuth 2.0 Security Best Current Practice" (draft-ietf-oauth-security-topics-25, 2024); WebAuthn Level 2 (W3C 2021); SPIFFE/SPIRE Spec v1.6 (CNCF Graduated 2022); HashiCorp Vault Documentation; Cedar / AWS Verified Permissions (re:Invent 2023).</em></p>'
+    };
+
+    const QUIZ_ARCH = [
+        // -- Zero Trust (13) --
+        q('Wie viele "Tenets" definiert NIST SP 800-207 §2.1?',
+            ['7', '5', '10', '12'], 0,
+            'NIST SP 800-207 (Aug. 2020) §2.1 listet exakt sieben Grundsaetze ("Tenets") fuer Zero Trust.'),
+        q('Welche Komponente trifft im NIST-ZT-Modell die Zugriffsentscheidung?',
+            ['Policy Engine (PE)', 'Policy Enforcement Point (PEP)', 'Service Mesh Sidecar', 'CDM-Sensor'], 0,
+            'SP 800-207 §3.1: Die PE entscheidet (zusammen mit dem PA als PDP); der PEP setzt die Entscheidung an der Resource durch.'),
+        q('Wo liegt nach SP 800-207 logisch der Policy Enforcement Point?',
+            ['Vor jeder Resource', 'Nur an der Internet-Grenze', 'Innerhalb des IdP', 'Im SIEM'], 0,
+            'SP 800-207 §3.1: PEP ist logisch immer <em>vor</em> der Resource. Ein einziger Edge-PEP erfuellt das Modell nicht.'),
+        q('Welcher der drei ZTA-Implementierungsansaetze nutzt primaer Identitaets-Plattformen mit dynamischen Attributen?',
+            ['Enhanced Identity Governance (EIG)', 'Micro-Segmentation', 'Software-Defined Perimeter (SDP)', 'Air-Gap'], 0,
+            'SP 800-207 §3.2 unterscheidet EIG (identitaets-zentriert), Micro-Segmentation (netzbasiert) und SDP/Network-Infrastructure-Ansatz.'),
+        q('Welche Aussage zu ZT vs. ZTNA ist korrekt?',
+            ['ZTA ist die ganze Architektur, ZTNA bezeichnet eine Produktkategorie fuer Remote-Access', 'ZTNA ist ein neueres Synonym fuer ZTA', 'ZTNA ersetzt klassische IdPs', 'ZTA gilt nur in der Cloud, ZTNA on-prem'], 0,
+            'SP 800-207 trennt die Architektur (ZTA) von marktueblichen ZTNA-Produkten (Remote-Access mit Brokered Sessions).'),
+        q('Welcher Tenet adressiert kontinuierliche Asset-Integritaets-Bewertung?',
+            ['Tenet 5 (Monitoring/Measurement aller Assets)', 'Tenet 1 (Resources-Begriff)', 'Tenet 3 (Per-Session)', 'Tenet 7 (Information sammeln)'], 0,
+            'SP 800-207 §2.1: Tenet 5 fordert Monitoring und Messen der Integritaet aller Assets; Tenet 7 erweitert auf Sammeln/Auswerten.'),
+        q('Welche Token-Lebensdauer ist fuer ein ZT-konformes Access-Token typisch?',
+            ['5-15 min', '24 h', '30 Tage', '1 Jahr'], 0,
+            'Tenet 3 ("per Session") und RFC 9068 fuehren zu kurzlebigen Access-Tokens mit Refresh-Flow; lange Tokens widersprechen der dynamischen Re-Evaluation.'),
+        q('Welches Dokument erweitert das ZTA-Modell explizit um Cloud-native Mehrschicht-Durchsetzung (Identity-, Workload-, Service-Mesh-Tier)?',
+            ['NIST SP 800-207A', 'NIST SP 800-207', 'CISA ZTMM v2.0', 'ISO/IEC 27001'], 0,
+            'NIST SP 800-207A (Sep. 2023) ergaenzt SP 800-207 um cloud-native Layered Enforcement.'),
+        q('Welche Datenquelle ist KEIN typischer Input fuer den Trust-Algorithm einer Policy Engine?',
+            ['Marketing-CRM-Datenbank', 'Identity-/Access-Management', 'CDM/Endpoint-Posture', 'Threat-Intel-Feeds'], 0,
+            'SP 800-207 §3.3: typische PE-Inputs sind IAM, CDM, Threat-Intel, Activity-Logs, PKI, SIEM, Data-Access-Policies; ein Marketing-CRM ist es nicht.'),
+        q('Was beschreibt der "Trust Algorithm" (TA) im NIST-ZT-Modell?',
+            ['Logik, mit der die PE Inputs zu einer Grant/Deny-Entscheidung verrechnet', 'Hash-Funktion fuer Identity-Tokens', 'Cryptographic Suite-Negotiation', 'Konsens-Protokoll'], 0,
+            'SP 800-207 §3.3: Der TA ist die in der PE implementierte Entscheidungs-Logik (Score-/Criteria-/Singular-Variants).'),
+        q('Welcher Tenet schliesst die Aussage "Zugriff wird per Session entschieden" ein?',
+            ['Tenet 3', 'Tenet 1', 'Tenet 4', 'Tenet 6'], 0,
+            'SP 800-207 §2.1, Tenet 3 lautet: "Access to individual enterprise resources is granted on a per-session basis".'),
+        q('Welche Reifegrad-Bewertung fuer ZT-Migrationen veroeffentlicht CISA?',
+            ['Zero Trust Maturity Model v2.0 (Apr. 2023)', 'Zero Trust Capability Model v3.0', 'NIST CSF v1.1', 'COBIT 2019'], 0,
+            'CISA ZTMM v2.0 vom April 2023 stuft Identity, Devices, Networks, Applications, Data in Stufen Traditional/Initial/Advanced/Optimal.'),
+        q('Wann ist eine VPN-basierte Architektur NICHT als Zero-Trust-konform anzusehen?',
+            ['Wenn mit erfolgreichem VPN-Login implizites Vertrauen ins gesamte Netz gewaehrt wird', 'Wenn der VPN-Tunnel mTLS verwendet', 'Wenn das VPN MFA erzwingt', 'Wenn das VPN nur HTTPS-Verkehr transportiert'], 0,
+            'SP 800-207 verbietet implizites Netz-Vertrauen; VPN-mit-Flat-Inner-Net widerspricht den Tenets 2/3/6.'),
+
+        // -- Cloud Shared Responsibility / CCM / Top Threats (12) --
+        q('In welchem Cloud-Service-Modell ist der Kunde fuer das Patchen des Gast-Betriebssystems verantwortlich?',
+            ['IaaS', 'PaaS', 'SaaS', 'In keinem'], 0,
+            'NIST SP 800-145 / SP 800-144 §4: In IaaS gehoert das Gast-OS dem Kunden, in PaaS/SaaS uebernimmt der CSP.'),
+        q('Welche Schicht bleibt im SaaS-Modell zwingend in der Verantwortung des Kunden?',
+            ['Daten und Datenklassifikation', 'Hypervisor-Patches', 'Datacenter-Physik', 'Netzwerk-Backbone'], 0,
+            'CSA Shared Responsibility: Daten, Klassifikation, Identitaeten und Endgeraete-Sicherheit liegen in jedem Modell beim Kunden.'),
+        q('Wie viele Domaenen umfasst die CSA Cloud Controls Matrix v4.0.10?',
+            ['17', '11', '93', '197'], 0,
+            'CCM v4 ist in 17 Domaenen mit insgesamt 197 Controls strukturiert.'),
+        q('Welche Domaene der CCM v4 adressiert Schluesselmanagement?',
+            ['CEK (Cryptography, Encryption &amp; Key Management)', 'IAM', 'STA', 'GRC'], 0,
+            'CCM v4 Domaene CEK kapselt Crypto/Encryption/Key-Management; IAM adressiert Zugriff, STA Lieferkette, GRC Governance.'),
+        q('Was ist die primaere Aufgabe einer CSPM-Plattform?',
+            ['Kontinuierliche Bewertung der Cloud-Konfiguration gegen Baselines', 'Schutz von Container-Workloads zur Laufzeit', 'Verschluesselungs-Schluesselrotation', 'Loadbalancer-Failover'], 0,
+            'CSPM (Cloud Security Posture Management) erkennt Misconfigurations in der Control Plane (offene Buckets, IAM-Drift); CWPP adressiert die Laufzeit.'),
+        q('Welche Tool-Kategorie entdeckt einen Container-Escape zur Laufzeit?',
+            ['CWPP', 'CSPM', 'CIEM', 'IaC-Scanner'], 0,
+            'CWPP ueberwacht Workload-Laufzeit (Prozesse, Syscalls); CSPM/IaC sehen nur Konfiguration, CIEM sieht Berechtigungen.'),
+        q('Wofuer steht CIEM?',
+            ['Cloud Infrastructure Entitlement Management', 'Cloud Incident &amp; Event Management', 'Continuous Identity Enforcement Module', 'Cloud Image Encryption Manager'], 0,
+            'CIEM analysiert IAM-Berechtigungen, findet ungenutzte Permissions und Toxic Combinations.'),
+        q('Welcher der "Pandemic Eleven" Top-Threats 2024 wird primaer durch IaC-Scanning + CSPM addressiert?',
+            ['Misconfiguration &amp; inadequate Change Control', 'Insecure Software Development', 'Organized Crime / APT', 'Cloud Storage Data Exfiltration'], 0,
+            'CSA Top-Threats 2024: Threat 1 (Misconfiguration) ist die Hauptursache; CSPM + IaC-Scan im Pull-Request-Flow ist die Standardabwehr.'),
+        q('Welche Aussage zur DSGVO-Verantwortung in einer SaaS-Beziehung ist korrekt?',
+            ['Der Kunde ist regelmaessig Verantwortlicher (Art. 4 Nr. 7), der CSP Auftragsverarbeiter (Art. 28)', 'Der CSP wird automatisch Verantwortlicher', 'DSGVO gilt fuer SaaS nicht', 'Der Kunde ist Auftragsverarbeiter'], 0,
+            'DSGVO Art. 4 Nr. 7-8 / Art. 28: Standard-SaaS-Konstellation ist Verantwortlicher (Kunde) + Auftragsverarbeiter (CSP) mit AVV.'),
+        q('Welcher Standard liefert ein deutsches, von BSI publiziertes Cloud-Pruefkriterium?',
+            ['BSI C5:2020', 'NIST SP 800-53', 'ISO/IEC 27017', 'PCI DSS v4'], 0,
+            'BSI C5:2020 ("Cloud Computing Compliance Criteria Catalogue") ist der vom BSI veroeffentlichte Pruefstandard.'),
+        q('Welcher Mappings-Standard wird von CCM v4 NICHT explizit referenziert?',
+            ['IEC 62443-3-3', 'ISO/IEC 27001:2022', 'NIST SP 800-53 Rev. 5', 'PCI DSS v4'], 0,
+            'CCM v4 mappt auf ISO 27001/27017/27018, NIST 800-53 r5, PCI DSS v4, BSI C5; IEC 62443-3-3 (OT) ist kein primaeres Cloud-Mapping.'),
+        q('Welche Top-Threat-2024-Position adressiert "Insecure Interfaces and APIs"?',
+            ['Position 3', 'Position 7', 'Position 11', 'Position 5'], 0,
+            'CSA Top Threats 2024 listet Insecure Interfaces &amp; APIs an Position 3.'),
+
+        // -- Kubernetes / Container / Supply Chain (13) --
+        q('Welche Pod-Security-Standards-Stufe ist fuer Anwendungs-Workloads empfohlen?',
+            ['Restricted', 'Privileged', 'Baseline', 'PSP-Level-3'], 0,
+            'Kubernetes Pod Security Standards (k8s.io) empfehlen <em>restricted</em> fuer alle Anwendungen; <em>baseline</em> nur uebergangsweise, <em>privileged</em> fuer System-Workloads.'),
+        q('Welcher Mechanismus loest die Pod Security Policies (PSP) ab Kubernetes 1.25 ab?',
+            ['Pod Security Admission Controller mit Pod Security Standards', 'NetworkPolicy', 'AdmissionRegistration v1', 'kube-bench'], 0,
+            'PSP wurde in 1.25 entfernt; der eingebaute PodSecurity Admission Controller setzt die Pod Security Standards um (alternativ Kyverno/OPA Gatekeeper).'),
+        q('Welche SecurityContext-Einstellung ist im Restricted-Profil PFLICHT?',
+            ['allowPrivilegeEscalation: false', 'allowPrivilegeEscalation: true', 'privileged: true', 'hostNetwork: true'], 0,
+            'Pod Security Standards Restricted: allowPrivilegeEscalation=false, runAsNonRoot=true, capabilities drop ALL, seccompProfile=RuntimeDefault.'),
+        q('Welche CVE 2024 wurde unter dem Namen "Leaky Vessels" als Container-Escape bekannt?',
+            ['CVE-2024-21626 (runc)', 'CVE-2024-3094 (xz-utils)', 'CVE-2023-44487 (HTTP/2 Rapid Reset)', 'CVE-2022-22965 (Spring4Shell)'], 0,
+            'CVE-2024-21626 ist Teil der "Leaky Vessels"-Serie und betrifft runc (file-descriptor-leak fuehrt zu Host-Filesystem-Escape).'),
+        q('Welcher Port am Worker-Node liefert ohne korrekte Authn/Authz Container-Eskalation?',
+            ['10250 (kubelet)', '6443 (kube-apiserver)', '2379 (etcd)', '443 (Ingress)'], 0,
+            'NSA/CISA Hardening Guide v1.2: kubelet-Port 10250 ohne Authn/Authz erlaubt exec/logs auf Containern; Anonymous-Auth muss disabled, Webhook-Authz aktiv sein.'),
+        q('Welche Komponente in Sigstore haelt das Transparency-Log fuer Signaturen?',
+            ['Rekor', 'Fulcio', 'Cosign', 'Trillian-Log-Frontend'], 0,
+            'Sigstore: Cosign signiert, Fulcio ist die ephemerale OIDC-CA, Rekor speichert Signatur-Eintraege im Tamper-Evident-Log (basiert auf Trillian).'),
+        q('Welcher SLSA-Level fordert isolierte, gehostete Builds mit nicht-faelschbarer Provenance?',
+            ['Level 3', 'Level 1', 'Level 2', 'Level 4'], 0,
+            'SLSA v1.0: Level 3 fordert isolierten Build-Service + signierte, nicht-faelschbare Provenance; Level 4 zusaetzlich hermetic+reproducible+two-person-review.'),
+        q('Welches Format ist Standard fuer eine ML- oder Software-BOM, die ML-Komponenten unterstuetzt?',
+            ['CycloneDX 1.6 (mit ML-BOM-Erweiterung, 2024)', 'SPDX 1.0', 'OSV-Schema', 'CSAF 2.0'], 0,
+            'CycloneDX 1.6 (Mai 2024) erweitert um ML-Komponenten; SPDX 2.3 unterstuetzt ML noch nicht voll; OSV/CSAF sind Vulnerability-Formate.'),
+        q('Welche Admission-Controller-Loesung erlaubt deklarative Sicherheits-Policies in K8s?',
+            ['Kyverno oder OPA Gatekeeper', 'kube-proxy', 'CoreDNS', 'kubelet-csr-approver'], 0,
+            'Kyverno und OPA Gatekeeper sind die zwei verbreiteten Admission-Controller fuer deklarative Policies (verifyImages, requireLabels, denyHostPath).'),
+        q('Welche NetworkPolicy-Strategie wird vom NSA/CISA-Guide v1.2 empfohlen?',
+            ['Default-Deny + explizite Allow-Regeln pro Namespace', 'Default-Allow + selektive Deny-Regeln', 'Keine NetworkPolicies bei Service Mesh', 'NetworkPolicies nur im kube-system-Namespace'], 0,
+            'NSA/CISA K8s Hardening Guide v1.2 §"Network Separation" fordert default-deny im Namespace und explizite Allow-Regeln (auch wenn ein Mesh laeuft).'),
+        q('Welche Anti-Praktik vermeidet das Pinning eines Container-Images per Image-Digest (sha256)?',
+            ['Replay einer manipulierten Tag-Version', 'Verlust des SBOM', 'Ueberlast des Registries', 'Reduzierte Build-Geschwindigkeit'], 0,
+            'Tag-Pinning (z.B. <code>:latest</code>) erlaubt Replacement; sha256-Digest-Pinning + Cosign-Verifikation verhindern Replay/Manipulation.'),
+        q('Welche Aussage zu kube-apiserver Audit-Logs ist korrekt?',
+            ['Audit-Policy mindestens auf Stufe Metadata, Logs ausserhalb des Clusters speichern', 'Audit-Logs in /var/log innerhalb der Master-Node ausreichend', 'Audit ist standardmaessig auf RequestResponse aktiv', 'Audit-Logs werden vom kubelet erstellt'], 0,
+            'NSA/CISA Hardening Guide: kube-apiserver Audit-Policy konfigurieren (mind. Metadata, sensible Bereiche RequestResponse); Logs an SIEM ausserhalb des Clusters senden.'),
+        q('Welche Kategorie beschreibt MITRE ATT&amp;CK Containers T1611?',
+            ['Escape to Host', 'Cloud Service Discovery', 'Network Service Discovery', 'Lateral Tool Transfer'], 0,
+            'MITRE ATT&amp;CK for Containers v15: T1611 ist "Escape to Host"; Container-Escapes wie CVE-2024-21626 fallen darunter.'),
+
+        // -- IAM / PAM / Secrets / Segmentierung (12) --
+        q('Welches Modell trifft Autorisierung anhand von Subjekt-/Objekt-/Aktions-Attributen und Kontext?',
+            ['ABAC', 'RBAC', 'ReBAC', 'DAC'], 0,
+            'ABAC (Attribute-Based Access Control, NIST SP 800-162) wertet Attribute pro Anfrage aus; RBAC nutzt Rollen, ReBAC Beziehungen.'),
+        q('Welcher OAuth-2.0-Flow ist 2024 fuer SPAs und Native-Apps Stand der Technik?',
+            ['Authorization Code Flow mit PKCE', 'Implicit Flow', 'Resource Owner Password Credentials', 'Client Credentials'], 0,
+            'IETF "OAuth 2.0 Security BCP" (draft-ietf-oauth-security-topics) untersagt Implicit Flow und ROPC; Authorization-Code mit PKCE (RFC 7636) ist Pflicht.'),
+        q('Welche RFC standardisiert das JWT-Profil fuer OAuth-2.0-Access-Tokens (Pflicht-Claims sub/iss/aud/exp/scope, typ at+jwt)?',
+            ['RFC 9068 (2021)', 'RFC 7519 (JWT-Basis)', 'RFC 6749 (OAuth-Core)', 'RFC 8693 (Token Exchange)'], 0,
+            'RFC 9068 (2021) definiert das at+jwt-Profil mit den genannten Pflicht-Claims.'),
+        q('Welcher Authenticator-Typ wird in NIST SP 800-63-3 als phishing-resistent (AAL3) eingestuft?',
+            ['WebAuthn/FIDO2 Hardware-Authenticator', 'SMS-OTP', 'TOTP per App', 'E-Mail-Magic-Link'], 0,
+            'NIST SP 800-63-3 / -4 Draft: AAL3 erfordert Hardware-basierte, phishing-resistente Authenticatoren wie FIDO2/PIV; SMS-OTP gilt als deprecated.'),
+        q('Was charakterisiert "Just-in-Time"-Privilegienvergabe (JIT)?',
+            ['Temporaere, zeitlich begrenzte Mitgliedschaft mit Approval', 'Permanente Aufnahme in die Admin-Gruppe', 'Auto-Eskalation bei jedem Login', 'Nur lesender Zugriff'], 0,
+            'JIT (z.B. Entra PIM, AWS IAM Identity Center, GCP PAM 2024) gewaehrt Privilegien zeitlich begrenzt mit Begruendung/Approval; danach automatischer Entzug.'),
+        q('Welches CNCF-Projekt definiert eine standardisierte Workload-Identitaet inkl. SVID?',
+            ['SPIFFE/SPIRE', 'OPA', 'Cilium', 'Envoy'], 0,
+            'SPIFFE (Secure Production Identity Framework For Everyone) und SPIRE als Implementierung; SVID = SPIFFE Verifiable Identity Document (X.509 oder JWT).'),
+        q('Welche URI-Form hat eine SPIFFE-ID?',
+            ['spiffe://&lt;trust-domain&gt;/&lt;path&gt;', 'urn:spiffe:&lt;id&gt;', 'did:spiffe:&lt;id&gt;', 'spiffe:&lt;trust-domain&gt;/&lt;path&gt;'], 0,
+            'SPIFFE-Spec: <code>spiffe://trust-domain/path</code>, also URI-Schema mit Authority und Pfad.'),
+        q('Welche Aufgabe loest eine PAM-Plattform NICHT primaer?',
+            ['Bitcoin-Wallet-Verwaltung', 'Vault fuer privilegierte Credentials', 'Session-Recording', 'JIT-Privilegienvergabe + Approval'], 0,
+            'PAM (z.B. CyberArk, BeyondTrust, HashiCorp Boundary, Entra PIM) macht Vault, JIT, Recording, Approval; Bitcoin-Wallets sind nicht der Scope.'),
+        q('Welcher Service Mesh-Mode setzt mTLS zwischen Workloads erst nach Migration verpflichtend durch?',
+            ['Istio PeerAuthentication mode STRICT (vorher PERMISSIVE)', 'Istio mTLS DISABLED', 'Linkerd cleartext-only', 'Cilium ohne IdentityPolicy'], 0,
+            'Istio empfiehlt Migration ueber PERMISSIVE (Mischbetrieb) zu STRICT (Pflicht-mTLS); STRICT ist die ZT-konforme Endkonfiguration.'),
+        q('Welche AuthZ-Engine ist von AWS Verified Permissions (re:Invent 2023) als Policy-Sprache uebernommen worden?',
+            ['Cedar', 'Rego', 'XACML', 'OPA-Gatekeeper-DSL'], 0,
+            'AWS Cedar (Open Source 2023) ist die Policy-Sprache hinter Verified Permissions; OPA verwendet Rego.'),
+        q('Wofuer steht das Akronym CIEM in Abgrenzung zu IAM?',
+            ['Permissions-Right-Sizing in Cloud-IAM-Stacks', 'Identity Federation across Clouds', 'Container Image Exploit Manager', 'Continuous Integration Entitlement Manager'], 0,
+            'CIEM (Cloud Infrastructure Entitlement Management) findet ungenutzte/uebertriebene Berechtigungen und Toxic Combinations in Cloud-IAM.'),
+        // Letztes Item dieses Pools mit optionalen Metadaten gemaess AGENTS §22.
+        {
+            q: 'Welche Aussage zu Sigstore Cosign Keyless-Signaturen ist korrekt?',
+            options: [
+                'Cosign holt ein kurzlebiges Signaturzertifikat von Fulcio per OIDC-Identity und protokolliert die Signatur in Rekor',
+                'Cosign signiert ausschliesslich mit langlebigen RSA-2048-Schluesseln aus einem KMS',
+                'Keyless heisst, dass keine Signatur erzeugt wird',
+                'Rekor ersetzt OCI-Registries und speichert die Image-Layer'
+            ],
+            correct: 0,
+            explanation: 'Sigstore Cosign Keyless: ephemerales Zertifikat von Fulcio (OIDC-CA), Privatschluessel nie gespeichert, Eintrag in Rekor-Transparency-Log; verifiziert wird Identitaet (z.B. GitHub-Workflow) gegen das Tamper-Evident-Log.',
+            lo: 'arch.supplychain.sigstore-keyless',
+            bloom: 'understand',
+            difficulty: 'medium',
+            tags: ['kubernetes', 'supply-chain', 'sigstore', 'cosign'],
+            source: 'Sigstore Cosign Documentation (sigstore.dev, 2024); SLSA v1.0 Specification (slsa.dev, 2023); Fulcio/Rekor design docs.'
+        }
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_cybersec',
         code: 'MA-ET CyberSec',
@@ -2971,6 +3504,13 @@
                 summary: 'Adversarial Examples (FGSM/PGD/C&W), Membership-Inference, Modell-Diebstahl, Differential Privacy (DP-SGD), OWASP LLM Top 10 v2025, Indirect Prompt Injection, MITRE ATLAS, NIST AI RMF 1.0 / AI 600-1, EU AI Act 2024/1689, ISO/IEC 42001:2023, MLOps-Sicherheit.',
                 pages: [PAGE_AI_ADVERSARIAL, PAGE_AI_PRIVACY, PAGE_AI_LLM, PAGE_AI_GOVERNANCE],
                 quiz: QUIZ_AI
+            },
+            {
+                id: 'arch',
+                title: 'Kapitel 7 — Security Architecture, Zero Trust und Cloud/Kubernetes-Security',
+                summary: 'Zero Trust Architecture nach NIST SP 800-207 / 800-207A, Cloud Shared Responsibility und CSA CCM v4, Kubernetes-/Container-Hardening (NSA/CISA Guide v1.2, Pod Security Standards, Sigstore + SLSA + SBOM), IAM/PAM, Workload Identity (SPIFFE/SPIRE), Service-Mesh-Mikrosegmentierung.',
+                pages: [PAGE_ARCH_ZT, PAGE_ARCH_CLOUD, PAGE_ARCH_K8S, PAGE_ARCH_IAM],
+                quiz: QUIZ_ARCH
             }
         ]
     });
