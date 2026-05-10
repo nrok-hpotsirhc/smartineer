@@ -204,7 +204,7 @@ Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht
 - Der Tab **Optionen** bündelt Kategorie-Sichtbarkeit, Fortschritts-Export/-Import, Reset und den PWA-Installations-Flow.
 - Der Bereich **Schulungen** ist mit einem lokalen Login geschützt. Die Zugangsdaten werden optional über `js/auth-credentials.js` eingebunden; die mitgelieferte Vorlage ist [js/auth-credentials.example.js](js/auth-credentials.example.js).
 - Die Anmeldung ist eine reine UX-Hilfe ohne echten Sicherheitsanspruch. Der Quellcode und der Browser-Storage bleiben einsehbar.
-- Die beiden Master-ET-Schulungen sind derzeit als `status: 'preparation'` angelegt; jeweils ein Kapitel ist produktiv ausgearbeitet, die übrigen Kapitel sind bewusst als Platzhalter markiert.
+- Die Master-ET-Cybersec-Schulung ist seit v30 vollstaendig produktiv (alle 6 Kapitel ausgearbeitet); die Master-ET-Automation-Schulung ist als `status: 'preparation'` angelegt, ein Kapitel produktiv und die uebrigen als Platzhalter markiert.
 
 ---
 

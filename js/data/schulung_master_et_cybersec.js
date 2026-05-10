@@ -2251,13 +2251,582 @@
             'Caralli et al. CMU/SEI-2007-TR-012: OCTAVE Allegro ist asset-zentriert, qualitativ, 8 Schritte in 4 Phasen.')
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 6 — AI-Security und vertrauenswuerdige Systeme (PRODUKTIV)
+    // Quellen: Goodfellow/Shlens/Szegedy "Explaining and Harnessing Adversarial
+    // Examples" ICLR 2015 (FGSM); Madry et al. "Towards Deep Learning Models
+    // Resistant to Adversarial Attacks" ICLR 2018 (PGD, Adversarial Training);
+    // Carlini & Wagner "Towards Evaluating the Robustness of Neural Networks"
+    // IEEE S&P 2017 (C&W); Szegedy et al. "Intriguing properties of neural
+    // networks" ICLR 2014 (L-BFGS); Cohen/Rosenfeld/Kolter "Certified Adversarial
+    // Robustness via Randomized Smoothing" ICML 2019; Shokri et al. "Membership
+    // Inference Attacks against Machine Learning Models" IEEE S&P 2017;
+    // Fredrikson/Jha/Ristenpart "Model Inversion Attacks" CCS 2015; Tramer et al.
+    // "Stealing Machine Learning Models via Prediction APIs" USENIX Security
+    // 2016; Gu/Dolan-Gavitt/Garg "BadNets" arXiv:1708.06733 (2017); Biggio et al.
+    // "Poisoning Attacks against SVMs" ICML 2012; Dwork "Differential Privacy"
+    // ICALP 2006; Dwork & Roth "The Algorithmic Foundations of Differential
+    // Privacy" 2014; Abadi et al. "Deep Learning with Differential Privacy"
+    // CCS 2016 (DP-SGD); McMahan et al. "Communication-Efficient Learning of
+    // Deep Networks from Decentralized Data" AISTATS 2017 (FedAvg); Bonawitz
+    // et al. "Practical Secure Aggregation" CCS 2017; Greshake et al. "Not what
+    // you've signed up for: Compromising Real-World LLM-Integrated Applications
+    // with Indirect Prompt Injection" AISec 2023; OWASP "Top 10 for LLM
+    // Applications" v2025 (Nov. 2024); MITRE ATLAS Matrix v2024; NIST AI 600-1
+    // "Generative AI Profile" (Juli 2024); NIST AI RMF 1.0 (Jan. 2023, NIST AI
+    // 100-1); Verordnung (EU) 2024/1689 (KI-Verordnung / EU AI Act,
+    // veroeffentlicht 12.07.2024, Inkrafttreten 01.08.2024, gestaffelte Geltung
+    // bis 02.08.2027); ISO/IEC 42001:2023 (AI Management System); ISO/IEC
+    // 23894:2023 (AI Risk Management); ISO/IEC 22989:2022 (AI Concepts and
+    // Terminology); Anthropic "Model Context Protocol" Spezifikation 2024;
+    // Carlini et al. "Extracting Training Data from Large Language Models"
+    // USENIX Security 2021.
+    // ----------------------------------------------------------------------
+
+    const PAGE_AI_ADVERSARIAL = {
+        title: '6.1 Adversarial Machine Learning — Evasion, Poisoning, Robustheit',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Threat-Modelle gegen ML-Systeme klassifizieren (Evasion, Poisoning, Backdoor), (2) FGSM, PGD und C&amp;W als konkrete Evasion-Angriffe unterscheiden, (3) Adversarial Training und Certified Defenses (Randomized Smoothing) gegeneinander abgrenzen, (4) MITRE ATLAS und NIST AI 100-2 in das Bedrohungsmodell einordnen.</blockquote>'
+
+            + '<h4>6.1.1 Bedrohungs-Taxonomie nach NIST AI 100-2</h4>'
+            + '<p>NIST AI 100-2 E2023 (Adversarial Machine Learning, Jan. 2024) klassifiziert Angriffe entlang dreier Achsen:</p>'
+            + '<table><thead><tr><th>Achse</th><th>Auspraegungen</th></tr></thead><tbody>'
+            + '<tr><td>Lernphase</td><td><strong>Training-Time</strong> (Poisoning, Backdoor) vs. <strong>Inference-Time</strong> (Evasion, Privacy)</td></tr>'
+            + '<tr><td>Wissen des Angreifers</td><td><strong>White-Box</strong> (volle Modellkenntnis), <strong>Gray-Box</strong> (Architektur/Logits), <strong>Black-Box</strong> (nur API-Output)</td></tr>'
+            + '<tr><td>Angriffsziel</td><td><strong>Availability</strong> (Modell unbrauchbar machen), <strong>Integrity</strong> (gezielte Fehlklassifikation), <strong>Privacy</strong> (Trainingsdaten extrahieren)</td></tr>'
+            + '</tbody></table>'
+            + '<p>MITRE ATLAS (Adversarial Threat Landscape for AI Systems) liefert die ATT&amp;CK-aequivalente Matrix mit 14 Taktiken (Reconnaissance &rarr; ML Model Access &rarr; Initial Access &rarr; ... &rarr; Impact) und konkreten Techniken wie <code>AML.T0043 Craft Adversarial Data</code> oder <code>AML.T0019 Publish Poisoned Datasets</code>.</p>'
+
+            + '<h4>6.1.2 Evasion-Angriffe (Inference-Time)</h4>'
+            + '<p>Ziel: kleine, fuer Menschen meist nicht wahrnehmbare Stoerung $\\delta$ mit $\\|\\delta\\|_p \\le \\epsilon$, sodass das Modell $f(x+\\delta) \\ne f(x)$ liefert.</p>'
+
+            + '<h5>FGSM — Fast Gradient Sign Method (Goodfellow et al. 2015)</h5>'
+            + '<p>Einschritt-Angriff im $L_\\infty$-Bedrohungsmodell:</p>'
+            + '<p>$$x_{\\text{adv}} = x + \\epsilon \\cdot \\mathrm{sign}\\bigl(\\nabla_x J(\\theta, x, y)\\bigr)$$</p>'
+            + '<p>Schnell und effizient (eine Backprop-Berechnung), aber relativ leicht abwehrbar. Liefert linearisierte Perturbation in Richtung der lokalen Verlust-Steigung.</p>'
+
+            + '<h5>PGD — Projected Gradient Descent (Madry et al. 2018)</h5>'
+            + '<p>Mehrstufige Iteration: in jedem Schritt FGSM-Update plus Projektion zurueck in die $\\epsilon$-Kugel um $x$:</p>'
+            + '<p>$$x^{t+1}_{\\text{adv}} = \\Pi_{B_\\epsilon(x)}\\Bigl(x^t_{\\text{adv}} + \\alpha \\cdot \\mathrm{sign}(\\nabla_x J)\\Bigr)$$</p>'
+            + '<p>PGD gilt als <em>universellster First-Order-Angriff</em> &mdash; ein Modell, das gegen PGD robust ist, ist gegen alle First-Order-Angriffe in derselben $\\epsilon$-Kugel robust.</p>'
+
+            + '<h5>C&amp;W — Carlini-Wagner-Angriff (2017)</h5>'
+            + '<p>Optimierungs-Angriff mit Lagrange-aehnlichem Ziel $\\min \\|\\delta\\|_p + c \\cdot g(x+\\delta)$, gelaesst $L_2$, $L_0$, $L_\\infty$. Bricht systematisch viele Defensiv-Distillation-/Gradient-Masking-Verfahren und gilt als Goldstandard zur Robustheits-Evaluation. Findet typischerweise <em>kleinere</em> Stoerungen als FGSM/PGD bei vergleichbarer Erfolgsquote.</p>'
+
+            + '<h5>Black-Box und Transfer-Angriffe</h5>'
+            + '<p>Adversariale Beispiele <strong>uebertragen</strong> sich oft zwischen Modellen (Papernot et al. 2016): ein auf einem Surrogat-Modell trainiertes Adversarial-Sample fuehrt mit hoher Wahrscheinlichkeit auch das Zielmodell in die Irre. Black-Box-Angriffe nutzen das aus (Substitute Model, ZOO, Square Attack).</p>'
+
+            + '<h4>6.1.3 Poisoning- und Backdoor-Angriffe (Training-Time)</h4>'
+            + '<table><thead><tr><th>Angriff</th><th>Idee</th><th>Referenz</th></tr></thead><tbody>'
+            + '<tr><td>Label-Flipping</td><td>Trainings-Labels gezielt aendern</td><td>Biggio et al. 2012</td></tr>'
+            + '<tr><td>Clean-Label Poisoning</td><td>nur Features veraendern, Labels bleiben korrekt</td><td>Shafahi et al. 2018</td></tr>'
+            + '<tr><td>BadNets</td><td>Trigger-Pixelmuster + falsches Ziel-Label; bei Trigger-Inferenz erfolgt Fehlklassifikation, sonst normal</td><td>Gu et al. 2017</td></tr>'
+            + '<tr><td>TrojanNN</td><td>Trojaner ohne Zugriff auf Original-Trainingsdaten, ueber Re-Training</td><td>Liu et al. NDSS 2018</td></tr>'
+            + '</tbody></table>'
+            + '<p>Backdoors sind heimtueckisch: sie veraendern die <em>saubere</em> Genauigkeit kaum, treten nur bei Trigger-Inputs auf. Detektion: Neural Cleanse (Wang et al. 2019), STRIP, Activation Clustering.</p>'
+
+            + '<h4>6.1.4 Verteidigungen</h4>'
+            + '<table><thead><tr><th>Verfahren</th><th>Garantie</th><th>Bemerkung</th></tr></thead><tbody>'
+            + '<tr><td><strong>Adversarial Training</strong> (Madry 2018)</td><td>empirisch</td><td>min-max-Spiel, trainiert auf staerksten gefundenen Adv-Beispielen; Goldstandard, aber +Compute-Kosten</td></tr>'
+            + '<tr><td><strong>Defensive Distillation</strong> (Papernot 2016)</td><td>empirisch</td><td>von C&amp;W gebrochen — gilt als <em>nicht</em> sicher</td></tr>'
+            + '<tr><td><strong>Randomized Smoothing</strong> (Cohen 2019)</td><td><strong>zertifiziert</strong></td><td>gibt provable Robustheits-Radius im $L_2$ unter Gaussian-Noise; kein Gradient-Masking</td></tr>'
+            + '<tr><td><strong>Gradient Masking</strong></td><td>scheinbar</td><td><em>Anti-Pattern</em> — verschleiert Gradienten, schuetzt nicht (Athalye et al. 2018 "Obfuscated Gradients")</td></tr>'
+            + '</tbody></table>'
+            + '<p>Faustregel zur Robustheits-Evaluation: stets PGD <em>und</em> C&amp;W; wer nur gegen FGSM testet, hat ein <em>Gradient-Masking</em>-Problem (Carlini et al. 2019 "On Evaluating Adversarial Robustness").</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: Szegedy et al. ICLR 2014; Goodfellow et al. ICLR 2015 (FGSM); Madry et al. ICLR 2018 (PGD, Adversarial Training); Carlini &amp; Wagner IEEE S&amp;P 2017; Cohen et al. ICML 2019; Athalye et al. ICML 2018; Gu et al. arXiv:1708.06733; Biggio et al. ICML 2012; NIST AI 100-2 E2023 (Jan. 2024); MITRE ATLAS v2024.</em></p>'
+    };
+
+    const PAGE_AI_PRIVACY = {
+        title: '6.2 Privatsphaere und Modellschutz — DP, Membership Inference, Modell-Diebstahl',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Membership-Inference und Modell-Inversion-Angriffe erklaeren, (2) Differential Privacy formal definieren und DP-SGD skizzieren, (3) Federated Learning und Secure Aggregation einordnen, (4) Modell-Diebstahl und Watermarking als Schutzmechanismus beschreiben.</blockquote>'
+
+            + '<h4>6.2.1 Privacy-Angriffe</h4>'
+            + '<table><thead><tr><th>Angriff</th><th>Ziel</th><th>Referenz</th></tr></thead><tbody>'
+            + '<tr><td><strong>Membership Inference (MIA)</strong></td><td>Bestimmen, ob ein konkreter Datenpunkt im Trainingsdatensatz war</td><td>Shokri et al. IEEE S&amp;P 2017</td></tr>'
+            + '<tr><td><strong>Modell-Inversion</strong></td><td>Rekonstruktion repraesentativer Trainings-Inputs (z.B. Gesicht aus Klassen-Label)</td><td>Fredrikson et al. CCS 2015</td></tr>'
+            + '<tr><td><strong>Attribute Inference</strong></td><td>Sensitive Attribute aus partiellem Input + Modell-Output ableiten</td><td>Fredrikson et al. USENIX Sec. 2014</td></tr>'
+            + '<tr><td><strong>Training Data Extraction</strong></td><td>woertliches Extrahieren von Trainings-Strings aus LLMs (Memorization)</td><td>Carlini et al. USENIX Sec. 2021</td></tr>'
+            + '</tbody></table>'
+            + '<p>MIA-Vorgehen (Shadow-Models): Angreifer trainiert mehrere Schatten-Modelle auf bekannten Datensaetzen; lernt aus deren Confidence-Verteilungen einen Klassifikator "member vs. non-member" und wendet ihn auf das Zielmodell an. Modelle mit hoher Generalisierungs-Luecke (Overfitting) sind besonders anfaellig.</p>'
+
+            + '<h4>6.2.2 Differential Privacy — formale Definition (Dwork 2006)</h4>'
+            + '<p>Ein randomisierter Mechanismus $\\mathcal{M}$ ist <strong>$(\\epsilon,\\delta)$-differentially private</strong>, falls fuer alle benachbarten Datensaetze $D, D\'$ (unterscheiden sich in genau einem Eintrag) und alle Mengen $S \\subseteq \\mathrm{Range}(\\mathcal{M})$ gilt:</p>'
+            + '<p>$$\\Pr[\\mathcal{M}(D) \\in S] \\le e^{\\epsilon} \\cdot \\Pr[\\mathcal{M}(D\') \\in S] + \\delta$$</p>'
+            + '<p>Interpretation: das Hinzufuegen oder Entfernen eines einzelnen Datensatzes aendert die Output-Verteilung nur um Faktor $e^\\epsilon$. Praxis-Werte: $\\epsilon \\in [0{,}1; 10]$, $\\delta \\ll 1/n$ (typisch $10^{-5}$).</p>'
+            + '<ul>'
+            + '<li><strong>Pure DP</strong>: $\\delta = 0$, also $(\\epsilon,0)$-DP.</li>'
+            + '<li><strong>Approximate DP</strong>: $\\delta &gt; 0$, in der Praxis verbreitet.</li>'
+            + '<li><strong>Renyi DP</strong> (Mironov 2017) und <strong>Concentrated DP</strong>: feinere Composition-Bilanzierung.</li>'
+            + '</ul>'
+            + '<p><strong>Composition</strong>: $k$-fache Anwendung eines $(\\epsilon,0)$-DP-Mechanismus ist $(k\\epsilon,0)$-DP (sequentielle Komposition); fortgeschrittene Composition liefert bessere Schranken.</p>'
+
+            + '<h4>6.2.3 DP-SGD (Abadi et al. CCS 2016)</h4>'
+            + '<p>Differentially-private Variante des stochastischen Gradientenabstiegs:</p>'
+            + '<ol>'
+            + '<li>Mini-Batch ziehen.</li>'
+            + '<li><strong>Per-Sample-Gradient</strong> berechnen.</li>'
+            + '<li><strong>Clipping</strong>: jeden Sample-Gradienten auf $L_2$-Norm $C$ stutzen.</li>'
+            + '<li><strong>Noise hinzufuegen</strong>: Mittel des geclippten Gradienten plus $\\mathcal{N}(0, \\sigma^2 C^2 I)$.</li>'
+            + '<li>Update mit aufaddiertem Privacy-Budget (Moments Accountant fuer enge $\\epsilon$-Bilanz).</li>'
+            + '</ol>'
+            + '<p>Clipping schraenkt den Einfluss eines einzelnen Datenpunkts ein, Noise sorgt fuer DP-Garantie. Trade-off: groesseres $\\sigma$ &rarr; mehr Privacy, aber schlechtere Genauigkeit.</p>'
+
+            + '<h4>6.2.4 Federated Learning und Secure Aggregation</h4>'
+            + '<p><strong>FedAvg</strong> (McMahan et al. AISTATS 2017): Clients trainieren lokal, schicken nur Modell-Updates an den Server, der gewichtet mittelt. Vorteil: Rohdaten verlassen das Geraet nicht.</p>'
+            + '<p>Aber: Updates koennen Trainingsdaten leaken. Gegenmassnahmen:</p>'
+            + '<ul>'
+            + '<li><strong>Secure Aggregation</strong> (Bonawitz et al. CCS 2017): Server sieht nur die Summe der Updates, nicht die einzelnen Beitraege (Pairwise Masking + Shamir Secret Sharing fuer Drop-out-Robustheit).</li>'
+            + '<li><strong>Local DP</strong>: jeder Client gibt seine Updates schon mit Noise heraus.</li>'
+            + '<li><strong>Cross-Silo vs. Cross-Device FL</strong>: Cross-Silo (wenige Organisations-Clients), Cross-Device (Mio. Endgeraete) haben unterschiedliche Bedrohungsmodelle.</li>'
+            + '</ul>'
+
+            + '<h4>6.2.5 Modell-Diebstahl und Watermarking</h4>'
+            + '<p><strong>Model Extraction</strong> (Tramer et al. USENIX Sec. 2016): mit Query-Zugriff zur Prediction-API kann ein funktional aequivalentes Modell rekonstruiert werden &mdash; insbesondere bei Modellen mit Logits-Output und ohne Rate-Limiting.</p>'
+            + '<p>Schutzmassnahmen:</p>'
+            + '<ul>'
+            + '<li>Output auf Top-1-Label reduzieren (statt voller Logits).</li>'
+            + '<li>Rate-Limiting / Anomalie-Detektion (untypische Query-Verteilungen).</li>'
+            + '<li><strong>Watermarking</strong>: Trainings-Trigger mit definiertem Output, der ein gestohlenes Modell forensisch identifizierbar macht (Adi et al. USENIX Sec. 2018).</li>'
+            + '<li><strong>PRADA</strong> (Juuti et al. EuroS&amp;P 2019): laufzeit-basierte Detektion verdaechtiger Query-Muster.</li>'
+            + '</ul>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: Shokri et al. IEEE S&amp;P 2017; Fredrikson et al. CCS 2015; Carlini et al. USENIX Sec. 2021 (LLM-Memorization); Dwork ICALP 2006; Dwork &amp; Roth Foundations 2014; Mironov CSF 2017 (RDP); Abadi et al. CCS 2016 (DP-SGD); McMahan et al. AISTATS 2017 (FedAvg); Bonawitz et al. CCS 2017; Tramer et al. USENIX Sec. 2016; Adi et al. USENIX Sec. 2018; ISO/IEC 27559:2022 (Privacy-enhancing data de-identification).</em></p>'
+    };
+
+    const PAGE_AI_LLM = {
+        title: '6.3 LLM- und Agentic-AI-Sicherheit',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die OWASP LLM Top 10 v2025 benennen und Beispiele zuordnen, (2) Direct- und Indirect-Prompt-Injection unterscheiden, (3) Excessive-Agency-Risiken bei Tool-using Agenten einschaetzen, (4) Sicherheits-Implikationen des Anthropic Model Context Protocol (MCP) erklaeren, (5) NIST AI 600-1 Generative-AI-Profile in das Kontrollsystem integrieren.</blockquote>'
+
+            + '<h4>6.3.1 OWASP Top 10 fuer LLM-Applications, Version 2025</h4>'
+            + '<p>Veroeffentlicht November 2024 durch das OWASP GenAI Security Project (Vorgaenger: v1.1, Okt. 2023). Die Reihenfolge spiegelt nicht direkt Severity, sondern beobachtete Praevalenz und Impact in produktiven LLM-Apps:</p>'
+            + '<table><thead><tr><th>ID</th><th>Titel</th><th>Kerninhalt</th></tr></thead><tbody>'
+            + '<tr><td><strong>LLM01</strong></td><td>Prompt Injection</td><td>direkte oder indirekte Manipulation des Prompts (Jailbreaks, Indirect via abgerufene Inhalte)</td></tr>'
+            + '<tr><td><strong>LLM02</strong></td><td>Sensitive Information Disclosure</td><td>Leak von PII, Secrets, geistigem Eigentum aus Training oder Kontext</td></tr>'
+            + '<tr><td><strong>LLM03</strong></td><td>Supply Chain</td><td>kompromittierte Modelle, Datasets, Plug-ins, LoRA-Adapter, Inference-Frameworks</td></tr>'
+            + '<tr><td><strong>LLM04</strong></td><td>Data and Model Poisoning</td><td>vergiftete Trainings-/RAG-Daten, Backdoors</td></tr>'
+            + '<tr><td><strong>LLM05</strong></td><td>Improper Output Handling</td><td>Downstream-Injektionen (XSS, SSRF, SQLi) durch ungefilterte LLM-Outputs</td></tr>'
+            + '<tr><td><strong>LLM06</strong></td><td>Excessive Agency</td><td>zu weit gefasste Tool-/API-Berechtigungen von Agenten</td></tr>'
+            + '<tr><td><strong>LLM07</strong></td><td>System Prompt Leakage</td><td>Geheimnisse oder Logik aus System-Prompts werden vom Modell ausgegeben</td></tr>'
+            + '<tr><td><strong>LLM08</strong></td><td>Vector and Embedding Weaknesses</td><td>RAG-spezifisch: Embedding-Inversion, Daten-Vermischung, Tenant-Verletzung</td></tr>'
+            + '<tr><td><strong>LLM09</strong></td><td>Misinformation</td><td>Halluzinationen, Overreliance, fehlende Quellenangaben</td></tr>'
+            + '<tr><td><strong>LLM10</strong></td><td>Unbounded Consumption</td><td>Denial-of-Wallet/Service durch Endlos-Generierung, Kontext-Stuffing, Model-Cloning-Queries</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>6.3.2 Prompt Injection im Detail</h4>'
+            + '<ul>'
+            + '<li><strong>Direct Prompt Injection</strong>: User-Input enthaelt Anweisungen, die System-Instruktionen ueberstimmen ("Ignoriere alle vorherigen Anweisungen ...").</li>'
+            + '<li><strong>Indirect Prompt Injection</strong> (Greshake et al. AISec 2023): bosartige Anweisungen versteckt in <em>abgerufenen</em> Inhalten (E-Mails, Webseiten, PDFs), die ein RAG- oder Agent-System verarbeitet. Der User initiiert keinen boswilligen Prompt — der Angreifer schreibt die Anweisung in eine Quelle, die das Modell konsumiert.</li>'
+            + '<li><strong>Multi-Modal Prompt Injection</strong>: in Bildern (Steganografie / Adversarial Patches) oder Audio versteckte Anweisungen.</li>'
+            + '</ul>'
+            + '<p>Mitigation-Strategien (kombinieren!):</p>'
+            + '<ul>'
+            + '<li>Strikte <em>Role Separation</em> (System / User / Tool / Retrieved-Content) und Trust-Tiers.</li>'
+            + '<li>Output-Validierung gegen erlaubte Ziel-Aktionen (Schema-Constraints, allow-list von Tool-Calls).</li>'
+            + '<li>Human-in-the-Loop fuer Aktionen mit hohem Impact (Money-Movement, Mass-E-Mail, Datei-Loeschen).</li>'
+            + '<li>Detection-Modelle (z.B. Microsoft Prompt Shields, Llama Guard 3) — keine vollstaendige Garantie.</li>'
+            + '<li><strong>Wichtig</strong>: nach aktuellem Stand 2025 gibt es <em>keine</em> verlaessliche, vollstaendige Loesung gegen Prompt Injection (NIST AI 600-1, OWASP). Defense-in-Depth ist Pflicht.</li>'
+            + '</ul>'
+
+            + '<h4>6.3.3 Excessive Agency und Agentic Systems</h4>'
+            + '<p>Agentic-Systeme (LLM + Tools + Memory + Planung) erweitern den Angriffsraum erheblich. Kontroll-Pflichten nach OWASP LLM06:</p>'
+            + '<ul>'
+            + '<li><strong>Excessive Functionality</strong>: nur die Tools registrieren, die der Use-Case wirklich benoetigt.</li>'
+            + '<li><strong>Excessive Permissions</strong>: jedes Tool mit Least-Privilege; Read- vs. Write-Trennung.</li>'
+            + '<li><strong>Excessive Autonomy</strong>: Approval-Schritte fuer irreversible Aktionen.</li>'
+            + '</ul>'
+            + '<p><strong>Anthropic Model Context Protocol (MCP, 2024)</strong> standardisiert die Anbindung von Tools/Datenquellen an LLM-Clients. Sicherheits-Implikationen:</p>'
+            + '<ul>'
+            + '<li>MCP-Server bestimmt, was als <em>Tool</em> ausgegeben wird &mdash; ein boser Server kann Funktionen mit irrefuehrenden Beschreibungen registrieren ("Tool Description Injection" / "Rug-Pull").</li>'
+            + '<li>Authentifizierung &amp; Autorisierung des MCP-Servers liegt beim Host-Client; per OAuth 2.1 (Spez. 2025) zu sichern.</li>'
+            + '<li>Tool-Outputs sind <em>untrusted retrieved content</em> &rarr; Indirect-Prompt-Injection-Risiko.</li>'
+            + '<li>MCP-Permissions muessen pro Tool und pro Aktion explizit vom User bestaetigt werden (Prinzip "Approval Flows").</li>'
+            + '</ul>'
+
+            + '<h4>6.3.4 NIST AI 600-1 (Generative AI Profile)</h4>'
+            + '<p>NIST AI 600-1 (Juli 2024) konkretisiert das AI RMF fuer generative KI; identifiziert 12 GAI-spezifische Risiken, u.a.:</p>'
+            + '<ul>'
+            + '<li>CBRN/Cyber-Capability-Uplift, Confabulation (Halluzination), Dangerous/Violent/Hateful Content, Data Privacy, Environmental Impact, Harmful Bias, Human-AI Configuration, Information Integrity (Synthetic-Media-Provenance), IP-Issues, Obscene/Degrading Content, Information Security, Value Chain &amp; Component Integration.</li>'
+            + '<li>Empfiehlt Gegenmassnahmen entlang Govern/Map/Measure/Manage (analog NIST AI RMF 1.0).</li>'
+            + '<li>Fuer Synthetic-Media: Provenance via C2PA / Content Credentials.</li>'
+            + '</ul>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: OWASP GenAI Security Project "Top 10 for LLM Applications" v2025 (Nov. 2024); Greshake et al. AISec 2023; NIST AI 600-1 (Juli 2024); MITRE ATLAS v2024 (Techniken AML.T0051 LLM Prompt Injection, AML.T0054 LLM Plugin Compromise); Anthropic Model Context Protocol Spezifikation 2024-2025; Microsoft "Prompt Shields" Doku (2024); Carlini et al. USENIX Sec. 2021 (Memorization).</em></p>'
+    };
+
+    const PAGE_AI_GOVERNANCE = {
+        title: '6.4 MLOps-Sicherheit, NIST AI RMF, EU AI Act, ISO/IEC 42001',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die vier Funktionen des NIST AI RMF 1.0 erlaeutern, (2) die Risikoklassen des EU AI Act und Inkrafttreten-Fristen nennen, (3) ISO/IEC 42001:2023 als zertifizierungsfaehiges AI-Managementsystem einordnen, (4) MLOps-Pipeline-Risiken auf konkrete Controls abbilden.</blockquote>'
+
+            + '<h4>6.4.1 NIST AI Risk Management Framework 1.0</h4>'
+            + '<p>NIST AI 100-1 "AI RMF 1.0" (Januar 2023) ist freiwillig und definiert vier Kern-Funktionen ("Core"):</p>'
+            + '<table><thead><tr><th>Funktion</th><th>Inhalt</th></tr></thead><tbody>'
+            + '<tr><td><strong>Govern</strong></td><td>Kultur, Policies, Rollen, Verantwortlichkeit, Compliance, Lieferkette</td></tr>'
+            + '<tr><td><strong>Map</strong></td><td>Kontext, Use-Case, Risiken, Annahmen identifizieren</td></tr>'
+            + '<tr><td><strong>Measure</strong></td><td>quantitative/qualitative Bewertung der Risiken (Performance, Bias, Robustness, Privacy)</td></tr>'
+            + '<tr><td><strong>Manage</strong></td><td>Priorisierung, Behandlung, Monitoring der Risiken im Lebenszyklus</td></tr>'
+            + '</tbody></table>'
+            + '<p>Querschnitt: <em>Trustworthy AI Characteristics</em> &mdash; Valid &amp; Reliable, Safe, Secure &amp; Resilient, Accountable &amp; Transparent, Explainable &amp; Interpretable, Privacy-Enhanced, Fair (with harmful bias managed). Ergaenzt durch <strong>NIST AI 600-1</strong> fuer GenAI (siehe 6.3.4).</p>'
+
+            + '<h4>6.4.2 EU AI Act (Verordnung 2024/1689)</h4>'
+            + '<p>Veroeffentlicht im EU-Amtsblatt am 12.07.2024, Inkrafttreten <strong>1. August 2024</strong>. Gestaffelte Geltung:</p>'
+            + '<table><thead><tr><th>Datum</th><th>Was gilt</th></tr></thead><tbody>'
+            + '<tr><td>02.02.2025</td><td>Kapitel I (Allgemeines) und Kapitel II (verbotene Praktiken nach Art. 5) gelten</td></tr>'
+            + '<tr><td>02.08.2025</td><td>GPAI-Pflichten (Art. 51-55), Governance / Notified Bodies, Sanktionen</td></tr>'
+            + '<tr><td>02.08.2026</td><td>Hauptanwendung der Hochrisiko-Pflichten</td></tr>'
+            + '<tr><td>02.08.2027</td><td>Anwendung auf Hochrisiko-Systeme nach Anhang I (Produktsicherheit)</td></tr>'
+            + '</tbody></table>'
+            + '<p>Risiko-basierter Ansatz mit vier Stufen:</p>'
+            + '<ul>'
+            + '<li><strong>Verbotene Praktiken</strong> (Art. 5): u.a. Social Scoring durch Behoerden, manipulative subliminale Techniken, untargeted Scraping fuer Gesichts-Datenbanken, Echtzeit-Remote-Biometrie im oeffentlichen Raum (mit eng definierten Ausnahmen), Emotionserkennung am Arbeitsplatz / in Bildung.</li>'
+            + '<li><strong>Hochrisiko</strong> (Anhang III + Anhang I): Biometrie, kritische Infrastruktur, Bildung, Beschaeftigung, oeffentliche Dienste, Strafverfolgung, Migration, Justiz; sowie KI-Komponenten in regulierten Produkten (Maschinen, Medizinprodukte). Pflichten: Risikomanagement-System (Art. 9), Daten-Governance (Art. 10), technische Dokumentation (Art. 11), Logging (Art. 12), Transparenz (Art. 13), menschliche Aufsicht (Art. 14), Genauigkeit/Robustheit/Cybersicherheit (Art. 15), Konformitaetsbewertung, CE-Kennzeichnung, Post-Market-Monitoring.</li>'
+            + '<li><strong>Begrenztes Risiko</strong>: Transparenzpflichten, u.a. Kennzeichnung KI-generierter Inhalte (Art. 50, Deepfakes).</li>'
+            + '<li><strong>Minimales Risiko</strong>: keine spezifischen Pflichten.</li>'
+            + '</ul>'
+            + '<p><strong>GPAI</strong> (General-Purpose AI Models, Art. 51 ff.): zwei Stufen. Standard-GPAI &rarr; technische Doku, Trainingsdaten-Zusammenfassung, Urheberrechts-Compliance. <em>Systemic-Risk-GPAI</em> (Schwellwert per Default $10^{25}$ FLOPs Training-Compute, Art. 51 Abs. 2) zusaetzlich: Modell-Evaluierung, Adversarial-Testing, Risikomanagement, Cybersecurity, Vorfall-Meldung an die KI-Behoerde. Sanktionen bis 7% Konzern-Jahresumsatz oder 35 Mio. EUR (Art. 99) fuer verbotene Praktiken.</p>'
+
+            + '<h4>6.4.3 ISO/IEC 42001:2023 — AI Management System</h4>'
+            + '<p>Erste internationale Norm fuer ein zertifizierungsfaehiges AI-Managementsystem (AIMS). Annex-SL-Struktur (analog ISO 27001), Klauseln 4-10 verbindlich. Anhang A: 38 Controls in 9 Bereichen (u.a. Policies, internal organization, AI system lifecycle, data quality, third-party use, customer relationships).</p>'
+            + '<ul>'
+            + '<li>Komplementaer zu <strong>ISO/IEC 23894:2023</strong> (AI Risk Management) und <strong>ISO/IEC 22989:2022</strong> (Concepts and Terminology).</li>'
+            + '<li>Erfuellt einen Teil der EU-AI-Act-Anforderungen an QMS &mdash; eine ISO/IEC-42001-Zertifizierung adressiert insbesondere Art. 17 (QMS fuer Hochrisiko-Anbieter); ist aber kein automatischer "presumed conformity" fuer den AI Act, solange keine harmonisierten Normen via CEN-CENELEC JTC 21 publiziert sind.</li>'
+            + '</ul>'
+
+            + '<h4>6.4.4 MLOps-Pipeline-Sicherheit</h4>'
+            + '<p>Eine produktionsreife ML-Pipeline hat dieselben Stufen wie klassisches DevOps, plus Daten- und Modell-Artefakte. Pro Stufe typische Risiken/Controls:</p>'
+            + '<table><thead><tr><th>Stufe</th><th>Risiko</th><th>Control</th></tr></thead><tbody>'
+            + '<tr><td>Daten-Erhebung</td><td>Poisoning, PII-Verletzung</td><td>Daten-Lineage, Datasheets, PIA / DPIA</td></tr>'
+            + '<tr><td>Feature Engineering</td><td>Leakage, Bias-Verstaerkung</td><td>Feature Store mit Versionierung, Bias-Audits</td></tr>'
+            + '<tr><td>Training</td><td>Model Theft, Backdoor</td><td>isolierte Trainings-Compute, Reproducibility (Seeds, Container-Hashes), DP-SGD wo angebracht</td></tr>'
+            + '<tr><td>Modell-Registry</td><td>unautorisierter Push</td><td>signierte Model Cards (z.B. ML-Spec/Sigstore), RBAC, Approval-Gates</td></tr>'
+            + '<tr><td>Deployment</td><td>Endpoint-Missbrauch, Model Extraction</td><td>Auth/Quota/Rate-Limiting, Output-Sanitization, Monitoring</td></tr>'
+            + '<tr><td>Operation</td><td>Concept/Data Drift, Feedback-Loops</td><td>Drift-Detection (z.B. KS-Test, PSI), Champion/Challenger, Shadow-Deployments</td></tr>'
+            + '<tr><td>Decommissioning</td><td>verwaiste Endpoints, vergessene Daten</td><td>Lifecycle-Policy, Data-Erasure-Nachweis</td></tr>'
+            + '</tbody></table>'
+            + '<p>Querschnitt: SBOM/<strong>AIBOM</strong> (CycloneDX 1.6 hat AI/ML-Erweiterung), Sigstore-Signaturen, Reproducible Builds und Provenance nach SLSA Level 3+ analog zu klassischen Build-Pipelines (siehe Kap. 4 und Kap. 5).</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST AI 100-1 "AI RMF 1.0" (Jan. 2023); NIST AI 600-1 (Juli 2024); Verordnung (EU) 2024/1689 ueber KI ("AI Act", Amtsblatt L 12.07.2024); ISO/IEC 42001:2023 (AIMS); ISO/IEC 23894:2023 (AI Risk Management); ISO/IEC 22989:2022 (AI Concepts &amp; Terminology); CEN-CENELEC JTC 21 Standardisation Request M/593 (2023); CycloneDX 1.6 ML-BOM (2024); SLSA v1.0.</em></p>'
+    };
+
+    const QUIZ_AI = [
+        // -- Adversarial ML (13) --
+        q('Welches Verfahren beschreibt die Fast Gradient Sign Method (FGSM)?',
+            ['Einschritt-Update $x_{adv}=x+\\epsilon\\,\\mathrm{sign}(\\nabla_x J)$ im $L_\\infty$-Modell',
+             'Iterative Optimierung mit Lagrange-Term und beliebiger $L_p$-Norm',
+             'Black-Box-Angriff per Substitute-Modell',
+             'Zertifizierte Robustheit unter Gauss-Rauschen'], 0,
+            'Goodfellow et al. ICLR 2015: FGSM ist ein Einschritt-Angriff im $L_\\infty$-Bedrohungsmodell, $x_{adv}=x+\\epsilon\\,\\mathrm{sign}(\\nabla_x J(\\theta,x,y))$.'),
+        q('Welche Aussage zu PGD (Madry et al. ICLR 2018) ist korrekt?',
+            ['Mehrstufige FGSM-Iteration mit Projektion in die $\\epsilon$-Kugel um $x$',
+             'Einschritt-Methode ohne Projektion',
+             'Black-Box-Verfahren ohne Gradientenzugriff',
+             'Zertifizierte Verteidigung statt Angriff'], 0,
+            'Madry et al. ICLR 2018: PGD = iterierter FGSM-Schritt mit Projektion zurueck in die zulaessige $\\epsilon$-Kugel; gilt als universellster First-Order-Angriff.'),
+        q('Wofuer ist der Carlini-Wagner-Angriff bekannt?',
+            ['Goldstandard zur Robustheits-Evaluation; bricht Defensive Distillation und viele Gradient-Masking-Verfahren',
+             'Schnellster Black-Box-Angriff auf Cloud-APIs',
+             'Erste zertifizierte Verteidigung mit Gauss-Glaettung',
+             'Variante des Backdoor-Trainings'], 0,
+            'Carlini &amp; Wagner IEEE S&amp;P 2017: optimierungsbasiert, findet typischerweise kleinere Perturbationen als FGSM/PGD und brach Papernots Defensive Distillation.'),
+        q('Welche Verteidigung liefert eine PROVABLE (zertifizierte) Robustheits-Garantie?',
+            ['Randomized Smoothing (Cohen et al. ICML 2019)',
+             'Defensive Distillation (Papernot et al. 2016)',
+             'Gradient Masking',
+             'Standard-Adversarial-Training mit FGSM'], 0,
+            'Cohen/Rosenfeld/Kolter ICML 2019: Randomized Smoothing liefert einen zertifizierten Robustheits-Radius im $L_2$ unter Gaussian-Noise; die anderen Verfahren sind nur empirisch (oder gebrochen).'),
+        q('Worum geht es beim Athalye-et-al.-Paper "Obfuscated Gradients" (ICML 2018)?',
+            ['Nachweis, dass viele "Defensiv-Methoden" nur Gradienten verschleiern, ohne echte Robustheit zu liefern',
+             'Erste Implementierung von DP-SGD',
+             'Definition der MITRE ATLAS-Matrix',
+             'Einfuehrung des EU AI Act'], 0,
+            'Athalye/Carlini/Wagner ICML 2018: zeigten, dass die meisten 2017-2018 vorgeschlagenen Defensiven auf "Obfuscated Gradients" beruhten und durch BPDA/EOT brechbar sind.'),
+        q('Was charakterisiert eine "Clean-Label"-Poisoning-Attacke?',
+            ['Trainings-Inputs werden veraendert, Labels bleiben korrekt',
+             'Trainings-Labels werden geflippt, Inputs bleiben unveraendert',
+             'Inferenz-Inputs werden mit Trigger-Pixel versehen',
+             'Modell wird durch API-Queries kopiert'], 0,
+            'Shafahi et al. NeurIPS 2018: Clean-Label-Poisoning vergiftet die Features, ohne die Labels zu manipulieren — schwerer zu erkennen als Label-Flipping.'),
+        q('Was beschreibt der BadNets-Angriff (Gu et al. 2017)?',
+            ['Backdoor: Trigger-Pixelmuster fuehrt zu gezielter Fehlklassifikation, Sauber-Genauigkeit unveraendert',
+             'Black-Box-Evasion via Substitute-Modell',
+             'Modell-Diebstahl per Logits-API',
+             'Membership-Inference per Shadow-Models'], 0,
+            'Gu/Dolan-Gavitt/Garg arXiv:1708.06733 (2017): BadNets versteckt einen Trigger im Trainingssatz; das Modell verhaelt sich auf sauberen Inputs normal, aber bei Trigger-Inputs gezielt falsch.'),
+        q('Welcher Angriff faellt in NIST AI 100-2 unter "Privacy"?',
+            ['Membership Inference',
+             'PGD',
+             'BadNets',
+             'Clean-Label Poisoning'], 0,
+            'NIST AI 100-2 E2023 (Adversarial ML, Jan. 2024): Privacy-Angriffe zielen auf Trainingsdaten; MIA gehoert dazu, PGD/BadNets adressieren Integrity.'),
+        q('Was bedeutet "Transferability" adversarialer Beispiele?',
+            ['Auf einem Surrogat-Modell erzeugte Beispiele wirken oft auch auf andere Modelle',
+             'Adversariale Beispiele uebertragen sich nur innerhalb derselben Architektur',
+             'Adversariale Beispiele lassen sich auf alle Eingabeformen uebertragen',
+             'Adversariale Beispiele sind beliebig zwischen Datenmodalitaeten konvertierbar'], 0,
+            'Papernot/McDaniel/Goodfellow 2016: Adversariale Beispiele sind oft modelluebergreifend uebertragbar; das ermoeglicht Black-Box-Angriffe ueber Substitute Models.'),
+        q('Welche MITRE-ATLAS-Taktik beschreibt das Sammeln oeffentlicher Modell-Informationen vor einem Angriff?',
+            ['Reconnaissance',
+             'Impact',
+             'Defense Evasion',
+             'Lateral Movement'], 0,
+            'MITRE ATLAS v2024 uebernimmt die ATT&amp;CK-Phasen: Reconnaissance ist die erste Phase und umfasst Modell-/Datensatz-Aufklaerung (z.B. AML.T0001 Search for Victim\'s Publicly Available Research Materials).'),
+        q('Welche Norm ist NICHT primaer fuer Adversarial-ML-Bedrohungen relevant?',
+            ['ISO/IEC 27018 (Cloud-PII-Schutz)',
+             'NIST AI 100-2',
+             'MITRE ATLAS',
+             'OWASP ML Top 10'], 0,
+            'ISO/IEC 27018:2019 adressiert PII-Schutz in Public-Cloud-Diensten und ist nicht ML-Adversarial-spezifisch; die anderen drei sind genau dafuer geschaffen.'),
+        q('Welche Bedingung definiert das Bedrohungsmodell von FGSM/PGD typischerweise?',
+            ['$\\|\\delta\\|_\\infty \\le \\epsilon$',
+             '$\\|\\delta\\|_2 \\le 0$',
+             '$\\delta = 0$',
+             'beliebige $L_p$-Norm ohne Schranke'], 0,
+            'In der Praxis werden FGSM und PGD im $L_\\infty$-Modell mit $\\|\\delta\\|_\\infty\\le\\epsilon$ analysiert; $L_2$- und $L_0$-Varianten existieren ebenfalls.'),
+        q('Welche Aussage zu Adversarial Training (Madry 2018) ist korrekt?',
+            ['Loest ein min-max-Problem: das Modell wird auf staerksten gefundenen Adversarial-Beispielen trainiert',
+             'Trainiert das Modell zusaetzlich mit synthetischen Privacy-Daten',
+             'Erzielt zertifizierte Robustheit ohne weitere Massnahmen',
+             'Macht Gradient Masking ueberfluessig durch Distillation'], 0,
+            'Madry et al. ICLR 2018 formulieren das Problem als $\\min_\\theta \\mathbb{E}[\\max_\\delta L(\\theta,x+\\delta,y)]$; die innere Maximierung wird mit PGD approximiert.'),
+
+        // -- Privacy / Modellschutz (13) --
+        q('Welche formale Bedingung definiert $(\\epsilon,\\delta)$-Differential Privacy?',
+            ['$\\Pr[\\mathcal{M}(D)\\in S]\\le e^{\\epsilon}\\Pr[\\mathcal{M}(D\')\\in S]+\\delta$ fuer benachbarte $D,D\'$',
+             '$\\Pr[\\mathcal{M}(D)\\in S]=\\Pr[\\mathcal{M}(D\')\\in S]$ fuer alle $D,D\'$',
+             '$\\Pr[\\mathcal{M}(D)\\in S]<\\delta$',
+             'KL-Divergenz zwischen $\\mathcal{M}(D)$ und $\\mathcal{M}(D\')$ ist $0$'], 0,
+            'Dwork &amp; Roth (Foundations 2014): exakt diese Ungleichung fuer benachbarte Datenmengen $D,D\'$, alle messbaren $S\\subseteq\\mathrm{Range}(\\mathcal{M})$.'),
+        q('Welcher Wertebereich ist fuer $\\epsilon$ in praktischer DP typisch?',
+            ['$[0{,}1; 10]$',
+             '$[100; 1000]$',
+             '$\\epsilon = 0$ exakt',
+             '$[10^{-10}; 10^{-9}]$'], 0,
+            'Dwork &amp; Roth: praktische Privacy-Budgets liegen typischerweise zwischen 0,1 und 10; sehr kleine $\\epsilon$ sind in High-Privacy-Settings, sehr grosse weitgehend ohne Schutz.'),
+        q('Welche Operation FEHLT in DP-SGD nicht?',
+            ['Per-Sample Gradient Clipping auf $L_2$-Norm $C$',
+             'Hinzufuegen von Gauss-Rauschen $\\mathcal{N}(0,\\sigma^2 C^2 I)$ zum Mittel',
+             'Privacy-Accounting (Moments Accountant / RDP)',
+             'Verwendung des Adam-Optimizers ist verpflichtend'], 3,
+            'Abadi et al. CCS 2016: DP-SGD verlangt Per-Sample-Clipping, Noise und Privacy-Accounting; der Optimierer (SGD/Adam/...) ist nicht durch DP-SGD vorgeschrieben — Adam ist NICHT zwingend.'),
+        q('Welche Studie fuehrte Membership-Inference-Angriffe gegen ML-Modelle ein?',
+            ['Shokri et al. IEEE S&amp;P 2017 (Shadow Models)',
+             'Goodfellow et al. ICLR 2015',
+             'Madry et al. ICLR 2018',
+             'McMahan et al. AISTATS 2017'], 0,
+            'Shokri/Stronati/Song/Shmatikov IEEE S&amp;P 2017 fuehrte den klassischen MIA mit Shadow-Models gegen Cloud-ML-APIs ein.'),
+        q('Welcher Angriff zielt darauf, Trainingsdaten zu rekonstruieren?',
+            ['Model Inversion (Fredrikson et al. CCS 2015)',
+             'PGD',
+             'FGSM',
+             'BadNets'], 0,
+            'Fredrikson/Jha/Ristenpart CCS 2015 demonstrierten Model Inversion gegen Gesichtserkennungs-APIs mit Klassen-Label-Zugriff.'),
+        q('Welche Aussage zu Carlini et al. "Extracting Training Data from Large Language Models" (USENIX Sec. 2021) trifft zu?',
+            ['LLMs koennen woertliche Trainings-Sequenzen (z.B. PII) memorisieren und ueber gezielte Prompts ausgeben',
+             'Demonstriert, dass LLMs niemals Trainingsdaten leaken',
+             'Schlaegt PGD-Verteidigung fuer LLMs vor',
+             'Beweist, dass DP fuer LLMs unmoeglich ist'], 0,
+            'Carlini et al. zeigten Memorization-Angriffe gegen GPT-2: extrahierten u.a. PII, URLs, Code-Schnipsel woertlich aus den Trainingsdaten.'),
+        q('Was leistet "Secure Aggregation" in Federated Learning (Bonawitz et al. CCS 2017)?',
+            ['Server sieht nur die Summe aller Client-Updates, keine Einzel-Updates',
+             'Verhindert Backdoor-Trigger im Foederationsprozess',
+             'Liefert zertifizierte Robustheit gegen Evasion',
+             'Beschleunigt das Training um Faktor 10'], 0,
+            'Bonawitz et al. CCS 2017: Pairwise-Masking + Shamir Secret Sharing erlaubt dem Server, die Summe der Updates zu erfahren, nicht jedoch einzelne Beitraege.'),
+        q('Welche Behauptung zu Federated Learning ist FALSCH?',
+            ['Roh-Daten verlassen das Geraet, das ist akzeptabel',
+             'FedAvg mittelt Modell-Updates server-seitig',
+             'Updates allein koennen Trainingsdaten leaken',
+             'Local-DP kann Privacy-Schutz auf Client-Ebene erzwingen'], 0,
+            'McMahan et al. AISTATS 2017: in FL bleiben die Rohdaten lokal — sie verlassen das Geraet NICHT. Updates koennen jedoch sensible Information enthalten und benoetigen zusaetzlich Schutz.'),
+        q('Welche Verteidigung gegen Modell-Diebstahl arbeitet praeventiv via Output-Reduktion?',
+            ['Top-1-Label statt voller Logits/Probabilities zurueckliefern',
+             'Gradient Masking',
+             'Defensive Distillation',
+             'BadNets-Trainingsdaten einbauen'], 0,
+            'Tramer et al. USENIX Sec. 2016: Modell-Extraktion ist mit Logits-Output deutlich effektiver; Top-1-Label-only ist eine wirksame Mitigation neben Rate-Limiting.'),
+        q('Wofuer steht "Watermarking" im Kontext Modell-Schutz?',
+            ['Einbetten eines geheimen Trigger-Behaviors zur forensischen Wiedererkennung gestohlener Modelle',
+             'Steganografische Markierung von Trainingsdaten',
+             'Methode der Differential Privacy',
+             'Variante der Defensive Distillation'], 0,
+            'Adi et al. USENIX Sec. 2018: Modell-Watermarking faerbt das Modellverhalten auf einer geheimen Trigger-Menge ein, sodass Diebstahl nachgewiesen werden kann.'),
+        q('Welche Eigenschaft hat Renyi Differential Privacy gegenueber klassischer $(\\epsilon,\\delta)$-DP?',
+            ['Engere Composition-Schranken bei mehrfacher Anwendung',
+             'Schwaecher als $(\\epsilon,0)$-DP',
+             'Garantiert keinerlei Privacy',
+             'Verzichtet auf einen Privacy-Parameter'], 0,
+            'Mironov CSF 2017: RDP basiert auf Renyi-Divergenz und liefert engere Bilanzierungen iterativer Composition als basic Composition; Standard-Werkzeug im Moments-Accountant.'),
+        q('Was beschreibt "Cross-Device" vs. "Cross-Silo" Federated Learning?',
+            ['Cross-Device: Mio. Endgeraete als Clients; Cross-Silo: wenige Organisations-Clients',
+             'Cross-Device: zentralisierte Cloud; Cross-Silo: einzelnes Smartphone',
+             'Cross-Device: ohne Verschluesselung; Cross-Silo: mit TLS',
+             'Beide Begriffe bedeuten dasselbe'], 0,
+            'Kairouz et al. "Advances and Open Problems in Federated Learning" 2021: Cross-Device hat heterogene, unzuverlaessige Endgeraete; Cross-Silo wenige zuverlaessige Organisations-Clients.'),
+        q('Welche Massnahme ist KEIN Schutz gegen Modell-Extraktion?',
+            ['Veroeffentlichung aller Logits ohne Rate-Limit',
+             'Top-1-Label-Output statt Logits',
+             'API-Rate-Limiting und Anomalie-Detektion (PRADA)',
+             'Watermarking'], 0,
+            'Veroeffentlichung voller Logits beguenstigt Extraktion; sie ist ein Anti-Pattern, kein Schutz.'),
+
+        // -- LLM / Agentic AI (12) --
+        q('Wie viele Top-Risiko-Kategorien definiert OWASP "Top 10 for LLM Applications" v2025?',
+            ['10 (LLM01 bis LLM10)',
+             '5',
+             '15',
+             '20'], 0,
+            'OWASP GenAI Security Project Top 10 v2025 (Nov. 2024) listet exakt 10 Risiken (LLM01 Prompt Injection bis LLM10 Unbounded Consumption).'),
+        q('Welcher OWASP-LLM-v2025-Eintrag adressiert Denial-of-Wallet-Risiken durch Endlos-Generierung und Kontext-Stuffing?',
+            ['LLM10 Unbounded Consumption',
+             'LLM01 Prompt Injection',
+             'LLM07 System Prompt Leakage',
+             'LLM06 Excessive Agency'], 0,
+            'OWASP LLM v2025 LLM10: Unbounded Consumption umfasst Denial-of-Wallet/Service durch hohe Token-/Compute-/Cost-Verbraeuche.'),
+        q('Was ist eine "Indirect Prompt Injection" (Greshake et al. AISec 2023)?',
+            ['Boese Anweisung versteckt in vom LLM abgerufenen Inhalten (E-Mail, Webseite, PDF)',
+             'Direkter User-Prompt mit Jailbreak',
+             'Modell-Extraktion via Logits-API',
+             'Trainingszeit-Backdoor mit Trigger-Pixel'], 0,
+            'Greshake et al. AISec 2023 fuehrte den Begriff ein: bei RAG- oder Tool-using Agents werden externe Inhalte zu untrusted Instruktionen.'),
+        q('Welcher Eintrag der OWASP LLM Top 10 v2025 deckt RAG-spezifische Risiken (Embedding-Inversion, Tenant-Verletzung) explizit ab?',
+            ['LLM08 Vector and Embedding Weaknesses',
+             'LLM03 Supply Chain',
+             'LLM05 Improper Output Handling',
+             'LLM02 Sensitive Information Disclosure'], 0,
+            'OWASP LLM v2025 LLM08 wurde fuer RAG-/Vektor-Datenbanken-spezifische Schwaechen geschaffen.'),
+        q('Welche Aussage zu Prompt-Injection-Verteidigungen ist nach NIST AI 600-1 (Juli 2024) korrekt?',
+            ['Es gibt aktuell keine vollstaendige Loesung; Defense-in-Depth ist Pflicht',
+             'Standard-RLHF-Training eliminiert Prompt Injection vollstaendig',
+             'Llama Guard 3 garantiert 100% Detektion',
+             'Eine Whitelist von Stoppwoertern reicht aus'], 0,
+            'NIST AI 600-1 (Juli 2024) und OWASP LLM v2025 stellen klar: kein einzelnes Verfahren bietet vollstaendigen Schutz; Defense-in-Depth ist erforderlich.'),
+        q('Wofuer steht "Excessive Agency" in der OWASP LLM Top 10?',
+            ['Zu weitreichende Tool-/API-Berechtigungen oder Autonomie eines LLM-Agenten',
+             'Halluzinationen ohne Quellen',
+             'Memorization von Trainingsdaten',
+             'Embedding-Vermischung in Vektordatenbanken'], 0,
+            'OWASP LLM v2025 LLM06: Excessive Functionality, Excessive Permissions, Excessive Autonomy — Agenten erhalten mehr Faehigkeiten/Rechte/Freiheiten als noetig.'),
+        q('Welche der folgenden ist KEINE empfohlene Mitigation gegen Prompt Injection?',
+            ['Auf RLHF allein vertrauen und keine weiteren Kontrollen einsetzen',
+             'Strikte Role-Separation zwischen System-, User- und Retrieved-Content-Prompts',
+             'Schema-Constraints und Output-Validierung gegen Tool-Allowlists',
+             'Human-in-the-Loop bei irreversiblen Aktionen'], 0,
+            'OWASP / NIST AI 600-1: RLHF allein reicht nicht — Defense-in-Depth ist Pflicht.'),
+        q('Welche Sicherheits-Implikation hat das Anthropic Model Context Protocol (MCP)?',
+            ['MCP-Server koennen Tools mit irrefuehrenden Beschreibungen registrieren ("Description Injection"); Authentifizierung des Servers ist Pflicht',
+             'MCP eliminiert Indirect Prompt Injection',
+             'MCP-Tools muessen nicht authentifiziert werden',
+             'MCP ist ein verbindlicher EU-AI-Act-Standard'], 0,
+            'MCP-Spezifikation 2024-2025: Tool-Definitionen werden vom Server geliefert; ein bosartiger Server kann irrefuehrende Beschreibungen oder boesartige Tools anbieten — Auth/OAuth 2.1 und Approval-Flows sind Pflicht.'),
+        q('Welche MITRE-ATLAS-Technik beschreibt die Manipulation von LLM-Prompts?',
+            ['AML.T0051 LLM Prompt Injection',
+             'AML.T0019 Publish Poisoned Datasets',
+             'AML.T0043 Craft Adversarial Data',
+             'AML.T0010 ML Supply Chain Compromise'], 0,
+            'MITRE ATLAS v2024 listet AML.T0051 LLM Prompt Injection unter Initial Access; T0019 ist Poisoning, T0043 ist klassische Evasion.'),
+        q('Welcher Eintrag der OWASP LLM Top 10 v2025 ersetzte den frueheren v1.1-Eintrag "Insecure Output Handling"?',
+            ['LLM05 Improper Output Handling',
+             'LLM01 Prompt Injection',
+             'LLM10 Unbounded Consumption',
+             'LLM07 System Prompt Leakage'], 0,
+            'OWASP LLM v2025 benannte "Insecure Output Handling" (v1.1 LLM02) in "Improper Output Handling" um und nummerierte es als LLM05.'),
+        q('Welches Provenance-Verfahren empfiehlt NIST AI 600-1 fuer synthetische Medien?',
+            ['C2PA / Content Credentials',
+             'CVSS v4.0',
+             'EPSS',
+             'BadNets-Watermark'], 0,
+            'NIST AI 600-1 (Juli 2024, Risiko "Information Integrity") verweist auf C2PA/Content Credentials zur Provenance synthetischer Medien.'),
+        q('Welche Massnahme gehoert zu "Excessive Permissions" laut OWASP LLM06?',
+            ['Tool-Berechtigungen nach Least-Privilege; Read- und Write-Pfade trennen',
+             'Tools immer mit Admin-Rechten ausfuehren',
+             'Saemtliche Approval-Schritte deaktivieren',
+             'Token-Limits abschalten'], 0,
+            'OWASP LLM v2025 LLM06: Least-Privilege-Berechtigungen je Tool, Trennung Read/Write, Approval-Schritte fuer hohe-Impact-Aktionen.'),
+
+        // -- Governance / Compliance / MLOps (12) --
+        q('Welche vier Funktionen definiert das NIST AI RMF 1.0 Core?',
+            ['Govern, Map, Measure, Manage',
+             'Plan, Do, Check, Act',
+             'Identify, Protect, Detect, Respond',
+             'Discover, Classify, Protect, Monitor'], 0,
+            'NIST AI 100-1 "AI RMF 1.0" (Jan. 2023): vier Kern-Funktionen Govern (querschnittlich), Map, Measure, Manage.'),
+        q('Wann trat der EU AI Act (Verordnung 2024/1689) in Kraft?',
+            ['1. August 2024',
+             '12. Juli 2024',
+             '2. Februar 2025',
+             '2. August 2026'], 0,
+            'Verordnung (EU) 2024/1689: Veroeffentlichung 12.07.2024, Inkrafttreten am 20. Tag danach (Art. 113), also 1. August 2024; volle Anwendung gestaffelt bis 2027.'),
+        q('Ab wann gelten die Verbote nach Art. 5 EU AI Act (z.B. Social Scoring, manipulative Praktiken)?',
+            ['2. Februar 2025',
+             '1. August 2024',
+             '2. August 2025',
+             '2. August 2026'], 0,
+            'Art. 113 lit. a EU AI Act: Kapitel I + II (verbotene Praktiken) gelten 6 Monate nach Inkrafttreten — 2. Februar 2025.'),
+        q('Welcher FLOPs-Schwellenwert markiert per Default GPAI-Modelle mit "systemischem Risiko" laut Art. 51 AI Act?',
+            ['$10^{25}$',
+             '$10^{18}$',
+             '$10^{30}$',
+             '$10^{12}$'], 0,
+            'Art. 51 Abs. 2 EU AI Act: Vermutung systemischen Risikos ab kumulativ $10^{25}$ FLOPs Trainings-Compute (Schwelle durch Kommission anpassbar).'),
+        q('Welche Massnahme gehoert NICHT zu den Pflichten von Hochrisiko-AI-Anbietern laut Art. 9-15 AI Act?',
+            ['Generelles Werbe-Verbot',
+             'Risikomanagement-System ueber den Lebenszyklus (Art. 9)',
+             'Daten-Governance und Bias-Pruefung (Art. 10)',
+             'Menschliche Aufsicht (Art. 14)'], 0,
+            'Art. 9-15 EU AI Act: RMS, Daten-Governance, Doku, Logging, Transparenz, menschliche Aufsicht, Genauigkeit/Robustheit/Cybersicherheit — kein Werbeverbot.'),
+        q('Wie hoch sind die maximalen Bussgelder nach Art. 99 AI Act bei Verstoessen gegen verbotene Praktiken?',
+            ['Bis 7% Konzern-Jahresumsatz oder 35 Mio. EUR (je nachdem, was hoeher)',
+             'Bis 0,5% Jahresumsatz',
+             'Maximal 100.000 EUR pauschal',
+             'Keine Bussgelder, nur Untersagungsverfuegungen'], 0,
+            'Art. 99 Abs. 3 EU AI Act: bis zu 35 Mio. EUR oder 7% des weltweiten Jahresumsatzes — je nachdem, was hoeher ist.'),
+        q('Wofuer steht ISO/IEC 42001:2023?',
+            ['Erstes zertifizierungsfaehiges Management-System fuer KI (AIMS)',
+             'Norm fuer Adversarial-ML-Verteidigungen',
+             'Algorithmenverordnung der EU',
+             'Norm fuer Differential Privacy'], 0,
+            'ISO/IEC 42001:2023 ist die erste internationale Norm fuer ein zertifizierungsfaehiges AI Management System (Annex-SL-Struktur, Anhang A mit Controls).'),
+        q('Welche Norm liefert AI-spezifisches Risikomanagement-Vokabular und ergaenzt ISO/IEC 42001?',
+            ['ISO/IEC 23894:2023',
+             'ISO 31000:2018 (allg. Risikomanagement)',
+             'ISO/IEC 27001:2022',
+             'IEC 62443-3-3'], 0,
+            'ISO/IEC 23894:2023 "AI — Guidance on risk management" ist die AI-spezifische Konkretisierung (auf Basis von ISO 31000).'),
+        q('Welche der folgenden Aussagen zur EU-AI-Act-Konformitaet ist korrekt?',
+            ['Eine ISO/IEC-42001-Zertifizierung adressiert QMS-Anforderungen, ist aber kein automatischer "presumed conformity"-Nachweis ohne harmonisierte Normen',
+             'ISO/IEC 42001 garantiert automatisch volle AI-Act-Konformitaet',
+             'Der AI Act fordert keine technische Dokumentation',
+             'GPAI-Modelle muessen keine Trainingsdaten-Zusammenfassung liefern'], 0,
+            'Erst harmonisierte Normen unter CEN-CENELEC JTC 21 (Standardisation Request M/593) loesen "presumed conformity" nach Art. 40 AI Act aus; ISO/IEC 42001 ist hilfreich, aber kein automatischer Nachweis.'),
+        q('Welche MLOps-Massnahme adressiert Daten-/Concept-Drift im Betrieb?',
+            ['Drift-Detection (z.B. KS-Test, PSI) und Champion/Challenger-Deployments',
+             'Defensive Distillation',
+             'PGD-Adversarial-Training',
+             'Code-Signing der Trainings-Container'], 0,
+            'Drift-Detection ueberwacht Verteilungsverschiebungen; PGD/Distillation/Code-Signing adressieren andere Risiken.'),
+        q('Welcher Standard liefert eine ML-spezifische BOM-Erweiterung (AIBOM)?',
+            ['CycloneDX 1.6 (ML-BOM, 2024)',
+             'SPDX 1.0',
+             'NIST FIPS 197',
+             'IEC 62443-4-1'], 0,
+            'CycloneDX 1.6 (Mai 2024) erweitert das BOM-Modell um ML-Komponenten (Modell, Trainingsdaten, Metriken).'),
+        q('Welche Eigenschaft gehoert NICHT zu den "Trustworthy AI Characteristics" des NIST AI RMF 1.0?',
+            ['Profitable',
+             'Valid &amp; Reliable',
+             'Safe',
+             'Privacy-Enhanced'], 0,
+            'NIST AI 100-1: Trustworthy-AI-Eigenschaften sind Valid &amp; Reliable, Safe, Secure &amp; Resilient, Accountable &amp; Transparent, Explainable &amp; Interpretable, Privacy-Enhanced, Fair (with harmful bias managed) — "Profitable" gehoert nicht dazu.')
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_cybersec',
         code: 'MA-ET CyberSec',
         name: 'Master Elektrotechnik — Cyber-Security',
         short: 'MA-ET CyberSec',
         desc: 'Vertiefungsstudium Elektrotechnik mit Fokus Cyber-Security: Embedded Security, Netzwerk- und Industriesicherheit (IEC 62443), angewandte Kryptographie, Sichere Softwareentwicklung, Risikomanagement nach ISO 27001 / BSI Grundschutz, AI-Security.',
-        status: 'preparation',
         chapters: [
             {
                 id: 'krypto',
@@ -2297,30 +2866,9 @@
             {
                 id: 'aisec',
                 title: 'Kapitel 6 — AI-Security und vertrauenswuerdige Systeme',
-                summary: 'Adversarial Examples, Modell-Diebstahl, Membership-Inference, Prompt-Injection (OWASP LLM Top 10 v2025), MLOps-Security, EU-AI-Act-Pflichten.',
-                pages: [
-                    placeholderPage('Adversarial ML', [
-                        'Evasion-Angriffe (FGSM, PGD, C&W)',
-                        'Poisoning, Backdoor-Trigger',
-                        'Robustheit: Adversarial Training, Certified Defenses'
-                    ]),
-                    placeholderPage('Privatsphaere und Modellschutz', [
-                        'Membership-Inference, Modell-Inversion',
-                        'Differential Privacy, Federated Learning',
-                        'Modell-Diebstahl, Watermarking'
-                    ]),
-                    placeholderPage('LLM- und Agentic-AI-Sicherheit', [
-                        'OWASP Top 10 LLM v2025 — Prompt Injection, Excessive Agency',
-                        'NIST AI 600-1 (Generative-AI-Profile)',
-                        'Anthropic Model Context Protocol — Sicherheits-Implikationen'
-                    ]),
-                    placeholderPage('MLOps und Compliance', [
-                        'CI/CD fuer ML, Modell-Registry, Reproducibility',
-                        'EU-AI-Act-Anforderungen an Hochrisiko- und GPAI-Anbieter',
-                        'ISO/IEC 42001:2023 — AI Management System'
-                    ])
-                ],
-                quiz: placeholderQuiz('AI-Security')
+                summary: 'Adversarial Examples (FGSM/PGD/C&W), Membership-Inference, Modell-Diebstahl, Differential Privacy (DP-SGD), OWASP LLM Top 10 v2025, Indirect Prompt Injection, MITRE ATLAS, NIST AI RMF 1.0 / AI 600-1, EU AI Act 2024/1689, ISO/IEC 42001:2023, MLOps-Sicherheit.',
+                pages: [PAGE_AI_ADVERSARIAL, PAGE_AI_PRIVACY, PAGE_AI_LLM, PAGE_AI_GOVERNANCE],
+                quiz: QUIZ_AI
             }
         ]
     });

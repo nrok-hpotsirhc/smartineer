@@ -199,10 +199,13 @@ html.theme-dark, body.theme-dark {
 .theme-dark .bg-blue-50 { background-color: rgba(59,130,246,0.15); }
 .theme-dark .bg-blue-100 { background-color: rgba(59,130,246,0.25); }
 .theme-dark .bg-amber-50 { background-color: rgba(251,191,36,0.12); }
+.theme-dark .bg-amber-100 { background-color: rgba(251,191,36,0.22); }
+.theme-dark .border-amber-200 { border-color: rgba(251,191,36,0.45); }
 .theme-dark .border-amber-400 { border-color: #f59e0b; }
 .theme-dark .text-amber-800,
 .theme-dark .text-amber-900 { color: #fde68a; }
 .theme-dark .bg-emerald-50 { background-color: rgba(16,185,129,0.12); }
+.theme-dark .bg-emerald-100 { background-color: rgba(16,185,129,0.22); }
 .theme-dark .border-emerald-200,
 .theme-dark .border-emerald-300 { border-color: rgba(16,185,129,0.4); }
 .theme-dark .text-emerald-700,
@@ -211,6 +214,10 @@ html.theme-dark, body.theme-dark {
 .theme-dark .bg-teal-50 { background-color: rgba(20,184,166,0.12); }
 .theme-dark .border-teal-200 { border-color: rgba(20,184,166,0.4); }
 .theme-dark .text-teal-700 { color: #5eead4; }
+/* Blau-Akzente (Login-Hinweis, Badges): dunkel-blau-Hintergrund + helle Schrift */
+.theme-dark .border-blue-200 { border-color: rgba(59,130,246,0.45); }
+.theme-dark .text-blue-800,
+.theme-dark .text-blue-900 { color: #bfdbfe; }
 .theme-dark .bg-clip-text.text-transparent { -webkit-text-fill-color: initial; color: #e2e8f0; background: none; }
 .theme-dark .task-pill { background: #334155; color: #cbd5e1; border-color: transparent; }
 .theme-dark .task-pill:hover { background: #475569; }
