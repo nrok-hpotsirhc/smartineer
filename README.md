@@ -1,6 +1,6 @@
 # Smartineer — Engineering Knowledge Reloaded
 
-Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 15 Kategorien (inkl. Allgemeinmedizin als Spiegelung der gleichnamigen Schulung sowie KRL, Fügetechniken und Agentic AI), 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–4 (Klassen 5–10 und Englisch in Vorbereitung), ein **Schulungen-Bereich** mit Cert-Prep-Kursen (CompTIA SecurityX/Security+/CySA+/PenTest+) sowie zwei Master-ET-Schulungen in Vorbereitung, und ein **Optionen-Menü** mit Auth-Gate, Kategorie-Sichtbarkeit, Import/Export und PWA-Install.
+Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 15 Kategorien (inkl. Allgemeinmedizin als Spiegelung der gleichnamigen Schulung sowie KRL, Fügetechniken und Agentic AI), 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–4 (Klassen 5–10 und Englisch in Vorbereitung), ein **Schulungen-Bereich** mit Cert-Prep-Kursen (CompTIA SecurityX/Security+/CySA+/PenTest+) sowie zwei Master-ET-Schulungen in Vorbereitung, und ein **Optionen-Menü** mit Kategorie-Sichtbarkeit, Import/Export, PWA-Install und temporaer deaktiviertem Login.
 
 > **Stack**: React 18 (CDN, JSX via Babel-standalone) · Tailwind CSS (CDN) · Chart.js · KaTeX  
 > **Auslieferung**: Klassische Website **und** installierbare PWA (Desktop, Android, iOS)  
@@ -32,8 +32,8 @@ Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein e
 - **KaTeX-gerenderte Formeln** in Aufgaben, Hinweisen und Lösungen
 - **React-UI** (Hooks, Functional Components) mit weichen Übergangs-Animationen, Gradient-Hero, animierten Fortschrittsbalken und Hover-Effekten
 - **PWA**: voll installierbar auf Desktop / Android / iOS, **offline-fähig** durch Service-Worker-Caching
-- **Optionen-Menü** mit Konto-Login für Schulungen, Kategorie-Toggle, Import/Export, Reset und Install-Prompt
-- **Frontend-Only Schulungen-Gate** mit lokaler Session für Cert-Prep und Master-ET-Vorbereitungen
+- **Optionen-Menü** mit Kategorie-Toggle, Import/Export, Reset und Install-Prompt; der Konto-Login ist temporaer deaktiviert
+- **Schulungen-Bereich** fuer Cert-Prep und Master-ET-Vorbereitungen; das Frontend-Only Schulungen-Gate ist temporaer deaktiviert und als Reaktivierungs-Arbeitspaket vermerkt
 - **Cheatsheets** je Kategorie mit zwei Reitern:
   1. **Formeln** (kompakte Übersicht)
   2. **Musterlösungen** (vollständig isoliert mit Rechenweg und Kommentaren)
@@ -202,7 +202,7 @@ Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht
 ## Optionen & Schulungen
 
 - Der Tab **Optionen** bündelt Kategorie-Sichtbarkeit, Fortschritts-Export/-Import, Reset und den PWA-Installations-Flow.
-- Der Bereich **Schulungen** ist mit einem lokalen Login geschützt. Die Zugangsdaten werden optional über `js/auth-credentials.js` eingebunden; die mitgelieferte Vorlage ist [js/auth-credentials.example.js](js/auth-credentials.example.js).
+- Der lokale Login fuer den Bereich **Schulungen** ist temporaer deaktiviert; Reaktivierung ist als Arbeitspaket `P-UI-LOGIN-REACTIVATE` in `WORKPACKAGES.md` vermerkt. Die Zugangsdaten-Vorlage bleibt fuer die spaetere Reaktivierung unter [js/auth-credentials.example.js](js/auth-credentials.example.js) erhalten.
 - Die Anmeldung ist eine reine UX-Hilfe ohne echten Sicherheitsanspruch. Der Quellcode und der Browser-Storage bleiben einsehbar.
 - Die Master-ET-Cybersec-Schulung ist seit v30 vollstaendig produktiv (alle 6 Kapitel ausgearbeitet); die Master-ET-Automation-Schulung ist als `status: 'preparation'` angelegt, ein Kapitel produktiv und die uebrigen als Platzhalter markiert.
 
