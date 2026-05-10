@@ -2345,6 +2345,18 @@
         }
     });
 
+    // P-LP-FEEDBACK-LINKS: Lehrseiten-Metadaten fuer Match Quiz-Item -> Lehrseite.
+    // Die vier Lehrseiten von Kapitel 5 werden um lo/tags ergaenzt, damit der
+    // Quiz-Result-Renderer pro falscher Frage einen Direktlink anbieten kann.
+    PAGE_RISK_ISMS.lo        = ['LO-RISK-1'];
+    PAGE_RISK_ISMS.tags      = ['ISO-27001', 'Annex-A'];
+    PAGE_RISK_BSI_27005.lo   = ['LO-RISK-2', 'LO-RISK-3'];
+    PAGE_RISK_BSI_27005.tags = ['BSI-Grundschutz', 'BSI-200-x', 'ISO-27005', 'ISO-31000', 'Risikomethodik'];
+    PAGE_RISK_REGULATIONS.lo = ['LO-RISK-4'];
+    PAGE_RISK_REGULATIONS.tags = ['EU-NIS2', 'EU-CRA', 'Regulatorik'];
+    PAGE_RISK_SCORING.lo     = ['LO-RISK-5'];
+    PAGE_RISK_SCORING.tags   = ['CVSS-v4', 'EPSS', 'CISA-KEV', 'FAIR', 'OCTAVE-Allegro'];
+
     // ----------------------------------------------------------------------
     // Kapitel 6 — AI-Security und vertrauenswuerdige Systeme (PRODUKTIV)
     // Quellen: Goodfellow/Shlens/Szegedy "Explaining and Harnessing Adversarial

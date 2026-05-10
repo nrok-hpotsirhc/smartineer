@@ -2457,6 +2457,32 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                                         </div>
                                     )}
                                     {a.explanation && <div className="text-xs text-slate-600 mt-2 italic">{a.explanation}</div>}
+                                    {/* P-LP-FEEDBACK-LINKS: bei falscher Antwort Lehrseiten-Vorschlaege via lo/tags-Match.
+                                        Reviewmode: ueberspringt (Karteikarten kommen aus mehreren Kapiteln). */}
+                                    {!a.ok && !reviewMode && chapter && (() => {
+                                        const itLo = (it.lo || []);
+                                        const itTags = (it.tags || []);
+                                        if (!itLo.length && !itTags.length) return null;
+                                        const matches = chapter.pages.map((p, pi) => {
+                                            const pLo = (p.lo || []);
+                                            const pTags = (p.tags || []);
+                                            const loHit = pLo.filter(x => itLo.indexOf(x) !== -1).length;
+                                            const tagHit = pTags.filter(x => itTags.indexOf(x) !== -1).length;
+                                            return { pi, page: p, score: loHit * 3 + tagHit };
+                                        }).filter(m => m.score > 0).sort((x, y) => y.score - x.score).slice(0, 2);
+                                        if (!matches.length) return null;
+                                        return (
+                                            <div className="mt-2 flex flex-wrap gap-2">
+                                                {matches.map(m => (
+                                                    <button key={m.pi}
+                                                        onClick={() => openChapter(chapter.id, m.pi)}
+                                                        className="text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition">
+                                                        Lehrseite nachlesen: {m.page.title}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        );
+                                    })()}
                                 </li>
                             );
                         })}
