@@ -806,6 +806,201 @@
             'IEC 61508 (Ed. 2.0, 2010): Funktionale Sicherheit elektrischer/elektronischer/programmierbarer Systeme; SIL 1-4.')
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 4 — Antriebs- und Leistungselektronik (PRODUKTIV)
+    // Quellen: Schroeder/Boecker "Elektrische Antriebe — Regelung von Antriebs-
+    //   systemen", 5. Aufl., Springer Vieweg 2021; Leonhard "Control of
+    //   Electrical Drives", 3rd ed., Springer 2001; Vas "Sensorless Vector and
+    //   Direct Torque Control", Oxford UP 1998; Holmes/Lipo "Pulse Width
+    //   Modulation for Power Converters", IEEE/Wiley 2003;
+    //   Mohan/Undeland/Robbins "Power Electronics", 3rd ed., Wiley 2003;
+    //   Park "Two-Reaction Theory of Synchronous Machines" AIEE Trans. 1929;
+    //   Takahashi/Noguchi DTC IEEE Trans. IA-22 1986; Depenbrock "DSC" 1988.
+    //   Standards: IEC 60034-30-1:2014 (IE-Wirkungsgradklassen),
+    //   IEC 61800-5-2:2016 (PDS-SR Safety), IEC 61800-9-2:2017 (IES-Klassen),
+    //   IEC 61800-3:2017 (EMV), IEEE 519-2022 (Harmonics-Limits),
+    //   IEC 60364-5-52 (Kabel), DIN EN 60034-1 (rotating machines).
+    // ----------------------------------------------------------------------
+    const PAGE_DRIVES_MACH = {
+        title: '4.1 Drehstrommaschinen und Park-/Clarke-Transformation',
+        html: '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Asynchron- (ASM) und permanenterregte Synchronmaschine (PMSM) abgrenzen, (2) Clarke- ($\\alpha\\beta$) und Park-Transformation ($dq$) physikalisch und mathematisch erklaeren, (3) das Drehmoment in $dq$-Koordinaten formulieren, (4) Schlupf, Drehmoment-Schlupf-Kennlinie und Kippmoment der ASM einordnen.</blockquote><h4>4.1.1 Maschinentypen im industriellen Antrieb</h4><p>Die <strong>Asynchronmaschine</strong> (Kaefiglaeufer-ASM) ist robust, wartungsarm und der Standard fuer Pumpen, Lueftungen und Foerderantriebe. Drehmoment entsteht durch das im Laeufer induzierte Stromsystem; der Laeufer folgt dem Drehfeld mit dem Schlupf $s=\\frac{n_s-n}{n_s}$ und $n_s=\\frac{60\\,f}{p}$ (in min$^{-1}$, $p$ Polpaare).</p><p>Die <strong>permanenterregte Synchronmaschine</strong> (PMSM) erreicht hohe Wirkungsgrade und Leistungsdichte. Der Rotor traegt Magnete (oberflaechen- oder vergraben/IPMSM); das Statorfeld muss synchron mitlaufen. PMSM dominieren in Servoantrieben, E-Mobilitaet und vielen modernen Hauptantrieben. Die <strong>Reluktanzmaschine</strong> (SynRM) gewinnt in Pumpen-/Geblaeseanwendungen Marktanteile, da sie ohne Magnete auskommt.</p><h4>4.1.2 Clarke- und Park-Transformation</h4><p>Drehstromgroessen $i_a, i_b, i_c$ werden zunaechst per <strong>Clarke-Transformation</strong> in das ortsfeste Zweiphasensystem $\\alpha\\beta$ ueberfuehrt:</p><p>$$\\begin{pmatrix}i_\\alpha\\\\ i_\\beta\\end{pmatrix}=\\frac{2}{3}\\begin{pmatrix}1 & -\\tfrac{1}{2} & -\\tfrac{1}{2}\\\\ 0 & \\tfrac{\\sqrt{3}}{2} & -\\tfrac{\\sqrt{3}}{2}\\end{pmatrix}\\begin{pmatrix}i_a\\\\ i_b\\\\ i_c\\end{pmatrix}.$$</p><p>Bei amplitudeninvarianter Form ($\\tfrac{2}{3}$-Skalierung) bleiben Spitzenwerte erhalten; mit $\\sqrt{2/3}$ ist die Transformation leistungsinvariant.</p><p>Die <strong>Park-Transformation</strong> dreht $\\alpha\\beta$ in das mit dem Rotor- bzw. Flusswinkel $\\vartheta$ rotierende $dq$-System:</p><p>$$\\begin{pmatrix}i_d\\\\ i_q\\end{pmatrix}=\\begin{pmatrix}\\cos\\vartheta & \\sin\\vartheta\\\\ -\\sin\\vartheta & \\cos\\vartheta\\end{pmatrix}\\begin{pmatrix}i_\\alpha\\\\ i_\\beta\\end{pmatrix}.$$</p><p>Im stationaeren Betrieb sind $i_d, i_q$ Gleichgroessen — daraus stammt der Vorteil von $dq$-PI-Reglern.</p><h4>4.1.3 Drehmoment in dq-Koordinaten</h4><p>Fuer die PMSM gilt</p><p>$$M=\\tfrac{3}{2}\\,p\\,\\bigl(\\Psi_{PM}\\,i_q+(L_d-L_q)\\,i_d i_q\\bigr).$$</p><p>Bei oberflaechenmagnetischer PMSM ist $L_d\\approx L_q$, der Reluktanzanteil verschwindet und Drehmoment ist proportional zu $i_q$. Bei der ASM in rotorflussfester $dq$-Orientierung gilt analog $M=\\tfrac{3}{2}\\,p\\,\\tfrac{L_m}{L_r}\\,\\Psi_r\\,i_q$.</p><h4>4.1.4 Drehmoment-Schlupf-Kennlinie der ASM</h4><p>Die <strong>Klosssche Gleichung</strong> beschreibt im stationaeren Zustand</p><p>$$\\frac{M}{M_{kipp}}=\\frac{2}{\\tfrac{s}{s_{kipp}}+\\tfrac{s_{kipp}}{s}}.$$</p><p>$M_{kipp}$ ist das Kippmoment, $s_{kipp}$ der zugehoerige Kippschlupf. Im stabilen Bereich $0<s<s_{kipp}$ steigt $M$ ungefaehr linear mit $s$; bei Ueberschreiten kippt die Maschine. Der Stator-Strom verhaelt sich qualitativ wie ein Transformator-Kurzschlussstrom mit lastabhaengigem Sekundaerwiderstand $R_2/s$.</p><p class="text-xs text-slate-500"><em>Quellen: Schroeder/Boecker "Elektrische Antriebe" 5. Aufl. 2021 Kap. 5/8; Park, AIEE Trans. 1929; Clarke "Circuit Analysis of A-C Power Systems" 1943; Leonhard "Control of Electrical Drives" 3rd ed. 2001 Kap. 10-12; IEC 60034-1.</em></p>'
+    };
+
+    const PAGE_DRIVES_FOC = {
+        title: '4.2 Feldorientierte Regelung (FOC) und DTC',
+        html: '<blockquote><strong>Lernziele.</strong> Sie koennen (1) das Grundprinzip der feldorientierten Regelung (FOC) erklaeren, (2) FOC fuer PMSM und ASM unterscheiden, (3) Stromregelung im $dq$-System mit Entkopplung beschreiben, (4) sensorlose Verfahren (Back-EMF, HFI) und Direct Torque Control (DTC) einordnen.</blockquote><h4>4.2.1 Idee der FOC</h4><p>FOC, auch <em>Vector Control</em>, regelt eine Drehfeldmaschine im rotierenden $dq$-System, in dem flussbildende und drehmomentbildende Komponente entkoppelt sind: $i_d$ steuert den magnetischen Fluss, $i_q$ das Drehmoment. Damit verhaelt sich die Maschine in der Regelung wie eine fremderregte Gleichstrommaschine mit unabhaengiger Erregung und Anker.</p><p>Standardstruktur: Drehzahl-/Lageregler liefert Drehmoment-Sollwert; daraus werden $i_d^*, i_q^*$ bestimmt; PI-Stromregler in $dq$ erzeugen Spannungs-Sollwerte $u_d^*, u_q^*$; inverse Park/Clarke-Transformation liefert die Statorspannungen, die per PWM gestellt werden.</p><h4>4.2.2 PMSM-FOC</h4><p>Fuer oberflaechenmagnetische PMSM (SPMSM) ist die Standardstrategie <strong>$i_d=0$</strong>: dann ist $M\\propto i_q$, der Stator-Strom minimiert (max. M/A) und Verluste reduziert. Bei IPMSM mit $L_d\\ne L_q$ wird MTPA (Maximum Torque per Ampere) bzw. MTPV (Maximum Torque per Volt) eingesetzt — bei Feldschwaechung liefert ein negatives $i_d$ ein gegen den Magnetfluss wirkendes Statorfeld und erlaubt Drehzahlen oberhalb der Nenndrehzahl.</p><p>Die Stromregelstrecke ist im $dq$-System verkoppelt: $u_d=R_s i_d+L_d \\dot i_d-\\omega_e L_q i_q$ und $u_q=R_s i_q+L_q \\dot i_q+\\omega_e (L_d i_d+\\Psi_{PM})$. PI-Regler arbeiten gut, wenn die <strong>Kreuzkopplung</strong> per Vorsteuerung kompensiert wird — Feedforward-Terme $\\omega_e L_q i_q$ und $\\omega_e (L_d i_d+\\Psi_{PM})$ werden zum Reglerausgang addiert.</p><h4>4.2.3 ASM-FOC</h4><p>Bei der ASM gibt es keinen physikalischen Magnetfluss; der Rotorfluss muss aus Statorgroessen geschaetzt oder eingepraegt werden. Die <strong>indirekte FOC</strong> (Hasse-Leonhard) berechnet die Schlupffrequenz aus $\\omega_{sl}=\\frac{1}{T_r}\\frac{i_q}{i_d}$ ($T_r=L_r/R_r$ ist die Rotorzeitkonstante) und integriert sie zum Flusswinkel. Die <strong>direkte FOC</strong> (Blaschke) misst oder schaetzt $\\Psi_r$ explizit. $i_d$ baut den Rotorfluss auf und wird ueblicherweise konstant gehalten, $i_q$ stellt das Drehmoment.</p><h4>4.2.4 Sensorlose Verfahren</h4><p>Mittlere bis hohe Drehzahlen: Modellbasierte <strong>Back-EMF-Beobachter</strong> (z.B. erweiterter Luenberger, EKF, Sliding-Mode-Beobachter) schaetzen den Rotorlagewinkel aus Spannungen und Stroemen. Bei sehr niedrigen Drehzahlen verschwindet die Back-EMF; <strong>HFI</strong> (High Frequency Injection) speist ein hochfrequentes Pruefsignal ein und nutzt die magnetische Anisotropie ($L_d\\ne L_q$) der IPMSM zur Lageschaetzung.</p><h4>4.2.5 Direct Torque Control (DTC)</h4><p>DTC nach Takahashi/Noguchi (IEEE TIA 1986) regelt Statorfluss und Drehmoment direkt durch Hystereseregler und eine Schalttabelle, die je nach Lage des Statorflusszeigers einen der acht Wechselrichter-Zustaende auswaehlt. Vorteile: sehr schnelle Drehmoment-Antwort (typ. < 1 ms), keine PWM/Stromregler im klassischen Sinn. Nachteile: variable Schaltfrequenz, Drehmoment-Welligkeit und groesserer Berechnungsaufwand der Flussschaetzung. Moderne Varianten (DTC-SVM, predictive DTC) kombinieren DTC-Schaltlogik mit Raumzeiger-Modulation und reduzieren so die Welligkeit.</p><p class="text-xs text-slate-500"><em>Quellen: Vas "Sensorless Vector and Direct Torque Control" 1998; Schroeder/Boecker 2021 Kap. 13/14; Leonhard 2001 Kap. 12/13; Takahashi/Noguchi IEEE Trans. IA-22 1986; Depenbrock IEEE Trans. PE-3 1988 (DSC); Holtz "Sensorless Control of Induction Machines" Proc. IEEE 2002.</em></p>'
+    };
+
+    const PAGE_DRIVES_INV = {
+        title: '4.3 Umrichter-Topologien und Pulsweitenmodulation',
+        html: '<blockquote><strong>Lernziele.</strong> Sie koennen (1) Spannungs- und Stromzwischenkreis-Umrichter (VSI/CSI) abgrenzen, (2) 2-Level- und Multilevel-Topologien (NPC, T-type, MMC) einordnen, (3) Sinus-PWM, dritter-Harmonischer-Injektion und Raumzeiger-Modulation (SVPWM) unterscheiden, (4) Schaltverluste, EMV und $du/dt$ als Auslegungsgroessen einordnen.</blockquote><h4>4.3.1 Topologien</h4><p>Industrieller Standard ist der <strong>Spannungszwischenkreis-Umrichter</strong> (VSI) mit 3-phasiger 2-Level-B6-Brueckenschaltung. Pro Phase schalten zwei IGBT/MOSFET zwischen $+U_{ZK}$ und $0$. Der Zwischenkreiskondensator stuetzt die Gleichspannung. Stromzwischenkreis-Umrichter (CSI) mit Drosseln im Zwischenkreis sind heute auf Hochleistungsanwendungen (z.B. Sehr-Grosse-Antriebe) beschraenkt.</p><p><strong>Multilevel</strong>-Topologien (NPC nach Nabae/Takahashi/Akagi 1981, T-Type, FCC, MMC) reduzieren $du/dt$, Filteraufwand und Spannungsbeanspruchung der Halbleiter; Preis sind mehr Schalter und komplexere Modulation. Im Mittelspannungsbereich (3,3 / 6,6 kV) sind 3-Level-NPC und MMC Standard, in Servoanwendungen meist 2-Level mit Wide-Bandgap-Halbleitern (SiC/GaN).</p><h4>4.3.2 Sinus-PWM und Modulationsindex</h4><p>Bei Sinus-PWM wird ein dreiphasiges Sollspannungssystem $u_a^*, u_b^*, u_c^*$ mit einer hochfrequenten Dreiecksspannung verglichen; Schnittpunkte schalten den jeweiligen Bruckenzweig. Der lineare Modulationsbereich ist auf den Modulationsgrad $m\\le 1$ begrenzt: die maximale Phasenspannungsamplitude ist $\\hat{U}_{ph}=\\tfrac{1}{2}U_{ZK}$, die maximale Aussenleiterspannung $\\sqrt{3}\\,\\hat{U}_{ph}\\approx 0{,}866\\,U_{ZK}$.</p><h4>4.3.3 Dritte-Harmonische-Injektion und SVPWM</h4><p>Mit Injektion einer dritten Harmonischen oder mit <strong>Raumzeiger-PWM (SVPWM)</strong> wird der lineare Bereich auf $\\hat{U}_{ph,\\max}=\\tfrac{U_{ZK}}{\\sqrt{3}}$ erweitert — ein Spannungsgewinn von $\\tfrac{2}{\\sqrt{3}}\\approx 1{,}155$. Die Aussenleiterspannung ist dann $U_{LL,\\max}=U_{ZK}$. SVPWM betrachtet die acht moeglichen Schaltzustaende des B6 als Raumzeiger ($V_0\\dots V_7$, davon 6 aktive und 2 Null-Vektoren) und kombiniert sie zeitlich, um den Sollzeiger zu erzeugen.</p><h4>4.3.4 Schaltfrequenz, Verluste und EMV</h4><p>Die Schaltfrequenz $f_s$ bestimmt Stromripple, Geraeuschspektrum, Schaltverluste und Filterbedarf. <strong>Schaltverluste</strong> wachsen ungefaehr linear mit $f_s$, <strong>Durchlassverluste</strong> haengen vom Strom-Mittelwert ab. Hohe $du/dt$-Werte verursachen Lagerstroeme (EDM-Erosion), Wicklungsbeanspruchung an der ersten Wicklung und EMV-Probleme — Gegenmittel sind $du/dt$-Filter, Sinusfilter, isolierte Lager oder Wellenerdung. EMV-Anforderungen ergeben sich aus IEC 61800-3 (PDS-EMV) und industriellen Umgebungsklassen.</p><h4>4.3.5 Halbleiter-Materialien</h4><p>Si-IGBT bleiben Arbeitspferd fuer mittlere Schaltfrequenzen (typ. 2-16 kHz). <strong>SiC-MOSFET</strong> erlauben hoehere Sperrspannungen und schaltgeschwindigkeiten bei kleineren Verlusten und werden in Antrieben mit hoher Leistungsdichte eingesetzt. <strong>GaN-HEMT</strong> dominieren niedrige Spannungsklassen (≤ 650 V) mit sehr hohen Schaltfrequenzen, sind aber im klassischen Industrieantrieb noch Nische. Wirkungsgrade bewegen sich heute fuer Industrieumrichter im Bereich 96-99 %.</p><p class="text-xs text-slate-500"><em>Quellen: Holmes/Lipo "PWM for Power Converters" 2003; Mohan/Undeland/Robbins "Power Electronics" 3rd ed. 2003; Kazmierkowski/Krishnan/Blaabjerg "Control in Power Electronics" 2002; Nabae/Takahashi/Akagi IEEE Trans. IA-17 1981 (NPC); IEC 61800-3:2017 EMV; IEEE 519-2022 Harmonics; Schroeder 2021 Kap. 4.</em></p>'
+    };
+
+    const PAGE_DRIVES_SERVO = {
+        title: '4.4 Servoachsen-Auslegung, Reglerkaskade und Antriebs-Safety',
+        html: '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die klassische Reglerkaskade Strom-/Drehzahl-/Lageregelung dimensionieren, (2) das Massentraegheits-Verhaeltnis $J_{Last}/J_{Motor}$ bewerten, (3) Trapez-, S-Kurven- und Jerk-limitierte Bahnen unterscheiden, (4) sicherheitsbezogene Stoppfunktionen nach IEC 61800-5-2 (STO/SS1/SS2/SLS/SOS/SDI/SLA) einordnen, (5) Geberarten und IES-Wirkungsgradklassen einordnen.</blockquote><h4>4.4.1 Reglerkaskade</h4><p>Servoantriebe nutzen drei kaskadierte Schleifen — innen Strom, mittig Drehzahl, aussen Lage. Faustregel ist <strong>Bandbreitentrennung 1:5</strong> (oder 1:5:5): jede aeussere Schleife hat ungefaehr ein Fuenftel der Bandbreite der inneren, damit innere Schleife als idealer Ein-Eingang/Ein-Ausgang-Pfad erscheint.</p><ul><li><strong>Stromregler</strong> (innen): typ. 1-3 kHz Bandbreite; PI in $dq$-Koordinaten (siehe 4.2). Tastrate haeufig $f_s/1$ oder $f_s/2$ der PWM.</li><li><strong>Drehzahlregler</strong>: typ. 200-500 Hz; meist PI, Filterung der Geberauswertung.</li><li><strong>Lageregler</strong>: typ. 50-150 Hz; haeufig P-Regler mit Geschwindigkeitsvorsteuerung.</li></ul><p>Symmetrisches Optimum und Betrags-Optimum (nach Kessler/Schroeder) sind Standard-Auslegungsregeln; bei resonanten Achsen wird zusaetzlich ein Notch- oder Bi-Quad-Filter eingesetzt.</p><h4>4.4.2 Massentraegheits-Verhaeltnis</h4><p>Das Verhaeltnis $J_{Last}^*/J_{Motor}$ (Last bezogen auf die Motorwelle, also durch Getriebeuebersetzung quadratisch reduziert) ist ein zentraler Auslegungsparameter. Werte unter etwa 5:1 sind unkritisch; oberhalb 10:1 wird die Achse schwingungsanfaellig, Eigenfrequenzen ruecken in die Reglerbandbreite, und Resonanzen muessen aktiv gedaempft werden. Sehr niedrige Verhaeltnisse (< 1:1) deuten auf einen ueberdimensionierten Motor und sind oekonomisch ineffizient.</p><h4>4.4.3 Bahnplanung</h4><p>Eine <strong>Trapezbahn</strong> hat konstante Beschleunigung, dafuer Spruenge im Ruck (Jerk) — sie regt mechanische Eigenfrequenzen an. Eine <strong>S-Kurve</strong> begrenzt die Beschleunigungs-Aenderung und reduziert dadurch Schwingungen, Geraeusche und Werkzeugverschleiss. <strong>Jerk-limitierte</strong> oder polynomiale Bahnen (z.B. Bahn 7-Segment, Spline) erlauben gezieltes Vorgeben aller Ableitungen bis zur Schnappe; sie sind Standard in modernen Robotern und Werkzeugmaschinen.</p><h4>4.4.4 Antriebs-Safety nach IEC 61800-5-2</h4><p>IEC 61800-5-2:2016 (PDS-SR — Power Drive System with Safety-Related functions) standardisiert sicherheitsbezogene Stoppfunktionen, die im Antrieb selbst integriert sind:</p><ul><li><strong>STO</strong> Safe Torque Off — Drehmoment wird abgeschaltet, Energiezufuhr unterbrochen; entspricht Stoppkategorie 0 nach EN 60204-1.</li><li><strong>SS1</strong> Safe Stop 1 — gefuehrtes Bremsen, danach STO; Stoppkategorie 1.</li><li><strong>SS2</strong> Safe Stop 2 — gefuehrtes Bremsen, danach SOS (Achse haelt Lage geregelt); Stoppkategorie 2.</li><li><strong>SOS</strong> Safe Operating Stop — Lage wird ueberwacht gehalten, Motor bleibt aktiv.</li><li><strong>SLS</strong> Safely-Limited Speed — Drehzahl ist sicher unterhalb einer Grenze.</li><li><strong>SLA / SLT</strong> Safely-Limited Acceleration / Torque — analog fuer Beschleunigung bzw. Drehmoment.</li><li><strong>SDI</strong> Safe Direction — Drehrichtung sicher festgelegt.</li><li><strong>SBC</strong> Safe Brake Control — sichere Ansteuerung externer Haltebremsen.</li></ul><p>Die Funktionen erreichen typischerweise PL e nach ISO 13849-1:2023 oder SIL 3 nach IEC 62061:2021, abhaengig von Architektur und Diagnoseabdeckung. STO ist die meistverbaute Funktion und schaltet die Pulsfreigabe der Wechselrichter-Treiber redundant ab — der Schuetz im Hauptstromkreis kann entfallen, was Verschleiss spart.</p><h4>4.4.5 Geber, Wirkungsgrad und Norm-Klassen</h4><p><strong>Geber</strong>: Inkremental-Encoder geben Impulse mit AB-Quadratur und Index; Absolut-Encoder (SSI, BiSS-C, EnDat 2.2, HIPERFACE DSL) liefern absolute Position auch nach Spannungsausfall; Resolver sind robust und temperaturfest. Multi-Turn-Absolutgeber sparen Referenzfahrt.</p><p><strong>Wirkungsgrad</strong>: IEC 60034-30-1:2014 klassifiziert Motoren in IE1-IE5; IEC 61800-9-2:2017 klassifiziert das gesamte Antriebssystem (Motor + CDM) in IES0-IES2. Die EU-Oekodesign-Verordnung 2019/1781 schreibt fuer viele neue Antriebe Mindestklassen IE3/IE4 vor.</p><p class="text-xs text-slate-500"><em>Quellen: Schroeder/Boecker "Elektrische Antriebe" 5. Aufl. 2021 Kap. 14-16; Leonhard 2001 Kap. 9; IEC 61800-5-2:2016 (PDS-SR); IEC 61800-9-2:2017; IEC 60034-30-1:2014; ISO 13849-1:2023; IEC 62061:2021; EN 60204-1:2018; EU-Verordnung 2019/1781.</em></p>'
+    };
+
+    const QUIZ_DRIVES = [
+        // 4.1 — Maschinen, Park/Clarke (12 Fragen)
+        q('Wodurch entsteht das Drehmoment in einer Asynchronmaschine mit Kaefiglaeufer?',
+            ['Durch Hall-Sensoren in den Statornuten', 'Durch Permanentmagnete im Rotor', 'Durch geschaltete Reluktanz wie bei der SRM', 'Durch im Laeufer induzierte Stroeme im Drehfeld'], 3,
+            'Schroeder/Boecker 2021 Kap. 5: Im Kaefiglaeufer werden durch das relative Drehfeld Stroeme induziert; Wechselwirkung mit dem Statorfeld erzeugt das Drehmoment.'),
+        q('Welche Beziehung gilt fuer die Synchrondrehzahl einer Drehfeldmaschine?',
+            ['$n_s = 60\\,p\\,f$', '$n_s = \\frac{60\\,f}{p}$', '$n_s = \\frac{f}{60\\,p}$', '$n_s = p\\,f$'], 1,
+            'Standardbeziehung mit $p$ als Polpaarzahl und $f$ in Hz; Ergebnis in min$^{-1}$.'),
+        q('Was beschreibt der Schlupf $s$ einer ASM?',
+            ['Verhaeltnis von Stator- zu Rotorstrom', 'Differenz zwischen Synchron- und Laeuferdrehzahl, normiert auf $n_s$', 'Frequenz der Statorspannung', 'Verhaeltnis Laeuferinduktivitaet/Statorinduktivitaet'], 1,
+            '$s = (n_s - n)/n_s$. Bei $s=0$ laeuft der Rotor synchron und es wird kein Strom induziert, also kein Drehmoment.'),
+        q('Was leistet die Clarke-Transformation?',
+            ['Wandlung dreiphasiger Groessen in das ortsfeste $\\alpha\\beta$-System', 'Wandlung in das rotorfeste $dq$-System', 'Berechnung des Schlupfs', 'Glaettung der PWM-Spannung'], 0,
+            'Clarke 1943 / Schroeder Kap. 8: Die Clarke-Transformation ueberfuehrt $abc$ in das ortsfeste Zweiphasensystem $\\alpha\\beta$; ein Bezug auf die Drehlage erfolgt erst durch Park.'),
+        q('Wofuer dient die Park-Transformation?',
+            ['Schalten der IGBT', 'Drehung von $\\alpha\\beta$ in das mit dem Rotor- oder Flusswinkel rotierende $dq$-System', 'Pruefung der Phasenfolge', 'Messung der Zwischenkreisspannung'], 1,
+            'Park "Two-Reaction Theory" AIEE 1929: Drehung mit dem Winkel $\\vartheta$ in $dq$, in dem stationaere Groessen Gleichgroessen werden.'),
+        q('Welche Strategie minimiert bei oberflaechenmagnetischer PMSM den Stator-Strom fuer ein gegebenes Drehmoment?',
+            ['$i_q=0$', '$i_d=i_q$', '$i_d=0$', '$i_d=-i_q$'], 2,
+            'SPMSM: $L_d\\approx L_q$, kein Reluktanzanteil; $M\\propto i_q$. Mit $i_d=0$ wird $|i_s|=|i_q|$ minimal fuer das geforderte Drehmoment.'),
+        q('Was ist der Reluktanzanteil im Drehmoment einer IPMSM?',
+            ['Kupferverluste im Stator', 'Der Anteil $\\Psi_{PM}\\,i_d$', 'Reibung im Lager', 'Der Anteil $\\tfrac{3}{2}p(L_d-L_q)i_d i_q$'], 3,
+            'Schroeder 2021 Kap. 13: Bei $L_d\\ne L_q$ tragen Reluktanzkraefte zusaetzlich zum Magnetanteil bei; in IPMSM gezielt genutzt.'),
+        q('Worin unterscheidet sich die amplitudeninvariante von der leistungsinvarianten Clarke-Transformation?',
+            ['Sie verwendet andere Frequenzen', 'Sie ist nur fuer DC zulaessig', 'Vorfaktor $\\tfrac{2}{3}$ erhaelt Spitzenwerte; $\\sqrt{2/3}$ erhaelt die Wirkleistung', 'Eine erlaubt nur 6-pulsigen Betrieb'], 2,
+            'Standard: Vorfaktor $\\tfrac{2}{3}$ liefert gleiche Amplituden wie im $abc$-System; $\\sqrt{2/3}$ liefert leistungsinvariante Form.'),
+        q('Welche Aussage zur Klosschen Gleichung der ASM ist korrekt?',
+            ['Sie beschreibt das Verhaeltnis $M/M_{kipp}$ als Funktion von $s/s_{kipp}$', 'Sie gilt nur fuer Synchronmaschinen', 'Sie ersetzt die Park-Transformation', 'Sie ist nur fuer Permanentmagnetmaschinen anwendbar'], 0,
+            'Stationaere Drehmoment-Schlupf-Kennlinie: $M/M_{kipp}=2/(s/s_{kipp}+s_{kipp}/s)$.'),
+        q('Was kennzeichnet den stabilen Betriebsbereich einer ASM mit konstanter Statorspannung?',
+            ['Schlupf grosser als $s_{kipp}$', 'Schlupf gleich 1 (Stillstand)', 'Schlupf $s>1$ (Generatorbetrieb mit Bremswirkung)', 'Schlupf $0<s<s_{kipp}$, $M$ steigt monoton mit $s$'], 3,
+            'Im stabilen Bereich kann ein Lastsprung durch leichten Schlupfanstieg ausgeglichen werden; jenseits $s_{kipp}$ kippt die Maschine.'),
+        q('Welche Maschine kommt ohne Permanentmagnete und ohne Laeuferwicklung mit Klemmen aus?',
+            ['Permanenterregte Synchronmaschine', 'Schleifring-ASM', 'Stromrichtergespeiste DC-Maschine', 'Synchron-Reluktanzmaschine (SynRM)'], 3,
+            'SynRM nutzt nur die anisotrope Reluktanz des Rotors; weder Magnete noch Wicklung mit Aussenanschluss.'),
+        q('Welche Stromkomponente baut bei der ASM in rotorflussfester $dq$-Orientierung den Rotorfluss auf?',
+            ['$i_q$', '$i_d$', '$i_0$ (Nullsystem)', 'Der Aussenleiterstrom $i_a$ direkt'], 1,
+            'Hasse-Leonhard / Blaschke: $i_d$ entspricht dem Magnetisierungsstrom; $i_q$ ist drehmomentbildend.'),
+
+        // 4.2 — FOC und DTC (13 Fragen)
+        q('Was ist das Kernziel der feldorientierten Regelung?',
+            ['Vermeidung jeder Strommessung', 'Entkopplung von flussbildender und drehmomentbildender Stromkomponente', 'Synchronisation auf das Netz', 'Direkter Verzicht auf einen Wechselrichter'], 1,
+            'Schroeder Kap. 13/14: FOC zerlegt den Statorstromzeiger in $i_d$ (Fluss) und $i_q$ (Drehmoment) und regelt beide getrennt.'),
+        q('Welche Groesse wird in der indirekten ASM-FOC typischerweise berechnet, statt sie zu messen?',
+            ['Statorstrom', 'Zwischenkreisspannung', 'Schlupffrequenz aus $i_q/i_d$ und Rotorzeitkonstante $T_r$', 'PWM-Periode'], 2,
+            'Hasse-Leonhard: $\\omega_{sl} = \\tfrac{1}{T_r}\\tfrac{i_q}{i_d}$, daraus wird der Flusswinkel integriert (indirekt).'),
+        q('Was bedeutet "Feldschwaechung" bei einer PMSM?',
+            ['Demagnetisierung der Magnete im Normalbetrieb', 'Negativer $i_d$ erzeugt Statorfeld gegen den Magnetfluss; ermoeglicht hoehere Drehzahlen', 'Abschaltung der Permanentmagnete', 'Reduktion von $i_q$ auf null'], 1,
+            'Schroeder 2021 Kap. 13: Oberhalb der Nenndrehzahl wird durch negatives $i_d$ die Spannungsgrenze des Umrichters eingehalten und das wirksame Statorfeld reduziert.'),
+        q('Welche Aufgabe hat die Vorsteuerung in einer $dq$-Stromregelung?',
+            ['Sicherheitsfunktion STO', 'Erzeugen der PWM-Tabelle', 'Ueberwachung der Geberauswertung', 'Kompensation der drehzahlabhaengigen Kreuzkopplung zwischen $d$- und $q$-Achse'], 3,
+            'Kreuzkopplungsterme $\\omega_e L_q i_q$ und $\\omega_e (L_d i_d+\\Psi_{PM})$ werden vorgesteuert; PI-Regler muessen sie nicht ausregeln.'),
+        q('Welcher Beobachter wird typisch bei sensorloser PMSM-Regelung im mittleren Drehzahlbereich verwendet?',
+            ['Reduzierter Luenberger-Beobachter / EKF auf Basis der Back-EMF', 'Filter erster Ordnung der Statorspannung', 'Hall-Sensor-Auswertung', 'Lookup-Tabelle der Lastdrehmomente'], 0,
+            'Holtz Proc. IEEE 2002: Modellbasierte Beobachter (Luenberger, EKF, Sliding Mode) extrahieren die Lage aus der induzierten Spannung.'),
+        q('Warum versagen reine Back-EMF-Beobachter bei sehr niedrigen PMSM-Drehzahlen?',
+            ['Wegen TCP-Kollisionen', 'Wegen Schaltverlusten der IGBT', 'Weil die induzierte Spannung gegen null geht und im Mess-/Modellrauschen verschwindet', 'Wegen der Klemmenspannung am Zwischenkreis'], 2,
+            'Bei niedriger Drehzahl ist $|e|=\\omega_e\\Psi_{PM}$ klein; deshalb HFI-Methoden mit Anisotropie-Auswertung.'),
+        q('Worauf nutzt HFI (High Frequency Injection) bei IPMSM aus?',
+            ['Auf die Induktivitaetsanisotropie $L_d\\ne L_q$ zur Lageschaetzung', 'Auf Hall-Sensoren', 'Auf den Zwischenkreisstrom', 'Auf Temperaturdrift der Magnete'], 0,
+            'Vas 1998: Ein hochfrequentes Pruefsignal erzeugt anisotropie-abhaengige Stromantworten, aus denen die Rotorlage ableitbar ist; funktioniert auch im Stillstand.'),
+        q('Was ist das Kernprinzip von Direct Torque Control (DTC) nach Takahashi/Noguchi?',
+            ['PWM mit symmetrischer Dreiecksspannung', 'Hystereseregler fuer Statorfluss und Drehmoment + Schalttabelle waehlen einen der acht Wechselrichter-Zustaende', 'Strommessung im Zwischenkreis ohne Spannungssensor', 'Kaskadierte PI-Regler nur in $abc$'], 1,
+            'IEEE TIA 1986: DTC vermeidet $dq$-Stromregler und PWM; Hystereseband + Lookup-Schalttabelle waehlt direkt den Schaltvektor.'),
+        q('Welche Eigenschaft ist ein typischer Nachteil klassischer DTC?',
+            ['Sehr langsame Drehmoment-Antwort', 'Notwendigkeit eines Lagegebers im Rotor', 'Variable Schaltfrequenz und Drehmoment-Welligkeit', 'Unmoeglichkeit der Ausregelung der Wirkleistung'], 2,
+            'Vas 1998 / Schroeder 2021: Hysteresegrenzen fuehren zu drehzahl- und lastabhaengiger Schaltfrequenz und groesserer Welligkeit als FOC mit fester PWM.'),
+        q('Welche Aussage trifft auf MTPA-Strategie bei IPMSM zu?',
+            ['Ignoriert den Reluktanzanteil', 'Setzt $i_d=0$', 'Maximiert das Drehmoment pro Statorstromamplitude unter Nutzung des Reluktanzbeitrags', 'Schaltet die Magnete ab'], 2,
+            'Maximum-Torque-per-Ampere optimiert die Aufteilung $i_d/i_q$ unter Beruecksichtigung von $L_d\\ne L_q$.'),
+        q('Welcher Reglertyp ist Standard fuer den Stromregler in $dq$-FOC?',
+            ['Bang-Bang ohne Vorsteuerung', 'Reines P-Glied', 'PI mit Anti-Windup und Vorsteuerung', 'Pures Differenzierglied'], 2,
+            'Schroeder 2021 Kap. 14: PI mit Anti-Windup ist Industriestandard; Vorsteuerung kompensiert Kreuzkopplung.'),
+        q('Was modelliert die Rotorzeitkonstante $T_r$ einer ASM?',
+            ['Mechanische Anlaufzeit der Achse', 'Verhaeltnis $L_r/R_r$ — Zeitkonstante fuer Auf-/Abbau des Rotorflusses', 'Tastrate des Stromreglers', 'Schaltzeit des IGBT'], 1,
+            'Definition: $T_r=L_r/R_r$. $T_r$ bestimmt die Bandbreite des Flussaufbaus und ist temperaturabhaengig (Rotorerwaermung).'),
+        q('Welche Variante kombiniert DTC-Schaltlogik mit Raumzeiger-Modulation, um die Drehmoment-Welligkeit zu reduzieren?',
+            ['Skalare Stromsteuerung', 'Pure Sinus-PWM', 'V/f-Steuerung', 'DTC-SVM'], 3,
+            'DTC-SVM (auch Predictive DTC) berechnet aus Soll-Fluss/-Drehmoment einen Spannungs-Sollzeiger und stellt ihn per SVPWM mit fester Schaltfrequenz.'),
+
+        // 4.3 — Umrichter, PWM, EMV (13 Fragen)
+        q('Was ist die Grundstruktur eines industriellen 2-Level-Spannungszwischenkreis-Umrichters?',
+            ['12-pulsige Thyristorbruecke ohne Kondensator', 'Halbbruecke mit nur 2 Schaltern', 'Vollbruecke mit Drosseln statt Kondensator', 'B6-Brueckenschaltung mit 6 IGBT/MOSFET und Zwischenkreiskondensator'], 3,
+            'Mohan/Undeland/Robbins 2003: Standard-VSI ist die dreiphasige B6-Bruecke mit DC-Kondensator-Stuetzung.'),
+        q('Welche maximale Phasenspannung (Amplitude) erreicht reine Sinus-PWM linear?',
+            ['$\\hat{U}_{ph,\\max}=U_{ZK}$', '$\\hat{U}_{ph,\\max}=\\tfrac{1}{2}U_{ZK}$', '$\\hat{U}_{ph,\\max}=\\sqrt{2}U_{ZK}$', '$\\hat{U}_{ph,\\max}=\\tfrac{1}{\\sqrt{3}}U_{ZK}$'], 1,
+            'Holmes/Lipo 2003 Kap. 3: Linearer Bereich Sinus-PWM hat $\\hat{U}_{ph,\\max}=U_{ZK}/2$.'),
+        q('Welchen Spannungsgewinn bietet SVPWM (oder Sinus + dritte Harmonische) im linearen Bereich gegenueber reiner Sinus-PWM?',
+            ['Faktor 2', 'Faktor $\\sqrt{2}$', 'Faktor $\\tfrac{2}{\\sqrt{3}}\\approx 1{,}155$', 'Faktor 3'], 2,
+            'Holmes/Lipo: Mit Nullsystem-Injektion verschiebt sich der lineare Bereich auf $\\hat{U}_{ph,\\max}=U_{ZK}/\\sqrt{3}$, Gewinn $2/\\sqrt{3}$.'),
+        q('Wieviele Schaltzustaende und davon aktive Raumzeiger besitzt ein 3-phasiger 2-Level-VSI?',
+            ['4 Zustaende ohne Null-Vektor', '6 Zustaende, alle aktiv', '12 Zustaende, davon 8 aktiv', '8 Zustaende, davon 6 aktive und 2 Null-Vektoren'], 3,
+            'SVPWM-Grundlagen: Mit drei Halbbruecken ergeben sich $2^3=8$ Schaltkombinationen ($V_0\\dots V_7$), davon $V_1\\dots V_6$ aktiv und $V_0,V_7$ Null.'),
+        q('Was beschreibt den Modulationsgrad $m$ ueblicher Definition?',
+            ['Verhaeltnis Schaltfrequenz zu Grundfrequenz', 'Verhaeltnis der Sollspannungs-Amplitude zur halben Zwischenkreisspannung (bei Sinus-PWM)', 'Anteil der Verluste an der Wirkleistung', 'Anzahl der Schaltvorgaenge pro Periode'], 1,
+            'Mohan: $m = \\hat{U}_{soll}/\\tfrac{U_{ZK}}{2}$ in der Standardform; $m=1$ ist die lineare Aussteuerungsgrenze der Sinus-PWM.'),
+        q('Welcher Effekt entsteht durch hohe $du/dt$ am Motorklemmen?',
+            ['Verbessertes Wirkungsgrad-Verhalten der Magnete', 'Reduzierte Lebensdauer der Schalter', 'Lagerstroeme (EDM-Erosion), Wicklungsbeanspruchung an der ersten Wicklung, EMV-Probleme', 'Hoehere mechanische Eigenfrequenz'], 2,
+            'Schroeder 2021 / IEC 61800-3: Hohe Spannungsanstiegsraten verursachen Common-Mode-Stroeme, Lagerstrom-Erosion und Klemmen-Ueberspannungen ueber die erste Wicklung.'),
+        q('Welche Topologie reduziert $du/dt$ und Spannungsbeanspruchung der Halbleiter durch geschaltete Mittelpunkt-Klemmung?',
+            ['1-Level-VSI', 'Stromzwischenkreis-CSI ohne Modulation', '3-Level-NPC nach Nabae/Takahashi/Akagi 1981', 'Pure Vollbruecken-Halbbruecke'], 2,
+            'IEEE Trans. IA-17 1981: NPC-Konverter klemmt einen Mittelpunkt; jeder Schalter sperrt nur die halbe Zwischenkreisspannung.'),
+        q('In welchem Spannungsbereich werden GaN-HEMT in Antrieben aktuell typisch eingesetzt?',
+            ['Ausschliesslich in Mittelspannungsantrieben > 3 kV', 'Erst ab 6 kV', 'Nur in der Hochspannungs-DC-Uebertragung', 'Bis ca. 650 V mit hohen Schaltfrequenzen (Niedrig- und Mittelvoltbereich)'], 3,
+            'Industriepraxis: GaN dominiert <= 650 V mit hohen Schaltfrequenzen; SiC adressiert 600 V - 1700 V; Si-IGBT bleibt im klassischen Industrieantrieb verbreitet.'),
+        q('Was ist eine typische Standardschaltfrequenz fuer industrielle Si-IGBT-Servoumrichter?',
+            ['unter 100 Hz', 'ca. 50 Hz Netzfrequenz', '2-16 kHz', '2-10 MHz'], 2,
+            'Mohan 2003 / Praxis: Si-IGBT-Servoumrichter werden ueblicherweise zwischen 2 und 16 kHz getaktet; SiC erlaubt deutlich hoehere Werte.'),
+        q('Welcher Standard regelt EMV-Anforderungen an Power Drive Systems?',
+            ['IEC 61800-3:2017', 'IEC 60870-5-104', 'IEC 61131-3', 'ISO 9001'], 0,
+            'IEC 61800-3:2017 — EMV-Anforderungen und spezifische Pruefverfahren fuer drehzahlveraenderbare elektrische Antriebe.'),
+        q('Welche Norm definiert Harmonics-Grenzwerte am Verknuepfungspunkt zum Versorgungsnetz?',
+            ['IEC 62443-3-3', 'IEC 61131-3', 'ISO 13849-1', 'IEEE 519-2022'], 3,
+            'IEEE 519-2022: Recommended Practice and Requirements for Harmonic Control in Electric Power Systems.'),
+        q('Was unterscheidet Stromzwischenkreis-Umrichter (CSI) qualitativ vom Spannungszwischenkreis-Umrichter (VSI)?',
+            ['CSI nutzt eine grosse Drossel im Zwischenkreis und impraegniert einen eingepraegten Strom', 'CSI hat keinen Wechselrichter', 'CSI verzichtet auf Halbleiter', 'CSI arbeitet ohne Netzanschluss'], 0,
+            'Mohan 2003: CSI hat statt Stuetzkondensator eine Drossel; Eingangs- und Ausgangscharakteristik kehren sich um. Anwendung in Sehr-Grosse-Antrieben.'),
+        q('Welche Methode reduziert Schaltverluste durch zeitweises Klemmen auf einen Zwischenkreis-Pol?',
+            ['Diskontinuierliche PWM (DPWM)', 'Klassische 3-Phasen-Sinus-PWM ohne Nullsystem', 'Zufallsmodulation', 'PWM ohne Traegersignal'], 0,
+            'Holmes/Lipo: DPWM-Varianten klemmen je 60 Grad eine Phase, sparen ca. 33 Prozent Schaltvorgaenge und damit Schaltverluste.'),
+
+        // 4.4 — Servoachse, Kaskade, Safety, Wirkungsgrad (12 Fragen)
+        q('Was ist die uebliche Bandbreitentrennung in einer Servo-Reglerkaskade?',
+            ['Faktor 100 zwischen aufeinanderfolgenden Schleifen', 'Alle Schleifen mit identischer Bandbreite', 'Aussen schneller als innen', 'Faktor ca. 5 zwischen aufeinanderfolgenden Schleifen (innen schneller als aussen)'], 3,
+            'Schroeder 2021 Kap. 14: Faustregel 1:5 (oder 1:5:5) — innere Schleife muss schneller einschwingen als die naechste aeussere.'),
+        q('Welche Stoppfunktion nach IEC 61800-5-2 schaltet sicher das Drehmoment ab und entspricht Stoppkategorie 0 nach EN 60204-1?',
+            ['SOS', 'STO', 'SLS', 'SDI'], 1,
+            'IEC 61800-5-2:2016: Safe Torque Off (STO) — keine drehmomentbildende Energie, keine geregelte Bremsung; Kategorie 0 nach EN 60204-1.'),
+        q('Welche Stoppfunktion bremst gefuehrt und geht anschliessend in STO ueber?',
+            ['SS1', 'SS2', 'SOS', 'STO direkt'], 0,
+            'IEC 61800-5-2: Safe Stop 1 — kontrollierte Bremsung, danach sicheres Abschalten des Drehmoments (Kat. 1 nach EN 60204-1).'),
+        q('Welche Stoppfunktion haelt die Achse ueberwacht in Position, ohne Drehmoment abzuschalten?',
+            ['STO', 'SS1', 'SOS Safe Operating Stop', 'SDI'], 2,
+            'IEC 61800-5-2: SOS ueberwacht die Lage; Motor liefert weiterhin Haltemoment. SS2 fuehrt vor SOS eine kontrollierte Bremsung durch.'),
+        q('Welche Funktion gewaehrleistet eine sicher begrenzte Drehzahl im laufenden Betrieb?',
+            ['SLS Safely-Limited Speed', 'STO', 'SS1', 'SBC'], 0,
+            'IEC 61800-5-2: SLS ueberwacht eine maximale Drehzahl; bei Ueberschreitung greift definierte Reaktion.'),
+        q('Welcher Performance Level / SIL wird fuer STO heute typisch angestrebt?',
+            ['PL e nach ISO 13849-1:2023 bzw. SIL 3 nach IEC 62061:2021', 'PL a / SIL 1', 'Keine Anforderung', 'Nur PL b'], 0,
+            'Industriepraxis: STO an modernen Servoreglern erreicht ueberwiegend PL e / SIL 3; Architektur Kategorie 3 oder 4 mit hoher Diagnosedeckung.'),
+        q('Was ist ein typischer Grenzwert fuer das auf den Motor reduzierte Massentraegheits-Verhaeltnis $J_{Last}/J_{Motor}$, ab dem aktive Schwingungs-Daempfung sinnvoll wird?',
+            ['Ungefaehr 10:1 oder hoeher', '0{,}001:1', '0{,}1:1', '50000:1'], 0,
+            'Schroeder 2021 / Praxis: Bis etwa 5:1 problemlos, ab ca. 10:1 werden Resonanzen im Reglerbereich praesent und Notch-/Bi-Quad-Filter sinnvoll.'),
+        q('Welcher Bahnentwurf hat sprunghafte Beschleunigungs-Aenderungen (unendlicher Ruck)?',
+            ['S-Kurve', 'Trapezbahn (linearer Geschwindigkeitsverlauf)', 'Polynom 5. Ordnung', 'Jerk-limitierte Bahn'], 1,
+            'Trapezprofile haben konstante Beschleunigungsplateaus mit Sprung am Anfang/Ende — der Ruck ist unbegrenzt und regt Resonanzen an.'),
+        q('Welche Geberform liefert eine absolute Position direkt nach dem Einschalten ohne Referenzfahrt?',
+            ['Inkremental-Encoder mit Index', 'Absolutgeber (z.B. EnDat 2.2, BiSS-C, SSI, HIPERFACE DSL)', 'Tachogenerator', 'Motorstrommessung allein'], 1,
+            'Datenblaetter EnDat 2.2 / BiSS-C / HIPERFACE DSL: Absolute Position ueber serielles Protokoll, Multi-Turn moeglich; daher keine Referenzfahrt noetig.'),
+        q('Welche Norm klassifiziert Motoren in Wirkungsgradklassen IE1-IE5?',
+            ['IEC 60034-30-1:2014', 'IEC 61800-5-2', 'IEC 61131-3', 'IEC 61508'], 0,
+            'IEC 60034-30-1:2014 definiert IE1 (Standard) bis IE5 (Ultra Premium); EU-VO 2019/1781 referenziert diese Klassen fuer Oekodesign.'),
+        q('Welche Norm klassifiziert das gesamte Antriebssystem (Motor + Complete Drive Module) energetisch?',
+            ['IEC 61800-9-2:2017 (IES-Klassen)', 'ISO 9001', 'IEC 62443-3-3', 'ISO 13849-1'], 0,
+            'IEC 61800-9-2:2017 definiert IES0 (Referenz), IES1 (Standard) und IES2 (Premium) auf Systemebene; ergaenzt IE-Klassen des Motors.'),
+        q('Welche Auslegungsregel ist Standard fuer den Stromregler im Servoumrichter?',
+            ['Auslegung nur durch Probieren ohne Streckenmodell', 'Bang-Bang ohne Vorsteuerung', 'Reine Steuerung ohne Rueckfuehrung', 'Symmetrisches/Betrags-Optimum (Kessler/Schroeder)'], 3,
+            'Schroeder 2021 Kap. 14: Symmetrisches Optimum / Betrags-Optimum sind die etablierten analytischen Auslegungsverfahren fuer kaskadierte Antriebsregler.')
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_automation',
         code: 'MA-ET Automation',
@@ -838,30 +1033,9 @@
             {
                 id: 'drives',
                 title: 'Kapitel 4 — Antriebs- und Leistungselektronik',
-                summary: 'Drehstrommaschinen, feldorientierte Regelung (FOC), direktes Drehmomentregeln (DTC), Pulsweitenmodulation, Umrichter-Topologien, Servoachsen-Auslegung.',
-                pages: [
-                    placeholderPage('Asynchron- und Synchronmaschine', [
-                        'Park-/Clarke-Transformation',
-                        'Ersatzschaltbild, Drehmoment-Schlupf-Kennlinie',
-                        'Permanenterregte Synchronmaschinen (PMSM)'
-                    ]),
-                    placeholderPage('Feldorientierte Regelung (FOC)', [
-                        'd/q-Achsen-Regelung, Entkopplung',
-                        'Stromregelung mit PI-Reglern',
-                        'Sensorlose Verfahren (Back-EMF, HFI)'
-                    ]),
-                    placeholderPage('Umrichter und Modulation', [
-                        '2-Level- und 3-Level-Topologien',
-                        'PWM-Verfahren: Sinus-PWM, Raumzeiger-PWM (SVPWM)',
-                        'EMV, Filterauslegung, Schaltverluste'
-                    ]),
-                    placeholderPage('Servoachsen-Auslegung', [
-                        'Massentraegheits-Verhaeltnis Last/Motor',
-                        'Reglerkaskade Strom-/Drehzahl-/Lageregelung',
-                        'Bahnplanung: Trapez, S-Kurve, Jerk-limitiert'
-                    ])
-                ],
-                quiz: placeholderQuiz('Antriebstechnik')
+                summary: 'Drehstrommaschinen (ASM, PMSM, SynRM), Park-/Clarke-Transformation, feldorientierte Regelung (FOC), Direct Torque Control (DTC), Wechselrichter-Topologien (2-Level, 3-Level NPC), Pulsweitenmodulation (Sinus-PWM, SVPWM, DPWM), Servoachsen-Auslegung mit Reglerkaskade, Bahnplanung, Antriebs-Safety nach IEC 61800-5-2 (STO/SS1/SS2/SOS/SLS/SDI/SBC) und Wirkungsgrad-Klassen IE/IES.',
+                pages: [PAGE_DRIVES_MACH, PAGE_DRIVES_FOC, PAGE_DRIVES_INV, PAGE_DRIVES_SERVO],
+                quiz: QUIZ_DRIVES
             },
             {
                 id: 'robotics',

@@ -45,7 +45,7 @@ Pro Paket: ≥4 Lehrseiten (AGENTS §18.6) + ≥50 quellenbelegte MCQ (AGENTS §
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
 
 ### P-AUTO-04 — Master-ET Automation Kap. 4 "Antriebstechnik / FOC / DTC"
-- **Status:** ready
+- **Status:** done (v35, Sitzung 2026-05-10)
 - **Datei:** `js/data/schulung_master_et_automation.js`
 - **Schwerpunkte:** Park/Clarke-Transformation, Field-Oriented-Control (FOC) ASM/PMSM, Direct Torque Control (DTC), SVPWM, Sensorlose Verfahren (Back-EMF, Modell-Beobachter), Drehgeber/Resolver, Geschwindigkeits-/Lageregelkreis-Kaskade, EN 61800-5-2 Safety-Functions (STO, SS1, SLS).
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
@@ -130,8 +130,8 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Vorschlag (vom Agent gesetzt):** **P-AUTO-04** (Master-ET Automation Kap. 4 "Antriebstechnik / FOC / DTC").
-> Begruendung: P-AUTO-03 wurde erledigt (v34); Kap. 4 ist das naechste offene Master-ET-Automation-Kapitel in Reihenfolge und bildet die Grundlage fuer Servoachsen und Robotik in Kap. 5.
+> **Naechster Vorschlag (vom Agent gesetzt):** **P-AUTO-05** (Master-ET Automation Kap. 5 "Robotik / Kinematik / Cobot").
+> Begruendung: P-AUTO-04 wurde erledigt (v35); Kap. 5 ist das naechste offene Master-ET-Automation-Kapitel in Reihenfolge und nutzt die in Kap. 4 etablierten Servo-Achsen direkt als Robotergelenke weiter (Kinematik-Ketten, Drehzahl-/Lageregelkreise pro Achse, ISO 10218 / ISO/TS 15066).
 
 ---
 
@@ -146,3 +146,4 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 - 2026-05-10: P-UI-LOGIN-TEMP-DISABLE erledigt — Login-Feature temporaer ueber `AUTH_TEMPORARILY_DISABLED` deaktiviert; Schulungen-Gate laesst Inhalte ohne Session durch, Konto-Tab zeigt Hinweis statt Login-Formular, README markiert den temporären Status. Reaktivierung als P-UI-LOGIN-REACTIVATE aufgenommen. CACHE_VERSION v32 → v33. Naechster Vorschlag bleibt P-AUTO-03.
 
 - 2026-05-10: P-AUTO-03 erledigt — Master-ET Automation Kap. 3 "Feldbusse und OPC UA" produktiv ausgepflegt: 4 Lehrseiten (Industrial Ethernet und Echtzeitklassen; PROFINET/EtherCAT/Modbus/CANopen; OPC UA Architektur/PubSub/Security/FX; TSN-Auslegung und Migration) und 50 quellenbelegte MCQ mit Quellenankern (IEC 61158/61784, IEC 61784-2:2019, IEC 62541 Parts 1/4/6/14, IEEE 802.1Q-2022, IEEE 802.1AS-2020, IEEE 802.1CB-2017, ETG.1000, CiA 301, Modbus AP V1.1b3, IEC 62443-3-2/-3-3, OPC UA FX 1.00). `correct`-Verteilung balanciert auf [13,13,12,12]. CACHE_VERSION v33 → v34. Naechster Vorschlag: P-AUTO-04.
+- 2026-05-10: P-AUTO-04 erledigt — Master-ET Automation Kap. 4 "Antriebs- und Leistungselektronik" produktiv ausgepflegt: 4 Lehrseiten (4.1 Drehstrommaschinen + Park/Clarke + Klosssche Gleichung; 4.2 FOC fuer PMSM/IPMSM/ASM mit Hasse-Leonhard/Blaschke + sensorlos Back-EMF/HFI + DTC; 4.3 VSI/CSI + 2-Level/3-Level NPC + Sinus-PWM/SVPWM/DPWM + Si/SiC/GaN + EMV/IEC 61800-3/IEEE 519-2022; 4.4 Reglerkaskade Strom/Drehzahl/Lage + Massentraegheits-Verhaeltnis + Bahnplanung + IEC 61800-5-2 STO/SS1/SS2/SOS/SLS/SDI/SBC + IES-Klassen). 50 quellenbelegte MCQ mit Quellenanker pro `explanation` (Park 1929, Clarke 1943, Schroeder/Boecker 2021, Leonhard 2001, Vas 1998, Holmes/Lipo 2003, Mohan 2003, Takahashi/Noguchi IEEE TIA 1986, Nabae/Takahashi/Akagi 1981, IEC 60034-30-1:2014, IEC 61800-5-2:2016, IEC 61800-9-2:2017, IEC 61800-3:2017, IEEE 519-2022, ISO 13849-1:2023, IEC 62061:2021, EU-VO 2019/1781). `correct`-Verteilung balanciert auf [13,13,12,12]. CACHE_VERSION v34 → v35. Naechster Vorschlag: P-AUTO-05.
