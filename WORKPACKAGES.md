@@ -39,7 +39,7 @@ Pro Paket: ≥4 Lehrseiten (AGENTS §18.6) + ≥50 quellenbelegte MCQ (AGENTS §
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
 
 ### P-AUTO-03 — Master-ET Automation Kap. 3 "Feldbus / Industrial Ethernet / TSN"
-- **Status:** ready
+- **Status:** in-progress
 - **Datei:** `js/data/schulung_master_et_automation.js`
 - **Schwerpunkte:** PROFINET RT/IRT, EtherCAT (DC, FMMU), OPC UA Part 14 Pub/Sub, OPC UA FX (2022), IEEE 802.1Q-2022 TSN (Qbv, Qbu, ASc; gPTP IEEE 802.1AS-2020), CC-Link IE TSN, MODBUS-TCP, CAN/CANopen, Determinismus-Klassen.
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
