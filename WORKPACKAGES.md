@@ -12,9 +12,86 @@
 
 ---
 
+## 0) Fernstudium-Audit — drei Studiengaenge vollstaendig studierbar machen
+
+### Dozenten-Befund 2026-05-10
+
+- **Master Elektrotechnik — Cyber-Security:** fachlich breit und in 5/6 Kapiteln formal produktiv; Kap. 1 hat nur 30 MCQ und liegt damit unter dem Soll von 50. Fuer ein echtes Fernstudium fehlen noch explizite Lernziele, Voraussetzungen, Modul-/ECTS-Struktur, Labor-/Fallaufgaben, Pruefungsmodus, Wiederholungsplaene und Capstone-Projekt.
+- **Master Elektrotechnik — Automatisierungstechnik:** Kap. 2–4 sind produktiv, Kap. 5–6 sind Platzhalter mit je 1 Quizfrage; Kap. 1 hat nur 30 MCQ. Inhaltlich fehlen fuer ein vollstaendiges Fernstudium vor allem Robotik/I4.0-Ausarbeitung, Sensorik/Messtechnik, Systemidentifikation/Simulation, Prozessleittechnik/SCADA und praktische Inbetriebnahme-Labs.
+- **Allgemeinmedizin & Medizinstudium:** umfangreich fuer Allgemeinmedizin-orientiertes Selbststudium (3 Kapitel, 242 MCQ), aber didaktisch noch kein komplettes Medizinstudium. Es fehlen Modulstruktur entlang M1/M2/M3, viele klinische Faecher als eigene Kapitel, OSCE-/Fallvignetten, longitudinale Anatomie/Pharmakologie/Pathologie-Verknuepfung, Leitlinien-Audit und pruefungsnahe Progress-Tests.
+- **Gesamturteil:** Als Wissensreaktivierung gut geeignet; fuer ein komplettes Fernstudium noch nicht ausreichend. Noetig sind Curriculum-Mapping, didaktische Standardisierung, Aufgaben-Tiefenausbau, kompetenzorientierte Fall-/Laborformate und Qualitaetssicherung.
+
+### P-STUDY-ROADMAP — Dozenten-Audit und Session-Roadmap fuer alle drei Studiengaenge
+- **Status:** done (v35, Sitzung 2026-05-10)
+- **Dateien:** `WORKPACKAGES.md`
+- **Aktion:** Ist-Umfang der drei Studiengaenge auswerten, didaktische Luecken aus Dozentenperspektive benennen und session-optimierte Arbeitspakete fuer ein vollstaendiges Fernstudium anlegen.
+- **Akzeptanz:** Befund + priorisierte Pakete fuer Curriculum, Master-Cybersec, Master-Automation, Medizin und Cross-Cutting-Didaktik dokumentiert.
+
+### P-STUDY-CURRICULUM-MATRIX — Kompetenzmatrix und Modulhandbuch fuer alle drei Studiengaenge
+- **Status:** ready
+- **Dateien:** `README.md`, `WORKPACKAGES.md`, ggf. neue Datenfelder in `js/data/schulung_*.js`
+- **Aktion:** Fuer jeden Studiengang Lernziele, Voraussetzungen, Modulfolge, Taxonomie-Level, Soll-Workload und Pruefungsform definieren; bestehende Kapitel/Seiten/Quizfragen dagegen mappen.
+- **Akzeptanz:** Tabelle pro Studiengang mit Muss-/Soll-Themen, Ist-Abdeckung, Gap und naechstem Paket; keine Inhaltsaenderung ohne Quellenanker.
+
+### P-STUDY-DIDACTIC-TEMPLATE — Einheitliche Lehrseiten-Didaktik
+- **Status:** ready
+- **Dateien:** `AGENTS.md`, `WORKPACKAGES.md`, exemplarisch ein Schulungs-Datenskript
+- **Aktion:** Verbindliches Seitentemplate fuer Fernstudium definieren: Lernziele, Vorwissen, Kernkonzepte, Worked Examples, Selbstcheck, typische Fehler, Transferaufgabe, Quellen.
+- **Akzeptanz:** Konvention dokumentiert; ein bestehendes Kapitel exemplarisch umgestellt; Folgepakete koennen daran arbeiten.
+
+### P-STUDY-ASSESSMENT-MODES — Pruefungs-, Progress- und Fallmodus planen/umsetzen
+- **Status:** ready
+- **Dateien:** `js/app.jsx`, `css/styles.css`, `WORKPACKAGES.md`
+- **Aktion:** Neben 10-Fragen-Quiz einen Fernstudiums-Pruefungsmodus planen/implementieren: Kapiteltest, Modulabschluss, Gesamtprobe, Lernziel-Feedback, Bestehensgrenze, Review nach Kompetenzfeld.
+- **Akzeptanz:** UI unterstuetzt pruefungsnahe Auswertung ohne Backend; bestehende Quizfunktion bleibt kompatibel.
+
+### P-STUDY-PBQ-LABS — Kompetenzorientierte Labor-, Fall- und PBQ-Aufgaben
+- **Status:** ready
+- **Dateien:** `js/app.jsx`, `js/data/schulung_*.js`, `WORKPACKAGES.md`
+- **Aktion:** Bestehende PBQ-Typen (`sequence`, `cloze`) systematisch nutzen und um studiengangsspezifische Fall-/Laborpakete ergaenzen: Cyber-IR, SPS/Robotik-Inbetriebnahme, Medizin-Fallvignetten/OSCE.
+- **Akzeptanz:** Pro Studiengang mindestens ein produktiver PBQ-/Fall-Prototyp mit Quellen- oder Bewertungsrubrik; MCQ-Pfade bleiben stabil.
+
+### P-STUDY-QA-SOURCE-AUDIT — Quellen-, Aktualitaets- und Pruefungsqualitaet
+- **Status:** ready
+- **Dateien:** `js/data/schulung_*.js`, `WORKPACKAGES.md`
+- **Aktion:** Quellenanker, Aktualitaet, Distraktorqualitaet, Redundanzen, Schwierigkeitsmischung und Taxonomie-Level aller produktiven Kapitel stichprobenartig pruefen; Folgepakete fuer Korrekturen anlegen.
+- **Akzeptanz:** Audit-Log je Studiengang mit kritischen Korrekturen, Nice-to-have-Verbesserungen und priorisierten Nacharbeiten.
+
+---
+
 ## A) Master-Schulungen — Kapitel produktiv ausarbeiten
 
 Pro Paket: ≥4 Lehrseiten (AGENTS §18.6) + ≥50 quellenbelegte MCQ (AGENTS §18.4) mit Quellenanker pro `explanation`. Kein status-Switch auf `production` einzeln; erst wenn alle Kapitel der Schulung produktiv sind (Paket P-CYBERSEC-STATUS bzw. P-AUTO-STATUS).
+
+### P-CYBERSEC-01-TOPUP — Kap. 1 "Angewandte Kryptographie" auf 50 MCQ bringen
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_cybersec.js`
+- **Schwerpunkte:** AEAD, Nonce-Missbrauch, KDF/HKDF, PKI-Validierung, TLS 1.3, PQC-Migration FIPS 203/204/205:2024, Key-Lifecycle, HSM/FIPS 140-3.
+- **Akzeptanz:** 20 neue quellenbelegte MCQ anhaengen (30 → 50), `correct`-Verteilung ausbalancieren, keine Umordnung bestehender Quiz-Items, CACHE_VERSION bumpen.
+
+### P-CYBERSEC-07 — Security Architecture, Zero Trust und Cloud/Kubernetes-Security
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_cybersec.js`
+- **Schwerpunkte:** NIST SP 800-207 Zero Trust, Cloud Shared Responsibility, IAM/PAM, Kubernetes Threat Model, Container Image Supply Chain, Secrets-Management, CSPM/CWPP, Network Segmentation.
+- **Akzeptanz:** Neues Kapitel mit ≥4 Lehrseiten + ≥50 quellenbelegten MCQ; `index`/SW nur anpassen falls neue Datei noetig, sonst CACHE_VERSION bumpen.
+
+### P-CYBERSEC-08 — Incident Response, Forensik und Malware-Analyse
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_cybersec.js`
+- **Schwerpunkte:** NIST SP 800-61r2, ISO/IEC 27035, Chain of Custody, Speicher-/Datentraegerforensik, SIEM/EDR-Triage, Malware-Triage, Ransomware-Playbooks, Lessons Learned.
+- **Akzeptanz:** Neues Kapitel mit ≥4 Lehrseiten + ≥50 quellenbelegten MCQ sowie mindestens 2 Fall-/PBQ-Aufgaben.
+
+### P-CYBERSEC-09 — Offensive Security und Security Testing
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_cybersec.js`
+- **Schwerpunkte:** OWASP WSTG/ASVS, NIST SP 800-115, MITRE ATT&CK Enterprise, AD-Angriffspfade, Web/API-Security, Exploitability vs. Risk, Reporting und ethische Grenzen.
+- **Akzeptanz:** Neues Kapitel mit ≥4 Lehrseiten + ≥50 quellenbelegten MCQ; keine Anleitung zur realen Schaedigungsabsicht, nur defensive/autorisiert-testende Perspektive.
+
+### P-CYBERSEC-CAPSTONE — Master-Capstone Cyber-Security
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_cybersec.js`
+- **Schwerpunkte:** Architekturbewertung eines Industrie-/Embedded-Systems, Threat Model, Risikoanalyse, Controls, Testplan, Incident-Runbook, Management-Summary.
+- **Akzeptanz:** Capstone-Kapitel mit Rubrik, Musterstruktur, Selbstbewertung und ≥20 pruefungsnahen Review-Fragen.
 
 ### P-CYBERSEC-05 — Master-ET Cybersec Kap. 5 "Risikomanagement & Compliance"
 - **Status:** done (v29, Sitzung 2026-05-10)
@@ -63,8 +140,44 @@ Pro Paket: ≥4 Lehrseiten (AGENTS §18.6) + ≥50 quellenbelegte MCQ (AGENTS §
 - **Akzeptanz:** 4 Lehrseiten + 50 MCQ.
 
 ### P-AUTO-STATUS — `master_et_automation` auf `status: 'production'`
-- **Status:** blocked: P-AUTO-02 .. P-AUTO-06
+- **Status:** blocked: P-AUTO-01-TOPUP, P-AUTO-05, P-AUTO-06
 - **Aktion:** `status: 'preparation'` entfernen, README/Card-Badge pruefen, CACHE_VERSION bumpen.
+
+### P-AUTO-01-TOPUP — Kap. 1 "Fortgeschrittene Regelungstechnik" auf 50 MCQ bringen
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_automation.js`
+- **Schwerpunkte:** MIMO-Zustandsraum, Kalman-Filter, LQR/LQI, MPC, Robustheit, Lyapunov, Nichtlinearitaeten, Anti-Windup, Diskretisierung und reale Implementierung.
+- **Akzeptanz:** 20 neue quellenbelegte MCQ anhaengen (30 → 50), `correct`-Verteilung ausbalancieren, keine Umordnung bestehender Quiz-Items, CACHE_VERSION bumpen.
+
+### P-AUTO-07 — Sensorik, Messtechnik und Signalverarbeitung
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_automation.js`
+- **Schwerpunkte:** Messkette, Kalibrierung, Unsicherheit nach GUM, Encoder/Resolver, IMU, Kraft-/Druck-/Temperatursensorik, ADC/DAC, Filterung, Diagnose, EMV-gerechtes Messen.
+- **Akzeptanz:** Neues Kapitel mit ≥4 Lehrseiten + ≥50 quellenbelegten MCQ und mindestens 1 Rechen-/Auslegungsfall.
+
+### P-AUTO-08 — Systemidentifikation, Simulation und Digital-Commissioning
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_automation.js`
+- **Schwerpunkte:** ARX/ARMAX, Subspace Identification, Frequenzgangmessung, Grey-Box-Modelle, Hardware-in-the-Loop, Model-in-the-Loop, virtuelle Inbetriebnahme, FMI/FMU.
+- **Akzeptanz:** Neues Kapitel mit ≥4 Lehrseiten + ≥50 quellenbelegten MCQ und mindestens 1 PBQ zur Modellwahl/Validierung.
+
+### P-AUTO-09 — Prozessautomation, SCADA/MES und Batch/Continuous Control
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_automation.js`
+- **Schwerpunkte:** ISA-88, ISA-95/IEC 62264, P&ID, Alarmmanagement ISA-18.2, SCADA/HMI, Historian, Advanced Process Control, Safety Instrumented Systems IEC 61511.
+- **Akzeptanz:** Neues Kapitel mit ≥4 Lehrseiten + ≥50 quellenbelegten MCQ; Schnittstellen zu Cyber-Security und Industrie 4.0 explizit verlinken.
+
+### P-AUTO-LABS — Inbetriebnahme-Labs fuer SPS, Antrieb, Feldbus und Robotik
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_automation.js`
+- **Schwerpunkte:** strukturierte Fehlersuche, Safety-Check, Achsinbetriebnahme, Feldbusdiagnose, Roboter-Kalibrierung, Taktzeitoptimierung, Abnahmetest.
+- **Akzeptanz:** Mindestens 4 Fall-/PBQ-Labs mit Bewertungsrubrik; bestehende MCQ-Kapitel bleiben unveraendert.
+
+### P-AUTO-CAPSTONE — Master-Capstone Automatisierungstechnik
+- **Status:** ready
+- **Datei:** `js/data/schulung_master_et_automation.js`
+- **Schwerpunkte:** Entwurf einer automatisierten Zelle mit SPS, Feldbus, Servoachsen, Roboter, Safety, Digital Twin, HMI/MES-Anbindung und Abnahmeplan.
+- **Akzeptanz:** Capstone-Kapitel mit Systembeschreibung, Teilaufgaben, Rubrik, Musterloesungsstruktur und ≥20 Review-Fragen.
 
 ---
 
@@ -102,7 +215,7 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 ### P-MED-AUDIT — Allgemeinmedizin Leitlinien-Audit
 - **Status:** ready
 - **Datei:** `js/data/schulung_allgemeinmedizin.js`
-- **Aktion:** Bestehende 238 Quiz-Fragen + Lehrseiten gegen aktuelle Leitlinien-Versionen pruefen und ggf. anpassen:
+- **Aktion:** Bestehende 242 Quiz-Fragen + Lehrseiten gegen aktuelle Leitlinien-Versionen pruefen und ggf. anpassen:
   - NVL Typ-2-Diabetes (BAEK/AWMF, Stand pruefen)
   - NVL Asthma 2024
   - GOLD-Report 2024/2025 COPD
@@ -112,6 +225,78 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
   - DEGAM-S3-Leitlinien (Hausarztzentrierte Versorgung 2023)
   - AWMF-Leitlinien-Register letzte Revision
 - **Akzeptanz:** Aenderungs-Log pro betroffener Quiz-Frage mit Quellen-Anker; CACHE_VERSION bumpen.
+
+### P-MED-CURRICULUM-MATRIX — M1/M2/M3-Kompetenzmatrix und Gap-Analyse
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`, `WORKPACKAGES.md`
+- **Aktion:** Vorhandene Allgemeinmedizin-Schulung gegen M1/M2/M3/GK-Logik, ÄApprO, NKLM und allgemeinmedizinische Weiterbildung mappen; fehlende Faecher und Pruefungsformate priorisieren.
+- **Akzeptanz:** Matrix mit Ist-Abdeckung, kritischen Luecken, Paket-Reihenfolge und Quellenbasis; keine vorhandenen Quiz-Items umsortieren.
+
+### P-MED-M1-ANATOMIE-HISTO-EMBRYO — Vorklinik Anatomie/Histo/Embryologie
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`
+- **Schwerpunkte:** Bewegungsapparat, Thorax/Abdomen/Becken, Neuroanatomie, Histologie-Grundgewebe, Organentwicklung, klinische Leitsymptome.
+- **Akzeptanz:** Neues Kapitel oder Subkapitel mit ≥4 Lehrseiten + ≥50 quellenbelegten MCQ im medizinischen 5-Optionen-Stil; keine urheberrechtlich geschuetzten IMPP-Fragen kopieren.
+
+### P-MED-M1-PHYSIO-BIOCHEM-GENETIK — Vorklinik Physiologie/Biochemie/Genetik vertiefen
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`
+- **Schwerpunkte:** Herz/Kreislauf, Atmung, Niere, Endokrinologie, Neurophysiologie, Stoffwechselwege, Molekulargenetik, Laborinterpretation.
+- **Akzeptanz:** ≥4 Lehrseiten + ≥50 quellenbelegte MCQ; Rechen-/Diagrammfragen und klinische Transferfragen enthalten.
+
+### P-MED-M1-PSYCH-SOZIO-EPI — Medizinische Psychologie, Soziologie und Epidemiologie
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`
+- **Schwerpunkte:** Arzt-Patient-Kommunikation, Lern-/Verhaltensmodelle, Screening-Metriken, Bias, Studientypen, Public Health, Praevention.
+- **Akzeptanz:** ≥4 Lehrseiten + ≥50 quellenbelegte MCQ; Statistik-/Epidemiologieaufgaben mit nachvollziehbaren Rechnungen.
+
+### P-MED-M2-INNERE-SYSTEME — Innere Medizin systematisch ausbauen
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`
+- **Schwerpunkte:** Kardiologie, Pneumologie, Gastroenterologie, Nephrologie, Endokrinologie, Haematologie/Onkologie, Rheumatologie, Infektiologie.
+- **Akzeptanz:** Pro Session ein Organsystem mit ≥4 Lehrseiten + ≥50 MCQ; falls Umfang zu gross, in P-MED-M2-INNERE-<SYSTEM> splitten.
+
+### P-MED-M2-CHIRURGIE-ORTHO-URO — Chirurgie, Orthopaedie/Unfallchirurgie und Urologie
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`
+- **Schwerpunkte:** akutes Abdomen, Hernien, Frakturen, Gelenkerkrankungen, Wundversorgung, perioperatives Risiko, Urologie-Leitsymptome.
+- **Akzeptanz:** ≥4 Lehrseiten + ≥50 quellenbelegte MCQ und mindestens 2 Fallvignetten/PBQ.
+
+### P-MED-M2-NEURO-PSYCH — Neurologie, Psychiatrie und Psychosomatik
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`
+- **Schwerpunkte:** Schlaganfall, Epilepsie, Kopfschmerz, Demenz, Depression, Angst, Psychose, Delir, Suchtmedizin, Notfalltriage.
+- **Akzeptanz:** ≥4 Lehrseiten + ≥50 quellenbelegte MCQ; Leitlinienstand explizit in `explanation` nennen.
+
+### P-MED-M2-GYN-PAED-DERMA-SINNE — Gynaekologie, Paediatrie, Dermatologie, HNO/Augen
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`
+- **Schwerpunkte:** Schwangerschaftsbasis, Vorsorge, Impfungen, Fieberkind, Exantheme, Hauttumoren, Ohr-/Augen-Notfaelle, Red Flags.
+- **Akzeptanz:** ≥4 Lehrseiten + ≥50 quellenbelegte MCQ; pädiatrische Dosierungen nur mit klarer Quellen-/Sicherheitskennzeichnung.
+
+### P-MED-M2-DIAGNOSTIK-QUERSCHNITT — Radiologie, Labor, Pathologie, Pharmakologie, Notfall
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`
+- **Schwerpunkte:** Laboralgorithmen, Bildgebung-Indikationen, Pathologie-Grundmuster, Arzneimittelsicherheit, Interaktionen, Reanimation/ABCDE, Sepsis.
+- **Akzeptanz:** ≥4 Lehrseiten + ≥50 quellenbelegte MCQ mit Bildgebungs-/Laborbefundtexten statt externen Bildern.
+
+### P-MED-PJ-OSCE-FALLBOOK — PJ/Facharzt-Fallbuch und OSCE-Training
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`
+- **Schwerpunkte:** Anamnese, koerperliche Untersuchung, Beratungsanlaesse, Shared Decision Making, Red Flags, Dokumentation, Ueberweisung/Einweisung.
+- **Akzeptanz:** Mindestens 10 Fallvignetten/PBQ mit Bewertungsrubrik, Musterstruktur und Review-Fragen; keine echte Patientendaten.
+
+### P-MED-PROGRESS-TESTS — Longitudinale Progress-Tests M1/M2/M3
+- **Status:** ready
+- **Dateien:** `js/app.jsx`, `js/data/schulung_allgemeinmedizin.js`
+- **Aktion:** Kapiteluebergreifende Pruefungssets fuer M1, M2 und PJ/Facharzt konzipieren; Fragen nach Kompetenzfeld taggen oder per Kapitelpool zusammensetzen.
+- **Akzeptanz:** Pro Stufe ein reproduzierbarer Progress-Test-Modus oder dokumentierter Datenpfad; bestehende Kapitelquiz bleiben kompatibel.
+
+### P-MED-CAPSTONE — Allgemeinmedizin-Capstone "Unselektierter Patient"
+- **Status:** ready
+- **Datei:** `js/data/schulung_allgemeinmedizin.js`
+- **Schwerpunkte:** Erstkontakt, Priorisierung, Multimorbiditaet, Polypharmazie, Praevention, Notfall-Ausschluss, Verlaufskontrolle, Patientensicherheit.
+- **Akzeptanz:** Capstone-Kapitel mit ≥4 Lehrseiten/Fallseiten, ≥20 Review-Fragen und OSCE-aehnlicher Rubrik.
 
 ---
 
@@ -134,8 +319,8 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Vorschlag (vom Agent gesetzt):** **P-AUTO-05** (Master-ET Automation Kap. 5 "Robotik / Kinematik / Cobot").
-> Begruendung: P-AUTO-04 wurde erledigt (v35); Kap. 5 ist das naechste offene Master-ET-Automation-Kapitel in Reihenfolge und nutzt die in Kap. 4 etablierten Servo-Achsen direkt als Robotergelenke weiter (Kinematik-Ketten, Drehzahl-/Lageregelkreise pro Achse, ISO 10218 / ISO/TS 15066).
+> **Naechster Vorschlag (vom Agent gesetzt):** **P-STUDY-CURRICULUM-MATRIX** (Kompetenzmatrix und Modulhandbuch fuer alle drei Studiengaenge).
+> Begruendung: Vor weiteren Einzelkapiteln sollte aus Dozentensicht zuerst die Soll-Abdeckung fuer Cyber-Security, Automatisierungstechnik und Medizin festgelegt werden; dadurch werden P-AUTO-05/P-AUTO-06, P-CYBERSEC-Erweiterungen und die Medizinpakete sauber priorisiert.
 
 ---
 
@@ -152,3 +337,4 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 - 2026-05-10: P-AUTO-03 erledigt — Master-ET Automation Kap. 3 "Feldbusse und OPC UA" produktiv ausgepflegt: 4 Lehrseiten (Industrial Ethernet und Echtzeitklassen; PROFINET/EtherCAT/Modbus/CANopen; OPC UA Architektur/PubSub/Security/FX; TSN-Auslegung und Migration) und 50 quellenbelegte MCQ mit Quellenankern (IEC 61158/61784, IEC 61784-2:2019, IEC 62541 Parts 1/4/6/14, IEEE 802.1Q-2022, IEEE 802.1AS-2020, IEEE 802.1CB-2017, ETG.1000, CiA 301, Modbus AP V1.1b3, IEC 62443-3-2/-3-3, OPC UA FX 1.00). `correct`-Verteilung balanciert auf [13,13,12,12]. CACHE_VERSION v33 → v34. Naechster Vorschlag: P-AUTO-04.
 - 2026-05-10: P-AUTO-04 erledigt — Master-ET Automation Kap. 4 "Antriebs- und Leistungselektronik" produktiv ausgepflegt: 4 Lehrseiten (4.1 Drehstrommaschinen + Park/Clarke + Klosssche Gleichung; 4.2 FOC fuer PMSM/IPMSM/ASM mit Hasse-Leonhard/Blaschke + sensorlos Back-EMF/HFI + DTC; 4.3 VSI/CSI + 2-Level/3-Level NPC + Sinus-PWM/SVPWM/DPWM + Si/SiC/GaN + EMV/IEC 61800-3/IEEE 519-2022; 4.4 Reglerkaskade Strom/Drehzahl/Lage + Massentraegheits-Verhaeltnis + Bahnplanung + IEC 61800-5-2 STO/SS1/SS2/SOS/SLS/SDI/SBC + IES-Klassen). 50 quellenbelegte MCQ mit Quellenanker pro `explanation` (Park 1929, Clarke 1943, Schroeder/Boecker 2021, Leonhard 2001, Vas 1998, Holmes/Lipo 2003, Mohan 2003, Takahashi/Noguchi IEEE TIA 1986, Nabae/Takahashi/Akagi 1981, IEC 60034-30-1:2014, IEC 61800-5-2:2016, IEC 61800-9-2:2017, IEC 61800-3:2017, IEEE 519-2022, ISO 13849-1:2023, IEC 62061:2021, EU-VO 2019/1781). `correct`-Verteilung balanciert auf [13,13,12,12]. CACHE_VERSION v34 → v35. Naechster Vorschlag: P-AUTO-05.
 - 2026-05-10: Neue Arbeitspakete aufgenommen: P-CAT-ABB fuer ABB Roboterprogrammierung/RAPID mit 100 Fragen analog KUKA/KRL, P-CAT-PLC-SIEMENS fuer Siemens PLC Programming mit 100 Fragen, P-CAT-PLC-CODESYS fuer CODESYS PLC Programming mit 100 Fragen und P-CAT-PLC-BECKHOFF fuer Beckhoff/TwinCAT PLC Programming mit 100 Fragen. P-CAT-KRL bleibt als KUKA Robot Language (KRL) mit Soll ≥100 Fragen bestehen.
+- 2026-05-10: P-STUDY-ROADMAP erledigt — drei Studiengaenge aus Dozentensicht bewertet und Session-Roadmap fuer ein vollstaendiges Fernstudium angelegt. Befund: Cyber-Security ist fast produktiv, aber Kap. 1 braucht 20 MCQ und Fernstudiums-Didaktik/Labs/Capstone; Automatisierung braucht Kap. 5/6, Kap. 1-Top-up sowie Sensorik, Systemidentifikation, Prozessautomation, Labs und Capstone; Medizin ist umfangreich fuer Allgemeinmedizin, aber kein vollstaendiges Medizinstudium ohne M1/M2/M3-Kompetenzmatrix, Fachkapitel, OSCE/Fallbuch und Progress-Tests. Naechster Vorschlag: P-STUDY-CURRICULUM-MATRIX.
