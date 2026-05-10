@@ -283,6 +283,468 @@
             'Grover-Algorithmus (1996): generische Suche in $\\sqrt{N}$. Bedeutet AES-128 effektiv $2^{64}$, AES-256 bleibt $2^{128}$. Shor bricht RSA/ECC, nicht AES.')
     ];
 
+    // ----------------------------------------------------------------------
+    // Kapitel 2 — Embedded Security (PRODUKTIV)
+    // Quellen: Eckert "IT-Sicherheit" 11. Aufl. 2023, Kap. 11 (Embedded);
+    // Anderson "Security Engineering" 3rd ed. 2020, Kap. 18 (Tamper Resistance),
+    // Kap. 20 (Side Channels); NIST SP 800-147B (BIOS Resiliency 2014),
+    // SP 800-155 (BIOS Integrity Measurement Guidelines), SP 800-193
+    // (Platform Firmware Resiliency, 2018), SP 800-90B (Entropy Sources, 2018);
+    // ETSI EN 303 645 v3.1.3 (2024) Cyber Security for Consumer IoT;
+    // ARM TrustZone Reference Manual; Intel SGX Developer Reference;
+    // AMD SEV-SNP Whitepaper Rev. 1.55 (2023); Kocher 1996 (Timing),
+    // Kocher/Jaffe/Jun 1999 (DPA); CVE-2017-5753/5715/5754 (Spectre/Meltdown);
+    // Tang/Sethumadhavan/Stolfo 2017 (CLKSCREW); Bulck/Piessens/Strackx 2018
+    // (Foreshadow, USENIX Security); Murdock et al. 2020 (Plundervolt);
+    // Lipp et al. 2021 (PLATYPUS); Common Criteria PP-0084 (Smart Card).
+    // ----------------------------------------------------------------------
+
+    const PAGE_EMB_BOOT = {
+        title: '2.1 Secure Boot und Hardware Root-of-Trust',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) eine vollstaendige Boot-Chain aus ROM-Code, Bootloader und OS beschreiben, (2) einen <em>Hardware</em>-Root-of-Trust (RoT) gegen Software-RoT abgrenzen, (3) Measured Boot von Verified Boot unterscheiden, (4) Funktion und Schutzziele eines TPM 2.0 nach ISO/IEC 11889:2015 erklaeren.</blockquote>'
+
+            + '<h4>2.1.1 Boot-Chain und Vertrauenskette</h4>'
+            + '<p>Eine sichere Boot-Chain folgt dem Prinzip <em>Chain-of-Trust</em>: jede Stufe verifiziert die naechste, bevor sie ausgefuehrt wird. Typische Reihenfolge auf modernen ARM-/x86-Plattformen:</p>'
+            + '<ol>'
+            + '<li><strong>Boot-ROM</strong> — unveraenderlich (Mask-ROM), enthaelt den ersten Code nach Reset und einen oeffentlichen Schluessel-Hash (<em>OTP-Fuses</em>).</li>'
+            + '<li><strong>First-Stage-Bootloader (FSBL)</strong> — laedt aus Flash, wird vom ROM gegen den Fuse-Hash verifiziert.</li>'
+            + '<li><strong>Second-Stage-Bootloader</strong> (z.B. U-Boot, GRUB, Windows Boot Manager) — vom FSBL signiert und geprueft.</li>'
+            + '<li><strong>Kernel + initramfs</strong> — bei Linux z.B. <em>dm-verity</em>-geschuetzte Root-Partition.</li>'
+            + '</ol>'
+            + '<p>Die <strong>UEFI Secure Boot</strong>-Spezifikation (UEFI 2.10, 2024) implementiert diese Kette mit einer Hierarchie aus Plattform-Schluessel (PK), Key Exchange Key (KEK), Allowed Database (db) und Forbidden Database (dbx).</p>'
+
+            + '<h4>2.1.2 Verified Boot vs. Measured Boot</h4>'
+            + '<table><thead><tr><th>Merkmal</th><th>Verified Boot</th><th>Measured Boot</th></tr></thead><tbody>'
+            + '<tr><td>Pruefzeitpunkt</td><td>vor Ausfuehrung — Halt bei Mismatch</td><td>nachtraeglich, Hash wird ins TPM-PCR erweitert</td></tr>'
+            + '<tr><td>Reaktion</td><td>Boot-Abbruch / Recovery</td><td>Boot laeuft; Manipulation faellt bei Remote Attestation auf</td></tr>'
+            + '<tr><td>Beispiele</td><td>Android Verified Boot 2.0, UEFI Secure Boot</td><td>TCG PC Client Spec, Intel TXT, Linux IMA</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>2.1.3 Trusted Platform Module (TPM 2.0)</h4>'
+            + '<p>TPM 2.0 (ISO/IEC 11889:2015, TCG TPM Library Spec 1.59 / 2024) ist ein passiver Krypto-Coprozessor mit folgenden Kernfunktionen:</p>'
+            + '<ul>'
+            + '<li><strong>Platform Configuration Registers (PCR):</strong> 24 Slots, ausschliesslich erweiterbar via $\\mathrm{PCR}_i \\leftarrow H(\\mathrm{PCR}_i \\,\\|\\, \\text{measurement})$. Reset nur bei Plattform-Reset.</li>'
+            + '<li><strong>Endorsement Key (EK)</strong> — herstellerseitig, eindeutig, signiert vom Hersteller-CA. Niemals exportierbar.</li>'
+            + '<li><strong>Storage Root Key (SRK)</strong> — Wurzel der Sealing-Hierarchie.</li>'
+            + '<li><strong>Sealing</strong>: Daten an PCR-Werte binden — Entschluesselung nur, wenn Plattform identisch gebootet wurde (Grundlage von BitLocker, LUKS-TPM).</li>'
+            + '<li><strong>Quote / Attestation</strong>: signierter PCR-Snapshot, dient als Nachweis fuer Remote-Verifizierer.</li>'
+            + '</ul>'
+            + '<p>Praxis-Falle: TPM 2.0-Sniffing-Angriff (Hudson 2021) — bei diskretem TPM ueber den LPC-/SPI-Bus laesst sich der BitLocker-Volume-Master-Key abgreifen, wenn keine TPM+PIN-Konfiguration aktiv ist. Mitigation: TPM in CPU integrieren (fTPM/PTT) oder PIN/Passphrase erzwingen.</p>'
+
+            + '<h4>2.1.4 ARM TrustZone und Secure Element</h4>'
+            + '<p><strong>ARM TrustZone</strong> (seit ARMv7-A, in ARMv8-A erweitert um Secure-EL3) partitioniert die CPU in <em>Normal World</em> und <em>Secure World</em>. Der Wechsel erfolgt ueber den <code>SMC</code>-Befehl und einen <em>Secure Monitor</em>. Memory-Bus und Cache sind durch ein <em>NS-Bit</em> getrennt — der Normal World hat <em>kein</em> Bus-Zugriff auf Secure-Speicher.</p>'
+            + '<p><strong>Secure Element (SE)</strong> nach Common Criteria EAL5+ (PP-0084-2014, BSI) ist ein autonomer Chip mit eigenem Krypto-Coprozessor und manipulationsgeschuetztem Speicher (Beispiele: NXP A71CH, Infineon OPTIGA Trust M, Microchip ATECC608B). Anwendung: ePass, eUICC, Mobile-Payment, Industrie-IoT-Identitaeten.</p>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: ISO/IEC 11889:2015 (TPM 2.0); TCG TPM Library Spec 1.59, 2024; UEFI Specification 2.10, 2024; ARM Architecture Reference Manual ARMv8-A, Issue I.a (2023); BSI PP-0084-2014; Anderson 2020 §18; Eckert 2023 §11.4; Hudson, "Sniffing BitLocker Keys from a TPM", DEFCON 29, 2021.</em></p>'
+    };
+
+    const PAGE_EMB_TEE = {
+        title: '2.2 Trusted Execution Environments und Confidential Computing',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) das TEE-Bedrohungsmodell beschreiben, (2) Intel SGX, AMD SEV-SNP und ARM CCA gegeneinander abgrenzen, (3) Remote Attestation in Grundzuegen erklaeren, (4) bekannte TEE-Angriffe und ihre Mitigation einordnen.</blockquote>'
+
+            + '<h4>2.2.1 Was ist ein TEE?</h4>'
+            + '<p>Ein <strong>Trusted Execution Environment</strong> (GlobalPlatform TEE System Architecture v1.3, 2022) ist eine isolierte Ausfuehrungsumgebung mit den Sicherheitseigenschaften: <em>Code-Integritaet</em>, <em>Daten-Vertraulichkeit</em>, <em>Daten-Integritaet</em>, <em>Attestierbarkeit</em>. Bedrohungsmodell: ein vollstaendig kompromittiertes OS (Hypervisor, Kernel, BIOS) darf TEE-Inhalte weder lesen noch manipulieren — nur denial-of-service ist erlaubt.</p>'
+
+            + '<h4>2.2.2 Vergleich der wichtigsten TEEs</h4>'
+            + '<table><thead><tr><th>Plattform</th><th>Granularitaet</th><th>Speicher-Schutz</th><th>Attestation</th></tr></thead><tbody>'
+            + '<tr><td>Intel SGX (Skylake+)</td><td>Enclave (Prozess-Subset)</td><td>EPC verschluesselt durch MEE bzw. ab Ice Lake durch Total Memory Encryption mit MK-TME</td><td>EPID/DCAP, Quoting Enclave</td></tr>'
+            + '<tr><td>Intel TDX (Sapphire Rapids+)</td><td>Trust Domain (vollstaendige VM)</td><td>SEAM-Modul, Memory Encryption mit Ephemeral Keys</td><td>Quote-Service-Enclave (DCAP)</td></tr>'
+            + '<tr><td>AMD SEV-SNP (Milan+)</td><td>VM</td><td>AES-128-XEX pro VM, Reverse-Map-Table gegen Remap-Angriffe</td><td>VLEK/VCEK + AMD-CA</td></tr>'
+            + '<tr><td>ARM CCA / Realm (ARMv9-A)</td><td>Realm-VM</td><td>Granule Protection Tables (GPT) + Memory Encryption</td><td>Realm Management Monitor</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>2.2.3 Remote Attestation</h4>'
+            + '<p>Remote Attestation beweist einem Verifizierer, <em>welcher</em> Code in <em>welcher</em> Konfiguration im TEE laeuft. Standardablauf: das TEE generiert einen Quote = Signatur ueber (Mess-Wert des geladenen Codes, optional Nonce des Verifizierers, Plattform-Identitaet). Der Verifizierer prueft die Signatur gegen die Hersteller-CA und vergleicht den Mess-Wert mit einem erwarteten Hash (<em>Reference Value</em>, RFC 9334 RATS).</p>'
+            + '<p>RFC 9334 (RATS, 2023) standardisiert das Architektur-Modell: Attester &rarr; Verifier &rarr; Relying Party. EAT (Entity Attestation Token, RFC 9711, 2024) definiert ein CBOR/JWT-Format fuer Quotes.</p>'
+
+            + '<h4>2.2.4 Bekannte Angriffe</h4>'
+            + '<ul>'
+            + '<li><strong>Foreshadow / L1TF</strong> (Bulck et al., USENIX Security 2018): Spectre-Variante gegen SGX, exponiert L1-Cache-Inhalte. Mitigation: L1D-Flush bei Enclave-Exit (Microcode + Kernel).</li>'
+            + '<li><strong>Plundervolt</strong> (Murdock et al., S&amp;P 2020): Undervolting ueber MSR <code>0x150</code> erzeugt Faults in SGX-Multiplikation. Mitigation: Microcode 0xE0 deaktiviert User-Voltage-Control.</li>'
+            + '<li><strong>SGAxe / CrossTalk</strong> (2020): Diebstahl von SGX-Attestation-Keys ueber Microarchitectural Data Sampling.</li>'
+            + '<li><strong>CacheOut, Aepic Leak</strong> (2020/2022): Cache- bzw. APIC-basierte Datenleaks gegen SGX.</li>'
+            + '<li>Intel hat Server-SGX (Coffee Lake/Skylake-SP) als Reaktion eingestellt; auf Ice Lake-SP+ ist SGX wieder verfuegbar mit groesserer Enclave-Page-Cache (EPC) und gehaerteter Microarchitektur.</li>'
+            + '</ul>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: Intel SGX Developer Reference 2.20 (2024); Intel TDX Module Spec 1.5 (2023); AMD SEV-SNP Whitepaper Rev. 1.55 (2023); ARM CCA Architecture Spec DEN0125 (2023); GlobalPlatform TEE System Architecture v1.3, 2022; RFC 9334 RATS, 2023; RFC 9711 EAT, 2024.</em></p>'
+    };
+
+    const PAGE_EMB_FW = {
+        title: '2.3 Sichere Firmware-Updates und Plattform-Resilienz',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) die drei Schutzziele aus NIST SP 800-193 nennen, (2) ein A/B-Update-Schema mit Rollback-Schutz beschreiben, (3) typische OTA-Sicherheitsanforderungen aus ETSI EN 303 645 zitieren, (4) Anti-Rollback-Mechanismen im Detail erlaeutern.</blockquote>'
+
+            + '<h4>2.3.1 NIST SP 800-193 Platform Firmware Resiliency</h4>'
+            + '<p>SP 800-193 (Mai 2018) formuliert drei <strong>Schutzziele</strong> fuer Plattform-Firmware:</p>'
+            + '<ol>'
+            + '<li><strong>Protection</strong> — Firmware und kritische Daten sind vor unautorisierter Aenderung geschuetzt (Write-Protect, signierte Updates, Anti-Rollback-Counter).</li>'
+            + '<li><strong>Detection</strong> — Korruption wird zuverlaessig erkannt (Integritaets-Pruefung beim Boot, Cryptographic Hashes).</li>'
+            + '<li><strong>Recovery</strong> — Eine kompromittierte Firmware kann automatisch in einen vertrauenswuerdigen Zustand zurueckgefuehrt werden (Golden Image, Watchdog-Recovery).</li>'
+            + '</ol>'
+
+            + '<h4>2.3.2 A/B-Update mit Rollback-Schutz</h4>'
+            + '<p>Bei A/B-Updates existieren zwei vollstaendige Slots; das System bootet wechselweise. Standardablauf:</p>'
+            + '<ol>'
+            + '<li>Slot A laeuft, Slot B wird beschrieben.</li>'
+            + '<li>Bootloader markiert Slot B als <em>active+trial</em>.</li>'
+            + '<li>Reboot in Slot B; nach erfolgreichem Boot setzt eine Anwendung das <em>healthy</em>-Flag.</li>'
+            + '<li>Watchdog-Recovery: bleibt das Flag aus, bootet Slot A.</li>'
+            + '</ol>'
+            + '<p><strong>Anti-Rollback</strong>: ein monoton steigender Versionscounter im OTP-Fuse oder TPM-Monotonic-Counter verhindert, dass ein signiertes, aber alteresFirmware-Image mit bekannten Schwachstellen erneut geflasht werden kann (Android Verified Boot 2.0 §rollback_index; UEFI <code>SetVariable</code>+<code>EFI_VARIABLE_NON_VOLATILE</code> mit Authenticated Variable).</p>'
+
+            + '<h4>2.3.3 OTA-Anforderungen aus ETSI EN 303 645 v3.1.3</h4>'
+            + '<p>ETSI EN 303 645 v3.1.3 (2024) formuliert fuer Consumer-IoT u.a. die Anforderungen <em>5.3-7</em> (Updates):</p>'
+            + '<ul>'
+            + '<li>Updates muessen ueber einen <strong>vertrauenswuerdigen Kanal</strong> uebertragen werden (TLS 1.2+).</li>'
+            + '<li>Authentizitaet und Integritaet der Update-Pakete sind kryptographisch zu pruefen.</li>'
+            + '<li>Geraete sollen ueber Updates informieren und sie automatisiert anwenden koennen.</li>'
+            + '<li>Definierter <strong>Defined Support Period</strong> muss veroeffentlicht werden — Cyber Resilience Act (EU 2024/2847) macht dies in der EU verbindlich (Art. 13, mind. 5 Jahre).</li>'
+            + '</ul>'
+
+            + '<h4>2.3.4 Kryptographische Update-Verifikation</h4>'
+            + '<p>Empfohlenes Schema (BSI TR-02102-1:2024 + NIST SP 800-193): RSA-PSS &ge; 3072 bit oder ECDSA P-256/P-384 / EdDSA. Hashes: SHA-256 oder SHA-3-256. Fuer langlebige Geraete ab 2025 zusaetzlich Hybrid-Signaturen mit ML-DSA (FIPS 204) zur Vorbereitung auf PQC-Migration.</p>'
+            + '<p>Praxis-Faelle:</p>'
+            + '<ul>'
+            + '<li><strong>BootHole</strong> (CVE-2020-10713): Buffer-Overflow im GRUB2-Configfile-Parser, umgeht UEFI Secure Boot. Patch erforderte Massen-dbx-Update.</li>'
+            + '<li><strong>LogoFAIL</strong> (Binarly 2023): Image-Parser-Bugs in UEFI-Firmware ermoeglichen Code-Execution vor OS-Start.</li>'
+            + '<li><strong>BlackLotus</strong> (ESET 2023): erste In-the-Wild-UEFI-Bootkit, das UEFI Secure Boot via CVE-2022-21894 umging.</li>'
+            + '</ul>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: NIST SP 800-193 (2018); ETSI EN 303 645 v3.1.3 (2024); EU Cyber Resilience Act 2024/2847; BSI TR-02102-1:2024; Android Verified Boot 2.0 Reference (AOSP); UEFI Specification 2.10 (2024); CVE-2020-10713 BootHole; Binarly LogoFAIL Report Dec. 2023; ESET BlackLotus Analysis Mar. 2023.</em></p>'
+    };
+
+    const PAGE_EMB_SCA = {
+        title: '2.4 Seitenkanal- und Fault-Injection-Angriffe',
+        html: ''
+            + '<blockquote><strong>Lernziele.</strong> Sie koennen (1) passive (SPA, DPA, EM, Timing, Cache) von aktiven (Fault-Injection) Angriffen unterscheiden, (2) das Grundprinzip der Differential Power Analysis erklaeren, (3) Konstantzeit-Implementierungen begruenden, (4) Spectre-Klassen einordnen.</blockquote>'
+
+            + '<h4>2.4.1 Passive Seitenkanaele</h4>'
+            + '<p>Klassifikation nach Anderson 2020, §20:</p>'
+            + '<table><thead><tr><th>Kanal</th><th>Quelle</th><th>Angriff</th><th>Mitigation</th></tr></thead><tbody>'
+            + '<tr><td>Power</td><td>Stromaufnahme</td><td>SPA, DPA (Kocher/Jaffe/Jun 1999)</td><td>Maskierung, Hiding, Dual-Rail-Logik</td></tr>'
+            + '<tr><td>EM</td><td>elektromagnetische Abstrahlung</td><td>EMA, near-field-Probing</td><td>Schirmung, Layout-Rauschen</td></tr>'
+            + '<tr><td>Timing</td><td>variable Laufzeit</td><td>Kocher 1996; Lucky 13 (CVE-2013-0169)</td><td>Konstantzeit-Code, blinding</td></tr>'
+            + '<tr><td>Cache</td><td>Cache-Hit/Miss</td><td>Flush+Reload, Prime+Probe</td><td>Cache-Partitioning, Konstantzeit-Tabellen</td></tr>'
+            + '<tr><td>Mikroarchitektur</td><td>Branch-Predictor, Speculative Execution</td><td>Spectre v1/v2/v4, Meltdown</td><td>LFENCE/IBRS/STIBP/SSBD-Microcode, Retpoline, KPTI</td></tr>'
+            + '<tr><td>Acoustic / Photonic</td><td>Schall, Photonen</td><td>Genkin/Shamir 2014, PLATYPUS 2021</td><td>Filterung, Sensor-Erkennung</td></tr>'
+            + '</tbody></table>'
+
+            + '<h4>2.4.2 Differential Power Analysis (DPA)</h4>'
+            + '<p>Grundidee (Kocher/Jaffe/Jun, CRYPTO 1999): bei einem Krypto-Algorithmus mit unbekanntem Schluessel $k$ und vielen bekannten Klartexten $p_i$ wird fuer jeden $p_i$ die Stromkurve $T_i(t)$ aufgenommen. Fuer eine Hypothese $\\hat{k}$ wird ein <em>Selektionsbit</em> $s_i = f(p_i,\\hat{k})$ berechnet (z.B. ein Bit der ersten S-Box-Ausgabe). Korrelation:</p>'
+            + '<p>$$\\Delta(t) = \\frac{1}{|S_1|}\\sum_{i\\in S_1} T_i(t) - \\frac{1}{|S_0|}\\sum_{i\\in S_0} T_i(t)$$</p>'
+            + '<p>Fuer richtiges $\\hat{k}$ entsteht ein scharfer Peak; fuer falsches $\\hat{k}$ rauscht $\\Delta(t)$ um Null. Heute ueblich: <strong>CPA</strong> (Brier/Clavier/Olivier 2004) mit Pearson-Korrelation gegen ein Power-Modell (Hamming-Weight oder Hamming-Distance).</p>'
+
+            + '<h4>2.4.3 Konstantzeit-Implementierungen</h4>'
+            + '<p>Eine Funktion ist <em>konstantzeit</em>, wenn ihre Ausfuehrungszeit und ihr Speicherzugriffsmuster <strong>nicht</strong> vom geheimen Eingang abhaengen. Pflicht-Patterns:</p>'
+            + '<ul>'
+            + '<li><strong>Keine geheimnis-abhaengigen Branches</strong>. Statt <code>if (k_bit) acc = mul(acc, x);</code> wird konditionsfrei mit Maskierung gerechnet.</li>'
+            + '<li><strong>Keine geheimnis-abhaengigen Speicherzugriffe</strong>. AES-T-Tables sind cache-anfaellig (Bernstein 2005); modern: Bit-Slicing oder AES-NI / ARMv8-Crypto-Instructions.</li>'
+            + '<li><strong>Konstantzeit-Vergleiche</strong>: <code>memcmp</code> ist verboten — stattdessen <code>volatile</code>-XOR-OR-Akkumulator.</li>'
+            + '</ul>'
+            + '<p>Tooling: <code>ct-verif</code>, <code>dudect</code>, <code>ctgrind</code>, Coq-Beweis fuer HACL*.</p>'
+
+            + '<h4>2.4.4 Fault-Injection</h4>'
+            + '<ul>'
+            + '<li><strong>Voltage-Glitching</strong>: kurze Spannungseinbrueche skippen Instruktionen — Boneh/DeMillo/Lipton 1997 zeigte, dass <em>eine</em> fehlerhafte RSA-CRT-Signatur den geheimen Schluessel via $\\gcd$ enthuellt. Mitigation: Doppel-Berechnung + Verifikation.</li>'
+            + '<li><strong>Clock-Glitching</strong>: zu kurze Taktperioden verursachen Setup-Time-Verletzungen.</li>'
+            + '<li><strong>EM- und Laser-Pulse</strong>: lokal begrenzte Bit-Flips; Common-Criteria-EAL5+ schreibt aktive Sensoren und Doppel-Logic vor.</li>'
+            + '<li><strong>Rowhammer</strong> (Kim et al., ISCA 2014): DRAM-Bit-Flips durch wiederholten Zugriff auf Nachbarzeilen — uebertragen auf Speicher-Integritaet (CVE-2018-9442 Drammer auf Android).</li>'
+            + '<li><strong>CLKSCREW</strong> (Tang/Sethumadhavan/Stolfo, USENIX 2017): Software-induziertes Glitching durch DVFS-Manipulation.</li>'
+            + '</ul>'
+
+            + '<p class="text-xs text-slate-500"><em>Quellen: Kocher 1996 (Timing, CRYPTO); Kocher/Jaffe/Jun 1999 (DPA, CRYPTO); Brier/Clavier/Olivier 2004 (CPA, CHES); Boneh/DeMillo/Lipton 1997 (Bellcore-Attack); Anderson 2020 §20; CVE-2017-5753/5715/5754 (Spectre/Meltdown); Bulck et al. 2018 (Foreshadow); Murdock et al. 2020 (Plundervolt); Kim et al. 2014 (Rowhammer); Lipp et al. 2021 (PLATYPUS).</em></p>'
+    };
+
+    const QUIZ_EMB = [
+        q('Was ist die Aufgabe des Boot-ROM in einer Hardware-Root-of-Trust?',
+            ['Es enthaelt unveraenderlichen ersten Code und einen Hash des erlaubten Bootloader-Schluessels',
+             'Es speichert den privaten Signaturschluessel des Herstellers',
+             'Es fuehrt das vollstaendige Betriebssystem aus',
+             'Es ersetzt den TPM bei deaktivierter Hardware'], 0,
+            'Boot-ROM ist Mask-ROM, kann nicht ueberschrieben werden, und verifiziert die naechste Stufe gegen einen OTP-Fuse-Hash. Private Schluessel verlassen niemals die HSM-Infrastruktur des Herstellers (Eckert 2023 §11.4).'),
+        q('Wodurch unterscheiden sich Verified Boot und Measured Boot grundlegend?',
+            ['Verified Boot bricht bei Mismatch ab, Measured Boot setzt den Boot fort und protokolliert in PCRs',
+             'Verified Boot benoetigt zwingend ein TPM, Measured Boot nicht',
+             'Measured Boot verschluesselt die Firmware, Verified Boot signiert sie',
+             'Beide Begriffe sind synonym'], 0,
+            'TCG PC Client Spec 1.6: Measured Boot erweitert nur PCRs, Boot laeuft weiter. Manipulation faellt erst durch Remote Attestation auf. Verified Boot (Android 2.0, UEFI Secure Boot) bricht den Boot ab.'),
+        q('Welcher PCR-Wert ist typisch fuer den UEFI-Boot-Manager nach TCG PC Client Spec?',
+            ['PCR 4', 'PCR 0', 'PCR 7', 'PCR 16'], 0,
+            'TCG PC Client Platform Firmware Profile 1.06 §3.3.3.1: PCR 4 = Boot Manager Code; PCR 0 = SRTM/CRTM, PCR 7 = Secure Boot Policy, PCR 16 = Debug.'),
+        q('Was beweist eine TPM-Attestation gegenueber einem Remote-Verifizierer?',
+            ['Welche Komponenten in welcher Reihenfolge geladen wurden, signiert vom Endorsement-Key-Pfad',
+             'Dass der Benutzer ein gueltiges Passwort eingegeben hat',
+             'Dass die Festplatte nicht ausgetauscht wurde',
+             'Dass das Geraet online ist'], 0,
+            'TPM-Quote ist signierter PCR-Snapshot. Authentizitaet ueber EK-Zertifikat des Herstellers (TCG TPM Library Spec 1.59 §16; RFC 9334 RATS).'),
+        q('Welche Eigenschaft eines TPM-PCR ist sicherheitskritisch?',
+            ['Es ist nur durch Extend-Operation veraenderbar und resettet ausschliesslich beim Plattform-Reset',
+             'Es kann jederzeit zurueckgesetzt werden',
+             'Es ist exportierbar in andere TPMs',
+             'Es speichert Klartext-Konfigurationsdateien'], 0,
+            'PCR-Extend: $\\mathrm{PCR}\\leftarrow H(\\mathrm{PCR}\\,\\|\\,\\text{m})$. Append-only, Reset nur bei Plattform-Reset (TCG TPM Library Spec 1.59 §17.5).'),
+        q('Welcher Angriff zielt auf diskrete TPMs ueber den LPC-/SPI-Bus?',
+            ['TPM-Sniffing zur Extraktion des BitLocker-VMK ohne PIN',
+             'Differential Fault Analysis am TPM-Speicher',
+             'Spectre-Variante 2',
+             'Cold-Boot-Angriff auf den TPM'], 0,
+            'Hudson 2021 (DEFCON 29): unverschluesselter LPC-Bus ermoeglicht Sniffen des Volume-Master-Keys, sofern keine PIN/Pre-Boot-Authentication aktiv ist. Mitigation: fTPM oder PIN.'),
+        q('Worin partitioniert ARM TrustZone die CPU?',
+            ['Normal World und Secure World, getrennt durch ein NS-Bit auf System-Bus und Cache',
+             'Hypervisor- und Gast-Kontext via Stage-2-MMU',
+             'Big- und LITTLE-Cores',
+             'Application Processor und DSP'], 0,
+            'TrustZone (ARMv8-A): NS-Bit propagiert ueber AXI-Bus; Secure-Memory ist fuer Normal-World nicht zugreifbar. Wechsel ueber Secure Monitor Call (SMC) (ARM ARMv8-A Reference Manual Issue I.a §D5).'),
+        q('Was charakterisiert ein Common-Criteria-EAL5+-Secure-Element?',
+            ['Hardware-Manipulationsschutz, evaluierter Lebenszyklus, oft mit aktiver Sensorik gegen Fault-Injection',
+             'Reine Software-Loesung in einer Enclave',
+             'Cloud-basierter Schluesselspeicher',
+             'Optionaler Modus eines Standard-Mikrocontrollers'], 0,
+            'CC EAL5+ verlangt semi-formale Designmethodik und umfassende Vulnerability-Analyse. PP-0084-2014 (BSI) ist das Standard-Schutzprofil fuer Smart Cards / SE.'),
+        q('Welches Schutzziel adressiert "Detection" in NIST SP 800-193?',
+            ['Zuverlaessige Erkennung von Firmware-Korruption beim Boot',
+             'Verhinderung jeglicher Aenderung an der Firmware',
+             'Automatische Wiederherstellung nach Manipulation',
+             'Verschluesselung der Firmware-Updates'], 0,
+            'SP 800-193 §3 nennt drei Ziele: Protection, Detection, Recovery. Detection = Integritaets-Pruefung beim Boot.'),
+        q('Was leistet ein Anti-Rollback-Counter im Firmware-Update?',
+            ['Er verhindert das Flashen einer aelteren, signierten Version mit bekannter Schwachstelle',
+             'Er beschleunigt das Update durch Caching',
+             'Er prueft die Bandbreite des OTA-Kanals',
+             'Er ersetzt die Signatur des Update-Pakets'], 0,
+            'Monoton steigender Versionscounter im OTP-Fuse oder TPM-Monotonic-Counter. AVB 2.0 §rollback_index; UEFI Authenticated Variable.'),
+        q('Welches Signaturverfahren empfiehlt BSI TR-02102-1:2024 fuer langlebige Embedded-Firmware?',
+            ['ECDSA P-256/P-384, EdDSA oder RSA-PSS &ge; 3072 bit; perspektivisch Hybrid mit ML-DSA',
+             'RSA-1024 mit PKCS#1 v1.5',
+             'DSA-1024 mit SHA-1',
+             'Ungeprueft, da Firmware ohnehin Read-Only'], 0,
+            'BSI TR-02102-1:2024 Tabelle 1.2.1 empfiehlt RSA-PSS &ge; 3072, ECDSA P-256+, EdDSA. Fuer PQC-Vorbereitung Hybrid mit ML-DSA (FIPS 204).'),
+        q('Welche EU-Verordnung verpflichtet Hersteller zu definierten Support-Zeitraeumen fuer vernetzte Produkte?',
+            ['Cyber Resilience Act (EU 2024/2847)',
+             'eIDAS 2.0 (EU 2024/1183)',
+             'Digital Services Act (EU 2022/2065)',
+             'GDPR (EU 2016/679)'], 0,
+            'CRA Art. 13 verpflichtet zu mindestens 5 Jahren Sicherheits-Updates ab Inverkehrbringen, mit Anpassung an erwartete Produktlebensdauer.'),
+        q('Was war die Wirkung von BootHole (CVE-2020-10713)?',
+            ['Buffer-Overflow im GRUB2-Configfile-Parser umgeht UEFI Secure Boot',
+             'Speicher-Verschluesselung in SEV ist gebrochen',
+             'TPM-2.0-Quotes lassen sich faelschen',
+             'AES-NI fuehrt Side-Channel-Leaks aus'], 0,
+            'CVE-2020-10713 (Eclypsium Jul 2020): Buffer-Overflow in <code>grub.cfg</code>-Parser ermoeglicht Code vor OS-Start trotz Secure Boot. Massen-dbx-Update notwendig.'),
+        q('Was war BlackLotus (2023)?',
+            ['Erstes In-the-Wild-UEFI-Bootkit, das UEFI Secure Boot umging (CVE-2022-21894)',
+             'Eine Spectre-Variante der Apple-M2-CPU',
+             'Backdoor in xz-utils',
+             'Cisco-IOS-Schwachstelle'], 0,
+            'ESET-Analyse Mar. 2023: BlackLotus nutzte CVE-2022-21894 (Baton Drop) gegen den Windows-Bootloader; Secure Boot effektiv ausgehebelt.'),
+        q('Was beschreibt das TEE-Bedrohungsmodell laut GlobalPlatform?',
+            ['Auch ein vollstaendig kompromittiertes OS darf TEE-Daten weder lesen noch manipulieren',
+             'Das TEE schuetzt nur gegen Netzwerk-Angreifer',
+             'Das TEE ist nur gegen physikalische Angriffe ausgelegt',
+             'Das TEE benoetigt einen vertrauenswuerdigen Hypervisor'], 0,
+            'GlobalPlatform TEE System Architecture v1.3 (2022): Bedrohungsmodell schliesst kompromittierten Hypervisor/Kernel ein; nur DoS ist erlaubt.'),
+        q('Welche Granularitaet hat eine Intel-SGX-Enclave?',
+            ['Subset eines User-Prozesses (geladene Code/Daten-Pages im EPC)',
+             'Vollstaendige virtuelle Maschine',
+             'Komplette physische Maschine',
+             'Container im Sinne von Docker'], 0,
+            'SGX schuetzt Enclave-Pages im EPC; der Rest des Prozesses bleibt im Normal World. TDX/SEV/CCA hingegen schuetzen ganze VMs.'),
+        q('Was unterscheidet AMD SEV-SNP von SEV-ES?',
+            ['SEV-SNP fuegt Reverse Map Table und Memory-Integritaet gegen Remap- und Replay-Angriffe hinzu',
+             'SEV-SNP ersetzt AES durch ChaCha20',
+             'SEV-SNP verzichtet auf Memory Encryption',
+             'SEV-SNP benoetigt kein Attestation-Verfahren'], 0,
+            'AMD SEV-SNP Whitepaper Rev. 1.55 (2023): RMP schuetzt vor Remap-Attacken durch Hypervisor; Integritaet wird kryptographisch gesichert.'),
+        q('Was bedeutet Foreshadow (L1TF) im SGX-Kontext?',
+            ['Spekulativer Lesezugriff exponiert Enclave-Daten ueber den L1-Cache',
+             'EPID-Schluessel werden direkt vom Hersteller-Server geleakt',
+             'SGX-Enclaves crashen bei jedem Page-Fault',
+             'Memory Encryption ist mathematisch gebrochen'], 0,
+            'Bulck et al., USENIX Security 2018: L1 Terminal Fault liest spekulativ aus L1-Cache, umgeht SGX-Isolierung. Mitigation: L1D-Flush bei Enclave-Exit.'),
+        q('Was tut Plundervolt (CVE-2019-11157)?',
+            ['Software-Undervolting ueber MSR 0x150 erzeugt Faults in SGX-Multiplikation',
+             'Es liest direkt den Endorsement-Key aus',
+             'Es flasht die UEFI-Firmware',
+             'Es bricht Memory Encryption durch Brute Force'], 0,
+            'Murdock et al., S&P 2020: Voltage-Glitching ueber MSR 0x150 setzt Multiplikations-Bits falsch. Microcode 0xE0 deaktiviert User-Voltage-Control.'),
+        q('Welche Komponente in RFC 9334 (RATS) fordert die Vertrauensentscheidung an?',
+            ['Relying Party', 'Attester', 'Verifier', 'Endorser'], 0,
+            'RFC 9334 §3: Attester erzeugt Evidence, Verifier prueft sie gegen Reference Values, Relying Party trifft Trust-Entscheidung anhand der Attestation Result.'),
+        q('Was beschreibt EAT (RFC 9711, 2024)?',
+            ['Ein CBOR/JWT-Token-Format fuer Attestation Evidence',
+             'Eine Hardware-Spezifikation fuer TPMs',
+             'Ein Side-Channel-Resistenz-Profil',
+             'Eine Memory-Encryption-Spezifikation'], 0,
+            'RFC 9711 Entity Attestation Token: standardisiertes Claim-Set in CWT/JWT-Form fuer Quotes aus TEEs/TPMs.'),
+        q('Welche der folgenden Mitigationen wurde gegen Spectre v2 (CVE-2017-5715) eingefuehrt?',
+            ['Retpoline und IBRS/STIBP', 'KPTI / Page Table Isolation', 'Cache-Line-Padding', 'AES-NI-Aktivierung'], 0,
+            'Spectre v2 = Branch Target Injection. Mitigation: Retpoline (Compiler), IBRS+STIBP (Microcode/Kernel). KPTI mitigiert Meltdown (CVE-2017-5754), nicht Spectre v2.'),
+        q('Was ist Memory-Encryption-Engine (MEE) im Original-SGX (Skylake)?',
+            ['AES-CTR mit Integritaets-Tag fuer den Enclave Page Cache',
+             'AES-XTS ohne Authentifikation',
+             'ChaCha20-Stream im Hauptspeicher',
+             'Memory-Mapping ohne Verschluesselung'], 0,
+            'Intel SGX Explained (Costan/Devadas 2016, IACR ePrint): MEE verschluesselt EPC mit AES-CTR und schuetzt Integritaet ueber Carter-Wegman-MAC + Merkle-Tree.'),
+        q('Welche Massnahme erschwert Differential Power Analysis am wirksamsten?',
+            ['Boolesche Maskierung der S-Box-Eingaben mit zufaelligen Masken pro Ausfuehrung',
+             'Erhoehung der Taktfrequenz',
+             'Konstantzeit-Vergleich der Tags',
+             'Speicherung der Schluessel in EEPROM statt RAM'], 0,
+            'Maskierung ($x \\oplus m$ statt $x$) entkoppelt Stromsignal vom geheimen Wert; Standard-Mitigation gegen DPA (Anderson §20.3, NIST IR 8214A).'),
+        q('Worin besteht das Power-Modell "Hamming-Distance" bei CPA-Angriffen?',
+            ['Stromaufnahme ist proportional zur Anzahl der Bit-Aenderungen zwischen zwei Zustaenden',
+             'Stromaufnahme ist konstant unabhaengig vom Datum',
+             'Stromaufnahme ist proportional zur Schluessellaenge',
+             'Stromaufnahme variiert nur in Adressleitungen'], 0,
+            'Brier/Clavier/Olivier 2004 (CHES): in CMOS-Logik dominiert dynamische Verlustleistung; sie skaliert mit der Hamming-Distance zwischen vorherigem und neuem Register-Zustand.'),
+        q('Warum ist `memcmp(a, b, n)` fuer kryptographische Tag-Vergleiche unsicher?',
+            ['Die Laufzeit haengt von der Position des ersten unterschiedlichen Bytes ab — Timing-Leak',
+             'memcmp gibt eine falsche Ordnung zurueck',
+             'memcmp ist nicht thread-safe',
+             'memcmp ueberschreibt den Stack'], 0,
+            'Klassisches Timing-Leak (Lucky 13, CVE-2013-0169 in TLS-MAC). Korrekt: konstantzeit-Vergleich mit XOR-OR-Akkumulator.'),
+        q('Was ist Bit-Slicing im Kontext einer AES-Implementierung?',
+            ['Parallele Berechnung der S-Box ueber Boolean Logic ohne datenabhaengige Tabellenzugriffe',
+             'Aufteilung des Schluessels in n Teile fuer Multi-Party-Computation',
+             'Sequentielle Verarbeitung Bit-fuer-Bit',
+             'Speichern des Klartextes in mehreren Sektoren'], 0,
+            'Matsui 2007 / Kasper-Schwabe 2009: Bit-Slicing umgeht Cache-Side-Channels (Bernstein 2005), da keine geheimnis-abhaengigen Adressen entstehen.'),
+        q('Welcher Angriff nutzt zwischenzeilige DRAM-Bit-Flips aus?',
+            ['Rowhammer (Kim et al. 2014)', 'Spectre v4 (Speculative Store Bypass)', 'Foreshadow', 'BootHole'], 0,
+            'Kim et al., ISCA 2014: wiederholter Zugriff auf Aggressor-Rows induziert Bit-Flips in Victim-Rows. Drammer (CVE-2018-9442) zeigte Privilege Escalation auf Android.'),
+        q('Was ist die Boneh-DeMillo-Lipton-Attacke?',
+            ['Eine fehlerhafte RSA-CRT-Signatur enthuellt den privaten Schluessel via gcd-Berechnung',
+             'Eine Cache-Side-Channel-Variante von AES',
+             'Ein Reverse-Engineering-Tool fuer Smart Cards',
+             'Ein Timing-Angriff auf ECDSA'], 0,
+            'Boneh/DeMillo/Lipton 1997 ("Bellcore-Attack"): aus signierter und faulty signierter Nachricht laesst sich $p$ via $\\gcd(s-s_f^{e}, N)$ extrahieren. Mitigation: Signaturverifikation vor Ausgabe.'),
+        q('Welche Spectre-Variante adressiert KPTI vorrangig?',
+            ['Keine — KPTI ist Mitigation gegen Meltdown, nicht Spectre',
+             'Spectre v1 (Bounds Check Bypass)',
+             'Spectre v2 (Branch Target Injection)',
+             'Spectre v4 (Speculative Store Bypass)'], 0,
+            'KPTI = Kernel Page Table Isolation, Mitigation gegen Meltdown (CVE-2017-5754). Spectre-Mitigationen sind Retpoline, IBRS, LFENCE, SSBD.'),
+        q('Was bedeutet "Secure Boot" auf UEFI-Plattformen technisch?',
+            ['Bootloader und Treiber muessen Signaturen aus der db-Datenbank tragen, dbx blockt widerrufene Hashes',
+             'Boot wird durch ein Passwort geschuetzt',
+             'Es wird ausschliesslich Linux geladen',
+             'Es deaktiviert die UEFI-Shell'], 0,
+            'UEFI 2.10 §32: Secure Boot prueft Bootloader-Signaturen gegen db, blockt Eintraege aus dbx; PK/KEK regeln, wer db/dbx aktualisieren darf.'),
+        q('Welche Anforderung formuliert ETSI EN 303 645 v3.1.3 zur Default-Konfiguration?',
+            ['Keine universellen Default-Passwoerter; geraetespezifisch oder vom Nutzer beim Setup gesetzt',
+             'Default-Passwort "admin/admin" ist akzeptabel, wenn dokumentiert',
+             'Geraete duerfen ohne Authentifizierung ausgeliefert werden',
+             'Default-Konfiguration ist nicht Teil der Norm'], 0,
+            'EN 303 645 §5.1: keine universellen Default-Passwoerter (Provision 5.1-1). Reaktion auf Mirai-Botnet 2016.'),
+        q('Welcher Zweck steht hinter der Foundational Requirement FR 1 in IEC 62443-3-3?',
+            ['Identifikations- und Authentifizierungs-Kontrolle (IAC)',
+             'Use-Control',
+             'System-Integritaet',
+             'Daten-Vertraulichkeit'], 0,
+            'IEC 62443-3-3:2013 §3 listet FR 1=IAC, FR 2=UC, FR 3=SI, FR 4=DC, FR 5=RDF, FR 6=TRE, FR 7=RA. Frage adressiert FR 1.'),
+        q('Welche Schwachstelle ermoeglichte Stuxnet (2010) den Angriff auf Siemens-S7-Steuerungen?',
+            ['Hardcoded-Default-Credentials in WinCC + mehrere Windows-Zero-Days + signierte Treiber mit gestohlenen Zertifikaten',
+             'Reine Brute-Force-Attacke auf Modbus',
+             'OPC-UA-Authentifizierungsfehler',
+             'BLE-Pairing-Bug'], 0,
+            'Falliere/Murchu/Chien Symantec 2011: Stuxnet kombinierte 4 Windows-0-Days, gestohlene Realtek/JMicron-Code-Signing-Zertifikate, hartcodierte WinCC-Passwoerter. WinCC-Hash damals als "Schmuckstueck" bekannt.'),
+        q('Was beschreibt die Mitigation "Constant-Time Cryptography"?',
+            ['Ausfuehrungszeit und Speicherzugriffsmuster sind unabhaengig vom geheimen Eingang',
+             'Eine feste maximale Latenz pro Aufruf',
+             'Aktiver Watchdog-Timer im Krypto-Modul',
+             'CPU-Affinitaet auf einen einzigen Core'], 0,
+            'Konstantzeit bedeutet: keine secret-dependent branches und keine secret-dependent memory accesses. HACL*, BoringSSL und libsodium implementieren konsequent konstantzeit.'),
+        q('Was ist CLKSCREW (Tang/Sethumadhavan/Stolfo, USENIX 2017)?',
+            ['Software-induzierter Fault-Injection-Angriff via DVFS-Manipulation auf Smartphones',
+             'Power-Analyse mit klassischem Oszilloskop',
+             'EM-Probing mit Near-Field-Antenne',
+             'Cold-Boot-Variante gegen Mobile-DRAM'], 0,
+            'CLKSCREW manipuliert Voltage/Frequency-Regler via Kernel-Treiber, erzeugt Setup-Time-Verletzungen und extrahiert Schluessel aus TrustZone TAs. Mitigation: privilegierter Zugriff auf DVFS-Knobs.'),
+        q('Welche Eigenschaft hat ein Authenticated-Variable-Eintrag in UEFI?',
+            ['Nur durch signierte EFI_VARIABLE_AUTHENTICATION_2-Header aenderbar',
+             'Frei beschreibbar von jedem User-Mode-Programm',
+             'Im RAM gehalten und beim Reboot verloren',
+             'Verschluesselt, aber unsigniert'], 0,
+            'UEFI 2.10 §8.2: Authenticated Variables erfordern PKCS#7-Signatur ueber EFI_TIME-Counter zur Replay-Verhinderung. Basis fuer dbx-Updates.'),
+        q('Welcher Vorfall zeigte 2024, dass Supply-Chain-Backdoors auch in System-Bibliotheken vorkommen?',
+            ['xz-utils-Backdoor (CVE-2024-3094) in liblzma',
+             'log4shell (CVE-2021-44228)',
+             'Heartbleed (CVE-2014-0160)',
+             'Shellshock (CVE-2014-6271)'], 0,
+            'CVE-2024-3094 (Maerz 2024): boeswillig eingeschleuste Backdoor im xz-utils-Build via "Jia Tan"-Maintainer; Ziel war sshd-RCE bei Distros mit systemd-Linkage.'),
+        q('Was leistet ARM Confidential Compute Architecture (CCA)?',
+            ['Schafft VM-isolierte "Realms" mit Memory Encryption und Granule Protection Tables',
+             'Ersetzt TrustZone vollstaendig in ARMv9-A',
+             'Beschleunigt AES-CBC um Faktor 4',
+             'Stellt Big-LITTLE-Scheduling-Support bereit'], 0,
+            'ARM CCA Architecture Specification DEN0125 (2023): Realm Management Extension (RME) fuegt Realm-VMs zusaetzlich zu Secure/Normal World hinzu.'),
+        q('Welche Aussage zu Memory-Encryption-Schluessel-Rotation ist korrekt?',
+            ['Bei AMD SEV-SNP wird der VM-Encryption-Key beim Provisioning gesetzt; SNP fuegt monoton steigenden Counter hinzu',
+             'Schluessel werden bei jedem Speicherzugriff neu erzeugt',
+             'Schluessel sind weltweit fuer alle SEV-VMs identisch',
+             'Memory Encryption verwendet RSA-2048'], 0,
+            'AMD SEV-SNP Whitepaper Rev. 1.55: pro VM ein AES-Schluessel, ASID-gebunden. SNP verbessert Replay-Schutz via RMP/IDB.'),
+        q('Wie verhindert man Cache-Side-Channels bei AES-Implementierungen am wirksamsten?',
+            ['Hardware-Befehle (AES-NI / ARMv8-Crypto) oder Bit-Slicing statt T-Tables',
+             'Erhoehung der Schluessellaenge auf 256 bit',
+             'Verschluesselung mit doppeltem AES (3AES)',
+             'Padding aller Tabellen auf 4 KB'], 0,
+            'Bernstein 2005: T-Tables in DRAM/Cache erzeugen geheimnisabhaengige Adressmuster. Mitigation: AES-NI / ARMv8-AESE/AESD oder Bit-Slicing (Kasper-Schwabe 2009).'),
+        q('Welche Eigenschaft fordert NIST SP 800-90B fuer Hardware-Entropie-Quellen?',
+            ['Minimum-Entropy-Schaetzung mit Online-Health-Tests (RCT, APT)',
+             'Reine Pseudozufallszahlen aus Linear Congruential Generator',
+             'Verzicht auf Online-Tests zur Performancesteigerung',
+             'Mindestens 1024 bit Block-Output'], 0,
+            'SP 800-90B (2018) fordert Entropie-Schaetzung nach min-entropy-Modell + Repetition Count Test (RCT) + Adaptive Proportion Test (APT) als Health-Tests.'),
+        q('Welche Schwachstellenklasse gehoert zu den CWE Top 25 (2024) und betrifft Embedded-Code besonders?',
+            ['CWE-787 Out-of-bounds Write',
+             'CWE-200 Information Exposure',
+             'CWE-352 CSRF',
+             'CWE-307 Repeated Authentication Attempts'], 0,
+            'MITRE/CISA CWE Top 25 (2024): CWE-787 Out-of-bounds Write fuehrt die Liste an; in C/C++ -lastigem Embedded-Code besonders haeufig (Buffer Overflow).'),
+        q('Was bedeutet "Tamper-Resistant" im Sinne von Common Criteria PP-0084?',
+            ['Mechanische, elektrische und chemische Manipulation muss erkannt oder verhindert werden, sensitive Daten loeschen sich bei Erkennung',
+             'Das Geraet darf nicht geoeffnet werden ohne Werkzeug',
+             'Sensoren melden Aenderungen an einen Cloud-Server',
+             'Schluessel werden in Klartext per OTA gesendet'], 0,
+            'PP-0084-2014 §A: aktive Sensoren (Mesh, Lichtsensor, Temperatur) erkennen Manipulation; sensitive Daten werden gel\u00f6scht oder Chip wird unbrauchbar gemacht.'),
+        q('Welcher Angriff nutzt Lautsprecher-/Mikrofon-Emissionen elektronischer Bauteile?',
+            ['Akustische Kryptanalyse (Genkin/Shamir/Tromer 2014)',
+             'PLATYPUS (2021) ueber Energiezaehler',
+             'Foreshadow ueber L1-Cache',
+             'BadUSB ueber Firmware-Replace'], 0,
+            'Genkin/Shamir/Tromer 2014 (CRYPTO): Schaltreglergeraeusche eines Laptops verraten RSA-Schluessel-Bits ueber Hochfrequenz-Mikrofone.'),
+        q('Welche Eigenschaft hat eine ARM TrustZone "Trusted Application" (TA)?',
+            ['Laeuft im Secure World, kommuniziert mit Normal-World-Clients ueber GlobalPlatform TEE Client API',
+             'Laeuft im Hypervisor-Modus',
+             'Wird vom Linux-Userspace direkt geladen',
+             'Hat vollen Zugriff auf den Normal-World-Speicher'], 0,
+            'GlobalPlatform TEE Client API v1.0 + TrustZone: TAs im Secure World, Clients (CA) im Normal World. SMC-basiertes Marshalling.'),
+        q('Welcher Standard regelt zukuenftig den Mindest-Sicherheitslevel vernetzter Produkte in der EU?',
+            ['Cyber Resilience Act (Verordnung EU 2024/2847)',
+             'Funkanlagenrichtlinie RED 2014/53/EU (allein)',
+             'Maschinenverordnung 2023/1230 (allein)',
+             'GDPR (EU 2016/679)'], 0,
+            'CRA verabschiedet Okt. 2024, Inkrafttreten Dez. 2024, Anwendung 36 Monate spaeter. Definiert horizontale Cybersecurity-Anforderungen fuer "Produkte mit digitalen Elementen".'),
+        q('Welche Aussage zu eFuses ist korrekt?',
+            ['Sie sind one-time-programmable und werden typischerweise fuer Root-of-Trust-Hashes und Lifecycle-States verwendet',
+             'Sie sind beliebig oft umprogrammierbar wie Flash',
+             'Sie werden beim Reset zurueckgesetzt',
+             'Sie sind ausschliesslich fuer Debug-Pins'], 0,
+            'eFuses (Antifuses) brennen einen einzelnen Bit-Zustand permanent. Standard-Anwendungen: Root-Public-Key-Hash, Lifecycle (Test/Manuf/Production), JTAG-Lock.'),
+        q('Welcher Spectre-Schutzmechanismus auf x86 isoliert User- und Kernel-Speicher physisch?',
+            ['KPTI / Page Table Isolation', 'Retpoline', 'IBRS', 'STIBP'], 0,
+            'KPTI separiert Page-Tables von User- und Kernel-Mode, sodass spekulativer Lesezugriff (Meltdown, CVE-2017-5754) keine Kernel-Adressen mehr trifft. Retpoline/IBRS/STIBP adressieren Spectre v2.'),
+        q('Welche der folgenden Massnahmen ist NACH IEC 62443-4-1 Teil eines sicheren Entwicklungsprozesses fuer Embedded-Komponenten?',
+            ['Threat Modeling, Secure Coding, Vulnerability Management und Patch-Management ueber den Produktlebenszyklus',
+             'Ausschliesslich Penetration-Testing am Ende der Entwicklung',
+             'Verschluesselung nur des Source-Codes im Repository',
+             'Verzicht auf Updates ab Markteinfuehrung'], 0,
+            'IEC 62443-4-1:2018 fordert acht Practices: Security Management, Specification, Design, Implementation, Verification & Validation, Defect Management, Update Management, Security Guidelines.')
+    ];
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_cybersec',
         code: 'MA-ET CyberSec',
@@ -302,30 +764,8 @@
                 id: 'embedded',
                 title: 'Kapitel 2 — Embedded Security',
                 summary: 'Hardware-Sicherheit, Secure Boot, Trusted Execution Environments, Firmware-Update-Verfahren, Side-Channel-Resistenz, IoT-Security nach ETSI EN 303 645.',
-                pages: [
-                    placeholderPage('Secure Boot und Root-of-Trust', [
-                        'Boot-Chain: ROM-Code, Bootloader, OS-Image',
-                        'Hardware-Root-of-Trust: TPM 2.0, Secure Element, ARM TrustZone',
-                        'Mess- und attestation-basierte Verfahren'
-                    ]),
-                    placeholderPage('Trusted Execution Environments', [
-                        'ARM TrustZone, Intel SGX/TDX, AMD SEV-SNP',
-                        'Confidential Computing, Remote Attestation',
-                        'Bedrohungsmodell und bekannte Schwachstellen (Foreshadow, ZenBleed)'
-                    ]),
-                    placeholderPage('Firmware-Update-Sicherheit', [
-                        'NIST SP 800-193 Platform Firmware Resiliency',
-                        'Signierte Updates, A/B-Partition, Rollback-Schutz',
-                        'Over-The-Air (OTA) — TLS, Mutual Auth, Update-Server-Hardening'
-                    ]),
-                    placeholderPage('Seitenkanal- und Fault-Injection-Angriffe', [
-                        'Power-Analyse (SPA, DPA), elektromagnetische Analyse',
-                        'Timing-Angriffe, Cache-Side-Channel (Spectre, Meltdown)',
-                        'Fault-Injection: Voltage-Glitching, EM-Pulse, Laser',
-                        'Gegenmassnahmen: Maskierung, Konstantzeit-Implementierungen, Sensor-Mesh'
-                    ])
-                ],
-                quiz: placeholderQuiz('Embedded Security')
+                pages: [PAGE_EMB_BOOT, PAGE_EMB_TEE, PAGE_EMB_FW, PAGE_EMB_SCA],
+                quiz: QUIZ_EMB
             },
             {
                 id: 'industrial',
