@@ -31,10 +31,14 @@ function Schueler() {
     // P-UI-SCHUELER-SECTIONS-ALL (v78): Lehrplan-orientierte Abschnitte fuer alle
     // Mittelstufen-Faecher. Sprachfaecher haben tagged data (`section`-Feld via
     // `kind`/Datenpflege), die anderen Faecher werden heuristisch nach NRW-KLP-
-    // Domaenen (Mathe: Arithmetik/Funktionen/Geometrie/Stochastik; Physik:
-    // Mechanik/Elektrik/Optik/Waerme/Atom; Chemie: Stoffe/Atomare/Saeurebase/
-    // Organik; Biologie: Zelle/Mensch/Natur/Oekologie; Geschichte: Antike/MA/
-    // FNZ/Revolution/Kaiserreich/Modern; Deutsch: existing) zugeordnet.
+    // Domaenen zugeordnet. P-UI-SCHUELER-GESCHICHTE-SUBEPOCHS (v80): Geschichte
+    // hat zusaetzlich klassenstufen-spezifische Sub-Epochen (K5 Steinzeit/AEgypten/
+    // Griechen/Roemer; K6 Frueh-/Hoch-/Spaetmittelalter; K7 Renaissance/Reformation/
+    // Absolutismus/Aufklaerung; K8 Franzoesische Revolution/Napoleon/Vormaerz/
+    // Industrialisierung/Reichsgruendung; K9 Kaiserreich/WK1/Weimar/NS-Aufstieg;
+    // K10 WK2/Shoah/Kalter Krieg/BRD-DDR/Wiedervereinigung/Globalisierung).
+    // Mindestgroesse pro Abschnitt: 20 Aufgaben (`MIN_SECTION_ITEMS`).
+    const MIN_SECTION_ITEMS = 20;
     const languageSections = [
         { id: 'numbers', label: 'Zahlen', desc: 'Zahlenwoerter sicher erkennen und schreiben.' },
         { id: 'vocab', label: 'Vokabeln', desc: 'Grundwortschatz in beide Richtungen abrufen.' },
@@ -76,21 +80,57 @@ function Schueler() {
             { id: 'mensch', label: 'Mensch & Gesundheit', desc: 'Organsysteme, Atmung, Verdauung, Kreislauf.' },
             { id: 'natur', label: 'Pflanzen & Tiere', desc: 'Fotosynthese, Wirbeltiere, Insekten, Pflanzenteile.' },
             { id: 'oekologie', label: 'Oekologie & Evolution', desc: 'Oekosystem, Nahrungskette, Evolution.' }
+        ]
+        // Geschichte: siehe GESCHICHTE_SUBEPOCHS (klassenstufenspezifisch).
+    };
+    const GESCHICHTE_SUBEPOCHS = {
+        k5: [
+            { id: 'k5_steinzeit', label: 'Steinzeit', desc: 'Altsteinzeit, Jungsteinzeit, Nomaden, Sesshaftwerdung.' },
+            { id: 'k5_aegypten', label: 'AEgypten', desc: 'Pharaonen, Pyramiden, Nil, Hieroglyphen.' },
+            { id: 'k5_griechen', label: 'Griechen', desc: 'Polis, Athen, Sparta, Demokratie, Alexander.' },
+            { id: 'k5_roemer', label: 'Roemer', desc: 'Republik, Kaiserzeit, Legion, Provinzen.' }
         ],
-        geschichte: [
-            { id: 'antike', label: 'Steinzeit & Antike', desc: 'Steinzeit, Aegypten, Griechen, Roemer.' },
-            { id: 'mittelalter', label: 'Mittelalter', desc: 'Ritter, Burg, Kirche, Kaiser.' },
-            { id: 'fruehneuzeit', label: 'Fruehe Neuzeit', desc: 'Reformation, Absolutismus, Aufklaerung.' },
-            { id: 'revolution', label: 'Revolution & Industrie', desc: 'Franzoesische Revolution, Industrialisierung.' },
-            { id: 'kaiserreich', label: 'Kaiserreich & WK1', desc: 'Bismarck, Wilhelm II., Erster Weltkrieg.' },
-            { id: 'modern', label: 'WK2 & Gegenwart', desc: 'Zweiter Weltkrieg, Kalter Krieg, Wiedervereinigung.' }
+        k6: [
+            { id: 'k6_fruehmittel', label: 'Fruehmittelalter', desc: 'Voelkerwanderung, Franken, Karolinger, Ottonen.' },
+            { id: 'k6_hochmittel', label: 'Hochmittelalter', desc: 'Ritter, Burgen, Kreuzzuege, Staufer, Investitur.' },
+            { id: 'k6_spaetmittel', label: 'Spaetmittelalter', desc: 'Hanse, Stadtwesen, Pest, Buergertum.' }
+        ],
+        k7: [
+            { id: 'k7_renaissance', label: 'Renaissance & Entdeckungen', desc: 'Humanismus, Buchdruck, Kolumbus, Magellan.' },
+            { id: 'k7_reformation', label: 'Reformation', desc: 'Luther, 95 Thesen, Konfessionalisierung, Augsburger Religionsfrieden.' },
+            { id: 'k7_absolutismus', label: 'Absolutismus & 30j. Krieg', desc: 'Ludwig XIV, Versailles, Westfaelischer Friede.' },
+            { id: 'k7_aufklaerung', label: 'Aufklaerung & USA', desc: 'Kant, Voltaire, US-Unabhaengigkeit, Menschenrechte.' }
+        ],
+        k8: [
+            { id: 'k8_franzrev', label: 'Franzoesische Revolution', desc: '1789, Bastille, Jakobiner, Menschen- und Buergerrechte.' },
+            { id: 'k8_napoleon', label: 'Napoleon', desc: 'Code civil, Voelkerschlacht, Wiener Kongress, Restauration.' },
+            { id: 'k8_vormaerz', label: 'Vormaerz & 1848', desc: 'Burschenschaften, Hambacher Fest, Paulskirche.' },
+            { id: 'k8_industrie', label: 'Industrialisierung', desc: 'Dampfmaschine, Eisenbahn, Soziale Frage, Gewerkschaften.' },
+            { id: 'k8_reich', label: 'Reichsgruendung 1871', desc: 'Bismarck, Norddt. Bund, Krieg gegen Frankreich, Versailles.' }
+        ],
+        k9: [
+            { id: 'k9_kaiserreich', label: 'Kaiserreich 1871-1914', desc: 'Wilhelm II, Kolonien, Flottenpolitik, Kulturkampf.' },
+            { id: 'k9_wk1', label: 'Erster Weltkrieg', desc: 'Sarajevo, Verdun, Stellungskrieg, Versailler Vertrag.' },
+            { id: 'k9_weimar', label: 'Weimarer Republik', desc: 'Verfassung, Inflation 1923, Goldene Zwanziger, Stresemann.' },
+            { id: 'k9_nsaufstieg', label: 'Aufstieg des NS', desc: 'NSDAP, Machtergreifung 1933, Gleichschaltung, Nuernberger Gesetze.' }
+        ],
+        k10: [
+            { id: 'k10_wk2', label: 'Zweiter Weltkrieg', desc: '1939-1945, Kriegsverlauf, Kapitulation 1945.' },
+            { id: 'k10_shoah', label: 'Shoah & NS-Verbrechen', desc: 'Holocaust, KZ, Wannsee-Konferenz, Widerstand.' },
+            { id: 'k10_kalterkrieg', label: 'Kalter Krieg', desc: 'Eiserner Vorhang, Mauerbau, NATO vs. Warschauer Pakt.' },
+            { id: 'k10_brdddr', label: 'BRD & DDR', desc: 'Adenauer, Brandt, Wirtschaftswunder, SED, Stasi.' },
+            { id: 'k10_wiedervereinigung', label: 'Wiedervereinigung', desc: '1989, Mauerfall, Tag der Deutschen Einheit, Zwei-plus-Vier.' },
+            { id: 'k10_globalisierung', label: 'Globalisierung & EU', desc: 'Maastricht, Euro, 9/11, Klimawandel, Migration.' }
         ]
     };
-    const sectionsFor = (subjId) => SUBJECT_SECTIONS[subjId] || null;
-    const hasSubjectSections = (subjId) => Array.isArray(sectionsFor(subjId));
-    const sectionLabel = (sectionId, subjId) => {
+    const sectionsFor = (subjId, klassId) => {
+        if (subjId === 'geschichte' && klassId) return GESCHICHTE_SUBEPOCHS[klassId] || null;
+        return SUBJECT_SECTIONS[subjId] || null;
+    };
+    const hasSubjectSections = (subjId, klassId) => Array.isArray(sectionsFor(subjId, klassId));
+    const sectionLabel = (sectionId, subjId, klassId) => {
         if (!sectionId) return '';
-        const list = subjId ? sectionsFor(subjId) : null;
+        const list = sectionsFor(subjId, klassId);
         if (list) {
             const m = list.find(s => s.id === sectionId);
             if (m) return m.label;
@@ -98,6 +138,10 @@ function Schueler() {
         // Fallback ueber alle Subjects (z.B. wenn subjId nicht gesetzt ist)
         for (const k of Object.keys(SUBJECT_SECTIONS)) {
             const m = SUBJECT_SECTIONS[k].find(s => s.id === sectionId);
+            if (m) return m.label;
+        }
+        for (const kk of Object.keys(GESCHICHTE_SUBEPOCHS)) {
+            const m = GESCHICHTE_SUBEPOCHS[kk].find(s => s.id === sectionId);
             if (m) return m.label;
         }
         return '';
@@ -135,34 +179,99 @@ function Schueler() {
             return 'zelle';
         }
         if (subjId === 'geschichte') {
-            // Primaere Heuristik: erste plausible Jahreszahl im Text (3- oder
-            // 4-stellig). Jahreszahlen sind deutlich verlaesslicher als
-            // generische Stichworte wie "kirche" oder "papst", die in
-            // Reformation/Kulturkampf/Bismarck-Kontexten quer durch alle
-            // Epochen erscheinen.
+            // P-UI-SCHUELER-GESCHICHTE-SUBEPOCHS (v80): klassenstufen-spezifische
+            // Sub-Epochen. Heuristik kombiniert Jahreszahl-Cutoffs mit kuratierten
+            // Stichworten je Sub-Epoche. Faellt nichts, geht es auf die erste
+            // Sub-Epoche der Klasse (z.B. K8 -> 'k8_franzrev').
             const yearMatch = text.match(/\b(\d{3,4})(?:\s*(?:v\.?\s*chr|bc|n\.?\s*chr|ad))?\b/);
+            let year = null;
+            let isBC = false;
             if (yearMatch) {
-                const y = parseInt(yearMatch[1], 10);
-                const isBC = /v\.?\s*chr|bc/.test(text.slice(yearMatch.index, yearMatch.index + 20));
-                if (isBC) return 'antike';
-                if (y >= 100 && y < 500) return 'antike';
-                if (y >= 500 && y < 1500) return 'mittelalter';
-                if (y >= 1500 && y < 1789) return 'fruehneuzeit';
-                if (y >= 1789 && y < 1871) return 'revolution';
-                if (y >= 1871 && y < 1939) return 'kaiserreich';
-                if (y >= 1939) return 'modern';
+                year = parseInt(yearMatch[1], 10);
+                isBC = /v\.?\s*chr|bc/.test(text.slice(yearMatch.index, yearMatch.index + 20));
             }
-            // Sekundaere Heuristik: epochenspezifische Stichworte. Bewusst
-            // weggelassen: 'kirche', 'papst' (zu breit, kollidiert mit
-            // Reformation/Kulturkampf/Investiturstreit ueber Epochen hinweg).
-            if (/steinzeit|jaeger|jäger|aegypten|ägypten|pharao|pyramide|griech|rom\b|roem|römer|caesar|republik|antik\b|senat|legion|olymp|hieroglyph/.test(text)) return 'antike';
-            if (/mittelalter|ritter|burg\b|kaiser karl|karl der|lehnswesen|lehnswesen|kreuzzug|hanse|gilde|mönch|moench|staufer|hohenstauf|barbarossa|investiturstreit|gotik|romanik|otto i|otto der/.test(text)) return 'mittelalter';
-            if (/reformation|luther|absolutismus|aufkl|renaissance|gutenberg|buchdruck|kolumbus|entdeck|dreissigjaehrig|dreißigjährig|ludwig xiv|westfaelisch|westfälisch|preussen|preußen.*friedrich/.test(text)) return 'fruehneuzeit';
-            if (/franzoesische revolution|französische revolution|napoleon|industrialisier|dampfmaschine|wiener kongress|vormaerz|vormärz|paulskirche|fabrik|maschinenbau|hambacher|metternich/.test(text)) return 'revolution';
-            if (/bismarck|wilhelm ii|kaiserreich|reichsgruendung|reichsgründung|erster weltkrieg|weimar|kulturkampf|sozialgesetz|kolonia|tirpitz|versailles|spartak/.test(text)) return 'kaiserreich';
-            if (/zweiter weltkrieg|nationalsoz|hitler|shoah|holocaust|kalter krieg|wiedervereinigung|berliner mauer|nato|warschauer|ddr\b|brd\b|gruendung der bundesrepublik|gründung der bundesrepublik|grundgesetz|globalisier/.test(text)) return 'modern';
-            const byGrade = { k5: 'antike', k6: 'mittelalter', k7: 'fruehneuzeit', k8: 'revolution', k9: 'kaiserreich', k10: 'modern' };
-            return byGrade[klassId] || null;
+            if (klassId === 'k5') {
+                if (/steinzeit|altsteinzeit|jungsteinzeit|jaeger|jäger|sammler|neandert|nomad|sesshaft|faustkeil|hoehlenmal|höhlenmal|lascaux/.test(text)) return 'k5_steinzeit';
+                if (/aegypten|ägypten|pharao|pyramide|nil\b|hieroglyph|tutench|cheops|mumi|niltal|osiris/.test(text)) return 'k5_aegypten';
+                if (/griech|olymp|sparta|athen\b|polis|demokrat|alexander|aristoteles|sokrates|platon|homer|trojan|perikles|hellen|akropolis/.test(text)) return 'k5_griechen';
+                if (/\brom\b|roem|römer|caesar|augustus|republik|senat|legion|imperator|gladiator|kolosseum|cicero|forum|provinz|patriz|plebej|punisch/.test(text)) return 'k5_roemer';
+                if (isBC && year !== null) {
+                    if (year >= 3000) return 'k5_steinzeit';
+                    if (year >= 500) return 'k5_aegypten';
+                    if (year >= 100) return 'k5_griechen';
+                    return 'k5_roemer';
+                }
+                if (year !== null && year < 500) return 'k5_roemer';
+                return 'k5_steinzeit';
+            }
+            if (klassId === 'k6') {
+                if (/voelkerwander|völkerwander|karoling|karl der|otto i|otto der|merow|frank\b|franken|wikinger|normann|chlodwig|verdun.*843|sachsenkaiser|salier/.test(text)) return 'k6_fruehmittel';
+                if (/ritter|burg\b|kreuzzug|staufer|hohenstauf|barbarossa|lehnswesen|investiturstreit|gotik|romanik|byzanz|jerusalem|kloster|moench|mönch|minnesang|tempel/.test(text)) return 'k6_hochmittel';
+                if (/hanse|pest|schwarzer tod|reichstag|reichsstadt|landfrieden|interregnum|hexen|spaetmittel|spätmittel|zunft|gilde|buergertum|bürgertum/.test(text)) return 'k6_spaetmittel';
+                if (year !== null) {
+                    if (year < 1000) return 'k6_fruehmittel';
+                    if (year < 1300) return 'k6_hochmittel';
+                    return 'k6_spaetmittel';
+                }
+                return 'k6_hochmittel';
+            }
+            if (klassId === 'k7') {
+                if (/renaissance|humanism|leonardo|michelangelo|gutenberg|buchdruck|kolumbus|entdeck|magellan|inka|aztek|kolonie|neue welt|amerika.*entdeck/.test(text)) return 'k7_renaissance';
+                if (/reformation|luther|95 thesen|95-thesen|protestant|calvin|zwingli|melanchth|kirchspaltung|konfession|augsburger religion|tridentin|dreissigjaehrig|dreißigjährig|westfaelisch|westfälisch/.test(text)) return 'k7_reformation';
+                if (/absolutismus|ludwig xiv|versailles|sonnenkoenig|sonnenkönig|merkantil|preussen|preußen|friedrich der|friedrich ii\.|maria theres|hofstaat|standesgesellschaft/.test(text)) return 'k7_absolutismus';
+                if (/aufkl|kant\b|voltaire|rousseau|locke|montesquieu|unabhaengigkeit|unabhängigkeit|amerikanisch|\busa\b|gewaltenteilung|menschenrecht|enzyklopaed|enzyklopäd/.test(text)) return 'k7_aufklaerung';
+                if (year !== null) {
+                    if (year < 1550) return 'k7_renaissance';
+                    if (year < 1648) return 'k7_reformation';
+                    if (year < 1740) return 'k7_absolutismus';
+                    return 'k7_aufklaerung';
+                }
+                return 'k7_reformation';
+            }
+            if (klassId === 'k8') {
+                if (/franzoesische revolution|französische revolution|sturm auf die bastille|bastille|jakobin|robespierre|guillot|nationalversamm|menschen- und buergerrecht|menschen- und bürgerrecht|terreur|tuilerien/.test(text)) return 'k8_franzrev';
+                if (/napoleon|austerlitz|leipzig|voelkerschlacht|völkerschlacht|elba|sankt helena|st\. helena|kontinentalsperre|code civil|wiener kongress|metternich|restauration|befreiungskrieg|waterloo/.test(text)) return 'k8_napoleon';
+                if (/vormärz|vormaerz|hambacher|burschenschaft|wartburgfest|biedermeier|paulskirche|maerzrevolution|märzrevolution|frankfurter parlament|nationalversammlung 1848|karlsbader/.test(text)) return 'k8_vormaerz';
+                if (/industrialisier|industrielle revolution|dampfmaschine|eisenbahn|fabrik\b|maschinenbau|krupp|kohle|stahl|soziale frage|pauperism|kinderarbeit|gewerkschaft|sozialdemokrat|marx\b|kapital\b|proletariat/.test(text)) return 'k8_industrie';
+                if (/bismarck|reichsgruendung|reichsgründung|norddt|norddeutscher bund|deutsch-franzoesisch|deutsch-französisch|sedan|spiegelsaal|emser depesche|eiserner kanzler|1871|kaiserproklamation/.test(text)) return 'k8_reich';
+                if (year !== null) {
+                    if (year >= 1789 && year < 1799) return 'k8_franzrev';
+                    if (year >= 1799 && year < 1815) return 'k8_napoleon';
+                    if (year >= 1815 && year < 1849) return 'k8_vormaerz';
+                    if (year >= 1849 && year < 1866) return 'k8_industrie';
+                    if (year >= 1866 && year < 1880) return 'k8_reich';
+                }
+                return 'k8_industrie';
+            }
+            if (klassId === 'k9') {
+                if (/nsdap|nationalsoz|\bhitler\b|machtergreifung|machtuebernahme|machtübernahme|gleichschaltung|hitlerputsch|nuernberger gesetze|nürnberger gesetze|reichstagsbrand|ermaechtigungsgesetz|ermächtigungsgesetz/.test(text)) return 'k9_nsaufstieg';
+                if (/erster weltkrieg|wk1|wk 1|sarajevo|tannenberg|verdun|somme|stellungskrieg|burgfrieden|hindenburg|ludendorff|versailler vertrag|versailles 1919|14 punkte|kriegsschuld/.test(text)) return 'k9_wk1';
+                if (/weimar|weimarer|reichspraesident|reichspräsident|\bebert\b|inflation 1923|hyperinflation|stresemann|locarno|goldene zwanziger|kapp-putsch|raeterepublik|räterepublik|dolchstoss/.test(text)) return 'k9_weimar';
+                if (/kaiserreich|wilhelm ii|wilhelm i\.|kolonia|kolonialpolitik|herero|samoa|flottenpolitik|tirpitz|weltpolitik|kulturkampf|sozialistenges|bismarcksche|gruenderzeit|gründerzeit|1888|1890/.test(text)) return 'k9_kaiserreich';
+                if (year !== null) {
+                    if (year >= 1933) return 'k9_nsaufstieg';
+                    if (year >= 1918 && year < 1933) return 'k9_weimar';
+                    if (year >= 1914 && year < 1919) return 'k9_wk1';
+                    if (year >= 1871 && year < 1914) return 'k9_kaiserreich';
+                }
+                return 'k9_kaiserreich';
+            }
+            if (klassId === 'k10') {
+                if (/shoah|holocaust|judenverfolgung|wannsee|konzentrationslager|\bkz\b|auschwitz|endloesung|endlösung|nuernberger prozess|nürnberger prozess|widerstand.*ns|stauffenberg|reichspogrom|kristallnacht/.test(text)) return 'k10_shoah';
+                if (/zweiter weltkrieg|wk2|wk 2|polenfeldzug|barbarossa|stalingrad|d-day|kapitulation|atombomb|hiroshima|nagasaki|kriegsende 1945|el alamein/.test(text)) return 'k10_wk2';
+                if (/wiedervereinigung|mauerfall|9\. november 1989|3\. oktober|tag der deutschen einheit|gorbatschow|perestrojka|glasnost|zwei-plus-vier|monday demo|montagsdemo/.test(text)) return 'k10_wiedervereinigung';
+                if (/kalter krieg|eiserner vorhang|sowjet|kuba-krise|kuba krise|berlin-blockade|berlinblockade|mauerbau|\bmauer\b|\bnato\b|warschauer pakt|vietnam.*krieg|abruestung|abrüstung|wettrueste|wettrüste/.test(text)) return 'k10_kalterkrieg';
+                if (/\bbrd\b|\bddr\b|\bbonn\b|adenauer|brandt|kohl\b|honecker|ulbricht|wirtschaftswunder|ostpolitik|grundgesetz|stasi|sed\b|sozialistische einheits/.test(text)) return 'k10_brdddr';
+                if (/globalisier|\beuro\b|europaeische union|europäische union|maastricht|lissabon|nato-osterw|osterweiterung|9\/11|11\. september 2001|terror|finanzkrise|klimawandel|migration|brexit|pandemie/.test(text)) return 'k10_globalisierung';
+                if (year !== null) {
+                    if (year >= 1939 && year < 1946) return 'k10_wk2';
+                    if (year >= 1946 && year < 1989) return 'k10_kalterkrieg';
+                    if (year >= 1989 && year < 1991) return 'k10_wiedervereinigung';
+                    if (year >= 1991) return 'k10_globalisierung';
+                }
+                return 'k10_kalterkrieg';
+            }
+            return null;
         }
         return null;
     };
@@ -173,13 +282,15 @@ function Schueler() {
         return cfg.pool.filter(item => deriveSection(item, subjId, klassId) === sectionId);
     };
     const renderSubjectSections = (klassId, subjId, cfg, trainingReady) => {
-        const sections = sectionsFor(subjId);
+        const sections = sectionsFor(subjId, klassId);
         if (!sections || !cfg || !Array.isArray(cfg.pool)) return null;
-        // Sektionen mit 0 Aufgaben blenden wir aus, damit Heuristik-Luecken nicht
-        // als leere Abschnitte erscheinen.
+        // Abschnitte mit weniger als MIN_SECTION_ITEMS Aufgaben werden ausgeblendet
+        // (Lehrplan-Floor, P-UI-SCHUELER-SECTION-FLOOR, v80). So entstehen keine
+        // visuell duennen Sections; betroffene Items sind ueber Gesamttraining/-
+        // Gesamtquiz weiterhin erreichbar.
         const rows = sections
             .map(section => ({ section, count: poolForSection(cfg, section.id, subjId, klassId).length }))
-            .filter(r => r.count > 0);
+            .filter(r => r.count >= MIN_SECTION_ITEMS);
         if (!rows.length) return null;
         return (
             <div className="mt-4 border-t border-slate-200 pt-4">
@@ -274,7 +385,7 @@ function Schueler() {
     const splitQuestionMeta = (rawQ, klassId, subjId, sectionId) => {
         const fach = subjectLabelOf(subjId);
         const klassL = klassLabelOf(klassId);
-        const sectionL = sectionId ? sectionLabel(sectionId, subjId) : '';
+        const sectionL = sectionId ? sectionLabel(sectionId, subjId, klassId) : '';
         let body = (rawQ == null ? '' : String(rawQ));
         let topic = '';
         const colonIdx = body.indexOf(':');
@@ -435,7 +546,7 @@ function Schueler() {
                         <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">Schüler-Training</div>
                         <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                             {klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}
-                            {selectedSection && <span className="text-slate-500"> · {sectionLabel(selectedSection, subject)}</span>}
+                            {selectedSection && <span className="text-slate-500"> · {sectionLabel(selectedSection, subject, klass)}</span>}
                         </h1>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -533,7 +644,7 @@ function Schueler() {
             <section className="view-fade max-w-2xl mx-auto" ref={drillRef}>
                 <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
                     <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                        Quiz{selectedSection ? ` · ${sectionLabel(selectedSection, subject)}` : ''} · Aufgabe {idx + 1} von {items.length}
+                        Quiz{selectedSection ? ` · ${sectionLabel(selectedSection, subject, klass)}` : ''} · Aufgabe {idx + 1} von {items.length}
                     </div>
                     <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) setStage('subjects'); }}
                         className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
@@ -582,7 +693,7 @@ function Schueler() {
             <section className="view-fade max-w-3xl mx-auto" ref={resultRef}>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
                     <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Auswertung</h2>
-                    <p className="text-slate-600 mb-6">{klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}{selectedSection ? ` · ${sectionLabel(selectedSection, subject)}` : ''}</p>
+                    <p className="text-slate-600 mb-6">{klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}{selectedSection ? ` · ${sectionLabel(selectedSection, subject, klass)}` : ''}</p>
                     <div className="flex justify-center gap-8 mb-4">
                         <div>
                             <div className="text-5xl font-extrabold text-emerald-600">{correct}</div>

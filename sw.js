@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v79-geschichte-section-heuristic';
+const CACHE_VERSION = 'smartineer-v80-geschichte-subepochs-minsection';
 const APP_SHELL = [
     './',
     './index.html',
