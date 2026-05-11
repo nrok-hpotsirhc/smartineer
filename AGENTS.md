@@ -580,6 +580,56 @@ Schulungen, deren Inhalte noch in Recherche/Vorbereitung sind, dürfen als Gerü
 - Sobald die Recherche-Datei vorliegt: `status` entfernen, Platzhalter-Pages durch volle didaktische Prosa ersetzen (§18.6), Platzhalter-Quiz durch ≥ 50 quellenbasierte Fragen pro Kapitel ersetzen (§18.4), `CACHE_VERSION` bumpen.
 - Beispiel: `js/data/schulung_allgemeinmedizin.js` (Stand: Vorbereitung, wartet auf Recherche-Datei).
 
+### 18.10 Pruefungen (Assessments)
+
+Seit v54 (`P-ARCH-ASSESSMENT-ENGINE`) unterstuetzt der Schulungen-Track einen **Pruefungsmodus** parallel zum Kapitel-Quiz und zum SRS-Wiederholungs-Modus. Pruefungen sind in der Schulungs-Datei als optionales Top-Level-Feld `assessments: [...]` deklariert und werden auf der Kapiteluebersicht in einer eigenen Sektion „Pruefungsmodus" angeboten.
+
+**Schema** (pro Eintrag):
+
+```js
+{
+    id: 'mock-module-final',     // Pflicht. Eindeutig je Schulung, snake_case, nie aendern (Persistenz!).
+    title: 'Modul-Mock-Pruefung',// Pflicht. Anzeige.
+    type: 'module',              // Optional: 'module'|'final'|'practice'|'chapter'. Reiner Tag.
+    poolFilter: {                // Optional. Default {} = alle Kapitel, alle MCQ-Items.
+        chapter: ['risk', 'aisec'],  // Whitelist Kapitel-IDs. Default: alle Kapitel.
+        lo: ['aisec.governance.*'],  // Optional, future use.
+        tags: ['compliance']          // Optional, future use.
+    },
+    count: 30,                   // Pflicht. Anzahl Items pro Versuch (Fisher-Yates aus dem Pool).
+    timeLimit: 60,               // Optional, in Minuten. 0/undefined = ohne Zeitlimit.
+    passScore: 0.6               // Optional, 0..1. Anteil korrekter Antworten zum Bestehen.
+}
+```
+
+**Semantik:**
+
+- **Kein Per-Item-Feedback waehrend des Laufs.** Alle Antworten werden gesammelt; Ergebnis erst am Ende. Unterscheidet Pruefung vom Kapitel-Quiz (das ohnehin erst am Ende auswertet, aber innerhalb eines Kapitels) und vom SRS-Wiederholungs-Modus (gleiches Verhalten).
+- **Pool wird zur Laufzeit gebaut** ueber `buildAssessmentPool(training, filter)` aus den MCQ-Items aller Kapitel, die `poolFilter.chapter` matcht (Default: alle Kapitel). Sequence- und Cloze-Items werden nicht aufgenommen (Trainings-Spiegelung, siehe §18.8 `mcqOnly`).
+- **Timer**: Wenn `timeLimit > 0`, laeuft ein Countdown. Beim Ablauf werden alle noch nicht beantworteten Items als falsch gewertet und das Ergebnis automatisch festgeschrieben (`finishAssessmentExpired`). Pill ist amber unter 5 min, rot unter 1 min.
+- **Pass/Fail-Badge** im Result-Screen nur, wenn `passScore` gesetzt ist. Sonst nur Quote.
+- **SRS-Integration**: Antworten werden zusaetzlich als SRS-Updates an die zugehoerigen Karten geschickt (gleiche `srsGradeMany`-Logik wie Kapitel-Quiz). Pruefungs-Versuch traegt also zum Lernstand bei.
+- **Persistenz**: `state[trainingId].__assessments[asmtId] = { attempts, lastResult: { score, total, date, passed }, bestScore: { score, total, date, ratio } }`. Doppelter Underscore-Prefix `__assessments` verhindert Kollision mit Kapitel-IDs im selben Tree. Gespeichert im Storage-Key `smartineer_schulungen_v2`.
+- **Abbruch** via Cancel-Button: Versuch wird **nicht** gezaehlt (kein `attempts++`, kein `lastResult`). Zeit-Ablauf hingegen zaehlt als regulaer beendeter Versuch.
+
+**Erweiterungsregeln:**
+
+- Neue Pruefung anlegen: Eintrag an `assessments` der Schulung anhaengen. Reihenfolge irrelevant. `id` darf nie nachtraeglich geaendert werden (sonst neuer Eintrag in `__assessments`, Bestleistung verloren).
+- Pruefung umbenennen (`title` aendern): erlaubt; `id` bleibt stabil.
+- Pruefung **entfernen**: Eintrag aus `assessments` loeschen. `__assessments[asmtId]` bleibt als Karteileiche im Storage liegen — schadet nicht, da kein Render-Pfad mehr darauf zugreift.
+- Pool-Erweiterung (neue Kapitel hinzufuegen): automatisch, sofern `poolFilter.chapter` nicht hartkodiert ist. Bei `poolFilter: {}` werden alle aktuellen Kapitel beruecksichtigt.
+- **Validator**: `tools/validate.js` prueft Pflichtfelder `id`/`title`/`count` und dass `count <= pool.length` ist (Pool aus aktuell konfigurierten Kapiteln). Mehrere Pruefungen mit gleicher `id` -> Fehler.
+
+**Anti-Pattern:**
+
+- Pruefungs-Versuche in `wissen_reloaded_progress_v1` schreiben — verletzt Track-Trennung.
+- Per-Item-Feedback im Pruefungsmodus nachruesten — verletzt die didaktische Semantik (closed-book exam simulation). Wer formative Inline-Checks will, nutzt `P-LP-INLINE-CHECK` (§18.6) auf Lehrseiten.
+- Sequence-/Cloze-Items in Pool aufnehmen — verletzt MCQ-only-Konvention der Pruefung. Falls in Zukunft PBQ-Sektionen gewuenscht, eigener Pool-Pfad mit eigener Item-Renderer-Logik.
+- `id` einer Pruefung umbenennen — Persistenz bricht. Stattdessen neue Pruefung anlegen.
+- `count` so hoch setzen, dass `count > pool.length`. Validator faengt das; UI deaktiviert Start-Button bei leerem Pool.
+
+**Referenz-Implementierung:** `js/data/schulung_master_et_cybersec.js` Top-Level-Feld `assessments` (zwei Pruefungen: 30-Item-Modul-Mock und 20-Item-Risk-Fokus).
+
 ---
 
 ## 19. Export / Import des Lernfortschritts (plattformübergreifend)

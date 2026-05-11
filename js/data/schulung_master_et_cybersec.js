@@ -5095,6 +5095,30 @@
         name: 'Master Elektrotechnik — Cyber-Security',
         short: 'MA-ET CyberSec',
         desc: 'Vertiefungsstudium Elektrotechnik mit Fokus Cyber-Security: Embedded Security, Netzwerk- und Industriesicherheit (IEC 62443), angewandte Kryptographie, Sichere Softwareentwicklung, Risikomanagement nach ISO 27001 / BSI Grundschutz, AI-Security.',
+        // P-ARCH-ASSESSMENT-ENGINE (AGENTS §18.10): Pruefungsmodus uebergreifend ueber Kapitel.
+        // Pool wird zur Laufzeit aus allen MCQ-Items der gefilterten Kapitel gezogen; Items
+        // werden Fisher-Yates-gemischt. Kein Per-Item-Feedback bis zum Ende. Zeitlimit in Minuten.
+        // Bestehensgrenze 0..1 (Anteil korrekter Antworten). passScore=0.6 entspricht typischen
+        // CompTIA-Mock-Pruefungen.
+        assessments: [
+            {
+                id: 'mock-module-final',
+                title: 'Modul-Mock-Pruefung Cyber-Security',
+                type: 'module',
+                poolFilter: {},
+                count: 30,
+                timeLimit: 60,
+                passScore: 0.6
+            },
+            {
+                id: 'risk-focus-practice',
+                title: 'Risiko & Compliance — Uebungspruefung',
+                type: 'practice',
+                poolFilter: { chapter: ['risk'] },
+                count: 20,
+                passScore: 0.7
+            }
+        ],
         chapters: [
             {
                 id: 'krypto',

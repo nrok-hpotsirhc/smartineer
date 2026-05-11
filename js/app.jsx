@@ -1454,8 +1454,33 @@ function useSchulungenState() {
             return next;
         });
     }, []);
+    // P-ARCH-ASSESSMENT-ENGINE: separater Schluessel `__assessments` pro Schulung,
+    // damit Pruefungs-Bestleistungen nicht mit Kapitel-Quiz-Scores vermischt werden
+    // und Auswertung pro Pruefungs-`id` reproduzierbar bleibt.
+    const recordAssessment = useCallback((tid, asmtId, score, total, passScore) => {
+        setState(prev => {
+            const next = { ...prev };
+            next[tid] = { ...(next[tid] || {}) };
+            const asm = { ...((next[tid].__assessments) || {}) };
+            const prevEntry = asm[asmtId] || { attempts: 0 };
+            const ratio = total ? score / total : 0;
+            const passed = typeof passScore === 'number' ? ratio >= passScore : null;
+            const result = { score, total, date: new Date().toISOString(), passed };
+            const best = prevEntry.bestScore;
+            const bestRatio = best ? best.score / best.total : -1;
+            const nextEntry = {
+                attempts: (prevEntry.attempts || 0) + 1,
+                lastResult: result,
+                bestScore: (!best || ratio >= bestRatio) ? result : best
+            };
+            asm[asmtId] = nextEntry;
+            next[tid].__assessments = asm;
+            try { localStorage.setItem(SCHULUNGEN_KEY, JSON.stringify(next)); } catch (e) {}
+            return next;
+        });
+    }, []);
     const reset = useCallback(() => persist({}), [persist]);
-    return { state, setLastPage, recordQuiz, reset };
+    return { state, setLastPage, recordQuiz, recordAssessment, reset };
 }
 
 // ---------- Spaced Repetition (SM-2 lite) ----------
@@ -1822,6 +1847,45 @@ function chapterProgress(chapter, chState) {
     return { totalPages, lastPage, pagePct, quizBest };
 }
 
+// P-ARCH-ASSESSMENT-ENGINE: baut einen Quiz-Item-Pool aus einer Schulung
+// gemaess einem optionalen Filter `{ chapter?:string[], lo?:string[], tags?:string[] }`.
+// Items werden mit Kontext (`tid`, `cid`, `idx`, `qid`) zurueckgegeben, damit der
+// gleiche Quiz-Renderer wie fuer Kapitel-Quizze und Wiederholungs-Modus genutzt werden kann.
+function buildAssessmentPool(training, filter) {
+    if (!training || !Array.isArray(training.chapters)) return [];
+    const f = filter || {};
+    const allowChapter = Array.isArray(f.chapter) && f.chapter.length ? new Set(f.chapter) : null;
+    const allowLo = Array.isArray(f.lo) && f.lo.length ? new Set(f.lo) : null;
+    const allowTags = Array.isArray(f.tags) && f.tags.length ? new Set(f.tags) : null;
+    const out = [];
+    training.chapters.forEach(ch => {
+        if (allowChapter && !allowChapter.has(ch.id)) return;
+        const pool = Array.isArray(ch.quiz) ? ch.quiz : [];
+        pool.forEach((item, idx) => {
+            if (allowLo) {
+                const ilo = Array.isArray(item.lo) ? item.lo : (item.lo ? [item.lo] : []);
+                if (!ilo.some(x => allowLo.has(x))) return;
+            }
+            if (allowTags) {
+                const itags = Array.isArray(item.tags) ? item.tags : [];
+                if (!itags.some(x => allowTags.has(x))) return;
+            }
+            out.push({ item, tid: training.id, cid: ch.id, idx, qid: stableQid(item) });
+        });
+    });
+    return out;
+}
+
+function assessmentStats(asmt, asmEntry) {
+    const best = asmEntry && asmEntry.bestScore;
+    const last = asmEntry && asmEntry.lastResult;
+    const attempts = (asmEntry && asmEntry.attempts) || 0;
+    const passScore = typeof asmt.passScore === 'number' ? asmt.passScore : null;
+    const bestRatio = best ? best.score / best.total : 0;
+    const passed = (passScore != null && best) ? bestRatio >= passScore : null;
+    return { best, last, attempts, passScore, bestRatio, passed };
+}
+
 function trainingProgress(training, tState) {
     let pages = 0, pageDone = 0, quizSum = 0, quizCount = 0;
     training.chapters.forEach(ch => {
@@ -1903,7 +1967,7 @@ function InlineCheck({ check }) {
 
 function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
     const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
-    const { state, setLastPage, recordQuiz } = useSchulungenState();
+    const { state, setLastPage, recordQuiz, recordAssessment } = useSchulungenState();
     const [stage, setStage] = useState('index'); // index | chapters | reader | quiz | quizResult
     const [tid, setTid] = useState(null);
     const [cid, setCid] = useState(null);
@@ -1916,6 +1980,13 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
     const [quizAnswers, setQuizAnswers] = useState([]);
     const [quizInput, setQuizInput] = useState(null);
     const [reviewMode, setReviewMode] = useState(false);
+    // P-ARCH-ASSESSMENT-ENGINE: assessmentMode wird parallel zu reviewMode gefuehrt.
+    // currentAssessment ist das Pruefungs-Definitions-Objekt (id/title/type/poolFilter/count/passScore/timeLimit).
+    // deadlineMs (ms-Epoch) startet bei Quiz-Start und bewirkt Auto-Submit beim Ablauf, falls timeLimit gesetzt.
+    const [assessmentMode, setAssessmentMode] = useState(false);
+    const [currentAssessment, setCurrentAssessment] = useState(null);
+    const [deadlineMs, setDeadlineMs] = useState(null);
+    const [, setNowTick] = useState(0);
 
     const readerRef = useKaTeX([stage, tid, cid, page]);
     const quizRef = useKaTeX([stage, quizIdx]);
@@ -2014,6 +2085,39 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
         setStage('quiz');
     };
 
+    // P-ARCH-ASSESSMENT-ENGINE: startet eine Pruefung gemaess Definition.
+    // Items werden zufaellig (Fisher-Yates) aus dem gefilterten Pool gezogen,
+    // bei `timeLimit > 0` startet ein Countdown der bei Ablauf den Submit ausloest.
+    // Pruefungsmodus erbt die "kein-Per-Item-Feedback"-Eigenschaft vom regulaeren Quiz-Flow.
+    const startAssessment = (asmt) => {
+        if (!training || !asmt) return;
+        const pool = buildAssessmentPool(training, asmt.poolFilter || {});
+        if (pool.length < 1) {
+            window.alert('Keine passenden Items fuer diese Pruefung gefunden.');
+            return;
+        }
+        const count = Math.min(Math.max(1, asmt.count | 0 || 10), pool.length);
+        if (pool.length < count) {
+            // Wir tolerieren weniger Items als gewuenscht — Pool kann mit der Zeit wachsen.
+        }
+        const shuffled = pool.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        const picked = shuffled.slice(0, count);
+        const items = picked.map(p => p.item);
+        const refs = picked.map(p => ({ tid: p.tid, cid: p.cid, idx: p.idx, qid: p.qid }));
+        setReviewMode(false);
+        setAssessmentMode(true);
+        setCurrentAssessment(asmt);
+        const dl = (asmt.timeLimit > 0) ? (Date.now() + asmt.timeLimit * 60 * 1000) : null;
+        setDeadlineMs(dl);
+        setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]);
+        setQuizInput(items.length ? defaultInputForItem(items[0]) : null);
+        setStage('quiz');
+    };
+
     const submitQuizAnswer = () => {
         const item = quizSet[quizIdx];
         if (!item) return;
@@ -2031,11 +2135,15 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
             const score = next.filter(a => a.ok).length;
             // Karteikarten aktualisieren — auch im Wiederholungs-Modus.
             srsGradeMany(next.map(a => ({ ref: a.ref, ok: a.ok })).filter(u => u.ref));
-            // Quiz-Best/Last nur fuer regulaere Kapitel-Quizze: im Review-Modus
-            // wuerde ein Score, der Karten aus mehreren Kapiteln mischt, die
-            // Kapitel-Statistiken verfaelschen.
-            if (!reviewMode) recordQuiz(tid, cid, score, quizSet.length);
+            // Persistenz: regulaeres Kapitel-Quiz -> recordQuiz, Pruefung -> recordAssessment,
+            // Wiederholung -> nichts (Karten kommen aus mehreren Kapiteln, Score wuerde verfaelschen).
+            if (assessmentMode && currentAssessment) {
+                recordAssessment(tid, currentAssessment.id, score, quizSet.length, currentAssessment.passScore);
+            } else if (!reviewMode) {
+                recordQuiz(tid, cid, score, quizSet.length);
+            }
             setQuizInput(null);
+            setDeadlineMs(null);
             setStage('quizResult');
         } else {
             const nextItem = quizSet[quizIdx + 1];
@@ -2043,6 +2151,48 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
             setQuizInput(defaultInputForItem(nextItem));
         }
     };
+
+    // P-ARCH-ASSESSMENT-ENGINE: Auto-Submit beim Ablauf der Pruefungszeit.
+    // Bei Ablauf wird der Rest des Quizzes mit den bisherigen Antworten + leeren
+    // Antworten fuer noch nicht beantwortete Items abgeschlossen.
+    const finishAssessmentExpired = useCallback(() => {
+        if (!assessmentMode) return;
+        // Beantwortete bleiben, unbeantwortete werden als falsch gewertet.
+        const answered = quizAnswers.slice();
+        for (let i = answered.length; i < quizSet.length; i++) {
+            answered.push({
+                item: quizSet[i],
+                given: null,
+                ok: false,
+                explanation: quizSet[i] && quizSet[i].explanation,
+                ref: quizRefs[i] || null
+            });
+        }
+        const score = answered.filter(a => a.ok).length;
+        srsGradeMany(answered.map(a => ({ ref: a.ref, ok: a.ok })).filter(u => u.ref));
+        if (currentAssessment) {
+            recordAssessment(tid, currentAssessment.id, score, quizSet.length, currentAssessment.passScore);
+        }
+        setQuizAnswers(answered);
+        setQuizInput(null);
+        setDeadlineMs(null);
+        setStage('quizResult');
+    }, [assessmentMode, quizAnswers, quizSet, quizRefs, currentAssessment, tid, recordAssessment, srsGradeMany]);
+
+    // Tick-Effekt fuer Timer-Anzeige + Auto-Submit. Re-rendert jede Sekunde,
+    // wenn deadlineMs gesetzt ist; loest beim Ablauf finishAssessmentExpired aus.
+    useEffect(() => {
+        if (!deadlineMs || stage !== 'quiz') return;
+        const id = setInterval(() => {
+            if (Date.now() >= deadlineMs) {
+                clearInterval(id);
+                finishAssessmentExpired();
+            } else {
+                setNowTick(t => (t + 1) % 1000000);
+            }
+        }, 1000);
+        return () => clearInterval(id);
+    }, [deadlineMs, stage, finishAssessmentExpired]);
 
     // ---------- Stage: Index ----------
     if (stage === 'index') {
@@ -2133,6 +2283,51 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                                 className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2 px-5 rounded-lg shadow text-sm transition">
                                 {srsStats.due > 0 ? 'Wiederholen starten' : srsStats.fresh > 0 ? 'Neue Karten lernen' : 'Nichts fällig'}
                             </button>
+                        </div>
+                    </div>
+                )}
+                {/* P-ARCH-ASSESSMENT-ENGINE: Pruefungs-Section. Wird nur gerendert,
+                    wenn die Schulung `assessments: [...]` definiert. Liest Bestleistungen
+                    aus `state[training.id].__assessments[asmt.id]`. */}
+                {Array.isArray(training.assessments) && training.assessments.length > 0 && (
+                    <div className="mb-5 bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-200 rounded-2xl p-4 md:p-5">
+                        <div className="mb-3">
+                            <div className="text-xs font-bold uppercase tracking-wider text-indigo-700 mb-1">Pruefungsmodus</div>
+                            <h3 className="text-base md:text-lg font-bold text-slate-900">Cross-Chapter-Pruefungen</h3>
+                            <p className="text-xs text-slate-600 mt-0.5">Pruefung uebergreifend ueber Kapitel hinweg. Kein Per-Item-Feedback bis zum Ende; optional mit Zeitlimit und Bestehensgrenze.</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            {training.assessments.map(asmt => {
+                                const asmEntry = (tState.__assessments || {})[asmt.id];
+                                const st = assessmentStats(asmt, asmEntry);
+                                const pool = buildAssessmentPool(training, asmt.poolFilter || {});
+                                const enough = pool.length >= 1;
+                                return (
+                                    <div key={asmt.id} className="bg-white border border-indigo-200 rounded-lg px-4 py-3 flex items-center gap-4 flex-wrap">
+                                        <div className="flex-1 min-w-[220px]">
+                                            <div className="text-sm font-bold text-slate-800">{asmt.title}</div>
+                                            <div className="text-[11px] text-slate-500 mt-0.5">
+                                                {asmt.count} Items aus {pool.length} verfuegbar
+                                                {asmt.timeLimit > 0 && ` · ${asmt.timeLimit} min`}
+                                                {typeof asmt.passScore === 'number' && ` · Bestehen ab ${Math.round(asmt.passScore * 100)}%`}
+                                                {st.attempts > 0 && ` · ${st.attempts} Versuch${st.attempts === 1 ? '' : 'e'}`}
+                                            </div>
+                                            {st.best && (
+                                                <div className="text-[11px] mt-1">
+                                                    <span className="text-slate-500">Best: </span>
+                                                    <span className="font-bold text-slate-700">{st.best.score}/{st.best.total} ({Math.round(st.bestRatio * 100)}%)</span>
+                                                    {st.passed === true && <span className="ml-2 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">bestanden</span>}
+                                                    {st.passed === false && <span className="ml-2 px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 font-bold">unter Grenze</span>}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button onClick={() => startAssessment(asmt)} disabled={!enough}
+                                            className="text-sm font-bold px-4 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow transition">
+                                            {st.attempts > 0 ? 'Wiederholen' : 'Pruefung starten'}
+                                        </button>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 )}
@@ -2276,7 +2471,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
     // ---------- Stage: Quiz ----------
     // Im Wiederholungs-Modus (reviewMode) ist `chapter` null — die Karten kommen
     // aus mehreren Kapiteln. Wir akzeptieren stattdessen `training` allein.
-    if (stage === 'quiz' && training && (chapter || reviewMode)) {
+    if (stage === 'quiz' && training && (chapter || reviewMode || assessmentMode)) {
         const item = quizSet[quizIdx];
         if (!item) { setStage('chapters'); return null; }
         const itype = quizItemType(item);
@@ -2302,6 +2497,25 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
 
         return (
             <section className="view-fade max-w-2xl mx-auto" ref={quizRef}>
+                {assessmentMode && currentAssessment && (() => {
+                    const remainingMs = deadlineMs ? Math.max(0, deadlineMs - Date.now()) : null;
+                    const lowTime = remainingMs != null && remainingMs < 60 * 1000;
+                    const mm = remainingMs != null ? Math.floor(remainingMs / 60000) : null;
+                    const ss = remainingMs != null ? Math.floor((remainingMs % 60000) / 1000) : null;
+                    return (
+                        <div className={`mb-3 rounded-xl border px-4 py-2 flex items-center justify-between gap-3 flex-wrap ${lowTime ? 'border-rose-400 bg-rose-50' : 'border-violet-300 bg-violet-50'}`}>
+                            <div className="text-sm">
+                                <span className="font-bold text-violet-900">Pruefungsmodus</span>
+                                <span className="text-slate-700"> · {currentAssessment.title}</span>
+                            </div>
+                            {remainingMs != null && (
+                                <div className={`text-sm font-mono font-bold ${lowTime ? 'text-rose-700' : 'text-violet-700'}`} aria-live="polite">
+                                    {mm}:{String(ss).padStart(2, '0')}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
                 <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
                     <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
                         Frage {quizIdx + 1} von {quizSet.length}
@@ -2311,7 +2525,18 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                             </span>
                         )}
                     </div>
-                    <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) { setReviewMode(false); setStage('chapters'); } }}
+                    <button onClick={() => {
+                        const msg = assessmentMode
+                            ? 'Pruefung abbrechen? Antworten gehen verloren und der Versuch zaehlt NICHT.'
+                            : 'Quiz abbrechen? Antworten gehen verloren.';
+                        if (window.confirm(msg)) {
+                            setReviewMode(false);
+                            setAssessmentMode(false);
+                            setCurrentAssessment(null);
+                            setDeadlineMs(null);
+                            setStage('chapters');
+                        }
+                    }}
                         className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-2 mb-5 overflow-hidden">
@@ -2371,9 +2596,17 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                         </div>
                     )}
 
-                    <button onClick={submitQuizAnswer} disabled={!canSubmit}
+                    <button onClick={() => {
+                        const isLast = quizIdx + 1 >= quizSet.length;
+                        if (assessmentMode && isLast) {
+                            const answered = quizAnswers.length + 1;
+                            const total = quizSet.length;
+                            if (!window.confirm(`Pruefung jetzt abgeben? ${answered} von ${total} Fragen beantwortet. Eine Korrektur ist danach nicht moeglich.`)) return;
+                        }
+                        submitQuizAnswer();
+                    }} disabled={!canSubmit}
                         className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition">
-                        Antwort bestätigen
+                        {assessmentMode && quizIdx + 1 >= quizSet.length ? 'Pruefung abgeben' : 'Antwort bestätigen'}
                     </button>
                 </div>
             </section>
@@ -2381,18 +2614,29 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
     }
 
     // ---------- Stage: QuizResult ----------
-    if (stage === 'quizResult' && training && (chapter || reviewMode)) {
+    if (stage === 'quizResult' && training && (chapter || reviewMode || assessmentMode)) {
         const score = quizAnswers.filter(a => a.ok).length;
         const wrong = quizAnswers.length - score;
+        const asmtPct = quizAnswers.length ? score / quizAnswers.length : 0;
+        const asmtPassScore = (assessmentMode && currentAssessment && typeof currentAssessment.passScore === 'number') ? currentAssessment.passScore : null;
+        const asmtPassed = asmtPassScore != null ? asmtPct >= asmtPassScore : null;
         return (
             <section className="view-fade max-w-3xl mx-auto" ref={resultRef}>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">{reviewMode ? 'Wiederholung — Auswertung' : 'Quiz-Auswertung'}</h2>
-                    <p className="text-slate-600 mb-6">
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">
+                        {assessmentMode ? 'Pruefungs-Auswertung' : reviewMode ? 'Wiederholung — Auswertung' : 'Quiz-Auswertung'}
+                    </h2>
+                    <p className="text-slate-600 mb-4">
                         {training.short || training.name}
-                        {!reviewMode && chapter ? ` · ${chapter.title}` : ''}
+                        {assessmentMode && currentAssessment ? ` · ${currentAssessment.title}` : ''}
+                        {!assessmentMode && !reviewMode && chapter ? ` · ${chapter.title}` : ''}
                         {reviewMode ? ` · ${quizAnswers.length} Karteikarte${quizAnswers.length === 1 ? '' : 'n'}` : ''}
                     </p>
+                    {assessmentMode && asmtPassed != null && (
+                        <div className={`inline-block mb-5 px-4 py-2 rounded-full text-sm font-bold border-2 ${asmtPassed ? 'bg-emerald-50 border-emerald-500 text-emerald-800' : 'bg-rose-50 border-rose-500 text-rose-800'}`}>
+                            {asmtPassed ? `Bestanden (Bestehensgrenze ${Math.round(asmtPassScore * 100)}%)` : `Nicht bestanden (benoetigt: ${Math.round(asmtPassScore * 100)}%)`}
+                        </div>
+                    )}
                     <div className="flex justify-center gap-8 mb-2 flex-wrap">
                         <div><div className="text-5xl font-extrabold text-emerald-600">{score}</div><div className="text-xs font-bold text-slate-500 uppercase tracking-wider">richtig</div></div>
                         <div><div className="text-5xl font-extrabold text-rose-600">{wrong}</div><div className="text-xs font-bold text-slate-500 uppercase tracking-wider">falsch</div></div>
@@ -2553,7 +2797,14 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                     </ol>
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center">
-                    {reviewMode ? (
+                    {assessmentMode ? (
+                        <>
+                            <button onClick={() => { const a = currentAssessment; setAssessmentMode(false); setCurrentAssessment(null); startAssessment(a); }}
+                                className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">Pruefung erneut versuchen</button>
+                            <button onClick={() => { setAssessmentMode(false); setCurrentAssessment(null); setStage('chapters'); }}
+                                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Zur Kapitelübersicht</button>
+                        </>
+                    ) : reviewMode ? (
                         <>
                             <button onClick={startReview} className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">Weiter wiederholen</button>
                             <button onClick={() => { setReviewMode(false); setStage('chapters'); }} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Zur Kapitelübersicht</button>
@@ -2723,11 +2974,11 @@ function OptionenKonto({ auth }) {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
             <h3 className="text-lg font-bold text-slate-800 mb-2">Anmelden</h3>
             <p className="text-sm text-slate-600 mb-4">Notwendig nur fuer den Schulungen-Bereich. Dashboard, Training, Cheatsheets und Schueler-Bereich sind ohne Anmeldung nutzbar.</p>
-            {auth.configured && (
+            {/* {auth.configured && (
                 <div className="bg-blue-50 border border-blue-200 text-blue-900 text-sm p-3 rounded-lg mb-4">
                     Default-Zugangsdaten (siehe <code>js/auth-credentials.js</code>): <strong>admin / admin</strong> oder <strong>user / user</strong>. Lokal in <code>js/auth-credentials.js</code> anpassen.
                 </div>
-            )}
+            )} */}
             {!auth.configured && (
                 <div className="bg-amber-50 border border-amber-200 text-amber-900 text-sm p-3 rounded-lg mb-4">
                     Auth-Konfiguration fehlt: <code>js/auth-credentials.js</code> nicht geladen. Beispiel siehe <code>js/auth-credentials.example.js</code>.
