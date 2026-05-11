@@ -88,7 +88,15 @@ smartineer/
 ├── css/
 │   └── styles.css          # eigenes CSS (Pills, Animationen, Safe-Area, Scrollbar)
 └── js/
-    ├── app.jsx             # React-App (alle Komponenten, Hooks, Install-Prompt, Routing)
+    ├── app.jsx             # App-Root und React-Mount
+    ├── app/
+    │   ├── _core.jsx       # Konstanten, Hooks, Export/Import, QID/SRS-Basis
+    │   ├── training.jsx    # Navigation, Dashboard, Ingenieurs-Training
+    │   ├── cheatsheet.jsx  # Cheatsheet-View
+    │   ├── schueler.jsx    # Schueler-Track
+    │   ├── schulungen.jsx  # Schulungen-Track, Reader, Quiz, SRS-Helfer
+    │   ├── install.jsx     # PWA-Install-Prompt und Impressum
+    │   └── optionen.jsx    # Optionen-View
     └── data/
         ├── <id>.js         # eine Datei pro Kategorie (siehe §5)
         └── ...
@@ -109,7 +117,7 @@ In `index.html` werden Skripte in dieser Reihenfolge geladen:
 1. Tailwind, Chart.js, KaTeX (CDN, im `<head>` mit `defer` wo möglich).
 2. **Alle** `js/data/<id>.js` — Reihenfolge bestimmt die Reihenfolge in Sidebar/Dashboard/Radar. Diese Skripte registrieren `window.APP_DATA` / `window.APP_ORDER` und müssen **vor** React/Babel laden.
 3. React + ReactDOM (UMD, production) und Babel-standalone (CDN).
-4. `<script type="text/babel" data-presets="react" src="js/app.jsx"></script>` — die App.
+4. Die App-JSX-Skripte in dieser Reihenfolge: `js/app/_core.jsx`, `js/app/training.jsx`, `js/app/cheatsheet.jsx`, `js/app/schueler.jsx`, `js/app/schulungen.jsx`, `js/app/install.jsx`, `js/app/optionen.jsx`, danach `js/app.jsx` als App-Root/Mount. Alle werden als `<script type="text/babel" data-presets="react" ...>` geladen; **keine** `import`-Statements / kein Bundler.
 5. Inline-Snippet für `navigator.serviceWorker.register('sw.js')`.
 
 Wer eine neue Kategorie einfügt, muss den `<script>`-Tag manuell **vor** den React/Babel-Skripten ergänzen **und** `sw.js`-`APP_SHELL` um die Datei erweitern (sonst kein Offline-Fallback).
@@ -781,7 +789,7 @@ Die Top-Navigation wird auf Mobil/PWA häufig zu breit, wenn alle Tabs als Text 
 - Desktop ab Tailwind-Breakpoint `md` (≥ 768 px): klassische Text-Labels (`Dashboard`, `Training`, `Cheatsheets`, `Schulungen`, `Schüler`, `Hell/Dunkel`).
 - Unter `md`: nur **Icons** (24×24 Inline-SVG, Stroke-only, `currentColor`), Texte sind via `hidden md:inline` ausgeblendet. Brand-Wortmarke „Smartineer" verschwindet unter `sm`, das Logo bleibt sichtbar.
 - Jeder Icon-Button hat `title` und `aria-label` mit dem Klartext-Label. Aktiver Tab zusätzlich `aria-current="page"`.
-- Icons leben inline in `app.jsx` (`NAV_ICONS`), nicht als separate Asset-Dateien — Service Worker muss nicht zusätzlich cachen.
+- Icons leben inline im App-JSX (`NAV_ICONS`, aktuell `js/app/training.jsx`), nicht als separate Asset-Dateien — Service Worker muss nicht zusätzlich cachen.
 - Beim Hinzufügen neuer Top-Level-Views: passendes Icon in `NAV_ICONS` ergänzen, sonst rendert die Mobile-Variante leer.
 - Keine externen Icon-Bibliotheken (Heroicons-CDN, FontAwesome) — vermeidet zusätzliche CDN-Abhängigkeit und respektiert §1 (keine zusätzlichen Frameworks ohne Diskussion).
 

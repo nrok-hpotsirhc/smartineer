@@ -138,8 +138,16 @@ smartineer/
 ├── css/
 │   └── styles.css              # Pills, Animationen, Safe-Area, Scrollbars
 └── js/
-  ├── auth-credentials.example.js  # Vorlage für Schulungen-Login
-    ├── app.jsx                 # React-App (Hooks, Komponenten, Install-Prompt)
+    ├── auth-credentials.example.js  # Vorlage für Schulungen-Login
+    ├── app.jsx                 # App-Root und React-Mount
+    ├── app/
+    │   ├── _core.jsx           # Konstanten, Hooks, Export/Import, QID/SRS-Basis
+    │   ├── training.jsx        # Navigation, Dashboard, Ingenieurs-Training
+    │   ├── cheatsheet.jsx      # Cheatsheet-View
+    │   ├── schueler.jsx        # Schüler-Track
+    │   ├── schulungen.jsx      # Schulungen-Track, Reader, Quiz
+    │   ├── install.jsx         # PWA-Install-Prompt und Impressum
+    │   └── optionen.jsx        # Optionen-View
     └── data/
         ├── math.js             # Höhere Mathematik
         ├── control.js          # Regelungstechnik

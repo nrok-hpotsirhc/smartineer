@@ -340,6 +340,12 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 - **Akzeptanz:** Mathe/Physik/Chemie/Biologie/Geschichte je (Klasse, Fach) exakt 200 Pool-Items nach dem Laden von `schueler_200_topups.js`; Englisch/Franzoesisch/Latein je (Klasse, Sprache) 400 Pool-Items, davon 200 `kind:'vocab'` und 200 `kind:'grammar'`; Klassen 5-10 listen alle drei Sprachen; `normalize()` ist akzent-/apostroph-tolerant; Validator erzwingt die neuen Mindestmengen; CACHE_VERSION bumpen.
 - **Honesty-Notiz:** Die Sprachpools sind curriculum-orientiert und lehrplan-kompatibel, aber keine schulbuchspezifischen "vorgegebenen Vokabellisten", weil der Kernlehrplan keine exakte 200-Wort-Liste pro Klasse vorgibt. Fuer exakte Lehrwerksvokabeln ist die autorisierte Liste nachzureichen und append-only einzupflegen.
 
+### P-SCHUELER-SPRACHEN-LEHRWERK-AUDIT — Sprachpools gegen konkrete Lehrwerkslisten abgleichen
+- **Status:** blocked: konkrete autorisierte Vokabel-/Grammatiklisten je Sprache, Klasse und Lehrwerk fehlen
+- **Dateien:** `js/data/schueler_200_topups.js`, `tools/validate.js`, `README.md`, `AGENTS.md`, `WORKPACKAGES.md`
+- **Aktion:** Sobald eine konkrete Quelle vorliegt (z.B. Green Line, Decouvertes, Pontes/Cursus/Prima mit Jahrgang und Bundesland), die bestehenden curriculum-orientierten 200/200-Sprachpools append-only gegen die vorgegebenen Listen abgleichen.
+- **Akzeptanz:** Pro (Klasse, Sprache) Audit-Tabelle: Lehrwerksquelle, vorhandene Treffer, fehlende Vokabeln/Grammatikthemen, append-only Top-up oder begruendete Ersetzung; Validator bleibt fuer 200 `vocab` + 200 `grammar` gruen; keine urheberrechtlich geschuetzten Listen wörtlich uebernehmen, sofern keine Nutzungsrechte vorliegen.
+
 ---
 
 ## D) UI / Bugs / Tooling — werden ad-hoc als P-UI-... eingeplant
@@ -387,13 +393,13 @@ Alle Pakete bleiben kompatibel zu AGENTS.md (statische SPA, kein Build-Schritt, 
 - **Akzeptanz:** AGENTS §21 beschreibt Batch-Auswahl, Locking, Abschluss, Rueckstellung nicht begonnener Pakete und naechsten Paket-/Batch-Vorschlag; WORKPACKAGES-Kopf widerspricht dem nicht mehr.
 
 ### P-ARCH-APPJSX-SPLIT — `js/app.jsx` modularisieren (kein Build-Schritt)
-- **Status:** ready
+- **Status:** done (v74, Sitzung 2026-05-11)
 - **Dateien:** `js/app.jsx` (auflosen), neu `js/app/_core.jsx`, `js/app/training.jsx`, `js/app/cheatsheet.jsx`, `js/app/schueler.jsx`, `js/app/schulungen.jsx`, `js/app/optionen.jsx`, `js/app/install.jsx`; `index.html`; `sw.js`
 - **Aktion:** Module als zusaetzliche `<script type="text/babel" data-presets="react">`-Tags in `index.html` laden — Reihenfolge `_core` zuerst, dann Track-Module, dann Mount. Keine `import`-Statements (Babel-standalone-Constraint). Globale Hilfsfunktionen leben in `window.SMARTINEER` als Single Namespace.
 - **Akzeptanz:** Verhalten unveraendert (Smoke-Test alle Views); `sw.js` `APP_SHELL` enthaelt alle neuen Dateien; CACHE_VERSION gebumpt; AGENTS §3/§4 ergaenzt.
 
 ### P-ARCH-DATA-LAZY — Schulungs-Daten lazy laden
-- **Status:** blocked: P-ARCH-APPJSX-SPLIT
+- **Status:** ready
 - **Dateien:** `js/data/schulung_*.js` (pro Kapitel splitten), `index.html`, `sw.js`
 - **Aktion:** Pro Kapitel ein Skript `js/data/schulung_<sid>__<cid>.js`. Schulungs-Index-Skript registriert nur Metadaten; Kapitel-Daten werden beim Oeffnen via dynamisch erzeugtem `<script>`-Tag injiziert. SW-Precache bleibt fuer Offline-Pfad bestehen.
 - **Akzeptanz:** Time-to-Interactive auf Mobile messbar besser (Vorher/Nachher dokumentieren); Offline weiterhin voll funktional; Reihenfolge in `index.html` weiter fuer Eager-Tracks (Training/Schueler).
@@ -615,12 +621,14 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-APPJSX-SPLIT** (Code-Hygiene; `js/app.jsx` ist weiter sehr gross) oder **P-MED-AUDIT** (Quellenaudit Allgemeinmedizin). Fuer den Schueler-Track ist nach v73 fachlich als naechstes ein **P-SCHUELER-SPRACHEN-LEHRWERK-AUDIT** sinnvoll, sobald konkrete Schulbuch-/Vokabellisten vorliegen; UI-seitig bleibt **P-UI-SCHUELER-MOTIVATION** der naechste Hebel.
-> Begruendung: v73 hat die grossen Schueler-Pool-Mindestmengen technisch geschlossen; offen bleibt die fachliche Feinanpassung an konkrete Lehrwerke, waehrend Code-Hygiene und medizinisches Quellenaudit weiterhin die groessten systemischen Risiken sind.
+> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-DATA-LAZY** (jetzt durch v74 entblockt) oder **P-MED-AUDIT** (Quellenaudit Allgemeinmedizin). Fuer den Schueler-Track ist **P-SCHUELER-SPRACHEN-LEHRWERK-AUDIT** als blocked dokumentiert, bis konkrete Schulbuch-/Vokabellisten vorliegen; UI-seitig bleibt **P-UI-SCHUELER-MOTIVATION** der naechste Hebel.
+> Begruendung: v74 hat den App-Root in kleinere Babel-Skripte geteilt und damit die Voraussetzung fuer Daten-Lazy-Loading geschaffen; die naechsten groessten Hebel sind Ladeperformance (Lazy-Daten) und medizinische Quellenqualitaet.
 
 ---
 
 ## F) Aenderungs-Historie dieser Datei
+
+- 2026-05-11: Session-Batch v74 erledigt — **P-ARCH-APPJSX-SPLIT** (User: "dringende themen fortführen"). `js/app.jsx` wurde mechanisch in sieben geladene JSX-Module zerlegt: `js/app/_core.jsx` (Konstanten, Hooks, Export/Import, QID/SRS-Basis), `js/app/training.jsx` (Navigation, Dashboard, Ingenieurs-Training), `js/app/cheatsheet.jsx`, `js/app/schueler.jsx`, `js/app/schulungen.jsx`, `js/app/install.jsx`, `js/app/optionen.jsx`; `js/app.jsx` enthaelt nur noch App-Root und Mount. `index.html` laedt die Module in dieser Reihenfolge vor dem Root-Mount; `sw.js` precached alle neuen Dateien und setzt `CACHE_VERSION` v73 -> v74 (`smartineer-v74-appjsx-split`). `AGENTS.md` und `README.md` dokumentieren die neue Struktur und Ladefolge. Beim mechanischen Split entstand kurz UTF-8-Mojibake durch PowerShell-Encoding; alle neuen JSX-Dateien wurden via CP1252->UTF-8-Reparatur korrigiert und per Browser-Smoke auf `hasMojibake=false` geprueft. **Validierung:** `node tools/validate.js --strict-sources` exit 0; `get_errors` clean fuer alle neuen JSX-Module, `index.html`, `sw.js`, `README.md`, `AGENTS.md`, `WORKPACKAGES.md`; Browser-Smoke `http://127.0.0.1:8765/index.html?smoke=v74-final` bestaetigt Module `[_core, training, cheatsheet, schueler, schulungen, install, optionen, app]`, Dashboard/Training/Cheatsheets/Schueler/Schulungen/Optionen rendern, keine JS-Fehler, keine Mojibake. **Roll-forward:** `P-ARCH-DATA-LAZY` ist jetzt von `blocked` auf `ready`; **P-SCHUELER-SPRACHEN-LEHRWERK-AUDIT** neu als `blocked` dokumentiert, weil fuer exakte lehrwerksspezifische Vokabeln konkrete Listen fehlen.
 
 - 2026-05-11: Session-Batch v73 erledigt — **P-SCHUELER-200-SPRACHEN** (User-Request: alle Faecher Klasse 5-10 auf 200 Fragen; Englisch, Franzoesisch, Latein von 5-10 mit je 200 Vokabel-Abfragen + 200 Grammatikfragen). Neue append-only Erweiterungsdatei `js/data/schueler_200_topups.js` wird nach `schueler.js` geladen und mutiert `window.SCHUELER`: Mathe/Physik/Chemie/Biologie/Geschichte werden je (Klasse, Fach) auf 200 Pool-Items aufgefuellt; `SCHUELER.subjects` um `franzoesisch` und `latein` erweitert; Klassen 5-10 enthalten `englisch`, `franzoesisch`, `latein`; die bisherigen Englisch-Stubs werden durch produktive Pools ersetzt. Sprachpools: je (Klasse, Sprache) 400 Items, exakt 200 `kind:'vocab'` + 200 `kind:'grammar'`; Vokabelteil kombiniert Zahlenwoerter und curriculum-orientierten Grundwortschatz, Grammatikteil deckt CEFR-A1-B1-/Latein-SI-Progression ab. `normalize()` toleriert nun Akzente, Apostrophe und Satzzeichen. Validator fordert seit v73 fuer k5-k10.(mathe|physik|chemie|biologie|geschichte) ≥200 Items und fuer k5-k10.(englisch|franzoesisch|latein) ≥200 Vokabel- plus ≥200 Grammatikitems. `index.html` und `sw.js` registrieren `schueler_200_topups.js`; `CACHE_VERSION` v72 -> v73. **Validierung:** `node --check js/data/schueler_200_topups.js tools/validate.js` gruen; Zaehlscript bestaetigt alle 48 Mittelstufen-Pools (30 Kernfach-Pools à 200, 18 Sprachpools à 400 mit 200/200); `node tools/validate.js --strict-sources` exit 0; `get_errors` clean fuer neue Datei, Validator, index und SW. **Honesty:** Exakte schulbuchspezifische "vorgegebene Vokabeln" bleiben OFFEN, da keine konkrete Lehrwerks-/Bundesland-/Schulliste mitgeliefert wurde und Kernlehrplaene keine 200-Wort-Liste je Klasse definieren.
 
