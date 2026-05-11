@@ -1050,10 +1050,761 @@
         }
     };
 
+    // TOPUP v70: +50 Naturwissenschafts-Fragen je Klassenstufe 5-10,
+    // verteilt auf Physik/Chemie/Biologie und ausgerichtet an Rahmenlehrplan/KLP SI.
+    const NATWI_EXTRA_V70 = {
+        k5: {
+            physik: natwiTopup('Klasse 5 Physik Rahmenplan', [
+                ['magnetkraft', 'Welche Kraft zieht Eisennaegel zu einem Magneten?'],
+                ['influenz', 'Wie nennt man voruebergehende Magnetisierung durch einen nahen Magneten?'],
+                ['feld', 'Welcher Begriff beschreibt den Raum, in dem ein Magnet wirkt?'],
+                ['kompassnadel', 'Welches Kompassteil ist selbst ein kleiner Magnet?'],
+                ['geschlossen', 'Wie muss ein Stromkreis sein, damit eine Lampe leuchtet?'],
+                ['spannung', 'Welche elektrische Groesse treibt Ladungen im Stromkreis an?'],
+                ['stromstaerke', 'Welche Groesse beschreibt, wie viel Ladung pro Zeit fliesst?'],
+                ['isolator', 'Wie nennt man Glas, Gummi oder trockene Luft im Stromkreis allgemein?'],
+                ['leiter', 'Wie nennt man Metalle wie Kupfer im Stromkreis allgemein?'],
+                ['schaltplan', 'Wie nennt man eine Zeichnung mit Symbolen fuer elektrische Bauteile?'],
+                ['schlagschatten', 'Wie nennt man den sichtbaren Schatten eines Gegenstands auf einer Flaeche?'],
+                ['lichtbuendel', 'Wie nennt man viele benachbarte Lichtstrahlen zusammen?'],
+                ['geradlinig', 'Wie breitet sich Licht in Luft naeherungsweise aus?'],
+                ['reflexion', 'Was passiert mit Licht an einem Spiegel?'],
+                ['absorption', 'Wie nennt man Aufnahme von Lichtenergie durch einen Koerper?'],
+                ['waermestrahlung', 'Welche Waermeuebertragung funktioniert auch ohne Luft?'],
+                ['temperaturdifferenz', 'Was ist die Ursache fuer Waermefluss zwischen zwei Koerpern?']
+            ]),
+            chemie: natwiTopup('Klasse 5 Chemie Rahmenplan', [
+                ['reinstoff', 'Wie nennt man einen Stoff mit einheitlicher Zusammensetzung?'],
+                ['stoffgemisch', 'Wie nennt man eine Mischung aus mehreren Reinstoffen?'],
+                ['suspension', 'Wie nennt man ein Gemisch aus Feststoffteilchen in einer Fluessigkeit?'],
+                ['emulsion', 'Wie nennt man ein Gemisch aus zwei nicht mischbaren Fluessigkeiten?'],
+                ['loesung', 'Wie nennt man ein klares Gemisch aus geloestem Stoff und Loesungsmittel?'],
+                ['filter', 'Welches Hilfsmittel trennt Feststoffteilchen aus einer Fluessigkeit?'],
+                ['sedimentieren', 'Wie nennt man Absinken schwerer Teilchen in einem Gemisch?'],
+                ['dekantieren', 'Wie nennt man vorsichtiges Abgiessen einer Fluessigkeit vom Bodensatz?'],
+                ['teilchen', 'Aus welchen kleinsten Bausteinen erklaert das Teilchenmodell Stoffe?'],
+                ['diffusion', 'Wie nennt man selbststaendige Durchmischung von Teilchen?'],
+                ['siedetemperatur', 'Welche Stoffeigenschaft nutzt man beim Destillieren?'],
+                ['verdunsten', 'Wie heisst Verdampfen an der Oberflaeche unterhalb des Siedepunktes?'],
+                ['kristallisation', 'Wie nennt man Bildung fester Kristalle aus einer Loesung?'],
+                ['luft', 'Welches Gasgemisch besteht hauptsaechlich aus Stickstoff und Sauerstoff?'],
+                ['sauerstoff', 'Welcher Luftbestandteil ist fuer Verbrennungen wichtig?'],
+                ['kohlenstoffdioxid', 'Welches Gas entsteht bei vielen Verbrennungen und truebt Kalkwasser?'],
+                ['wasser', 'Welcher Stoff hat bei Normaldruck Schmelzpunkt 0 und Siedepunkt 100 Grad Celsius?']
+            ]),
+            biologie: natwiTopup('Klasse 5 Biologie Rahmenplan', [
+                ['keimung', 'Wie nennt man den Beginn des Wachstums aus einem Samen?'],
+                ['wurzelhaare', 'Welche feinen Strukturen vergroessern die Aufnahmeflaeche der Wurzel?'],
+                ['sprossachse', 'Welcher Pflanzenteil traegt Blaetter und leitet Wasser?'],
+                ['blatt', 'In welchem Pflanzenteil findet besonders viel Fotosynthese statt?'],
+                ['chlorophyll', 'Welcher gruene Farbstoff nimmt Licht fuer die Fotosynthese auf?'],
+                ['bluete', 'Welches Pflanzenorgan dient der geschlechtlichen Fortpflanzung?'],
+                ['frucht', 'Was entsteht nach der Befruchtung oft aus dem Fruchtknoten?'],
+                ['samen', 'Welche Struktur enthaelt den Pflanzenembryo und Reservestoffe?'],
+                ['wirbeltier', 'Wie nennt man Tiere mit Wirbelsaeule?'],
+                ['saeugetier', 'Welche Wirbeltierklasse saeugt ihre Jungen mit Milch?'],
+                ['insekt', 'Welche Tiergruppe besitzt sechs Beine und meist drei Koerperabschnitte?'],
+                ['kiemen', 'Mit welchem Organ atmen die meisten Fische im Wasser?'],
+                ['lunge', 'Mit welchem Organ atmen Saeugetiere und Voegel?'],
+                ['gelenk', 'Wie nennt man eine bewegliche Verbindung zwischen Knochen?'],
+                ['muskel', 'Welches Organ erzeugt Bewegung durch Zusammenziehen?'],
+                ['ernaehrung', 'Welcher Lebensvorgang versorgt Organismen mit Energie und Baustoffen?']
+            ])
+        },
+        k6: {
+            physik: natwiTopup('Klasse 6 Physik Rahmenplan', [
+                ['einfallslot', 'Wie nennt man die gedachte Senkrechte auf einen Spiegel am Auftreffpunkt?'],
+                ['einfallswinkel', 'Welcher Winkel liegt zwischen einfallendem Strahl und Lot?'],
+                ['reflexionswinkel', 'Welcher Winkel ist beim Reflexionsgesetz gleich gross wie der Einfallswinkel?'],
+                ['sammellinse', 'Welche Linse buendelt paralleles Licht?'],
+                ['zerstreuungslinse', 'Welche Linse verteilt paralleles Licht nach aussen?'],
+                ['brennpunkt', 'Wie nennt man den Punkt, in dem eine Sammellinse paralleles Licht buendelt?'],
+                ['spektrum', 'Wie nennt man die Aufspaltung von weissem Licht in Farben?'],
+                ['prisma', 'Welcher Glaskoerper kann weisses Licht in Spektralfarben zerlegen?'],
+                ['schwingung', 'Welche Bewegung erzeugt Schall an einer Gitarrensaite?'],
+                ['frequenz', 'Welche Groesse bestimmt bei Schall vor allem die Tonhoehe?'],
+                ['amplitude', 'Welche Groesse bestimmt bei Schall vor allem die Lautstaerke?'],
+                ['ultraschall', 'Wie heisst Schall oberhalb des menschlichen Hoerbereichs?'],
+                ['infraschall', 'Wie heisst Schall unterhalb des menschlichen Hoerbereichs?'],
+                ['waermeleitung', 'Welche Waermeuebertragung dominiert in Metallen?'],
+                ['konvektion', 'Welche Waermeuebertragung erfolgt durch Stroemung in Fluessigkeiten oder Gasen?'],
+                ['isolation', 'Wie nennt man Massnahmen, die Waermeuebertragung verringern?'],
+                ['thermische ausdehnung', 'Wie nennt man Groesserwerden von Stoffen beim Erwaermen?']
+            ]),
+            chemie: natwiTopup('Klasse 6 Chemie Rahmenplan', [
+                ['filtrat', 'Wie nennt man die Fluessigkeit, die beim Filtrieren durch den Filter laeuft?'],
+                ['rueckstand', 'Wie nennt man den Feststoff, der im Filter zurueckbleibt?'],
+                ['chromatographie', 'Welches Trennverfahren trennt Farbstoffe nach Wanderungsgeschwindigkeit?'],
+                ['destillation', 'Welches Verfahren trennt Fluessigkeiten ueber Verdampfen und Kondensieren?'],
+                ['eindampfen', 'Welches Verfahren gewinnt geloesten Feststoff aus einer Loesung?'],
+                ['extraktion', 'Wie nennt man Herausloesen eines Stoffes mit geeignetem Loesungsmittel?'],
+                ['lackmus', 'Welcher Indikator zeigt saure und basische Loesungen farblich an?'],
+                ['indikator', 'Wie nennt man einen Stoff, der pH-Aenderungen durch Farbe zeigt?'],
+                ['sauer', 'Wie nennt man eine Loesung mit pH kleiner 7?'],
+                ['basisch', 'Wie nennt man eine Loesung mit pH groesser 7?'],
+                ['neutral', 'Wie nennt man eine Loesung mit pH 7?'],
+                ['stoffeigenschaft', 'Wie nennt man Dichte, Loeslichkeit oder Schmelztemperatur allgemein?'],
+                ['nachweisreaktion', 'Wie nennt man eine Reaktion, mit der man einen Stoff erkennt?'],
+                ['kalkwasser', 'Womit kann man Kohlenstoffdioxid im Schulversuch nachweisen?'],
+                ['branddreieck', 'Welches Modell nennt Brennstoff, Sauerstoff und Zuendtemperatur?'],
+                ['zuendtemperatur', 'Welche Temperatur muss ein Brennstoff zum Entzuenden erreichen?'],
+                ['loeslichkeit', 'Welche Eigenschaft bestimmt, wie viel Stoff sich in Wasser loest?']
+            ]),
+            biologie: natwiTopup('Klasse 6 Biologie Rahmenplan', [
+                ['wirbelsaeule', 'Welche Knochenkette stuetzt den Ruecken von Wirbeltieren?'],
+                ['sehne', 'Welche Struktur verbindet Muskel und Knochen?'],
+                ['baender', 'Welche Strukturen stabilisieren Gelenke zwischen Knochen?'],
+                ['bronchien', 'Wie heissen die Verzweigungen der Luftroehre in der Lunge?'],
+                ['lungenblaeschen', 'Wo findet der Gasaustausch in der Lunge statt?'],
+                ['sauerstoff', 'Welcher Stoff wird beim Atmen aus der Luft aufgenommen?'],
+                ['kohlenstoffdioxid', 'Welcher Stoff wird beim Ausatmen vermehrt abgegeben?'],
+                ['speiseroehre', 'Welche Roehre transportiert Nahrung vom Mund zum Magen?'],
+                ['duenndarm', 'Wo werden die meisten Naehrstoffe aufgenommen?'],
+                ['dickdarm', 'Welcher Darmabschnitt entzieht dem Nahrungsbrei viel Wasser?'],
+                ['omnivore', 'Wie nennt man Tiere, die Pflanzen und Tiere fressen?'],
+                ['herbivore', 'Wie nennt man reine Pflanzenfresser?'],
+                ['carnivore', 'Wie nennt man Fleischfresser?'],
+                ['lebensraum', 'Wie nennt man den Ort, an dem eine Art lebt?'],
+                ['anpassung', 'Wie nennt man ein Merkmal, das zum Lebensraum passt?'],
+                ['winterschlaf', 'Welche Strategie senkt Stoffwechsel und Aktivitaet im Winter stark?']
+            ])
+        },
+        k7: {
+            physik: natwiTopup('Klasse 7 Physik Rahmenplan', [
+                ['40', 'Berechne $s$ in m: $v=8\\,\\text{m/s}$, $t=5\\,\\text{s}$.'],
+                ['12', 'Berechne $v$ in m/s: $s=96\\,\\text{m}$, $t=8\\,\\text{s}$.'],
+                ['9', 'Berechne $t$ in s: $s=72\\,\\text{m}$, $v=8\\,\\text{m/s}$.'],
+                ['2', 'Berechne $\\rho$ in g/cm$^3$: $m=180\\,\\text{g}$, $V=90\\,\\text{cm}^3$.'],
+                ['120', 'Berechne $m$ in g: $\\rho=3\\,\\text{g/cm}^3$, $V=40\\,\\text{cm}^3$.'],
+                ['30', 'Berechne $F$ in N: $m=6\\,\\text{kg}$, $a=5\\,\\text{m/s}^2$.'],
+                ['5', 'Berechne $a$ in m/s$^2$: $F=45\\,\\text{N}$, $m=9\\,\\text{kg}$.'],
+                ['kraftmesser', 'Welches Messgeraet misst Kraefte?'],
+                ['newton', 'Welche Einheit hat die Kraft?'],
+                ['kilogramm', 'Welche SI-Einheit hat die Masse?'],
+                ['meter', 'Welche SI-Einheit hat die Laenge?'],
+                ['sekunde', 'Welche SI-Einheit hat die Zeit?'],
+                ['gleichfoermig', 'Wie nennt man Bewegung mit konstanter Geschwindigkeit?'],
+                ['beschleunigung', 'Welche Groesse beschreibt Aenderung der Geschwindigkeit pro Zeit?'],
+                ['traegheit', 'Welche Eigenschaft laesst Koerper ihren Bewegungszustand beibehalten?'],
+                ['reibung', 'Welche Kraft wirkt der Bewegung zwischen Beruehrungsflaechen entgegen?'],
+                ['schwerpunkt', 'Wie nennt man den Punkt, an dem man die Gewichtskraft angreifen laesst?']
+            ]),
+            chemie: natwiTopup('Klasse 7 Chemie Rahmenplan', [
+                ['atom', 'Wie nennt man das kleinste Teilchen eines Elements?'],
+                ['molekuel', 'Wie nennt man ein Teilchen aus mindestens zwei verbundenen Atomen?'],
+                ['element', 'Wie nennt man einen Reinstoff aus nur einer Atomart?'],
+                ['verbindung', 'Wie nennt man einen Reinstoff aus mehreren Atomarten in festem Verhaeltnis?'],
+                ['reaktion', 'Wie nennt man Stoffumwandlung mit neuen Stoffen?'],
+                ['edukte', 'Wie nennt man Ausgangsstoffe einer chemischen Reaktion?'],
+                ['produkte', 'Wie nennt man entstehende Stoffe einer chemischen Reaktion?'],
+                ['exotherm', 'Wie nennt man eine Reaktion, die Energie abgibt?'],
+                ['endotherm', 'Wie nennt man eine Reaktion, die Energie aufnimmt?'],
+                ['aktivierungsenergie', 'Welche Energie braucht eine Reaktion zum Starten?'],
+                ['katalysator', 'Welcher Stoff senkt Aktivierungsenergie und wird nicht verbraucht?'],
+                ['h2o', 'Welche Summenformel hat Wasser?'],
+                ['co2', 'Welche Summenformel hat Kohlenstoffdioxid?'],
+                ['o2', 'Welche Summenformel hat Sauerstoffgas?'],
+                ['n2', 'Welche Summenformel hat Stickstoffgas?'],
+                ['nacl', 'Welche Formel hat Kochsalz?'],
+                ['massenerhaltung', 'Welches Gesetz sagt, dass Masse bei chemischen Reaktionen erhalten bleibt?']
+            ]),
+            biologie: natwiTopup('Klasse 7 Biologie Rahmenplan', [
+                ['zellkern', 'Welches Zellorganell enthaelt die Erbinformation?'],
+                ['zellmembran', 'Welche Struktur grenzt jede Zelle nach aussen ab?'],
+                ['cytoplasma', 'Wie nennt man die fluessige Grundsubstanz der Zelle?'],
+                ['mitochondrien', 'Welche Zellorganellen stellen viel nutzbare Energie bereit?'],
+                ['vakuole', 'Welcher grosse Speicherraum ist typisch fuer Pflanzenzellen?'],
+                ['chloroplasten', 'Welche Organellen betreiben Fotosynthese?'],
+                ['zellwand', 'Welche feste Struktur gibt Pflanzenzellen Form und Stabilitaet?'],
+                ['mikroskop', 'Welches Geraet vergroessert kleine biologische Strukturen?'],
+                ['produzenten', 'Welche Organismen stellen im Oekosystem Biomasse aus Lichtenergie her?'],
+                ['konsumenten', 'Welche Organismen ernaehren sich von anderen Lebewesen?'],
+                ['destruenten', 'Welche Organismen zersetzen tote organische Stoffe?'],
+                ['nahrungsnetz', 'Wie nennt man mehrere verknuepfte Nahrungsketten?'],
+                ['biotop', 'Wie nennt man den unbelebten Lebensraum einer Lebensgemeinschaft?'],
+                ['biozoenose', 'Wie nennt man die Lebensgemeinschaft in einem Biotop?'],
+                ['oekosystem', 'Wie nennt man Biotop und Biozoenose zusammen?'],
+                ['konkurrenz', 'Wie nennt man Wettbewerb um begrenzte Ressourcen?']
+            ])
+        },
+        k8: {
+            physik: natwiTopup('Klasse 8 Physik Rahmenplan', [
+                ['4', 'Berechne $I$ in A: $U=20\\,\\text{V}$, $R=5\\,\\Omega$.'],
+                ['36', 'Berechne $U$ in V: $R=12\\,\\Omega$, $I=3\\,\\text{A}$.'],
+                ['6', 'Berechne $R$ in Ohm: $U=18\\,\\text{V}$, $I=3\\,\\text{A}$.'],
+                ['60', 'Berechne $P$ in W: $U=15\\,\\text{V}$, $I=4\\,\\text{A}$.'],
+                ['120', 'Berechne $W$ in J: $F=30\\,\\text{N}$, $s=4\\,\\text{m}$.'],
+                ['20', 'Berechne $P$ in W: $W=400\\,\\text{J}$, $t=20\\,\\text{s}$.'],
+                ['reihenschaltung', 'In welcher Schaltung ist die Stromstaerke durch alle Bauteile gleich?'],
+                ['parallelschaltung', 'In welcher Schaltung liegt an jedem Zweig dieselbe Spannung?'],
+                ['amperemeter', 'Welches Messgeraet misst die Stromstaerke?'],
+                ['voltmeter', 'Welches Messgeraet misst die Spannung?'],
+                ['ohm', 'Welche Einheit hat der elektrische Widerstand?'],
+                ['watt', 'Welche Einheit hat die Leistung?'],
+                ['joule', 'Welche Einheit hat Arbeit und Energie?'],
+                ['kurzschluss', 'Wie heisst ein sehr kleiner Widerstand direkt zwischen den Polen?'],
+                ['sicherung', 'Welches Bauteil schuetzt vor zu grosser Stromstaerke?'],
+                ['energieumwandlung', 'Was geschieht in einem Motor mit elektrischer Energie?'],
+                ['wirkungsgrad', 'Welche Groesse vergleicht nutzbare Energie mit zugefuehrter Energie?']
+            ]),
+            chemie: natwiTopup('Klasse 8 Chemie Rahmenplan', [
+                ['proton', 'Welches positiv geladene Teilchen sitzt im Atomkern?'],
+                ['neutron', 'Welches ungeladene Teilchen sitzt im Atomkern?'],
+                ['elektron', 'Welches negativ geladene Teilchen befindet sich in der Atomhuelle?'],
+                ['ordnungszahl', 'Welche Zahl gibt die Protonenzahl eines Elements an?'],
+                ['massenzahl', 'Welche Zahl ist Summe aus Protonen und Neutronen?'],
+                ['isotop', 'Wie nennt man Atome eines Elements mit unterschiedlicher Neutronenzahl?'],
+                ['gruppe', 'Wie nennt man eine senkrechte Spalte im Periodensystem?'],
+                ['periode', 'Wie nennt man eine waagerechte Zeile im Periodensystem?'],
+                ['edelgase', 'Welche Gruppe ist besonders reaktionstraege?'],
+                ['alkalimetalle', 'Welche Gruppe enthaelt Lithium, Natrium und Kalium?'],
+                ['halogene', 'Welche Gruppe enthaelt Fluor, Chlor und Brom?'],
+                ['ion', 'Wie nennt man ein geladenes Teilchen?'],
+                ['kation', 'Wie nennt man ein positiv geladenes Ion?'],
+                ['anion', 'Wie nennt man ein negativ geladenes Ion?'],
+                ['ionenbindung', 'Welche Bindung entsteht durch Anziehung entgegengesetzt geladener Ionen?'],
+                ['elektronenpaarbindung', 'Welche Bindung beruht auf gemeinsam genutzten Elektronenpaaren?'],
+                ['metallbindung', 'Welche Bindung erklaert gute elektrische Leitfaehigkeit von Metallen?']
+            ]),
+            biologie: natwiTopup('Klasse 8 Biologie Rahmenplan', [
+                ['zwerchfell', 'Welcher Muskel trennt Brust- und Bauchraum und hilft beim Atmen?'],
+                ['diffusion', 'Welcher Transportvorgang bewegt Sauerstoff aus den Alveolen ins Blut?'],
+                ['kapillaren', 'Wie heissen die feinsten Blutgefaesse?'],
+                ['arterien', 'Welche Gefaesse fuehren Blut vom Herzen weg?'],
+                ['venen', 'Welche Gefaesse fuehren Blut zum Herzen hin?'],
+                ['herzvorhof', 'Wie nennt man eine obere Herzkammer?'],
+                ['herzkammer', 'Wie nennt man eine untere Herzhoehle?'],
+                ['plasma', 'Wie heisst der fluessige Anteil des Blutes?'],
+                ['leukozyten', 'Welche Blutzellen gehoeren zur Immunabwehr?'],
+                ['thrombozyten', 'Welche Blutbestandteile helfen bei der Gerinnung?'],
+                ['amylase', 'Welches Enzym beginnt im Mund mit Staerkespaltung?'],
+                ['galle', 'Welche Fluessigkeit hilft bei der Fettverdauung?'],
+                ['resorption', 'Wie nennt man Aufnahme von Naehrstoffen ins Blut?'],
+                ['peristaltik', 'Wie nennt man wellenfoermige Darmbewegungen?'],
+                ['glucose', 'Welcher einfache Zucker ist wichtiger Energietraeger?'],
+                ['zellatmung', 'Welcher Prozess gewinnt Energie aus Glucose und Sauerstoff?']
+            ])
+        },
+        k9: {
+            physik: natwiTopup('Klasse 9 Physik Rahmenplan', [
+                ['50', 'Berechne $F$ in N: $m=10\\,\\text{kg}$, $a=5\\,\\text{m/s}^2$.'],
+                ['4', 'Berechne $a$ in m/s$^2$: $F=28\\,\\text{N}$, $m=7\\,\\text{kg}$.'],
+                ['250', 'Berechne $E_\\text{kin}$ in J: $m=5\\,\\text{kg}$, $v=10\\,\\text{m/s}$.'],
+                ['800', 'Berechne $E_\\text{pot}$ in J: $m=8\\,\\text{kg}$, $h=10\\,\\text{m}$, $g\\approx10\\,\\text{N/kg}$.'],
+                ['1000', 'Berechne $p$ in Pa: $F=200\\,\\text{N}$, $A=0{,}2\\,\\text{m}^2$.'],
+                ['20', 'Berechne $Q$ in C: $I=4\\,\\text{A}$, $t=5\\,\\text{s}$.'],
+                ['induktion', 'Wie nennt man Erzeugung einer Spannung durch Aenderung eines Magnetfeldes?'],
+                ['lorentzkraft', 'Welche Kraft wirkt auf bewegte Ladungen im Magnetfeld?'],
+                ['generator', 'Welche Maschine wandelt Bewegungsenergie in elektrische Energie?'],
+                ['transformator', 'Welches Geraet veraendert Wechselspannungen?'],
+                ['wechselstrom', 'Welche Stromart aendert periodisch ihre Richtung?'],
+                ['gleichstrom', 'Welche Stromart fliesst dauerhaft in eine Richtung?'],
+                ['energieerhaltung', 'Welches Prinzip besagt, dass Energie nicht verloren geht?'],
+                ['impuls', 'Welche Groesse ist Produkt aus Masse und Geschwindigkeit?'],
+                ['druck', 'Welche Groesse beschreibt Kraft pro Flaeche?'],
+                ['auftrieb', 'Welche Kraft wirkt in Fluessigkeiten nach oben?'],
+                ['archimedes', 'Welches Prinzip erklaert den Auftrieb durch verdraengte Fluessigkeit?']
+            ]),
+            chemie: natwiTopup('Klasse 9 Chemie Rahmenplan', [
+                ['hydroniumion', 'Welches Ion ist typisch fuer saure waessrige Loesungen?'],
+                ['hydroxidion', 'Welches Ion ist typisch fuer basische waessrige Loesungen?'],
+                ['neutralisation', 'Wie nennt man Reaktion von Saeure und Base zu Salz und Wasser?'],
+                ['salz', 'Welcher Stofftyp entsteht aus Kationen und Anionen?'],
+                ['indikatorpapier', 'Womit kann man den pH-Bereich schnell abschaetzen?'],
+                ['exotherm', 'Wie ist die Neutralisation haeufig energetisch einzuordnen?'],
+                ['oxidation', 'Wie nennt man Elektronenabgabe?'],
+                ['reduktion', 'Wie nennt man Elektronenaufnahme?'],
+                ['redoxreaktion', 'Wie nennt man gekoppelte Oxidation und Reduktion?'],
+                ['edukte', 'Wie nennt man Stoffe links vom Reaktionspfeil?'],
+                ['produkte', 'Wie nennt man Stoffe rechts vom Reaktionspfeil?'],
+                ['elektrolyse', 'Wie nennt man Zerlegung eines Stoffes durch elektrischen Strom?'],
+                ['elektrode', 'Wie nennt man einen Leiter, an dem Strom in eine Loesung ein- oder austritt?'],
+                ['anode', 'An welcher Elektrode findet Oxidation statt?'],
+                ['kathode', 'An welcher Elektrode findet Reduktion statt?'],
+                ['korrosion', 'Wie nennt man langsame Zerstoerung von Metallen durch chemische Reaktionen?'],
+                ['rost', 'Wie nennt man das Korrosionsprodukt von Eisen in feuchter Luft?']
+            ]),
+            biologie: natwiTopup('Klasse 9 Biologie Rahmenplan', [
+                ['chromosom', 'Wie nennt man verpackte DNA-Struktur im Zellkern?'],
+                ['allel', 'Wie nennt man eine Variante eines Gens?'],
+                ['genotyp', 'Wie nennt man die genetische Ausstattung eines Merkmals?'],
+                ['phaenotyp', 'Wie nennt man das beobachtbare Erscheinungsbild?'],
+                ['dominant', 'Wie nennt man ein Allel, das sich im heterozygoten Zustand auspraegt?'],
+                ['rezessiv', 'Wie nennt man ein Allel, das im heterozygoten Zustand verdeckt bleibt?'],
+                ['homozygot', 'Wie nennt man zwei gleiche Allele?'],
+                ['heterozygot', 'Wie nennt man zwei unterschiedliche Allele?'],
+                ['mutation', 'Wie nennt man eine dauerhafte Veraenderung der Erbinformation?'],
+                ['rekombination', 'Wie nennt man neue Kombination von Erbanlagen bei sexueller Fortpflanzung?'],
+                ['selektion', 'Welcher Evolutionsfaktor beguenstigt besser angepasste Merkmale?'],
+                ['fitness', 'Welche Groesse beschreibt Fortpflanzungserfolg in der Evolution?'],
+                ['fossil', 'Wie nennt man erhaltene Reste oder Spuren frueherer Lebewesen?'],
+                ['homologie', 'Wie nennt man Aehnlichkeit durch gemeinsamen Ursprung?'],
+                ['analogie', 'Wie nennt man Aehnlichkeit durch gleiche Funktion ohne nahen Ursprung?'],
+                ['art', 'Wie nennt man Gruppe von Lebewesen, die fruchtbare Nachkommen erzeugen koennen?']
+            ])
+        },
+        k10: {
+            physik: natwiTopup('Klasse 10 Physik Rahmenplan', [
+                ['alpha', 'Welche radioaktive Strahlung besteht aus Heliumkernen?'],
+                ['beta', 'Welche radioaktive Strahlung besteht aus schnellen Elektronen oder Positronen?'],
+                ['gamma', 'Welche radioaktive Strahlung ist elektromagnetisch und sehr energiereich?'],
+                ['geigerzaehler', 'Welches Geraet weist ionisierende Strahlung nach?'],
+                ['halbwertszeit', 'Welche Zeit halbiert die Anzahl instabiler Kerne?'],
+                ['12.5', 'Nach drei Halbwertszeiten bleiben wie viel Prozent einer Probe?'],
+                ['kernspaltung', 'Wie nennt man Zerlegung schwerer Atomkerne in leichtere Kerne?'],
+                ['kernfusion', 'Wie nennt man Verschmelzung leichter Atomkerne?'],
+                ['brechung', 'Wie nennt man Richtungswechsel von Licht beim Medienwechsel?'],
+                ['totalreflexion', 'Wie nennt man vollstaendige Reflexion ab einem Grenzwinkel?'],
+                ['brennweite', 'Welche Strecke liegt zwischen Linse und Brennpunkt?'],
+                ['dioptrie', 'Welche Einheit verwendet man fuer die Brechkraft einer Linse?'],
+                ['2', 'Berechne $\\lambda$ in m: $c=3\\cdot10^8\\,\\text{m/s}$, $f=1{,}5\\cdot10^8\\,\\text{Hz}$.'],
+                ['60', 'Berechne $f$ in Hz: $c=300\\,\\text{m/s}$, $\\lambda=5\\,\\text{m}$.'],
+                ['photoeffekt', 'Welcher Effekt zeigt Licht als Teilchenstrom von Photonen?'],
+                ['rutherford', 'Welches Atommodell entstand aus dem Streuversuch mit Goldfolie?'],
+                ['bohr', 'Welches Atommodell nutzt Elektronenschalen mit bestimmten Energien?']
+            ]),
+            chemie: natwiTopup('Klasse 10 Chemie Rahmenplan', [
+                ['kohlenwasserstoff', 'Wie nennt man eine Verbindung nur aus Kohlenstoff und Wasserstoff?'],
+                ['alkan', 'Welche Stoffklasse besitzt nur C-C-Einfachbindungen?'],
+                ['alken', 'Welche Stoffklasse besitzt mindestens eine C-C-Doppelbindung?'],
+                ['alkin', 'Welche Stoffklasse besitzt mindestens eine C-C-Dreifachbindung?'],
+                ['methan', 'Wie heisst CH$_4$?'],
+                ['ethan', 'Wie heisst C$_2$H$_6$?'],
+                ['propan', 'Wie heisst C$_3$H$_8$?'],
+                ['butan', 'Wie heisst C$_4$H$_{10}$?'],
+                ['hydroxylgruppe', 'Welche funktionelle Gruppe kennzeichnet Alkohole?'],
+                ['carboxylgruppe', 'Welche funktionelle Gruppe kennzeichnet Carbonsaeuren?'],
+                ['ester', 'Welche Stoffklasse entsteht aus Carbonsaeure und Alkohol?'],
+                ['polymer', 'Wie nennt man ein Riesenmolekuel aus vielen Wiederholungseinheiten?'],
+                ['monomer', 'Wie nennt man einen kleinen Baustein fuer Polymere?'],
+                ['kunststoff', 'Wie nennt man ein technisches Polymermaterial allgemein?'],
+                ['verbrennung', 'Welche Reaktion von Kohlenwasserstoffen mit Sauerstoff liefert CO$_2$ und Wasser?'],
+                ['substitution', 'Wie nennt man Austausch eines Atoms oder einer Gruppe im Molekuel?'],
+                ['addition', 'Wie nennt man Anlagerung an eine Doppelbindung?']
+            ]),
+            biologie: natwiTopup('Klasse 10 Biologie Rahmenplan', [
+                ['nukleotid', 'Wie nennt man einen Baustein der DNA?'],
+                ['doppelhelix', 'Welche Raumstruktur besitzt DNA nach Watson und Crick?'],
+                ['adenin', 'Welche DNA-Base paart mit Thymin?'],
+                ['cytosin', 'Welche DNA-Base paart mit Guanin?'],
+                ['replikation', 'Wie nennt man Verdopplung der DNA?'],
+                ['codon', 'Wie nennt man ein Basentriplett der mRNA?'],
+                ['ribosom', 'An welchem Zellort findet Translation statt?'],
+                ['protein', 'Was entsteht bei der Translation aus Aminosaeuren?'],
+                ['enzym', 'Wie nennt man ein Protein, das Reaktionen beschleunigt?'],
+                ['biodiversitaet', 'Wie nennt man Vielfalt von Genen, Arten und Lebensraeumen?'],
+                ['oekosystemdienstleistung', 'Wie nennt man Nutzen von Oekosystemen fuer Menschen?'],
+                ['habitat', 'Wie nennt man den Lebensraum einer Art?'],
+                ['fragmentierung', 'Wie nennt man Zerschneidung von Lebensraeumen in kleine Teile?'],
+                ['renaturierung', 'Wie nennt man Wiederherstellung naturnaher Lebensraeume?'],
+                ['monitoring', 'Wie nennt man systematische Beobachtung von Arten oder Lebensraeumen?'],
+                ['schutzgebiet', 'Welches Gebiet wird rechtlich zum Erhalt von Natur ausgewiesen?']
+            ])
+        }
+    };
+
     function withNatwiTopup(base, classId, subject) {
         const byClass = NATWI_TOPUPS[classId] || {};
         const extraByClass = NATWI_EXTRA_V69[classId] || {};
-        return enrichSchuelerTrainingItems(base.concat(byClass[subject] || [], extraByClass[subject] || []), classId, subject);
+        const frameByClass = NATWI_EXTRA_V70[classId] || {};
+        return enrichSchuelerTrainingItems(base.concat(byClass[subject] || [], extraByClass[subject] || [], frameByClass[subject] || []), classId, subject);
+    }
+
+    function decimalAnswerFromCents(cents) {
+        return (cents / 100).toFixed(2).replace(/0$/, '').replace(/\.0$/, '');
+    }
+
+    function decimalQuestionFromCents(cents) {
+        return decimalAnswerFromCents(cents).replace('.', ',');
+    }
+
+    function mathTask(question, answer, formula, work) {
+        const finalAnswer = String(answer);
+        return {
+            q: question,
+            a: finalAnswer,
+            f: '<p><strong>Formel/Merksatz.</strong> ' + formula + '</p>',
+            s: '<p><strong>Musterloesung.</strong> ' + work + '</p>'
+                + '<p><strong>Endergebnis:</strong> <code>' + escapeHtml(finalAnswer) + '</code></p>'
+                + '<p class="text-xs text-slate-500 dark:text-slate-400">Quelle: Rahmenlehrplan/KLP Mathematik Sekundarstufe I; schuluebliche SI-Konventionen.</p>'
+        };
+    }
+
+    function pool_k5_mathe() {
+        const items = [];
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const addend = 35 + idx * 4;
+            const factor = (idx % 7) + 2;
+            const multiplier = (idx % 5) + 3;
+            const product = factor * multiplier;
+            items.push(mathTask(
+                'Berechne: $' + addend + '+' + factor + '\\cdot ' + multiplier + '$.',
+                addend + product,
+                'Punktrechnung vor Strichrechnung: zuerst Multiplikation, dann Addition.',
+                '$' + factor + '\\cdot ' + multiplier + '=' + product + '$, danach $' + addend + '+' + product + '=' + (addend + product) + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const numeratorA = (idx % 4) + 1;
+            const numeratorB = (idx % 3) + 1;
+            const denominator = numeratorA + numeratorB + (idx % 5) + 2;
+            const sum = numeratorA + numeratorB;
+            items.push(mathTask(
+                'Addiere ohne zu kuerzen: $\\frac{' + numeratorA + '}{' + denominator + '}+\\frac{' + numeratorB + '}{' + denominator + '}$. Gib den Bruch als a/b ein.',
+                sum + '/' + denominator,
+                'Gleichnamige Brueche addiert man ueber die Zaehler: $\\frac{a}{n}+\\frac{b}{n}=\\frac{a+b}{n}$.',
+                '$' + numeratorA + '+' + numeratorB + '=' + sum + '$, der Nenner bleibt $' + denominator + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const centsA = 120 + idx * 7;
+            const centsB = 75 + idx * 6;
+            const total = centsA + centsB;
+            items.push(mathTask(
+                'Berechne in Euro: $' + decimalQuestionFromCents(centsA) + '+' + decimalQuestionFromCents(centsB) + '$.',
+                decimalAnswerFromCents(total),
+                'Bei Dezimalzahlen Komma unter Komma schreiben; im Eingabefeld ist Punkt oder Komma erlaubt.',
+                'In Cent: $' + centsA + '+' + centsB + '=' + total + '$ Cent, also $' + decimalQuestionFromCents(total) + '$ Euro.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const length = idx + 5;
+            const width = (idx % 6) + 3;
+            const area = length * width;
+            items.push(mathTask(
+                'Ein Rechteck ist $' + length + '\\,\\text{cm}$ lang und $' + width + '\\,\\text{cm}$ breit. Berechne den Flaecheninhalt in cm$^2$.',
+                area,
+                'Rechteck: $A=a\\cdot b$.',
+                '$A=' + length + '\\cdot ' + width + '=' + area + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const centimeters = 12 + idx * 3;
+            const millimeters = centimeters * 10;
+            items.push(mathTask(
+                'Wandle $' + centimeters + '\\,\\text{cm}$ in mm um. Gib nur die Zahl ein.',
+                millimeters,
+                'Laengeneinheiten: $1\\,\\text{cm}=10\\,\\text{mm}$.',
+                '$' + centimeters + '\\cdot 10=' + millimeters + '$.'
+            ));
+        }
+        return items;
+    }
+
+    function pool_k6_mathe() {
+        const items = [];
+        const percentValues = [5, 10, 20, 25, 40, 50, 60, 75, 80, 90];
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const denominator = (idx % 5) + 2;
+            const numerator = Math.min(denominator - 1, (idx % denominator) + 1);
+            const base = denominator * (idx + 6);
+            const result = base * numerator / denominator;
+            items.push(mathTask(
+                'Berechne $\\frac{' + numerator + '}{' + denominator + '}$ von $' + base + '$.',
+                result,
+                'Bruchteil: $\\frac{z}{n}$ von $G$ ist $G:n\\cdot z$.',
+                '$' + base + ':' + denominator + '=' + (base / denominator) + '$ und $' + (base / denominator) + '\\cdot ' + numerator + '=' + result + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const percent = percentValues[(idx - 1) % percentValues.length];
+            const base = 100 + idx * 20;
+            const result = base * percent / 100;
+            items.push(mathTask(
+                'Berechne $' + percent + '\\%$ von $' + base + '$.',
+                result,
+                'Prozentwert: $W=\\frac{p}{100}\\cdot G$.',
+                '$W=' + percent + ':100\\cdot ' + base + '=' + result + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const left = idx - 16;
+            const right = (idx % 9) - 4;
+            const result = left - right;
+            items.push(mathTask(
+                'Berechne mit ganzen Zahlen: $(' + left + ')-(' + right + ')$.',
+                result,
+                'Subtrahieren einer Zahl bedeutet Addieren der Gegenzahl.',
+                '$(' + left + ')-(' + right + ')=' + left + '+(' + (-right) + ')=' + result + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const coefficient = (idx % 6) + 2;
+            const solution = idx + 3;
+            const offset = (idx % 8) + 1;
+            const right = coefficient * solution + offset;
+            items.push(mathTask(
+                'Loese nach $x$: $' + coefficient + 'x+' + offset + '=' + right + '$. Gib nur $x$ ein.',
+                solution,
+                'Lineare Gleichung: erst umkehren, dann durch den Faktor teilen.',
+                '$' + right + '-' + offset + '=' + (right - offset) + '$ und $(' + (right - offset) + '):' + coefficient + '=' + solution + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const base = idx + 6;
+            const height = ((idx % 5) + 2) * 2;
+            const area = base * height / 2;
+            items.push(mathTask(
+                'Ein Dreieck hat Grundseite $' + base + '\\,\\text{cm}$ und Hoehe $' + height + '\\,\\text{cm}$. Berechne die Flaeche in cm$^2$.',
+                area,
+                'Dreieck: $A=\\frac{g\\cdot h}{2}$.',
+                '$A=' + base + '\\cdot ' + height + ':2=' + area + '$.'
+            ));
+        }
+        return items;
+    }
+
+    function pool_k7_mathe() {
+        const items = [];
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const coefficient = (idx % 7) + 3;
+            const solution = idx + 2;
+            const offset = (idx % 9) + 4;
+            const right = coefficient * solution - offset;
+            items.push(mathTask(
+                'Loese nach $x$: $' + coefficient + 'x-' + offset + '=' + right + '$. Gib nur $x$ ein.',
+                solution,
+                'Aequivalenzumformungen veraendern beide Seiten gleich.',
+                'Addiere $' + offset + '$: $' + coefficient + 'x=' + (right + offset) + '$. Teile durch $' + coefficient + '$: $x=' + solution + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const unitCount = (idx % 5) + 2;
+            const unitPrice = (idx % 6) + 3;
+            const targetCount = unitCount + (idx % 7) + 2;
+            const result = unitPrice * targetCount;
+            items.push(mathTask(
+                unitCount + ' Hefte kosten ' + (unitCount * unitPrice) + ' Euro. Was kosten ' + targetCount + ' Hefte bei proportionalem Preis?',
+                result,
+                'Proportionalitaet: erst Preis pro Stueck bestimmen, dann multiplizieren.',
+                'Ein Heft kostet $(' + (unitCount * unitPrice) + ':' + unitCount + ')=' + unitPrice + '$ Euro. $' + targetCount + '\\cdot ' + unitPrice + '=' + result + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const base = 200 + idx * 10;
+            const percent = (idx % 5 + 1) * 5;
+            const result = base + base * percent / 100;
+            items.push(mathTask(
+                'Ein Preis von ' + base + ' Euro steigt um ' + percent + ' %. Berechne den neuen Preis.',
+                result,
+                'Erhoehung: neuer Wert $G_\\text{neu}=G\\cdot(1+\\frac{p}{100})$.',
+                '$' + percent + '\\%$ von $' + base + '$ sind $' + (base * percent / 100) + '$. Neuer Preis: $' + base + '+' + (base * percent / 100) + '=' + result + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const slope = (idx % 6) + 1;
+            const intercept = (idx % 9) - 4;
+            const value = idx + 1;
+            const result = slope * value + intercept;
+            items.push(mathTask(
+                'Gegeben ist $y=' + slope + 'x' + (intercept >= 0 ? '+' + intercept : intercept) + '$. Berechne $y$ fuer $x=' + value + '$.',
+                result,
+                'Lineare Funktion: $y=mx+b$.',
+                '$y=' + slope + '\\cdot ' + value + (intercept >= 0 ? '+' + intercept : intercept) + '=' + result + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const coefficientA = idx + 2;
+            const coefficientB = (idx % 8) + 3;
+            const sum = coefficientA + coefficientB;
+            items.push(mathTask(
+                'Fasse zusammen: $' + coefficientA + 'x+' + coefficientB + 'x$. Gib das Ergebnis ohne Leerzeichen ein.',
+                sum + 'x',
+                'Gleichartige Terme darf man ueber ihre Koeffizienten addieren.',
+                '$(' + coefficientA + '+' + coefficientB + ')x=' + sum + 'x$.'
+            ));
+        }
+        return items;
+    }
+
+    function pool_k8_mathe() {
+        const items = [];
+        const triples = [[3, 4, 5], [5, 12, 13], [6, 8, 10], [7, 24, 25], [8, 15, 17]];
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const slope = (idx % 7) + 1;
+            const x1 = idx;
+            const y1 = (idx % 5) + 2;
+            const x2 = x1 + 3;
+            const y2 = y1 + slope * 3;
+            items.push(mathTask(
+                'Bestimme die Steigung der Geraden durch $P(' + x1 + '|' + y1 + ')$ und $Q(' + x2 + '|' + y2 + ')$.',
+                slope,
+                'Steigung: $m=\\frac{y_2-y_1}{x_2-x_1}$.',
+                '$m=(' + y2 + '-' + y1 + '):(' + x2 + '-' + x1 + ')=' + (y2 - y1) + ':3=' + slope + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const solutionX = idx + 2;
+            const solutionY = (idx % 9) + 1;
+            const sum = solutionX + solutionY;
+            const difference = solutionX - solutionY;
+            items.push(mathTask(
+                'Loese das Gleichungssystem $x+y=' + sum + '$ und $x-y=' + difference + '$. Gib nur $x$ ein.',
+                solutionX,
+                'Additionsverfahren: Addiere beide Gleichungen, dann entsteht $2x$.',
+                '$(' + sum + ')+(' + difference + ')=2x=' + (sum + difference) + '$, also $x=' + solutionX + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const triple = triples[(idx - 1) % triples.length];
+            const scale = Math.floor((idx - 1) / triples.length) + 1;
+            const sideA = triple[0] * scale;
+            const sideB = triple[1] * scale;
+            const hypotenuse = triple[2] * scale;
+            items.push(mathTask(
+                'Ein rechtwinkliges Dreieck hat Katheten $' + sideA + '$ und $' + sideB + '$. Berechne die Hypotenuse.',
+                hypotenuse,
+                'Satz des Pythagoras: $a^2+b^2=c^2$.',
+                '$c=\\sqrt{' + sideA + '^2+' + sideB + '^2}=' + hypotenuse + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const base = (idx % 5) + 2;
+            const exponentA = (idx % 4) + 2;
+            const exponentB = (idx % 3) + 1;
+            const result = exponentA + exponentB;
+            items.push(mathTask(
+                'Vereinfache $' + base + '^{' + exponentA + '}\\cdot ' + base + '^{' + exponentB + '}$. Gib nur den neuen Exponenten ein.',
+                result,
+                'Potenzregel: $a^m\\cdot a^n=a^{m+n}$.',
+                'Die Basis ist gleich, deshalb $' + exponentA + '+' + exponentB + '=' + result + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const value = (idx % 9) + 2;
+            const result = value * value;
+            items.push(mathTask(
+                'Bestimme den konstanten Term von $(x+' + value + ')^2$.',
+                result,
+                'Binomische Formel: $(x+a)^2=x^2+2ax+a^2$.',
+                'Der konstante Term ist $a^2=' + value + '^2=' + result + '$.'
+            ));
+        }
+        return items;
+    }
+
+    function pool_k9_mathe() {
+        const items = [];
+        const triples = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [9, 12, 15], [7, 24, 25]];
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const rootA = (idx % 8) + 1;
+            const rootB = rootA + (idx % 5) + 1;
+            items.push(mathTask(
+                'Die Gleichung $(x-' + rootA + ')(x-' + rootB + ')=0$ hat zwei Nullstellen. Gib die groessere Nullstelle ein.',
+                rootB,
+                'Nullproduktregel: Ein Produkt ist null, wenn ein Faktor null ist.',
+                '$x-' + rootA + '=0$ oder $x-' + rootB + '=0$. Die groessere Nullstelle ist $' + rootB + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const triple = triples[(idx - 1) % triples.length];
+            const scale = Math.floor((idx - 1) / triples.length) + 1;
+            const opposite = triple[0] * scale;
+            const hypotenuse = triple[2] * scale;
+            items.push(mathTask(
+                'In einem rechtwinkligen Dreieck gilt zur Winkelposition $\\sin(\\alpha)=\\frac{\\text{Gegenkathete}}{\\text{Hypotenuse}}$. Gegenkathete $=' + opposite + '$, Hypotenuse $=' + hypotenuse + '$. Gib $\\sin(\\alpha)$ als Bruch a/b ein.',
+                opposite + '/' + hypotenuse,
+                'Trigonometrie: $\\sin(\\alpha)=\\frac{Gegenkathete}{Hypotenuse}$.',
+                '$\\sin(\\alpha)=' + opposite + '/' + hypotenuse + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const red = (idx % 6) + 2;
+            const blue = (idx % 5) + 3;
+            const total = red + blue;
+            items.push(mathTask(
+                'In einer Urne liegen ' + red + ' rote und ' + blue + ' blaue Kugeln. Wie gross ist $P(\\text{rot})$? Gib als Bruch a/b ein.',
+                red + '/' + total,
+                'Laplace-Wahrscheinlichkeit: $P=\\frac{guenstige}{moegliche}$.',
+                'Guenstig sind $' + red + '$ rote Kugeln, moeglich sind $' + total + '$ Kugeln.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const original = idx + 6;
+            const scale = (idx % 4) + 2;
+            const result = original * scale;
+            items.push(mathTask(
+                'Eine Strecke von ' + original + ' cm wird im Massstab $' + scale + ':1$ vergroessert. Wie lang ist die Bildstrecke in cm?',
+                result,
+                'Aehnlichkeit: Laengen werden mit dem Massstabsfaktor multipliziert.',
+                '$' + original + '\\cdot ' + scale + '=' + result + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const center = idx + 5;
+            const values = [center - 2, center - 1, center, center + 1, center + 2];
+            items.push(mathTask(
+                'Berechne den Mittelwert der Werte ' + values.join(', ') + '.',
+                center,
+                'Mittelwert: Summe der Werte geteilt durch Anzahl der Werte.',
+                'Die Werte sind symmetrisch um $' + center + '$; die Summe ist $' + (center * 5) + '$, geteilt durch $5$ ergibt $' + center + '$.'
+            ));
+        }
+        return items;
+    }
+
+    function pool_k10_mathe() {
+        const items = [];
+        const triples = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [9, 40, 41]];
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const start = idx + 4;
+            const factor = (idx % 3) + 2;
+            const years = (idx % 4) + 2;
+            const result = start * Math.pow(factor, years);
+            items.push(mathTask(
+                'Eine Groesse startet bei ' + start + ' und wird jedes Jahr mit ' + factor + ' multipliziert. Berechne den Wert nach ' + years + ' Jahren.',
+                result,
+                'Exponentielles Wachstum: $N(t)=N_0\\cdot q^t$.',
+                '$N=' + start + '\\cdot ' + factor + '^{' + years + '}=' + result + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const base = (idx % 4) + 2;
+            const exponent = (idx % 5) + 2;
+            const value = Math.pow(base, exponent);
+            items.push(mathTask(
+                'Loese $' + base + '^x=' + value + '$. Gib nur $x$ ein.',
+                exponent,
+                'Gleiche Basis vergleichen: $a^x=a^n \\Rightarrow x=n$.',
+                '$' + value + '=' + base + '^{' + exponent + '}$, also $x=' + exponent + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const triple = triples[(idx - 1) % triples.length];
+            const scale = Math.floor((idx - 1) / triples.length) + 1;
+            const adjacent = triple[1] * scale;
+            const hypotenuse = triple[2] * scale;
+            items.push(mathTask(
+                'In einem rechtwinkligen Dreieck gilt $\\cos(\\alpha)=\\frac{\\text{Ankathete}}{\\text{Hypotenuse}}$. Ankathete $=' + adjacent + '$, Hypotenuse $=' + hypotenuse + '$. Gib als Bruch a/b ein.',
+                adjacent + '/' + hypotenuse,
+                'Trigonometrie: $\\cos(\\alpha)=\\frac{Ankathete}{Hypotenuse}$.',
+                '$\\cos(\\alpha)=' + adjacent + '/' + hypotenuse + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const radius = (idx % 8) + 2;
+            const height = (idx % 6) + 3;
+            const factor = radius * radius * height;
+            items.push(mathTask(
+                'Ein Zylinder hat Radius $' + radius + '$ und Hoehe $' + height + '$. Das Volumen ist $V=k\\pi$. Gib $k$ ein.',
+                factor,
+                'Zylinder: $V=\\pi r^2h$.',
+                '$k=r^2h=' + radius + '^2\\cdot ' + height + '=' + factor + '$.'
+            ));
+        }
+        for (let idx = 1; idx <= 20; idx += 1) {
+            const rootA = (idx % 7) + 1;
+            const rootB = rootA + (idx % 6) + 2;
+            const sum = rootA + rootB;
+            const product = rootA * rootB;
+            items.push(mathTask(
+                'Die quadratische Gleichung $x^2-' + sum + 'x+' + product + '=0$ hat zwei positive Loesungen. Gib die kleinere Loesung ein.',
+                rootA,
+                'Faktorisieren: $x^2-(a+b)x+ab=(x-a)(x-b)$.',
+                'Hier gilt $a+b=' + sum + '$ und $ab=' + product + '$. Die kleinere Loesung ist $' + rootA + '$.'
+            ));
+        }
+        return items;
     }
 
     function pool_k5_physik() {
@@ -1399,7 +2150,8 @@
                            note: 'Kleines Einmaleins, Geteilt-Aufgaben, schriftliche Addition/Subtraktion bis 1000. Bitte handschriftlich rechnen, nur Endergebnis eintragen.' },
             'k4.mathe':  { mode: 'pool', pool: pool_klasse4_mathe(),
                            note: 'Halbschriftliches und schriftliches Multiplizieren/Dividieren, Sachaufgaben. Bitte handschriftlich rechnen.' },
-            'k5.mathe':  { mode: 'stub' },
+            'k5.mathe':  { mode: 'pool', pool: pool_k5_mathe(),
+                           note: 'Mathematik Klasse 5: Rechnen mit natuerlichen Zahlen, Bruechen, Dezimalzahlen, Groessen und Rechtecken — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k5.englisch': { mode: 'stub' },
             'k5.physik':   { mode: 'pool', pool: pool_k5_physik(),
                              note: 'NRW-KLP NW SI Klasse 5/6: Magnetismus, einfacher Stromkreis, Licht & Schatten, Temperatur — 50er Pool.' },
@@ -1407,7 +2159,8 @@
                              note: 'NRW-KLP NW SI Klasse 5/6: Stoffe & Eigenschaften, Aggregatzustaende, Wasser & Luft — 50er Pool.' },
             'k5.biologie': { mode: 'pool', pool: pool_k5_biologie(),
                              note: 'NRW-KLP NW SI Klasse 5/6: Pflanzen, Tiere und Mensch — Einstieg in die Biologie — 50er Pool.' },
-            'k6.mathe':  { mode: 'stub' },
+            'k6.mathe':  { mode: 'pool', pool: pool_k6_mathe(),
+                           note: 'Mathematik Klasse 6: Bruchteile, Prozentrechnung, ganze Zahlen, Gleichungen und Dreiecksgeometrie — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k6.englisch': { mode: 'stub' },
             'k6.physik':   { mode: 'pool', pool: pool_k6_physik(),
                              note: 'NRW-KLP NW SI Klasse 5/6: Optik (Reflexion, Linsen, Farben), Schall, Waermetransport — 50er Pool.' },
@@ -1415,7 +2168,8 @@
                              note: 'NRW-KLP NW SI Klasse 5/6: Stofftrennung (Filtrieren, Destillieren, Chromatographie), Indikatoren, Reinstoffe — 50er Pool.' },
             'k6.biologie': { mode: 'pool', pool: pool_k6_biologie(),
                              note: 'NRW-KLP NW SI Klasse 5/6: Mensch, Wirbeltiere, oekologische Grundbegriffe — 50er Pool.' },
-            'k7.mathe':  { mode: 'stub' },
+            'k7.mathe':  { mode: 'pool', pool: pool_k7_mathe(),
+                           note: 'Mathematik Klasse 7: lineare Gleichungen, Proportionalitaet, Prozentrechnung, lineare Funktionen und Terme — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k7.englisch': { mode: 'stub' },
             'k7.physik':   { mode: 'pool', pool: pool_k7_physik(),
                              note: 'NRW-KLP Physik SI Klasse 7/8: Mechanik-Grundlagen (Geschwindigkeit, Kraft, Dichte, Einheiten) — Endergebnis ohne Einheit eintragen.' },
@@ -1423,7 +2177,8 @@
                              note: 'NRW-KLP Chemie SI Klasse 7/8: Aggregatzustaende, Summenformeln, Stoffeigenschaften — 50er Pool.' },
             'k7.biologie': { mode: 'pool', pool: pool_k7_biologie(),
                              note: 'NRW-KLP Biologie SI Klasse 7/8: Zelle, Oekosystem, Pflanzen vertieft — 50er Pool.' },
-            'k8.mathe':  { mode: 'stub' },
+            'k8.mathe':  { mode: 'pool', pool: pool_k8_mathe(),
+                           note: 'Mathematik Klasse 8: Steigung, Gleichungssysteme, Pythagoras, Potenzen und binomische Formeln — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k8.englisch': { mode: 'stub' },
             'k8.physik':   { mode: 'pool', pool: pool_k8_physik(),
                              note: 'NRW-KLP Physik SI Klasse 7/8: Elektrik (Ohmsches Gesetz, Reihen-/Parallelschaltung), Arbeit & Leistung — Endergebnis ohne Einheit.' },
@@ -1431,7 +2186,8 @@
                              note: 'NRW-KLP Chemie SI Klasse 7/8: Atombau, Periodensystem-Grundlagen, einfache Summenformeln — 50er Pool.' },
             'k8.biologie': { mode: 'pool', pool: pool_k8_biologie(),
                              note: 'NRW-KLP Biologie SI Klasse 7/8: Atmung, Verdauung, Blutkreislauf — 50er Pool.' },
-            'k9.mathe':  { mode: 'stub' },
+            'k9.mathe':  { mode: 'pool', pool: pool_k9_mathe(),
+                           note: 'Mathematik Klasse 9: quadratische Gleichungen, Trigonometrie, Wahrscheinlichkeit, Aehnlichkeit und Statistik — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k9.englisch': { mode: 'stub' },
             'k9.physik':   { mode: 'pool', pool: pool_k9_physik(),
                              note: 'NRW-KLP Physik SI Klasse 9/10: Newton, Energie, Elektromagnetismus, Druck — Endergebnis ohne Einheit.' },
@@ -1439,7 +2195,8 @@
                              note: 'NRW-KLP Chemie SI Klasse 9/10: pH-Wert, Saeuren & Basen, Neutralisation, Ionenbindung — 50er Pool.' },
             'k9.biologie': { mode: 'pool', pool: pool_k9_biologie(),
                              note: 'NRW-KLP Biologie SI Klasse 9/10: Genetik-Grundlagen (DNA, Mitose, Meiose), Evolution — 50er Pool.' },
-            'k10.mathe': { mode: 'stub' },
+            'k10.mathe': { mode: 'pool', pool: pool_k10_mathe(),
+                           note: 'Mathematik Klasse 10: Exponentialfunktionen, Potenzen, Trigonometrie, Koerpergeometrie und quadratische Gleichungen — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k10.englisch': { mode: 'stub' },
             'k10.physik':   { mode: 'pool', pool: pool_k10_physik(),
                              note: 'NRW-KLP Physik SI Klasse 9/10: Atombau, Radioaktivitaet, Optik — 50er Pool; Endergebnis ohne Einheit.' },

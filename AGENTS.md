@@ -398,7 +398,7 @@ Eine PR/Änderung gilt als fertig, wenn:
 
 ---
 
-## 17. Schüler-Bereich (Mathematik Klasse 1–4, Naturwissenschaften Klasse 5–10, später Englisch ab Klasse 5)
+## 17. Schüler-Bereich (Mathematik Klasse 1–10, Naturwissenschaften Klasse 5–10, später Englisch ab Klasse 5)
 
 Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Track:
 
@@ -418,7 +418,7 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
         'k1.mathe': { mode: 'generated', gen: () => ({ q, a }), note: '...' },
         'k3.mathe': { mode: 'pool',      pool: [{ q, a }, ...],  note: '...' },
         'k5.physik': { mode: 'pool',    pool: [{ q, a, f, s }, ...], note: '...' },
-        'k5.mathe': { mode: 'stub' },
+        'k5.mathe': { mode: 'pool',     pool: [{ q, a, f, s }, ...], note: '...' },
         ...
     },
     normalize: (s) => s.trim().replace(/\s+/g, '').replace(/,/g, '.').toLowerCase()
@@ -436,7 +436,7 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 - **Quiz:** Sets von genau 10 Aufgaben. Keine Konfiguration der Set-Größe durch User.
 - **Kein Multiple-Choice.** Eingabe ausschließlich als Text/Zahl. Antwort-Vergleich erfolgt nach Normalisierung (Whitespace weg, Komma → Punkt, Lowercase).
 - **Kein Hint, keine Musterlösung während des Quiz** — Schüler sollen handschriftlich rechnen. Formel/Merksatz und Musterlösung werden erst in der Ergebnisansicht angezeigt.
-- **Training fuer Mittelstufe-NW:** Fachkarten zeigen getrennt `Training oeffnen` und `10-Fragen-Quiz`. Training zeigt genau eine Aufgabe, Formel/Merksatz (`f`) und optional Musterloesung (`s`), plus `Als geloest markieren` mit Persistenz in `smartineer_schueler_progress_v1`.
+- **Training fuer Mittelstufe-NW und Mathe:** Fachkarten zeigen getrennt `Training oeffnen` und `10-Fragen-Quiz`. Training zeigt genau eine Aufgabe, Formel/Merksatz (`f`) und optional Musterloesung (`s`), plus `Als geloest markieren` mit Persistenz in `smartineer_schueler_progress_v1`.
 - Endbildschirm: Anzahl korrekt/falsch, Quote in %, Liste aller 10 Aufgaben mit eigener Antwort, richtiger Antwort und aufklappbarer Formel/Musterloesung.
 - Buttons am Ende: "Neues Quiz", optional "Training oeffnen", "Anderes Fach", "Andere Klasse".
 - Eingabefeld nutzt eigene Klasse `.schueler-input` (groß, zentriert) — Default heller Hintergrund, dunkler im Dark-Mode.
@@ -450,19 +450,22 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 | 2      | generated| Plus/Minus bis 100, Vorübung Einmaleins (×2, ×5, ×10).                                 |
 | 3      | pool     | Vollständiges kleines 1×1, Geteilt aus 1×1, schriftliche Addition/Subtraktion bis 1000.|
 | 4      | pool     | Halbschriftliches/schriftliches Mal/Geteilt, Division mit Rest, einfache Sachaufgaben.  |
-| 5      | pool     | **Naturwissenschaften (50er Pools, NRW-KLP NW SI):** Physik (Magnetismus, Stromkreis, Licht/Schatten, Temperatur), Chemie (Stoffe & Aggregatzustaende, Wasser & Luft), Biologie (Pflanzen/Tiere/Mensch). Mathe + Englisch in Vorbereitung. |
-| 6      | pool     | **Naturwissenschaften (50er Pools, NRW-KLP NW SI):** Physik (Optik, Schall, Waermetransport), Chemie (Stofftrennung, Indikatoren, Reinstoffe), Biologie (Mensch, Wirbeltiere, Oekologie). Mathe + Englisch in Vorbereitung. |
-| 7      | pool     | **Naturwissenschaften (50er Pools):** Physik (Mechanik, Einheiten), Chemie (Aggregatzustaende, Summenformeln), Biologie (Zelle, Oekosystem). Mathe + Englisch in Vorbereitung. |
-| 8      | pool     | **Naturwissenschaften (50er Pools):** Physik (Elektrik, Arbeit/Leistung), Chemie (Atombau, Periodensystem), Biologie (Atmung, Verdauung, Kreislauf). Mathe + Englisch in Vorbereitung. |
-| 9      | pool     | **Naturwissenschaften (50er Pools):** Physik (Newton, Energie, Druck), Chemie (Saeuren/Basen, Salze), Biologie (Genetik-Grundlagen, Evolution). Mathe + Englisch in Vorbereitung. |
-| 10     | pool     | **Naturwissenschaften (50er Pools):** Physik (Atombau, Optik), Chemie (Organische Chemie Einstieg), Biologie (Molekularbiologie, Biodiversitaet). Mathe + Englisch in Vorbereitung. |
+| 5      | pool     | **Mathematik (100er Pool):** natuerliche Zahlen, Brueche, Dezimalzahlen, Groessen, Rechtecke. **Naturwissenschaften (NRW-KLP NW SI):** Physik (Magnetismus, Stromkreis, Licht/Schatten, Temperatur), Chemie (Stoffe & Aggregatzustaende, Wasser & Luft), Biologie (Pflanzen/Tiere/Mensch). Englisch in Vorbereitung. |
+| 6      | pool     | **Mathematik (100er Pool):** Bruchteile, Prozentrechnung, ganze Zahlen, Gleichungen, Dreiecke. **Naturwissenschaften (NRW-KLP NW SI):** Physik (Optik, Schall, Waermetransport), Chemie (Stofftrennung, Indikatoren, Reinstoffe), Biologie (Mensch, Wirbeltiere, Oekologie). Englisch in Vorbereitung. |
+| 7      | pool     | **Mathematik (100er Pool):** lineare Gleichungen, Proportionalitaet, Prozentrechnung, lineare Funktionen, Terme. **Naturwissenschaften:** Physik (Mechanik, Einheiten), Chemie (Aggregatzustaende, Summenformeln), Biologie (Zelle, Oekosystem). Englisch in Vorbereitung. |
+| 8      | pool     | **Mathematik (100er Pool):** Steigung, Gleichungssysteme, Pythagoras, Potenzen, binomische Formeln. **Naturwissenschaften:** Physik (Elektrik, Arbeit/Leistung), Chemie (Atombau, Periodensystem), Biologie (Atmung, Verdauung, Kreislauf). Englisch in Vorbereitung. |
+| 9      | pool     | **Mathematik (100er Pool):** quadratische Gleichungen, Trigonometrie, Wahrscheinlichkeit, Aehnlichkeit, Statistik. **Naturwissenschaften:** Physik (Newton, Energie, Druck), Chemie (Saeuren/Basen, Salze), Biologie (Genetik-Grundlagen, Evolution). Englisch in Vorbereitung. |
+| 10     | pool     | **Mathematik (100er Pool):** Exponentialfunktionen, Potenzen, Trigonometrie, Koerpergeometrie, quadratische Gleichungen. **Naturwissenschaften:** Physik (Atombau, Optik), Chemie (Organische Chemie Einstieg), Biologie (Molekularbiologie, Biodiversitaet). Englisch in Vorbereitung. |
 
-**Naturwissenschaften-Pools (Klasse 5–10, seit v65; NRW-konform um Physik+Chemie in Klasse 5/6 erweitert seit v66; 50er Pools seit v68; Training seit v69):** Pro (Klasse, Fach) ein kuratierter Pool mit `{q, a, f, s}`-Schema; aktuell 950 NW-Aufgaben. Themen folgen dem **NRW-Kernlehrplan Sekundarstufe I** (KLP NW SI fuer Klasse 5/6 integrierter Naturwissenschaften-Unterricht; KLP Physik/Chemie/Biologie SI fuer Klasse 7–10). `q` und `a` bleiben Plain-Text/KaTeX; `f` und `s` duerfen kuratiertes HTML + KaTeX fuer Formel/Merksatz und Musterloesung enthalten, aber niemals User-Input. Antworten sind kurze Strings (Zahl, Begriff, Summenformel) und werden ueber `normalize()` (trim, whitespace weg, Komma->Punkt, Kleinschreibung) verglichen. Aufgaben sind handgeprueft gegen NRW-Lehrplaene Mittelstufe (§8 Wissenschaftliche Korrektheit). Erweiterungen erfolgen bevorzugt append-only ueber die Top-up-Bank in `js/data/schueler.js`; Stable-QID und Schueler-Progress entstehen aus Stem+Antwort, nicht aus Ingenieurs-Indizes.
+**Naturwissenschaften-Pools (Klasse 5–10, seit v65; NRW-konform um Physik+Chemie in Klasse 5/6 erweitert seit v66; 50er Pools seit v68; Training seit v69; Rahmenplan-Top-up seit v70):** Pro (Klasse, Fach) ein kuratierter Pool mit `{q, a, f, s}`-Schema; aktuell 1.250 NW-Aufgaben. Themen folgen dem **NRW-Kernlehrplan Sekundarstufe I** (KLP NW SI fuer Klasse 5/6 integrierter Naturwissenschaften-Unterricht; KLP Physik/Chemie/Biologie SI fuer Klasse 7–10). `q` und `a` bleiben Plain-Text/KaTeX; `f` und `s` duerfen kuratiertes HTML + KaTeX fuer Formel/Merksatz und Musterloesung enthalten, aber niemals User-Input. Antworten sind kurze Strings (Zahl, Begriff, Summenformel) und werden ueber `normalize()` (trim, whitespace weg, Komma->Punkt, Kleinschreibung) verglichen. Aufgaben sind handgeprueft gegen NRW-Lehrplaene Mittelstufe (§8 Wissenschaftliche Korrektheit). Erweiterungen erfolgen bevorzugt append-only ueber die Top-up-Bank in `js/data/schueler.js`; Stable-QID und Schueler-Progress entstehen aus Stem+Antwort, nicht aus Ingenieurs-Indizes.
+
+**Mathematik-Pools (Klasse 5–10, seit v70):** Pro Klassenstufe ein 100er Pool mit `{q, a, f, s}`-Schema, gleicher Trainings-/Quizpfad wie Naturwissenschaften. Die Themen folgen Rahmenlehrplan/KLP Mathematik SI und decken Rechnen, Algebra, Funktionen, Geometrie, Statistik/Wahrscheinlichkeit und Exponential-/Trigonometrie-Grundlagen altersgerecht ab. Antworten sind kurze Strings; Brueche werden als `a/b`, Dezimalzahlen mit Punkt oder Komma akzeptiert.
 
 ### 17.4 Erweiterungsregeln
 
 - **Neue Aufgabe für Klasse 3 oder 4 hinzufügen**: an das passende `pool_*`-Array anhängen (Reihenfolge irrelevant — die UI sampelt zufällig).
 - **Neue Naturwissenschaften-Aufgabe für Klasse 5–10 hinzufügen**: append-only in die passende `NATWI_TOPUPS`-/Extra-Liste oder ans passende `pool_k*_fach()`-Basisarray; keine bestehenden Items verschieben, da Schueler-Progress/Stable-QID aus Stem+Antwort entsteht und Review-Diffs sonst unnoetig schwer werden. Neue Items muessen nach Runtime-Anreicherung `{q,a,f,s}` besitzen; `tools/validate.js --strict-sources` prueft das.
+- **Neue Mathe-Aufgabe für Klasse 5–10 hinzufügen**: append-only in die passende `pool_k*_mathe()`-Funktion; Schema `{q,a,f,s}` direkt liefern, keine bestehenden Items verschieben. Validator fordert mindestens 100 Items pro Klasse und die Trainingsfelder.
 - **Neuen Generator (Klasse 1 oder 2)**: rein deterministisches `gen()` schreiben; immer `{ q: string, a: string }` zurückgeben. Antwort als String, damit `normalize()` greift. Schwerere Generatoren (z.B. Zehnerübergang) in eigene Funktion auslagern und in `gen_klasse2_mathe` per Wahrscheinlichkeit einsteuern.
 - **Klasse 5–10 freischalten**: `mode: 'stub'` durch `pool` oder `generated` ersetzen, `pool`/`gen` und `note` ergänzen. UI braucht keine Änderung — die Karten werden automatisch aktiv.
 - **Englisch ab Klasse 5**: gleiches Schema (`{ q, a }`). Da Antworten Texte sein können, muss `normalize()` ggf. erweitert werden (z.B. Bindestriche, Apostrophe). Vor Erweiterung in einem Issue diskutieren.

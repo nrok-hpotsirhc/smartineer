@@ -314,6 +314,18 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 - **Aktion:** User-Request 2026-05-11: Mittelstufenfaecher im Schueler-Bereich wie offene Trainingskategorien nutzbar machen, ohne sie mit Ingenieurs- oder Schulungen-Track zu vermischen. Pro Aufgabe Formel/Merksatz und Musterloesung ergaenzen, Aufgaben einzeln anzeigen, geloest markieren, daneben separaten 10-Fragen-Quizmodus behalten und weitere 50 Mittelstufenfragen ergaenzen.
 - **Akzeptanz:** Eigener Storage-Key `smartineer_schueler_progress_v1`; keine Nutzung von `window.APP_DATA`, `wissen_reloaded_progress_v1` oder Schulungen-State; Mittelstufen-NW-Pools enthalten `{q,a,f,s}`; UI bietet Training und Quiz getrennt; +50 append-only Fragen; Validator prueft neue Felder; CACHE_VERSION bumpen.
 
+### P-SCHUELER-NATWI-RAHMENPLAN-V70 — Naturwissenschaften Klasse 5-10 um je 50 Fragen erweitern
+- **Status:** in-progress
+- **Datei:** `js/data/schueler.js`
+- **Aktion:** User-Request 2026-05-11: Fuer jede Mittelstufen-Klasse 5-10 weitere 50 Naturwissenschaftsfragen nach Rahmenlehrplan/KLP anhaengen, verteilt auf Physik, Chemie und Biologie.
+- **Akzeptanz:** Append-only Zusatzbank; bestehende Items stabil; +300 NW-Fragen gesamt; alle Items nach Runtime-Anreicherung `{q,a,f,s}`; Validator und Zaehlscript gruen; CACHE_VERSION bumpen.
+
+### P-SCHUELER-MATHE-MITTELSTUFE — Mathematik Klasse 5-10 im Trainingsschema freischalten
+- **Status:** in-progress
+- **Dateien:** `js/data/schueler.js`, `tools/validate.js`, `README.md`, `AGENTS.md`, `WORKPACKAGES.md`, `sw.js`
+- **Aktion:** User-Request 2026-05-11: Mathematik fuer Klassen 5-10 mit Aufgabenpool im gleichen Schema wie Naturwissenschaften bereitstellen.
+- **Akzeptanz:** Klasse 5-10 Mathematik nicht mehr `stub`; je Klassenstufe 100 Aufgaben im `{q,a,f,s}`-Schema; Training/Quiz funktionieren ohne UI-Sonderpfad; Validator fordert Felder; Doku und Cache aktualisiert.
+
 ---
 
 ## D) UI / Bugs / Tooling — werden ad-hoc als P-UI-... eingeplant
