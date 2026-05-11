@@ -95,7 +95,7 @@ smartineer/
 
 **Regeln**:
 - Keine neuen Top-Level-Ordner ohne Diskussion.
-- **Keine Binär-Bilder** (PNG/JPG) — Icons sind SVG (Performance + git-friendly).
+- **Keine Binär-Bilder** (PNG/JPG) — App-Icons sind SVG (Performance + git-friendly). **Ausnahme:** Das Brand-Logo (`icons/smartineer-logo.png`) ist eine vorgegebene 3D-Illustration und liegt als optimiertes PNG mit transparentem Hintergrund vor. Die SVG-Icons (`icons/icon.svg`, `icon-192.svg`, `icon-512.svg`) bleiben Pflicht für Favicon, PWA-Manifest und Maskable. Eine vektorisierte, vereinfachte Variante des Brand-Logos liegt zur freien Verwendung in `logo/smartineer-logo-flat.svg`.
 - Keine Lockfiles, keine `node_modules/`, keine `package.json` (es gibt kein npm-Projekt).
 - `manifest.webmanifest` und `sw.js` müssen am **Repo-Root** liegen (Service-Worker-Scope = `/`).
 

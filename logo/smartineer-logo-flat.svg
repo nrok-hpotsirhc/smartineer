@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Smartineer">
+  <title>Smartineer</title>
+  <defs>
+    <linearGradient id="sGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="55%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+    <linearGradient id="gearGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="arrowGrad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#86efac"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Gear ring (back-right, accent) -->
+  <g transform="translate(330 270)">
+    <g fill="url(#gearGrad)">
+      <circle r="120"/>
+    </g>
+    <g fill="#0f172a" opacity="0.0"></g>
+    <!-- Gear teeth -->
+    <g fill="url(#gearGrad)">
+      <rect x="-18" y="-150" width="36" height="36" rx="6"/>
+      <rect x="-18" y="114" width="36" height="36" rx="6"/>
+      <rect x="-150" y="-18" width="36" height="36" rx="6"/>
+      <rect x="114" y="-18" width="36" height="36" rx="6"/>
+      <rect x="-18" y="-150" width="36" height="36" rx="6" transform="rotate(45)"/>
+      <rect x="-18" y="114" width="36" height="36" rx="6" transform="rotate(45)"/>
+      <rect x="-150" y="-18" width="36" height="36" rx="6" transform="rotate(45)"/>
+      <rect x="114" y="-18" width="36" height="36" rx="6" transform="rotate(45)"/>
+    </g>
+    <!-- Gear inner hole -->
+    <circle r="64" fill="#0b1220"/>
+    <circle r="56" fill="#0f172a"/>
+  </g>
+
+  <!-- Upward arrow (overlapping gear, growth) -->
+  <g>
+    <path d="M312 100
+             L378 100
+             L378 270
+             L420 270
+             L345 360
+             L270 270
+             L312 270 Z"
+          fill="url(#arrowGrad)"
+          stroke="#065f46" stroke-width="6" stroke-linejoin="round"
+          transform="scale(1 -1) translate(0 -460)"/>
+  </g>
+
+  <!-- Stylised S (front, brand mark) -->
+  <g>
+    <path d="M 305 130
+             C 215 105, 130 145, 130 215
+             C 130 270, 195 290, 250 295
+             C 305 300, 360 318, 360 360
+             C 360 415, 270 440, 175 410"
+          fill="none"
+          stroke="url(#sGrad)"
+          stroke-width="58"
+          stroke-linecap="round"/>
+    <!-- Circuit dots on left flank -->
+    <g fill="#1e3a8a">
+      <circle cx="108" cy="200" r="9"/>
+      <circle cx="92"  cy="240" r="9"/>
+      <circle cx="108" cy="282" r="9"/>
+    </g>
+    <g stroke="#1e3a8a" stroke-width="6" stroke-linecap="round" fill="none">
+      <line x1="108" y1="200" x2="138" y2="200"/>
+      <line x1="92"  y1="240" x2="128" y2="240"/>
+      <line x1="108" y1="282" x2="138" y2="282"/>
+    </g>
+  </g>
+</svg>

@@ -617,8 +617,8 @@ function Nav({ view, setView, theme, onToggleTheme }) {
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                 <div className="flex justify-between gap-2 h-16 items-center min-w-0">
                     <a href="./" className="flex items-center gap-2 min-w-0 flex-shrink" aria-label="Smartineer Home">
-                        <img src="icons/icon.svg" alt="" width="36" height="36"
-                             className="w-9 h-9 rounded-xl shadow-lg flex-shrink-0" />
+                        <img src="icons/smartineer-logo.png" alt="" width="36" height="36"
+                             className="w-9 h-9 flex-shrink-0" />
                         <span className="hidden sm:inline text-base sm:text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent truncate">Smartineer</span>
                     </a>
                     <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
@@ -3029,7 +3029,7 @@ function InstallPrompt({ open, onClose, deferredEvent, platform }) {
                 <button onClick={() => onClose(false)}
                     className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 transition text-xl leading-none" aria-label="Schließen">×</button>
                 <div className="flex items-center gap-3 mb-4">
-                    <img src="icons/icon.svg" alt="" width="48" height="48" className="w-12 h-12 rounded-xl shadow-lg" />
+                    <img src="icons/smartineer-logo.png" alt="" width="48" height="48" className="w-12 h-12" />
                     <div>
                         <h3 className="text-xl font-bold text-slate-900">Smartineer als App</h3>
                         <p className="text-xs text-slate-500">Offline lernen, schneller Start vom Homescreen</p>
