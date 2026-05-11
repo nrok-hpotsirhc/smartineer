@@ -308,6 +308,12 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 - **Aktion:** User-Request 2026-05-11: In Physik, Chemie und Biologie fuer jede Klasse 5-10 jeweils 40 weitere kuratierte Pool-Fragen anhaengen bzw. append-only generieren. Ziel: 18 Pools × 50 Items = 900 NW-Fragen gesamt.
 - **Akzeptanz:** Bestehende Pool-Items bleiben stabil; jeder Pool enthaelt 50 `{q,a}`-Items; Fragen sind NRW-KLP-SI-kompatibel, kurz beantwortbar und validator-sauber; CACHE_VERSION bumpen.
 
+### P-SCHUELER-MITTELSTUFE-TRAINING — Mittelstufe Training und Quiz getrennt strukturieren
+- **Status:** done (v69, Sitzung 2026-05-11)
+- **Dateien:** `js/app.jsx`, `js/data/schueler.js`, `tools/validate.js`, `README.md`, `AGENTS.md`, `WORKPACKAGES.md`, `sw.js`
+- **Aktion:** User-Request 2026-05-11: Mittelstufenfaecher im Schueler-Bereich wie offene Trainingskategorien nutzbar machen, ohne sie mit Ingenieurs- oder Schulungen-Track zu vermischen. Pro Aufgabe Formel/Merksatz und Musterloesung ergaenzen, Aufgaben einzeln anzeigen, geloest markieren, daneben separaten 10-Fragen-Quizmodus behalten und weitere 50 Mittelstufenfragen ergaenzen.
+- **Akzeptanz:** Eigener Storage-Key `smartineer_schueler_progress_v1`; keine Nutzung von `window.APP_DATA`, `wissen_reloaded_progress_v1` oder Schulungen-State; Mittelstufen-NW-Pools enthalten `{q,a,f,s}`; UI bietet Training und Quiz getrennt; +50 append-only Fragen; Validator prueft neue Felder; CACHE_VERSION bumpen.
+
 ---
 
 ## D) UI / Bugs / Tooling — werden ad-hoc als P-UI-... eingeplant
@@ -581,12 +587,14 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-APPJSX-SPLIT** (Code-Hygiene; `js/app.jsx` ~3400 Zeilen) oder **P-MED-AUDIT** (Quellenaudit Allgemeinmedizin). Fuer den Schueler-Track bleibt als naechster Inhaltshebel **P-SCHUELER-MATHE-MITTELSTUFE** (Mathe-Pools Klasse 5-10) offen.
-> Begruendung: v68 hat die Naturwissenschaften-Pools auf 18 × 50 Fragen gehoben; damit ist der Mittelstufen-NW-Bereich nicht mehr Skeleton. Die naechsten grossen Hebel sind Code-Hygiene (App-Split), medizinische Quellenqualitaet und Mathe 5-10.
+> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-APPJSX-SPLIT** (Code-Hygiene; `js/app.jsx` ist weiter sehr gross) oder **P-MED-AUDIT** (Quellenaudit Allgemeinmedizin). Fuer den Schueler-Track bleibt als naechster Inhaltshebel ein neues Paket **P-SCHUELER-MATHE-MITTELSTUFE** (Mathe-Pools Klasse 5-10) anzulegen.
+> Begruendung: v69 hat den Mittelstufen-NW-Bereich funktional auf Training + Quiz gehoben und auf 950 NW-Aufgaben erweitert; die naechsten grossen Hebel sind Code-Hygiene, medizinische Quellenqualitaet und Mathe 5-10.
 
 ---
 
 ## F) Aenderungs-Historie dieser Datei
+
+- 2026-05-11: Session-Batch v69 erledigt — **P-SCHUELER-MITTELSTUFE-TRAINING** (User-Request: Mittelstufenfaecher im Schueler-Bereich sollen wie Trainingskategorien arbeiten, aber getrennt von Ingenieurs- und Schulungen-Bereich bleiben). `js/app.jsx` erhaelt fuer den Schueler-Track die getrennten Stages `training` und `quiz`: Mittelstufen-NW-Fachkarten bieten jetzt **Training oeffnen** und **10-Fragen-Quiz**; Training zeigt jeweils eine Aufgabe, Formel/Merksatz, optional Musterloesung, geloest-Markierung und Aufgaben-Pillen. Persistenz laeuft ausschliesslich ueber `smartineer_schueler_progress_v1`, Export/Import und globaler Reset wurden um diesen Key erweitert; `wissen_reloaded_progress_v1` und Schulungen-State bleiben unberuehrt. `js/data/schueler.js` reichert alle Mittelstufen-NW-Items zur Laufzeit mit `{f,s}` an und fuegt append-only **+50** weitere Mittelstufenfragen hinzu; Stand: **950 NW-Aufgaben**. `tools/validate.js` verlangt fuer `k5-k10.(physik|chemie|biologie)` nun `{q,a,f,s}`. README, AGENTS §0/§17 und Memory vermerken die neue Prozent-Report-Pflicht: Am Ende jeder Prompt-Ausfuehrung Worklog-offen-Prozent nennen. **CACHE_VERSION:** v68 -> v69. **Naechster Batch-Anker:** P-ARCH-APPJSX-SPLIT oder P-MED-AUDIT; Schueler-Inhaltshebel danach Mathe 5-10.
 
 - 2026-05-11: Session-Batch v68 erledigt — **P-SCHUELER-NATWI-TOPUP** (User-Request: „weitere 40 Fragen je Kategorie je Klasse" in den Naturwissenschaften). `js/data/schueler.js` erhaelt eine neue append-only Top-up-Bank `NATWI_TOPUPS` mit +40 Items je (Klasse 5-10, Fach Physik/Chemie/Biologie), also +720 neue `{q,a}`-Drillfragen. Die 18 bestehenden Basis-Pools bleiben unveraendert und werden ueber `withNatwiTopup([...], classId, subject)` auf jeweils 50 Items erweitert; Gesamtausbau: 18 Pools × 50 = **900 NW-Fragen**. Themen bleiben NRW-KLP-SI-kompatibel: Klasse 5/6 integrierte NW (Magnetismus, Stromkreis, Licht/Schatten, Temperatur, Stoffe/Aggregatzustaende, Wasser/Luft, Optik, Schall, Stofftrennung, Mensch/Wirbeltiere/Oekologie), Klasse 7/8 Physik/Chemie/Biologie (Mechanik, Elektrik, Atombau, Periodensystem, Zelle/Oekosystem, Atmung/Verdauung/Kreislauf), Klasse 9/10 (Newton/Energie/Druck, Saeuren/Basen/Salze, Genetik/Evolution, Atombau/Radioaktivitaet/Optik, Organische Chemie, Molekularbiologie/Biodiversitaet). UI-Intro in `js/app.jsx`, README und AGENTS §17 aktualisiert: NW ist jetzt 50er-Pool statt Skeleton; Mathe 5-10 und Englisch bleiben in Vorbereitung. **CACHE_VERSION:** v67 -> v68. **Validierung:** Pool-Zaehlscript bestaetigt alle 18 NW-Pools mit 50 Items; `node tools/validate.js --strict-sources` exit 0; `get_errors` clean fuer `js/data/schueler.js`, `js/app.jsx`, `sw.js`. **Naechster Batch-Anker:** P-ARCH-APPJSX-SPLIT oder P-MED-AUDIT; Schueler-Inhaltshebel danach P-SCHUELER-MATHE-MITTELSTUFE.
 

@@ -16,6 +16,7 @@ Am Ende **jeder** Arbeitseinheit (Commit, PR, Agent-Antwort) ist ein knapper **S
 - **DONE** — was in dieser Einheit fertig wurde.
 - **OFFEN / DRINGEND** — Punkte, die noch fehlen *und* den Funktionsumfang oder die wissenschaftliche Korrektheit beeinträchtigen, oder bei denen Optimierungsbedarf besteht. **Diese Punkte müssen klar hervorgehoben werden.**
 - **NICE-TO-HAVE** — optionale TODOs nur stichpunktartig.
+- **WORKLOG-OFFEN** — nach jeder Prompt-/Task-Ausfuehrung den prozentual offenen Anteil nennen: offene Arbeitspakete / alle Arbeitspakete inklusive erledigter Pakete.
 
 Ehrlichkeit ist Pflicht: Lücken (z.B. zu wenige Quiz-Fragen, fehlende PBQ-Simulation, ungeprüfte Quelle) **dürfen nicht verschwiegen werden**. Wer einen Block knapp unter die Mindestanforderung liefert, muss den Gap explizit benennen.
 
@@ -403,9 +404,9 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 
 - Eigener Top-Level-Nav-Tab "Schüler" (links neben dem Theme-Toggle).
 - Eigene Datendatei `js/data/schueler.js` mit globalem `window.SCHUELER`.
-- Eigener Komponenten-Block `Schueler` in `app.jsx` (Stages: `classes` → `subjects` → `drill` → `result`).
-- **Eigener** Storage-Namespace (Prefix `smartineer_schueler_*`); der Ingenieurs-Storage-Key (`wissen_reloaded_progress_v1`) wird **nicht** angefasst.
-- KaTeX wird im Drill mitgerendert (nur falls eine Aufgabe `$...$` enthält); die generierten Klasse-1/2-Aufgaben sind reiner Text.
+- Eigener Komponenten-Block `Schueler` in `app.jsx` (Stages: `classes` -> `subjects` -> `training` oder `quiz` -> `result`).
+- **Eigener** Storage-Namespace (Prefix `smartineer_schueler_*`, aktuell `smartineer_schueler_progress_v1`); der Ingenieurs-Storage-Key (`wissen_reloaded_progress_v1`) und der Schulungen-State (`smartineer_schulungen_v2`) werden **nicht** angefasst.
+- KaTeX wird im Training, Quiz und Ergebnis mitgerendert (nur falls eine Aufgabe `$...$` enthält); die generierten Klasse-1/2-Aufgaben sind reiner Text.
 
 ### 17.1 Datenstruktur (`window.SCHUELER`)
 
@@ -416,6 +417,7 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
     content: {
         'k1.mathe': { mode: 'generated', gen: () => ({ q, a }), note: '...' },
         'k3.mathe': { mode: 'pool',      pool: [{ q, a }, ...],  note: '...' },
+        'k5.physik': { mode: 'pool',    pool: [{ q, a, f, s }, ...], note: '...' },
         'k5.mathe': { mode: 'stub' },
         ...
     },
@@ -431,11 +433,12 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 
 ### 17.2 UX-Vertrag
 
-- **Sets von genau 10 Aufgaben.** Keine Konfiguration der Set-Größe durch User.
+- **Quiz:** Sets von genau 10 Aufgaben. Keine Konfiguration der Set-Größe durch User.
 - **Kein Multiple-Choice.** Eingabe ausschließlich als Text/Zahl. Antwort-Vergleich erfolgt nach Normalisierung (Whitespace weg, Komma → Punkt, Lowercase).
-- **Kein Hint, keine Musterlösung während des Drills** — Schüler sollen handschriftlich rechnen.
-- Endbildschirm: Anzahl korrekt/falsch, Quote in %, Liste aller 10 Aufgaben mit eigener Antwort und (bei Fehler) der Musterlösung.
-- Buttons am Ende: "Neuer Durchgang", "Anderes Fach", "Andere Klasse".
+- **Kein Hint, keine Musterlösung während des Quiz** — Schüler sollen handschriftlich rechnen. Formel/Merksatz und Musterlösung werden erst in der Ergebnisansicht angezeigt.
+- **Training fuer Mittelstufe-NW:** Fachkarten zeigen getrennt `Training oeffnen` und `10-Fragen-Quiz`. Training zeigt genau eine Aufgabe, Formel/Merksatz (`f`) und optional Musterloesung (`s`), plus `Als geloest markieren` mit Persistenz in `smartineer_schueler_progress_v1`.
+- Endbildschirm: Anzahl korrekt/falsch, Quote in %, Liste aller 10 Aufgaben mit eigener Antwort, richtiger Antwort und aufklappbarer Formel/Musterloesung.
+- Buttons am Ende: "Neues Quiz", optional "Training oeffnen", "Anderes Fach", "Andere Klasse".
 - Eingabefeld nutzt eigene Klasse `.schueler-input` (groß, zentriert) — Default heller Hintergrund, dunkler im Dark-Mode.
 - Bei Klassen 3+4 zusätzlich Hinweis: *"Rechne wenn nötig im Heft, gib hier nur das Endergebnis ein."*
 
@@ -454,12 +457,12 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 | 9      | pool     | **Naturwissenschaften (50er Pools):** Physik (Newton, Energie, Druck), Chemie (Saeuren/Basen, Salze), Biologie (Genetik-Grundlagen, Evolution). Mathe + Englisch in Vorbereitung. |
 | 10     | pool     | **Naturwissenschaften (50er Pools):** Physik (Atombau, Optik), Chemie (Organische Chemie Einstieg), Biologie (Molekularbiologie, Biodiversitaet). Mathe + Englisch in Vorbereitung. |
 
-**Naturwissenschaften-Pools (Klasse 5–10, seit v65; NRW-konform um Physik+Chemie in Klasse 5/6 erweitert seit v66; 50er Pools seit v68):** Pro (Klasse, Fach) ein kuratierter Pool von **50 Aufgaben** mit `{q, a}`-Schema; aktuell 6 Klassen × 3 Faecher × 50 = 900 NW-Aufgaben. Themen folgen dem **NRW-Kernlehrplan Sekundarstufe I** (KLP NW SI fuer Klasse 5/6 integrierter Naturwissenschaften-Unterricht; KLP Physik/Chemie/Biologie SI fuer Klasse 7–10). Formeln werden via KaTeX (`$...$`) im Frage-Stem dargestellt; Antworten sind kurze Strings (Zahl, Begriff, Summenformel) und werden ueber `normalize()` (trim, whitespace weg, Komma->Punkt, Kleinschreibung) verglichen. Aufgaben sind handgeprueft gegen NRW-Lehrplaene Mittelstufe (§8 Wissenschaftliche Korrektheit). Erweiterungen erfolgen bevorzugt append-only ueber die Top-up-Bank in `js/data/schueler.js` (gleiche Idx-Stabilitaetsregel wie §17.4-Pools, AGENTS §11).
+**Naturwissenschaften-Pools (Klasse 5–10, seit v65; NRW-konform um Physik+Chemie in Klasse 5/6 erweitert seit v66; 50er Pools seit v68; Training seit v69):** Pro (Klasse, Fach) ein kuratierter Pool mit `{q, a, f, s}`-Schema; aktuell 950 NW-Aufgaben. Themen folgen dem **NRW-Kernlehrplan Sekundarstufe I** (KLP NW SI fuer Klasse 5/6 integrierter Naturwissenschaften-Unterricht; KLP Physik/Chemie/Biologie SI fuer Klasse 7–10). `q` und `a` bleiben Plain-Text/KaTeX; `f` und `s` duerfen kuratiertes HTML + KaTeX fuer Formel/Merksatz und Musterloesung enthalten, aber niemals User-Input. Antworten sind kurze Strings (Zahl, Begriff, Summenformel) und werden ueber `normalize()` (trim, whitespace weg, Komma->Punkt, Kleinschreibung) verglichen. Aufgaben sind handgeprueft gegen NRW-Lehrplaene Mittelstufe (§8 Wissenschaftliche Korrektheit). Erweiterungen erfolgen bevorzugt append-only ueber die Top-up-Bank in `js/data/schueler.js`; Stable-QID und Schueler-Progress entstehen aus Stem+Antwort, nicht aus Ingenieurs-Indizes.
 
 ### 17.4 Erweiterungsregeln
 
 - **Neue Aufgabe für Klasse 3 oder 4 hinzufügen**: an das passende `pool_*`-Array anhängen (Reihenfolge irrelevant — die UI sampelt zufällig).
-- **Neue Naturwissenschaften-Aufgabe für Klasse 5–10 hinzufügen**: append-only in die passende `NATWI_TOPUPS`-Liste oder ans passende `pool_k*_fach()`-Basisarray; keine bestehenden Items verschieben, da SRS/Stable-QID aus Stem+Antwort entsteht und Review-Diffs sonst unnoetig schwer werden.
+- **Neue Naturwissenschaften-Aufgabe für Klasse 5–10 hinzufügen**: append-only in die passende `NATWI_TOPUPS`-/Extra-Liste oder ans passende `pool_k*_fach()`-Basisarray; keine bestehenden Items verschieben, da Schueler-Progress/Stable-QID aus Stem+Antwort entsteht und Review-Diffs sonst unnoetig schwer werden. Neue Items muessen nach Runtime-Anreicherung `{q,a,f,s}` besitzen; `tools/validate.js --strict-sources` prueft das.
 - **Neuen Generator (Klasse 1 oder 2)**: rein deterministisches `gen()` schreiben; immer `{ q: string, a: string }` zurückgeben. Antwort als String, damit `normalize()` greift. Schwerere Generatoren (z.B. Zehnerübergang) in eigene Funktion auslagern und in `gen_klasse2_mathe` per Wahrscheinlichkeit einsteuern.
 - **Klasse 5–10 freischalten**: `mode: 'stub'` durch `pool` oder `generated` ersetzen, `pool`/`gen` und `note` ergänzen. UI braucht keine Änderung — die Karten werden automatisch aktiv.
 - **Englisch ab Klasse 5**: gleiches Schema (`{ q, a }`). Da Antworten Texte sein können, muss `normalize()` ggf. erweitert werden (z.B. Bindestriche, Apostrophe). Vor Erweiterung in einem Issue diskutieren.
@@ -468,6 +471,7 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 ### 17.5 Anti-Pattern
 
 - Schüler-Aufgaben in eine Ingenieurs-Kategorie mischen.
+- Schüler-Fortschritt in Ingenieurs- oder Schulungen-Storage schreiben.
 - Antworten in `q` oder `a` mit HTML-Tags, die User-Input rendern (XSS-Risiko) — beide Felder sind Plain-Text.
 - Multiple-Choice-Komponente einführen (nicht im Konzept).
 - Fortschritt der Schüler in `wissen_reloaded_progress_v1` schreiben.

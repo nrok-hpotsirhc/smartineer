@@ -1,6 +1,6 @@
 # Smartineer — Engineering Knowledge Reloaded
 
-Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 15 Kategorien (inkl. Allgemeinmedizin als Spiegelung der gleichnamigen Schulung sowie KRL, Fügetechniken und Agentic AI), 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–4 sowie Naturwissenschaften für Klasse 5–10 (Physik, Chemie, Biologie mit je 50 Fragen pro Klasse/Fach; Mathe 5–10 und Englisch in Vorbereitung), ein **Schulungen-Bereich** mit Cert-Prep-Kursen (CompTIA SecurityX/Security+/CySA+/PenTest+) sowie zwei Master-ET-Schulungen in Vorbereitung, und ein **Optionen-Menü** mit Kategorie-Sichtbarkeit, Import/Export, PWA-Install und temporaer deaktiviertem Login.
+Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 15 Kategorien (inkl. Allgemeinmedizin als Spiegelung der gleichnamigen Schulung sowie KRL, Fügetechniken und Agentic AI), 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–4 sowie Naturwissenschaften für Klasse 5–10 (Physik, Chemie, Biologie mit getrenntem Training plus 10-Fragen-Quiz, Formeln/Musterlösungen und geloest-Markierung; 950 NW-Aufgaben gesamt; Mathe 5–10 und Englisch in Vorbereitung), ein **Schulungen-Bereich** mit Cert-Prep-Kursen (CompTIA SecurityX/Security+/CySA+/PenTest+) sowie zwei Master-ET-Schulungen in Vorbereitung, und ein **Optionen-Menü** mit Kategorie-Sichtbarkeit, Import/Export, PWA-Install und temporaer deaktiviertem Login.
 
 > **Stack**: React 18 (CDN, JSX via Babel-standalone) · Tailwind CSS (CDN) · Chart.js · KaTeX  
 > **Auslieferung**: Klassische Website **und** installierbare PWA (Desktop, Android, iOS)  
@@ -34,7 +34,7 @@ Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein e
 - **PWA**: voll installierbar auf Desktop / Android / iOS, **offline-fähig** durch Service-Worker-Caching
 - **Optionen-Menü** mit Kategorie-Toggle, Import/Export, Reset und Install-Prompt; lokaler Konto-Login ueber `js/auth-credentials.js` (gitignored)
 - **Schulungen-Bereich** fuer Cert-Prep und Master-ET-Vorbereitungen; das Frontend-Only Schulungen-Gate ist aktiv (Login ueber Optionen)
-- **Schüler-Bereich**: Mathematik Klasse 1–4 plus Naturwissenschaften Klasse 5–10; Physik, Chemie und Biologie enthalten je 50 kurze Drill-Fragen pro Klasse/Fach (900 NW-Fragen gesamt)
+- **Schüler-Bereich**: Mathematik Klasse 1–4 plus Naturwissenschaften Klasse 5–10; Physik, Chemie und Biologie bieten getrenntes Training mit Formel/Merksatz, Musterlösung und eigener geloest-Markierung sowie ein 10-Fragen-Quiz (950 NW-Aufgaben gesamt)
 - **Cheatsheets** je Kategorie mit zwei Reitern:
   1. **Formeln** (kompakte Übersicht)
   2. **Musterlösungen** (vollständig isoliert mit Rechenweg und Kommentaren)
