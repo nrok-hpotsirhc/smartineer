@@ -114,6 +114,65 @@
         });
     }
 
+    function escapeHtml(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function schuelerFormulaFor(item, classId, subject) {
+        const q = String(item.q || '').toLowerCase();
+        if (subject === 'physik') {
+            if (q.includes('geschwindigkeit') || q.includes('$v')) return '<p><strong>Formel.</strong> Geschwindigkeit: $v = \\frac{s}{t}$, Weg: $s = v \\cdot t$, Zeit: $t = \\frac{s}{v}$.</p>';
+            if (q.includes('kraft') || q.includes('$f')) return '<p><strong>Formel.</strong> Newton: $F = m \\cdot a$; Gewichtskraft nahe der Erde: $F_G = m \\cdot g$ mit $g \\approx 10\\,\\text{N/kg}$.</p>';
+            if (q.includes('dichte') || q.includes('rho') || q.includes('\\rho')) return '<p><strong>Formel.</strong> Dichte: $\\rho = \\frac{m}{V}$, also Masse pro Volumen.</p>';
+            if (q.includes('widerstand') || q.includes('ohm') || q.includes('$r')) return '<p><strong>Formel.</strong> Ohmsches Gesetz: $U = R \\cdot I$, daraus $R = \\frac{U}{I}$ und $I = \\frac{U}{R}$.</p>';
+            if (q.includes('leistung') || q.includes('$p')) return '<p><strong>Formel.</strong> Leistung: $P = \\frac{W}{t}$; elektrische Leistung: $P = U \\cdot I$.</p>';
+            if (q.includes('arbeit') || q.includes('$w=')) return '<p><strong>Formel.</strong> Mechanische Arbeit bei konstanter Kraft: $W = F \\cdot s$.</p>';
+            if (q.includes('druck')) return '<p><strong>Formel.</strong> Druck: $p = \\frac{F}{A}$, Kraft pro Flaeche.</p>';
+            if (q.includes('ladung') || q.includes('$q')) return '<p><strong>Formel.</strong> Elektrische Ladung: $Q = I \\cdot t$; Spannung als Energie pro Ladung: $U = \\frac{W}{Q}$.</p>';
+            if (q.includes('wellenlaenge') || q.includes('lambda') || q.includes('\\lambda')) return '<p><strong>Formel.</strong> Wellengleichung: $c = \\lambda \\cdot f$, also $\\lambda = \\frac{c}{f}$.</p>';
+            if (q.includes('halbwertszeit') || q.includes('halbwert')) return '<p><strong>Formel.</strong> Nach $n$ Halbwertszeiten bleibt $N = N_0 \\cdot (\\tfrac{1}{2})^n$.</p>';
+            return '<p><strong>Merksatz.</strong> Ordne zuerst Groesse, Einheit und Grundgesetz zu; bei Begriffsfragen ist der praezise Fachbegriff die Loesung.</p>';
+        }
+        if (subject === 'chemie') {
+            if (q.includes('ph')) return '<p><strong>Merksatz.</strong> pH &lt; 7 = sauer, pH = 7 = neutral, pH &gt; 7 = basisch.</p>';
+            if (q.includes('neutralisation')) return '<p><strong>Reaktionsschema.</strong> Saeure + Base $\\rightarrow$ Salz + Wasser.</p>';
+            if (q.includes('summenformel') || q.includes('formel') || q.includes('symbol')) return '<p><strong>Merksatz.</strong> Eine Summenformel nennt Elementsymbole und Anzahl der Atome, z.B. $H_2O$, $CO_2$, $NaCl$.</p>';
+            if (q.includes('oxidation') || q.includes('reduktion') || q.includes('redox')) return '<p><strong>Merksatz.</strong> Oxidation = Elektronenabgabe, Reduktion = Elektronenaufnahme; beides zusammen ist eine Redoxreaktion.</p>';
+            if (q.includes('alkan') || q.includes('alken') || q.includes('alkohol') || q.includes('carbonsaeure')) return '<p><strong>Merksatz.</strong> Organische Stoffklassen werden ueber Kohlenstoffgeruest und funktionelle Gruppen erkannt, z.B. Alkane (Einfachbindungen), Alkohole (-OH), Carbonsaeuren (-COOH).</p>';
+            return '<p><strong>Merksatz.</strong> Nutze Stoffeigenschaft, Teilchenmodell oder Reaktionsschema; die Antwort ist der eindeutige chemische Fachbegriff bzw. die Formel.</p>';
+        }
+        if (subject === 'biologie') {
+            if (q.includes('dna') || q.includes('rna') || q.includes('gen') || q.includes('transkription') || q.includes('translation')) return '<p><strong>Merksatz.</strong> DNA speichert Information; Transkription erzeugt mRNA; Translation setzt die Information am Ribosom in ein Protein um.</p>';
+            if (q.includes('fotosynthese')) return '<p><strong>Schema.</strong> Fotosynthese: Kohlenstoffdioxid + Wasser + Licht $\\rightarrow$ Traubenzucker + Sauerstoff.</p>';
+            if (q.includes('oekosystem') || q.includes('nahrung') || q.includes('population') || q.includes('biodiversitaet')) return '<p><strong>Merksatz.</strong> Oekosysteme bestehen aus Lebensraum, Lebewesen, Stoffkreislauf und Energiefluss; Produzenten, Konsumenten und Zersetzer sind zentrale Rollen.</p>';
+            if (q.includes('atmung') || q.includes('kreislauf') || q.includes('verdauung') || q.includes('blut')) return '<p><strong>Merksatz.</strong> Organe werden ueber ihre Funktion erkannt: Aufnahme, Transport, Umwandlung oder Ausscheidung von Stoffen.</p>';
+            return '<p><strong>Merksatz.</strong> In der Biologie fuehrt die Frage meist von Struktur zu Funktion: Welcher Teil uebernimmt welche Aufgabe?</p>';
+        }
+        return '<p><strong>Merksatz.</strong> Nutze die im Unterricht eingefuehrte Regel oder Definition und pruefe das Endergebnis.</p>';
+    }
+
+    function schuelerSolutionFor(item, classId, subject) {
+        const answer = escapeHtml(item.a);
+        const numeric = /^-?[0-9]+(?:[.,][0-9]+)?$/.test(String(item.a));
+        const boxed = numeric
+            ? '<p>Damit lautet das Endergebnis $$\\boxed{' + answer.replace(/,/g, '{,}') + '}$$</p>'
+            : '<p><strong>Endergebnis:</strong> <code>' + answer + '</code></p>';
+        return '<p><strong>Musterloesung.</strong> Lies die gesuchte Groesse bzw. den gesuchten Fachbegriff aus der Aufgabenstellung ab und vergleiche ihn mit dem Merksatz.</p>'
+            + '<p>Die passende Antwort fuer diese Aufgabe ist <strong>' + answer + '</strong>.</p>'
+            + boxed
+            + '<p class="text-xs text-slate-500"><em>Quelle: NRW-Kernlehrplan Sekundarstufe I, Naturwissenschaften bzw. Physik/Chemie/Biologie; schuluebliche SI-Lehrbuchkonventionen.</em></p>';
+    }
+
+    function enrichSchuelerTrainingItems(items, classId, subject) {
+        return items.map(function (item) {
+            return Object.assign({}, item, {
+                f: item.f || schuelerFormulaFor(item, classId, subject),
+                s: item.s || schuelerSolutionFor(item, classId, subject)
+            });
+        });
+    }
+
     // TOPUP v68: je Klasse 5-10 und Fach Physik/Chemie/Biologie +40 Items.
     // Quellenbasis: NRW-Kernlehrplan Sekundarstufe I Naturwissenschaften 2019,
     // KLP Physik/Chemie/Biologie SI 2019/2022, uebliche SI-Lehrbuchkonventionen.
@@ -888,9 +947,114 @@
         }
     };
 
+    // TOPUP v69: +50 weitere Mittelstufen-Fragen verteilt ueber die vorhandenen
+    // Naturwissenschafts-Pools. Sie werden nach den v68-Topups angehaengt.
+    const NATWI_EXTRA_V69 = {
+        k5: {
+            physik: natwiTopup('Klasse 5 Physik Extra', [
+                ['magnetnadel', 'Welches Teil im Kompass richtet sich im Erdmagnetfeld aus?'],
+                ['batterie', 'Welche Spannungsquelle nutzt man oft im einfachen Schul-Stromkreis?'],
+                ['lichtstrahl', 'Wie nennt man eine gedachte gerade Linie fuer die Ausbreitung von Licht?']
+            ]),
+            chemie: natwiTopup('Klasse 5 Chemie Extra', [
+                ['teilchenmodell', 'Welches Modell erklaert Aggregatzustaende durch Bewegung kleinster Teilchen?'],
+                ['verdunsten', 'Wie heisst langsames Verdampfen unterhalb des Siedepunktes?'],
+                ['loesungsmittel', 'Wie nennt man den Stoff, der einen anderen Stoff loest?']
+            ]),
+            biologie: natwiTopup('Klasse 5 Biologie Extra', [
+                ['narbe', 'Auf welchen Bluetenteil gelangt Pollen bei der Bestaeubung?'],
+                ['staubblatt', 'Welcher Bluetenteil bildet Pollen?'],
+                ['larve', 'Wie nennt man ein Jugendstadium vieler Insekten?']
+            ])
+        },
+        k6: {
+            physik: natwiTopup('Klasse 6 Physik Extra', [
+                ['schattenraum', 'Wie nennt man den Raum hinter einem Koerper, in den kein direktes Licht gelangt?'],
+                ['waermekapazitaet', 'Welche Eigenschaft beschreibt, wie viel Waerme ein Stoff zum Erwaermen braucht?'],
+                ['schallquelle', 'Wie nennt man einen Koerper, der Schall erzeugt?']
+            ]),
+            chemie: natwiTopup('Klasse 6 Chemie Extra', [
+                ['abdampfschale', 'Welches Laborgeraet nutzt man haeufig zum Eindampfen kleiner Loesungsmengen?'],
+                ['trichter', 'Welches Laborgeraet haelt beim Filtrieren das Filterpapier?'],
+                ['destillat', 'Wie nennt man die bei der Destillation aufgefangene Fluessigkeit?']
+            ]),
+            biologie: natwiTopup('Klasse 6 Biologie Extra', [
+                ['knorpel', 'Welches elastische Gewebe polstert viele Gelenkflaechen?'],
+                ['luftröhre', 'Welches Rohr leitet Atemluft vom Kehlkopf zu den Bronchien?'],
+                ['naehrstoffe', 'Wie nennt man verwertbare Stoffe aus der Nahrung allgemein?']
+            ])
+        },
+        k7: {
+            physik: natwiTopup('Klasse 7 Physik Extra', [
+                ['24', 'Berechne $s$ in m: $v=6\\,\\text{m/s}$, $t=4\\,\\text{s}$.'],
+                ['25', 'Berechne $v$ in m/s: $s=75\\,\\text{m}$, $t=3\\,\\text{s}$.'],
+                ['5', 'Berechne $\\rho$ in g/cm$^3$: $m=250\\,\\text{g}$, $V=50\\,\\text{cm}^3$.']
+            ]),
+            chemie: natwiTopup('Klasse 7 Chemie Extra', [
+                ['mg', 'Welches Elementsymbol hat Magnesium?'],
+                ['ag', 'Welches Elementsymbol hat Silber?'],
+                ['pb', 'Welches Elementsymbol hat Blei?']
+            ]),
+            biologie: natwiTopup('Klasse 7 Biologie Extra', [
+                ['moose', 'Welche einfache Pflanzengruppe bildet Sporen und keine Blueten?'],
+                ['chloroplast', 'Welches Zellorganell enthaelt Chlorophyll?'],
+                ['zellulose', 'Aus welchem Stoff besteht die pflanzliche Zellwand hauptsaechlich?']
+            ])
+        },
+        k8: {
+            physik: natwiTopup('Klasse 8 Physik Extra', [
+                ['5', 'Berechne $I$ in A: $U=15\\,\\text{V}$, $R=3\\,\\Omega$.'],
+                ['48', 'Berechne $P$ in W: $U=24\\,\\text{V}$, $I=2\\,\\text{A}$.'],
+                ['200', 'Berechne $W$ in J: $F=40\\,\\text{N}$, $s=5\\,\\text{m}$.']
+            ]),
+            chemie: natwiTopup('Klasse 8 Chemie Extra', [
+                ['periodizitaet', 'Wie nennt man regelmaessige Wiederholung von Eigenschaften im Periodensystem?'],
+                ['metalle', 'Welche Stoffgruppe leitet Strom und Waerme meist gut?'],
+                ['nichtmetalle', 'Welche Stoffgruppe leitet Strom meist schlecht und bildet oft Molekuele?']
+            ]),
+            biologie: natwiTopup('Klasse 8 Biologie Extra', [
+                ['herzklappen', 'Welche Strukturen verhindern Rueckfluss des Blutes im Herzen?'],
+                ['gasaustausch', 'Welcher Vorgang findet in den Lungenblaeschen statt?'],
+                ['verdauungsenzyme', 'Welche Proteine spalten Naehrstoffe im Verdauungstrakt?']
+            ])
+        },
+        k9: {
+            physik: natwiTopup('Klasse 9 Physik Extra', [
+                ['500', 'Berechne $E_\\text{kin}$ in J: $m=10\\,\\text{kg}$, $v=10\\,\\text{m/s}$.'],
+                ['300', 'Berechne $E_\\text{pot}$ in J: $m=6\\,\\text{kg}$, $h=5\\,\\text{m}$, $g\\approx10\\,\\text{N/kg}$.'],
+                ['400', 'Berechne $p$ in Pa: $F=80\\,\\text{N}$, $A=0{,}2\\,\\text{m}^2$.']
+            ]),
+            chemie: natwiTopup('Klasse 9 Chemie Extra', [
+                ['ammoniak', 'Welcher Stoff hat die Formel NH$_3$?'],
+                ['chlorwasserstoff', 'Welches Gas bildet in Wasser Salzsaeure?'],
+                ['titration', 'Wie nennt man ein Verfahren zur Konzentrationsbestimmung mit Massloesung?']
+            ]),
+            biologie: natwiTopup('Klasse 9 Biologie Extra', [
+                ['codominanz', 'Wie nennt man Erbgang, bei dem zwei Allele gleichzeitig ausgepraegt werden?'],
+                ['stammbaum', 'Welche Darstellung nutzt man zur Analyse von Erbgaengen in Familien?'],
+                ['mutation', 'Was liefert neben Rekombination neue genetische Variation?']
+            ])
+        },
+        k10: {
+            physik: natwiTopup('Klasse 10 Physik Extra', [
+                ['6', 'Berechne $\\lambda$ in m: $c=3\\cdot10^8\\,\\text{m/s}$, $f=5\\cdot10^7\\,\\text{Hz}$.'],
+                ['6.25', 'Nach vier Halbwertszeiten bleiben wie viel Prozent der Anfangsmenge?']
+            ]),
+            chemie: natwiTopup('Klasse 10 Chemie Extra', [
+                ['polyethen', 'Welcher Kunststoff entsteht aus Ethen-Monomeren?'],
+                ['propanon', 'Wie heisst das einfachste Keton mit drei Kohlenstoffatomen?']
+            ]),
+            biologie: natwiTopup('Klasse 10 Biologie Extra', [
+                ['mrna', 'Welche RNA-Form transportiert die Geninformation zum Ribosom?'],
+                ['naturschutzgebiet', 'Wie nennt man ein ausgewiesenes Gebiet zum Schutz von Arten und Lebensraeumen?']
+            ])
+        }
+    };
+
     function withNatwiTopup(base, classId, subject) {
         const byClass = NATWI_TOPUPS[classId] || {};
-        return base.concat(byClass[subject] || []);
+        const extraByClass = NATWI_EXTRA_V69[classId] || {};
+        return enrichSchuelerTrainingItems(base.concat(byClass[subject] || [], extraByClass[subject] || []), classId, subject);
     }
 
     function pool_k5_physik() {
