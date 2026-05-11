@@ -29,6 +29,8 @@ const SRS_INTERVALS_DAYS = [1, 3, 7, 16, 35, 70, 140]; // SM-2 lite, gestaffelt
 // Markierungen des Anwenders und werden ueber Export/Import mitgenommen.
 const READER_NOTES_KEY = 'smartineer_reader_notes_v1';
 const READER_BOOKMARKS_KEY = 'smartineer_reader_bookmarks_v1';
+// P-UI-READER-TYPOGRAPHY: Shape `{ size: 'sm'|'md'|'lg', wide: bool, lineTall: bool }`.
+const READER_TYPO_KEY = 'smartineer_reader_typography_v1';
 // ----- Optionen / Auth (Schulungen-Bereich, FRONTEND-ONLY UX-CONVENIENCE) -----
 // WICHTIG: Diese Auth ist KEIN echter Schutz — Credentials liegen client-seitig
 // in window.SMARTINEER_AUTH (siehe js/auth-credentials.js, gitignored). Im
@@ -760,7 +762,7 @@ function CategoryCard({ cat, stats, onOpen, idx }) {
     );
 }
 
-function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrainingAt, onReset, onInstall, onExport, onImport }) {
+function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrainingAt, onResumeSchulung, resumeCandidate, onReset, onInstall, onExport, onImport }) {
     const totals = useMemo(() => {
         let total = 0, done = 0;
         order.forEach(k => { const s = categoryStats(data[k], isSolved); total += s.total; done += s.done; });
@@ -831,6 +833,28 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
                 </div>
             </div>
 
+            {/* P-UI-DASHBOARD-RESUME: Wiedereinstiegs-Hero. Wird nur gerendert, wenn
+                eine Schulung kuerzlich bearbeitet wurde (lastPage > 0 oder ein Quiz-Lauf vorliegt). */}
+            {resumeCandidate && onResumeSchulung && (
+                <div className="bg-gradient-to-br from-blue-50 via-white to-cyan-50/40 rounded-2xl border border-blue-200 shadow-sm p-6 md:p-7 mb-10 flex flex-col md:flex-row items-start md:items-center gap-5">
+                    <div className="flex-1 min-w-0">
+                        <div className="text-[11px] uppercase tracking-wider text-blue-700 font-bold mb-1">Weiterlernen</div>
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 truncate">{resumeCandidate.trainingName}</h2>
+                        <p className="text-slate-700 text-sm md:text-base">
+                            <span className="font-bold">{resumeCandidate.chapterTitle}</span>
+                            {resumeCandidate.pageTitle ? <> · Seite {resumeCandidate.pageIdx + 1}: <em>{resumeCandidate.pageTitle}</em></> : null}
+                        </p>
+                        {resumeCandidate.lastDate && (
+                            <p className="text-xs text-slate-500 mt-1">Zuletzt aktiv: {resumeCandidate.lastDate}</p>
+                        )}
+                    </div>
+                    <button onClick={() => onResumeSchulung(resumeCandidate.tid, resumeCandidate.cid)}
+                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition-all flex-shrink-0">
+                        Weiterlesen →
+                    </button>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {order.map((k, i) => {
                     const cat = data[k]; if (!cat) return null;
@@ -866,7 +890,8 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
                                 <span className="text-xs text-slate-500">deterministisch je Tag · 5 Aufgaben · max. 2/Kategorie</span>
                             </div>
                             {dailyMix.length === 0 ? (
-                                <p className="text-slate-500 text-sm italic">Noch keine Aufgaben verfuegbar.</p>
+                                <EmptyState title="Noch keine Aufgaben verfuegbar."
+                                    subtext="Loese ein paar Trainings-Aufgaben, dann erscheint hier ein Tagesmix aus deinem Lernverlauf." />
                             ) : (
                                 <ol ref={dailyMixRef} className="flex flex-col gap-3">
                                     {dailyMix.map((entry, i) => {
@@ -1641,6 +1666,82 @@ function useReaderAnnotations() {
     return { notes, bookmarks, getNote, setNote, isBookmarked, toggleBookmark };
 }
 
+// ---------- Reader-Typographie (P-UI-READER-TYPOGRAPHY) ----------
+// Persistiert pro Geraet Schriftgroesse, Zeilenabstand und Lesebreite des
+// Schulungen-Readers. KEIN Export-/Import-Inhalt (geraetespezifisch, AGENTS §19.3).
+const READER_TYPO_DEFAULT = { size: 'md', wide: false, lineTall: false };
+function useReaderTypography() {
+    const [typo, setTypoState] = useState(() => {
+        try {
+            const raw = JSON.parse(localStorage.getItem(READER_TYPO_KEY) || 'null');
+            if (raw && typeof raw === 'object') return Object.assign({}, READER_TYPO_DEFAULT, raw);
+        } catch (e) { /* corrupt */ }
+        return READER_TYPO_DEFAULT;
+    });
+    const setTypo = useCallback((patch) => {
+        setTypoState(prev => {
+            const next = Object.assign({}, prev, patch);
+            try { localStorage.setItem(READER_TYPO_KEY, JSON.stringify(next)); } catch (e) { /* quota */ }
+            return next;
+        });
+    }, []);
+    return { typo, setTypo };
+}
+
+// ---------- Resume-Kandidat (P-UI-DASHBOARD-RESUME) ----------
+// Liest den Schulungens-State aus localStorage und sucht die juengste Aktivitaet
+// (max von quizLast.date / quizBest.date), faellt sonst auf lastPage > 0 zurueck.
+// Liefert null, wenn keine Schulung jemals beruehrt wurde.
+function computeResumeCandidate() {
+    try {
+        const st = JSON.parse(localStorage.getItem(SCHULUNGEN_KEY) || '{}');
+        const list = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
+        if (!list.length) return null;
+        let best = null;
+        for (const tid of Object.keys(st)) {
+            const tEntry = st[tid] || {};
+            for (const cid of Object.keys(tEntry)) {
+                if (cid.startsWith('__')) continue;
+                const e = tEntry[cid] || {};
+                const date = (e.quizLast && e.quizLast.date) || (e.quizBest && e.quizBest.date) || null;
+                const lastPage = e.lastPage || 0;
+                if (!date && !lastPage) continue;
+                const score = date ? `Z${date}` : `P${String(lastPage).padStart(6, '0')}`;
+                if (!best || score > best.score) best = { tid, cid, date, lastPage, score };
+            }
+        }
+        if (!best) return null;
+        const training = list.find(t => t.id === best.tid);
+        if (!training) return null;
+        const chapter = (training.chapters || []).find(c => c.id === best.cid);
+        if (!chapter) return null;
+        const pageIdx = Math.min(best.lastPage || 0, Math.max(0, (chapter.pages || []).length - 1));
+        const pageTitle = (chapter.pages && chapter.pages[pageIdx] && chapter.pages[pageIdx].title) || null;
+        return {
+            tid: best.tid,
+            cid: best.cid,
+            trainingName: training.name,
+            chapterTitle: chapter.title,
+            pageIdx,
+            pageTitle,
+            lastDate: best.date
+        };
+    } catch (e) { return null; }
+}
+
+// ---------- EmptyState (P-UI-EMPTY-STATES) ----------
+// Einheitliche leere Zustaende: Titel + Subtext + optionale CTA. Ersetzt verstreute
+// `<p>...kursiv...</p>`-Literale (AGENTS-konformer Look statt Ad-hoc-Styling).
+function EmptyState({ title, subtext, cta }) {
+    return (
+        <div className="flex flex-col items-center gap-2 py-6 px-4 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300">
+            <div className="font-bold text-slate-700">{title}</div>
+            {subtext && <p className="text-sm text-slate-500 max-w-md">{subtext}</p>}
+            {cta && <div className="mt-2">{cta}</div>}
+        </div>
+    );
+}
+
 // ---------- Spaced Repetition (SM-2 lite) ----------
 function srsTodayISO() { return new Date().toISOString().slice(0, 10); }
 function srsAddDaysISO(days) {
@@ -2141,10 +2242,12 @@ function applyGlossary(html, gmap) {
     });
 }
 
-function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
+function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOpen }) {
     const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
     const { state, setLastPage, recordQuiz, recordAssessment } = useSchulungenState();
     const { getNote, setNote, isBookmarked, toggleBookmark } = useReaderAnnotations();
+    // P-UI-READER-TYPOGRAPHY: Schriftgroesse / Zeilenabstand / Breite des Readers.
+    const { typo, setTypo } = useReaderTypography();
     const [stage, setStage] = useState('index'); // index | chapters | reader | quiz | quizResult
     const [tid, setTid] = useState(null);
     const [cid, setCid] = useState(null);
@@ -2259,6 +2362,26 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
         setPage(Math.min(Math.max(0, start), Math.max(0, ch.pages.length - 1)));
         setStage('reader');
     };
+
+    // P-UI-DASHBOARD-RESUME: konsumiert die vom App-Root gesetzte (tid,cid)-Position
+    // beim ersten Render. tid wird sofort gesetzt, cid kommt im naechsten Effekt
+    // (sobald `training` aus dem neuen tid abgeleitet ist).
+    const pendingInitialCidRef = useRef(null);
+    useEffect(() => {
+        if (typeof getInitialOpen !== 'function') return;
+        const v = getInitialOpen();
+        if (!v || !v.tid) return;
+        setTid(v.tid);
+        pendingInitialCidRef.current = v.cid || null;
+    }, []);
+    useEffect(() => {
+        const targetCid = pendingInitialCidRef.current;
+        if (!targetCid || !training) return;
+        const ch = (training.chapters || []).find(c => c.id === targetCid);
+        if (!ch) { pendingInitialCidRef.current = null; return; }
+        pendingInitialCidRef.current = null;
+        openChapter(targetCid);
+    }, [tid]);
 
     const goPage = (p) => {
         const total = chapter.pages.length;
@@ -2647,7 +2770,24 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                                 Notiz{noteValue ? ' ●' : ''}
                             </button>
                         </div>
-                        <div className="text-xs text-slate-600 font-bold">Seite {page + 1} / {total}</div>
+                        <div className="text-xs text-slate-600 font-bold flex items-center gap-2">
+                            {/* P-UI-READER-TYPOGRAPHY: Typografie-Toolbar (3 Groessen, Zeilenabstand, Breite). */}
+                            <span className="hidden sm:inline-flex items-center gap-0.5 mr-1" role="group" aria-label="Schriftgroesse">
+                                {[['sm','A','Kleinere Schrift'],['md','A','Standardschrift'],['lg','A','Groessere Schrift']].map(([sz, lbl, ttl], i) => (
+                                    <button key={sz} onClick={() => setTypo({ size: sz })}
+                                        title={ttl} aria-label={ttl} aria-pressed={typo.size === sz}
+                                        className={`px-1.5 py-0.5 rounded border ${typo.size === sz ? 'border-blue-500 bg-blue-50 text-blue-800' : 'border-slate-300 bg-white hover:bg-slate-100 text-slate-600'}`}
+                                        style={{ fontSize: ['11px','13px','15px'][i] }}>{lbl}</button>
+                                ))}
+                            </span>
+                            <button onClick={() => setTypo({ lineTall: !typo.lineTall })}
+                                title="Zeilenabstand" aria-label="Zeilenabstand umschalten" aria-pressed={typo.lineTall}
+                                className={`hidden sm:inline-flex px-2 py-0.5 rounded border text-[10px] ${typo.lineTall ? 'border-blue-500 bg-blue-50 text-blue-800' : 'border-slate-300 bg-white hover:bg-slate-100 text-slate-600'}`}>☰</button>
+                            <button onClick={() => setTypo({ wide: !typo.wide })}
+                                title="Lesebreite" aria-label="Breite umschalten" aria-pressed={typo.wide}
+                                className={`hidden sm:inline-flex px-2 py-0.5 rounded border text-[10px] ${typo.wide ? 'border-blue-500 bg-blue-50 text-blue-800' : 'border-slate-300 bg-white hover:bg-slate-100 text-slate-600'}`}>↔</button>
+                            <span>Seite {page + 1} / {total}</span>
+                        </div>
                     </div>
                     <div className="px-4 py-2 text-xs text-slate-500 truncate border-b border-slate-100">
                         <span className="font-bold">{training.short || training.name}</span> · {chapter.title}
@@ -2655,8 +2795,16 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                     <div className="w-full bg-slate-100 h-1 overflow-hidden">
                         <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-1 transition-all" style={{ width: `${((page + 1) / total) * 100}%` }}></div>
                     </div>
-                    <article className="p-5 md:p-7 task-fade book-page" key={`${cid}-${page}`}>
+                    <article className={`p-5 md:p-7 task-fade book-page book-size-${typo.size}${typo.lineTall ? ' book-line-tall' : ''}${typo.wide ? ' book-wide' : ''}`} key={`${cid}-${page}`}>
                         <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 mb-4">{cur.title}</h2>
+                        {/* P-UI-READER-TYPOGRAPHY: Lesezeit-Hinweis (Annahme 200 wpm). */}
+                        {(() => {
+                            const wordCount = (cur.html || '').replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+                            const minutes = Math.max(1, Math.round(wordCount / 200));
+                            return (
+                                <p className="text-[11px] text-slate-400 mb-3">~ {minutes} min Lesezeit · {wordCount} Wörter</p>
+                            );
+                        })()}
                         <div className="prose-book text-slate-800" dangerouslySetInnerHTML={{ __html: applyGlossary(cur.html, glossaryMap) }} />
                         {cur.check && <InlineCheck check={cur.check} key={`check-${cid}-${page}`} />}
                     </article>
@@ -3563,6 +3711,17 @@ function App() {
         setView('training');
     };
 
+    // P-UI-DASHBOARD-RESUME: Ein-Klick-Wiedereinstieg in die zuletzt bearbeitete Schulung.
+    // Ref puffert {tid, cid}; <Schulungen> konsumiert es per `getInitialOpen()`-Prop beim Mount
+    // und springt direkt in den Reader an die gespeicherte `lastPage`.
+    const pendingSchulungOpenRef = useRef(null);
+    const onResumeSchulung = (tid, cid) => {
+        pendingSchulungOpenRef.current = { tid, cid };
+        setView('schulungen');
+    };
+    // Resume-Kandidat: juengste Schulungens-Aktivitaet aus Storage + Schulungs-Liste.
+    const resumeCandidate = useMemo(() => computeResumeCandidate(), [view]);
+
     const onReset = () => {
         if (window.confirm('Wirklich allen lokalen Fortschritt zurücksetzen?')) reset();
     };
@@ -3629,6 +3788,8 @@ function App() {
                     <Dashboard data={data} order={order} isSolved={isSolved}
                         srsState={srsState}
                         onOpenCategory={openCategory} onOpenTrainingAt={(catId, level, idx) => openTrainingAt(catId, level, idx)}
+                        onResumeSchulung={onResumeSchulung}
+                        resumeCandidate={resumeCandidate}
                         onReset={null}
                         onExport={null} onImport={null}
                         onInstall={null} />
@@ -3651,7 +3812,12 @@ function App() {
                 )}
                 {view === 'schulungen' && (
                     <Schulungen auth={auth} onGoToOptionen={() => setView('optionen')}
-                        srsState={srsState} srsGradeMany={srsGradeMany} />
+                        srsState={srsState} srsGradeMany={srsGradeMany}
+                        getInitialOpen={() => {
+                            const v = pendingSchulungOpenRef.current;
+                            pendingSchulungOpenRef.current = null;
+                            return v;
+                        }} />
                 )}
                 {view === 'optionen' && (
                     <Optionen data={data} allOrder={allOrder} vis={vis} auth={auth}

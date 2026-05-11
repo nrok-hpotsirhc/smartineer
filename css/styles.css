@@ -281,6 +281,12 @@ html.theme-dark, body.theme-dark {
     font-family: Georgia, 'Times New Roman', 'Iowan Old Style', serif;
     line-height: 1.7;
 }
+/* P-UI-READER-TYPOGRAPHY: Schriftgroessen, Zeilenabstand, Lesebreite. */
+.book-page.book-size-sm { font-size: 0.92rem; }
+.book-page.book-size-md { font-size: 1rem; }
+.book-page.book-size-lg { font-size: 1.125rem; }
+.book-page.book-line-tall { line-height: 1.9; }
+.book-page.book-wide { max-width: none; }
 .book-page h2, .book-page h3, .book-page h4 {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }

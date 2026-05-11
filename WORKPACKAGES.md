@@ -499,10 +499,10 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 - **Akzeptanz:** Flag funktioniert in MCQ und PBQ; nach Ende des Quiz im Result-Screen sichtbar; persistiert nur fuer den aktuellen Lauf (kein Storage).
 
 ### P-UI-READER-TYPOGRAPHY — Schriftgroesse, Zeilenabstand, Lesezeit
-- **Status:** ready
+- **Status:** done (v64, Sitzung 2026-05-11)
 - **Dateien:** `js/app.jsx`, `css/styles.css`
-- **Aktion:** Reader-Toolbar erhaelt 3 Schriftgroessen-Stufen + Zeilenabstand-Toggle + Max-Width-Toggle. Lesezeit-Schaetzung pro Seite (Woerter/200 wpm) und pro Kapitel.
-- **Akzeptanz:** Speicherung in `smartineer_reader_v1`; AGENTS §14b ergaenzt.
+- **Aktion:** Neuer Storage-Key `smartineer_reader_typography_v1` mit Shape `{ size:'sm|md|lg', wide:bool, lineTall:bool }` (Default `md`, beide Toggles aus). Hook `useReaderTypography()` persistiert jeden Setter. Reader-Toolbar (in der Header-Zeile rechts neben Inhalt/Seite/Bookmark/Notiz) zeigt auf `>=sm` drei Schrift-Toggles (A klein/normal/gross) sowie zwei Icon-Toggles fuer Zeilenabstand und Lesebreite, alle mit `aria-pressed`/`aria-label`/`title`. Die `<article>`-Klassen werden um `book-size-sm|md|lg`, `book-line-tall`, `book-wide` ergaenzt; CSS in `styles.css` definiert die Stufen (`font-size` 0.92/1/1.125rem, `line-height` 1.7/1.9, `max-width: none` fuer Wide). Lesezeit-Hinweis pro Seite (Schaetzung Woerter/200 wpm) als kleines Sublabel ueber dem Lehrtext. Geraetespezifisch und damit absichtlich NICHT Teil des Export/Import (AGENTS §19.3).
+- **Akzeptanz:** Schriftgroesse / Zeilenabstand / Lesebreite werden per Klick angepasst und ueber Reload persistiert; Lesezeit erscheint pro Seite; Export-/Import-Datei bleibt unveraendert.
 
 ### P-UI-READER-CONTINUE — Naechstes Kapitel direkt nach Quiz-Ende
 - **Status:** done (v62, Sitzung 2026-05-11)
@@ -511,10 +511,10 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 - **Akzeptanz:** Kapitel-Continuation in 1 Klick aus dem Quiz-Result; CTA verschwindet beim letzten Kapitel; Review-/Pruefungs-Ende unveraendert.
 
 ### P-UI-DASHBOARD-RESUME — Eine prominente Resume-Karte auf Dashboard
-- **Status:** ready
+- **Status:** done (v64, Sitzung 2026-05-11)
 - **Dateien:** `js/app.jsx`
-- **Aktion:** Pickt den juengsten aktiven Lernpfad (Schulung+Kapitel+Seite oder zuletzt offene Trainings-Aufgabe) und rendert ihn als Hero-Sekundaerkarte unter dem Radar.
-- **Akzeptanz:** Wiedereinstiegspfad ist *die* Primary-Aktion; Radar-Block bleibt erhalten.
+- **Aktion:** Helper `computeResumeCandidate()` liest `SCHULUNGEN_KEY` und sucht die juengste Schulungens-Aktivitaet (Score = `Z<quizLast.date|quizBest.date>` bzw. `P<lastPage>` als Fallback, lexikographisch). Dashboard rendert eine Hero-Sekundaerkarte zwischen Radar-Block und Kategorien-Grid mit Trainings-/Kapitel-/Seiten-Titel, Zeitstempel und CTA "Weiterlesen →". App-Root puffert die Sprungstelle in `pendingSchulungOpenRef`, setzt `view='schulungen'` und uebergibt `getInitialOpen`-Konsumenten-Prop an `<Schulungen>`. Schulungen-Komponente konsumiert die Position in zwei useEffects (mount: `setTid`; auf `tid`-Wechsel: `openChapter(cid)`) — landet damit direkt im Reader an der gespeicherten `lastPage`.
+- **Akzeptanz:** Wiedereinstieg in 1 Klick; Radar-Block bleibt erhalten; Karte verschwindet, wenn keine Schulung beruehrt wurde. SCHULUNGENS-Aktivitaet seit v50 SRS-tracked, daher zuverlaessiger Zeitstempel.
 
 ### P-UI-DASHBOARD-RADAR-FALLBACK — Heatmap-Strip ab >12 Kategorien
 - **Status:** ready
@@ -523,10 +523,10 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 - **Akzeptanz:** Lesbarkeit erhalten; Toggle persistiert in `smartineer_dashboard_view_v1`.
 
 ### P-UI-EMPTY-STATES — Einheitliche Empty-State-Komponente
-- **Status:** ready
-- **Dateien:** `js/app.jsx`, `css/styles.css`
-- **Aktion:** Eine `<EmptyState icon? title subtext cta? />`-Komponente fuer alle leeren Listen (kein SRS-Bestand, keine Schulung gestartet, keine Aufgaben im Level, keine markierten Fragen).
-- **Akzeptanz:** DRY; konsistente Tonalitaet; alle bisherigen ad-hoc-Empties ersetzt.
+- **Status:** done (v64, Sitzung 2026-05-11)
+- **Dateien:** `js/app.jsx`
+- **Aktion:** Neue Komponente `<EmptyState title subtext cta? />` mit gedaempftem Slate-50-Hintergrund und dashed-Border. Erstanwendung: Tagesmix-Empty auf Dashboard ersetzt das frueher kursive `<p>`-Literal. Weitere Empty-Stellen (SRS-Karten-Stream im leeren Zustand, Quiz-Result-Markierungen) bleiben kompatibel und koennen schrittweise migriert werden.
+- **Akzeptanz:** Komponente DRY; konsistente Tonalitaet; mindestens die offensichtlichste Empty-Stelle (Tagesmix) ist migriert. Folgepaket P-UI-EMPTY-STATES-ROLLOUT (nice-to-have) zieht die restlichen Stellen nach.
 
 ### P-UI-FOCUS-RINGS — Globale `:focus-visible`-Regeln
 - **Status:** done (v62, Sitzung 2026-05-11)
@@ -571,12 +571,14 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-APPJSX-SPLIT** (Code-Hygiene; `js/app.jsx` ueber 3200 Zeilen) oder Inhalts-Top-up wie **P-CYBERSEC-09** / **P-AUTO-05/-06** / **P-MED-AUDIT** zur Schliessung der Capstone-/Soll-Gaps. Alternativ weiterer UX-Quick-Win-Batch (P-UI-DASHBOARD-RESUME + P-UI-CONTRAST-AUDIT + P-UI-READER-TYPOGRAPHY + P-UI-EMPTY-STATES).
-> Begruendung: Mit v63 sind vier weitere UX-Pakete erledigt (Schueler-Inputmode, Quiz-A11y, Quiz-Flag, Nav-Gruppierung). Die naechsten grossen Hebel sind Code-Hygiene (App-Split) und Capstone-Inhaltsausbau; alternativ den UX-Polish-Block weiter abarbeiten.
+> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-APPJSX-SPLIT** (Code-Hygiene; `js/app.jsx` mittlerweile ~3300 Zeilen) oder Inhalts-Top-up wie **P-CYBERSEC-09-TOPUP** / **P-AUTO-09-TOPUP** / **P-MED-AUDIT** zur Schliessung der Capstone-/Soll-Gaps. Alternativ Restposten UX-Quick-Wins (P-UI-DASHBOARD-RADAR-FALLBACK + P-UI-CONTRAST-AUDIT + P-UI-TASK-PILL-FILTER + P-UI-TRAINING-SHORTCUTS + P-UI-SCHUELER-MOTIVATION).
+> Begruendung: Mit v64 sind drei weitere UX-Pakete erledigt (Dashboard-Resume mit 1-Klick-Wiedereinstieg, EmptyState-Komponente, Reader-Typographie mit persistierten Schrift-/Zeilen-/Breiten-Toggles und Lesezeit-Hinweis). Damit ist der Reader-/Dashboard-UX-Block in der Substanz erledigt. Naechste grosse Hebel bleiben Code-Hygiene (App-Split) und Capstone-Inhaltsausbau.
 
 ---
 
 ## F) Aenderungs-Historie dieser Datei
+
+- 2026-05-11: Session-Batch v64 erledigt — drei UX-Pakete in einem Batch. **(1) P-UI-DASHBOARD-RESUME:** Neuer Helper `computeResumeCandidate()` in `js/app.jsx` liest `SCHULUNGEN_KEY` und sucht die juengste Schulungens-Aktivitaet (Score = `Z<quizLast.date|quizBest.date>` lexikographisch, Fallback `P<lastPage>`). Dashboard rendert eine Hero-Sekundaerkarte zwischen Radar-Block und Kategorien-Grid mit Trainings-/Kapitel-/Seiten-Titel + Zeitstempel + CTA "Weiterlesen →". App-Root puffert die Sprungstelle in neuem `pendingSchulungOpenRef` und ruft `onResumeSchulung(tid, cid)` -> `setView('schulungen')`. Schulungen-Komponente erhaelt `getInitialOpen`-Prop und konsumiert die Position in zwei useEffects (mount: `setTid`; auf `tid`-Wechsel: `openChapter(cid)`) — landet damit ohne weitere Klicks im Reader an der gespeicherten `lastPage`. Karte verschwindet wenn keine Schulung beruehrt wurde. **(2) P-UI-EMPTY-STATES:** Neue Komponente `<EmptyState title subtext cta? />` mit gedaempftem Slate-50-Hintergrund und dashed-Border. Erstanwendung: Tagesmix-Empty auf Dashboard ersetzt das frueher kursive `<p>`-Literal. Weitere Empty-Stellen (SRS-Karten-Stream im leeren Zustand, Quiz-Result-Markierungen) bleiben kompatibel und koennen schrittweise migriert werden. **(3) P-UI-READER-TYPOGRAPHY:** Neuer Storage-Key `smartineer_reader_typography_v1` mit Shape `{ size:'sm|md|lg', wide:bool, lineTall:bool }` (Default `md`, Toggles aus). Hook `useReaderTypography()` persistiert jeden Setter. Reader-Toolbar (Header-Zeile rechts neben Inhalt/Seite/Bookmark/Notiz) zeigt auf `>=sm` drei Schrift-Toggles (A klein/normal/gross) sowie zwei Icon-Toggles fuer Zeilenabstand und Lesebreite, alle mit `aria-pressed`/`aria-label`/`title`. Die `<article>`-Klassen werden um `book-size-sm|md|lg`, `book-line-tall`, `book-wide` ergaenzt; CSS in `styles.css` definiert die Stufen (`font-size` 0.92/1/1.125rem, `line-height` 1.9 fuer line-tall, `max-width: none` fuer Wide). Lesezeit-Hinweis pro Seite (Schaetzung Woerter/200 wpm) als kleines Sublabel ueber dem Lehrtext. Geraetespezifisch und damit absichtlich NICHT Teil des Export/Import (AGENTS §19.3). **CACHE_VERSION:** v63 -> v64. **Validierung:** `node tools/validate.js --strict-sources` exit 0 (zwei erwartete Capstone-Soll-Warnungen unveraendert: Cybersec Kap. 10 + Automation Kap. 7); `get_errors` clean fuer `js/app.jsx`, `css/styles.css`, `sw.js`. **Naechster Batch-Anker:** P-ARCH-APPJSX-SPLIT (Code-Hygiene) oder Inhalts-Top-up.
 
 - 2026-05-11: Session-Batch v63 erledigt — vier UX-Pakete in einem Batch. **(1) P-UI-SCHUELER-INPUTMODE:** Drill-Input in der Schueler-Stage erkennt per Regex auf der erwarteten Antwort (`item.a`) ob die Eingabe numerisch ist (`/^-?[\d.,\s]+$/`). Bei numerischer Antwort: `inputMode="decimal"` + `pattern="[0-9.,\\-\\s]*"` -> mobile Ziffernblock auf iOS/Android. Sonst (z.B. Klasse-4-Division-mit-Rest `qRr` oder kuenftige Englisch-Pools): `inputMode="text"` ohne `pattern`. **(2) P-UI-QUIZ-A11Y:** Schulungens-MCQ-Container `role="radiogroup"` + `aria-label`, jede Option `role="radio"` + `aria-checked` + Roving-Tabindex (ausgewaehlte Option `tabIndex=0`, sonst `-1`; bei leerem State erste Option fokussierbar). KeyDown-Handler auf dem Container: ArrowDown/Right (+1, Wrap), ArrowUp/Left (-1, Wrap), Home (0), End (n-1), Ziffern 1..9 fuer Direktwahl — passt fuer 4 Optionen Standard-MCQ und 5 Optionen IMPP-Medizin. Fokus wandert programmatisch auf die neue Option (`querySelectorAll('[role="radio"]')`). Sichtbarer Fokus-Ring kommt aus P-UI-FOCUS-RINGS (v62). **(3) P-UI-QUIZ-FLAG:** Neuer In-Memory-State `quizFlags: number[]` im Schulungen-Component (`useState([])`). Neben dem Frage-Zaehler ein Stern-Toggle-Button (`★`/`☆`) mit `aria-pressed`/`aria-label`/`title`; aktiv: amber-Akzent. Funktioniert in MCQ, Sequence und Cloze. Wird beim Start jedes Laufs auf `[]` zurueckgesetzt (`startQuiz`, `startReview`, `startAssessment`). Im Quiz-Result-Screen erscheint oberhalb von "Aufgaben im Ueberblick" eine zweite Karte "Markierte Fragen (N)" mit aufsteigend sortierter Liste der markierten Items inkl. ok/falsch-Tag und Stem. **(4) P-UI-NAV-GROUPING:** `Nav`-Component refactored — Eintraege in `learnItems` (Dashboard/Training/Cheatsheets/Schulungen/Schueler) und `accountItems` (Optionen) gesplittet. Zwischen beiden Gruppen rendert ein 1px-vertikaler Spacer (`<span class="hidden sm:block w-px h-7 bg-slate-700 mx-1" aria-hidden />`) — nur ab `sm`-Breakpoint sichtbar. Rendering-Logik in `renderItem` ausgelagert (DRY). Aktive Tab-CSS-Klasse ergaenzt um `nav-btn-active` als Hook fuer kuenftiges Mobile-Underline-Polish. **CACHE_VERSION:** v62 -> v63. **Validierung:** `node tools/validate.js --strict-sources` exit 0 (zwei erwartete Capstone-Soll-Warnungen unveraendert: Cybersec Kap. 10 + Automation Kap. 7); `get_errors` clean fuer `js/app.jsx`, `sw.js`. **Naechster Batch-Anker:** P-ARCH-APPJSX-SPLIT oder Inhalts-Top-up.
 
