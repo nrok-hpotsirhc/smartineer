@@ -346,6 +346,18 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 - **Aktion:** Sobald eine konkrete Quelle vorliegt (z.B. Green Line, Decouvertes, Pontes/Cursus/Prima mit Jahrgang und Bundesland), die bestehenden curriculum-orientierten 200/200-Sprachpools append-only gegen die vorgegebenen Listen abgleichen.
 - **Akzeptanz:** Pro (Klasse, Sprache) Audit-Tabelle: Lehrwerksquelle, vorhandene Treffer, fehlende Vokabeln/Grammatikthemen, append-only Top-up oder begruendete Ersetzung; Validator bleibt fuer 200 `vocab` + 200 `grammar` gruen; keine urheberrechtlich geschuetzten Listen wörtlich uebernehmen, sofern keine Nutzungsrechte vorliegen.
 
+### P-SCHUELER-SPRACHEN-SECTIONS — Sprachkarten nach Zahlen/Vokabeln/Grammatik trennen
+- **Status:** done (v75, Sitzung 2026-05-11)
+- **Dateien:** `js/app/schueler.jsx`, `js/data/schueler_200_topups.js`, `README.md`, `AGENTS.md`, `WORKPACKAGES.md`, `sw.js`
+- **Aktion:** User-Request 2026-05-11: In den Sprachfaechern eine visuelle, einklappbare Trennung zwischen Zahlen, Vokabeln und Grammatik einfuehren.
+- **Akzeptanz:** Sprach-Items tragen eine stabile Abschnittsmetadaten-Ebene (`section: 'numbers'|'vocab'|'grammar'`); Fachkarten fuer Englisch/Franzoesisch/Latein zeigen einklappbare Abschnittsbloecke mit Counts und eigenen Training-/Quiz-Starts; bestehendes Gesamttraining/Gesamtquiz bleibt erreichbar; keine neue Persistenz oder Track-Vermischung.
+
+### P-SCHUELER-DEUTSCH-5-10 — Deutsch Klasse 5-10 als Mittelstufenfach
+- **Status:** done (v75, Sitzung 2026-05-11)
+- **Dateien:** `js/data/schueler_200_topups.js`, `tools/validate.js`, `README.md`, `AGENTS.md`, `WORKPACKAGES.md`, `sw.js`
+- **Aktion:** User-Request 2026-05-11: Deutsch ueber alle Klassen 5-10 abdecken.
+- **Akzeptanz:** `SCHUELER.subjects.deutsch` registriert; Klassen 5-10 enthalten `deutsch` in der Fachreihenfolge; pro Klasse ein 200er Pool im `{q,a,f,s}`-Schema; Themen decken Sprache/Grammatik/Rechtschreibung, Schreiben, Lesen/Literatur, Sachtexte/Medien und Argumentation altersgerecht ab; Validator fordert Deutsch ≥200 Items und Trainingsfelder; Training und 10-Fragen-Quiz funktionieren ohne UI-Sonderpfad; CACHE_VERSION bumpen.
+
 ---
 
 ## D) UI / Bugs / Tooling — werden ad-hoc als P-UI-... eingeplant
@@ -621,12 +633,14 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-DATA-LAZY** (jetzt durch v74 entblockt) oder **P-MED-AUDIT** (Quellenaudit Allgemeinmedizin). Fuer den Schueler-Track ist **P-SCHUELER-SPRACHEN-LEHRWERK-AUDIT** als blocked dokumentiert, bis konkrete Schulbuch-/Vokabellisten vorliegen; UI-seitig bleibt **P-UI-SCHUELER-MOTIVATION** der naechste Hebel.
-> Begruendung: v74 hat den App-Root in kleinere Babel-Skripte geteilt und damit die Voraussetzung fuer Daten-Lazy-Loading geschaffen; die naechsten groessten Hebel sind Ladeperformance (Lazy-Daten) und medizinische Quellenqualitaet.
+> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-DATA-LAZY** (durch v74 entblockt) oder **P-MED-AUDIT** (Quellenaudit Allgemeinmedizin). Fuer den Schueler-Track ist **P-SCHUELER-SPRACHEN-LEHRWERK-AUDIT** weiterhin blocked, bis konkrete Schulbuch-/Vokabellisten vorliegen; UI-seitig bleibt **P-UI-SCHUELER-MOTIVATION** der naechste Hebel.
+> Begruendung: v75 schliesst die aktuelle Schueler-Anforderung; die naechsten groessten Hebel bleiben Ladeperformance (Lazy-Daten) und medizinische Quellenqualitaet.
 
 ---
 
 ## F) Aenderungs-Historie dieser Datei
+
+- 2026-05-11: Session-Batch v75 erledigt — **P-SCHUELER-SPRACHEN-SECTIONS + P-SCHUELER-DEUTSCH-5-10** (User-Request: Sprachfaecher visuell/einklappbar nach Zahlen, Vokabeln, Grammatik trennen; Deutsch fuer Klassen 5-10 abdecken). `js/data/schueler_200_topups.js` erweitert die Sprachitems um `section: 'numbers'|'vocab'|'grammar'` und installiert fuer `deutsch` je Klasse 5-10 exakt 200 Aufgaben im `{q,a,f,s}`-Schema. `js/app/schueler.jsx` rendert bei Englisch/Franzoesisch/Latein einklappbare Abschnittsbloecke mit Counts und eigenen Training-/Quiz-Starts; Gesamttraining und Gesamtquiz bleiben erreichbar. `tools/validate.js` fordert jetzt Deutsch ≥200 Items sowie bei Sprachen 100 Zahlen-, 100 Vokabel- und 200 Grammatik-Section-Items; `README.md` und `AGENTS.md` dokumentieren Deutsch und die Section-Konvention. `sw.js` setzt `CACHE_VERSION` v74 -> v75 (`smartineer-v75-deutsch-sprachsections`). **Validierung:** `node --check js/data/schueler_200_topups.js; node --check tools/validate.js` gruen; Zaehlscript bestaetigt fuer k5-k10 Deutsch=200 und je Sprache `numbers=100`, `vocab=100`, `grammar=200`, `kind:vocab=200`; `node tools/validate.js --strict-sources` exit 0; `get_errors` clean fuer geaenderte Dateien; Browser-Smoke `http://127.0.0.1:8765/index.html?smoke=v75` bestaetigt Deutsch-Karte, Sprachabschnitte, Deutsch-Training, Englisch-Zahlen-Training und Englisch-Zahlen-Quiz ohne JS-Fehler.
 
 - 2026-05-11: Session-Batch v74 erledigt — **P-ARCH-APPJSX-SPLIT** (User: "dringende themen fortführen"). `js/app.jsx` wurde mechanisch in sieben geladene JSX-Module zerlegt: `js/app/_core.jsx` (Konstanten, Hooks, Export/Import, QID/SRS-Basis), `js/app/training.jsx` (Navigation, Dashboard, Ingenieurs-Training), `js/app/cheatsheet.jsx`, `js/app/schueler.jsx`, `js/app/schulungen.jsx`, `js/app/install.jsx`, `js/app/optionen.jsx`; `js/app.jsx` enthaelt nur noch App-Root und Mount. `index.html` laedt die Module in dieser Reihenfolge vor dem Root-Mount; `sw.js` precached alle neuen Dateien und setzt `CACHE_VERSION` v73 -> v74 (`smartineer-v74-appjsx-split`). `AGENTS.md` und `README.md` dokumentieren die neue Struktur und Ladefolge. Beim mechanischen Split entstand kurz UTF-8-Mojibake durch PowerShell-Encoding; alle neuen JSX-Dateien wurden via CP1252->UTF-8-Reparatur korrigiert und per Browser-Smoke auf `hasMojibake=false` geprueft. **Validierung:** `node tools/validate.js --strict-sources` exit 0; `get_errors` clean fuer alle neuen JSX-Module, `index.html`, `sw.js`, `README.md`, `AGENTS.md`, `WORKPACKAGES.md`; Browser-Smoke `http://127.0.0.1:8765/index.html?smoke=v74-final` bestaetigt Module `[_core, training, cheatsheet, schueler, schulungen, install, optionen, app]`, Dashboard/Training/Cheatsheets/Schueler/Schulungen/Optionen rendern, keine JS-Fehler, keine Mojibake. **Roll-forward:** `P-ARCH-DATA-LAZY` ist jetzt von `blocked` auf `ready`; **P-SCHUELER-SPRACHEN-LEHRWERK-AUDIT** neu als `blocked` dokumentiert, weil fuer exakte lehrwerksspezifische Vokabeln konkrete Listen fehlen.
 

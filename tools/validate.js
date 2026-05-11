@@ -384,8 +384,8 @@ function validateSchueler(win) {
     Object.keys(s.content).forEach((key) => {
         const c = s.content[key];
         const where = `SCHUELER.content["${key}"]`;
-        const needsTrainingFields = /^k(?:[5-9]|10)\.(mathe|physik|chemie|biologie|geschichte|englisch|franzoesisch|latein)$/.test(key);
-        const needsTwoHundredItems = /^k(?:[5-9]|10)\.(mathe|physik|chemie|biologie|geschichte)$/.test(key);
+        const needsTrainingFields = /^k(?:[5-9]|10)\.(mathe|deutsch|physik|chemie|biologie|geschichte|englisch|franzoesisch|latein)$/.test(key);
+        const needsTwoHundredItems = /^k(?:[5-9]|10)\.(mathe|deutsch|physik|chemie|biologie|geschichte)$/.test(key);
         const needsLanguageItems = /^k(?:[5-9]|10)\.(englisch|franzoesisch|latein)$/.test(key);
         if (!c || typeof c !== 'object') {
             err(file, where, 'Eintrag ist kein Objekt.');
@@ -408,8 +408,14 @@ function validateSchueler(win) {
                 if (needsLanguageItems) {
                     const vocabCount = c.pool.filter((it) => it && it.kind === 'vocab').length;
                     const grammarCount = c.pool.filter((it) => it && it.kind === 'grammar').length;
+                    const numberSectionCount = c.pool.filter((it) => it && it.section === 'numbers').length;
+                    const vocabSectionCount = c.pool.filter((it) => it && it.section === 'vocab').length;
+                    const grammarSectionCount = c.pool.filter((it) => it && it.section === 'grammar').length;
                     if (c.pool.length < 400 || vocabCount < 200 || grammarCount < 200) {
                         err(file, where, 'Sprachfaecher benoetigen mindestens 200 Vokabel-Items und 200 Grammatik-Items.');
+                    }
+                    if (numberSectionCount < 100 || vocabSectionCount < 100 || grammarSectionCount < 200) {
+                        err(file, where, 'Sprachfaecher benoetigen section-Aufteilung: 100 Zahlen, 100 Vokabeln, 200 Grammatik.');
                     }
                 }
                 c.pool.forEach((it, i) => {

@@ -1,14 +1,16 @@
 /*
- * Schueler-Top-up v72 — Zielgroesse 200 Items je bestehendem Fach Klasse 5-10
- * plus Sprachfaecher Englisch, Franzoesisch, Latein.
+ * Schueler-Top-up v75 — Zielgroesse 200 Items je bestehendem Fach Klasse 5-10
+ * plus Sprachfaecher Englisch, Franzoesisch, Latein und Deutsch.
  *
  * Architektur:
  *   - Diese Datei wird NACH js/data/schueler.js geladen und mutiert window.SCHUELER
  *     append-only. Bestehende Mathe/NW/Geschichte-Pools werden nicht umsortiert.
  *   - Neue Sprachfaecher ersetzen die bisherigen Englisch-Stubs und fuegen
- *     Franzoesisch/Latein hinzu.
+ *     Franzoesisch/Latein hinzu; Deutsch wird als eigenes Mittelstufenfach
+ *     mit 200 Items pro Klasse installiert.
  *   - Sprachpools enthalten pro (Klasse, Sprache) 200 Vokabel-Abfragen und
  *     200 Grammatik-Abfragen, markiert ueber kind: 'vocab' | 'grammar'.
+ *     Zusaetzlich trennt section: 'numbers' | 'vocab' | 'grammar' die UI.
  *
  * Fachliche Ehrlichkeitsgrenze:
  *   - Deutsche Kernlehrplaene geben Kompetenzbereiche und Themenfelder vor, aber
@@ -26,9 +28,11 @@
     const CLASSES = ['k5', 'k6', 'k7', 'k8', 'k9', 'k10'];
     const CORE_SUBJECTS = ['mathe', 'physik', 'chemie', 'biologie', 'geschichte'];
     const LANGUAGE_SUBJECTS = ['englisch', 'franzoesisch', 'latein'];
-    const SUBJECT_ORDER = ['mathe', 'englisch', 'franzoesisch', 'latein', 'physik', 'chemie', 'biologie', 'geschichte'];
+    const ADDED_SUBJECTS = LANGUAGE_SUBJECTS.concat(['deutsch']);
+    const SUBJECT_ORDER = ['mathe', 'deutsch', 'englisch', 'franzoesisch', 'latein', 'physik', 'chemie', 'biologie', 'geschichte'];
     const CLASS_NO = { k5: 5, k6: 6, k7: 7, k8: 8, k9: 9, k10: 10 };
 
+    SCH.subjects.deutsch = { label: 'Deutsch' };
     SCH.subjects.englisch = { label: 'Englisch' };
     SCH.subjects.franzoesisch = { label: 'Franzoesisch' };
     SCH.subjects.latein = { label: 'Latein' };
@@ -37,7 +41,10 @@
         return String(value).trim().replace(/\s+/g, '').replace(/,/g, '.').toLowerCase();
     };
     SCH.normalize = function (value) {
-        return baseNormalize(String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        const prepared = String(value)
+            .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+            .replace(/Ä/g, 'ae').replace(/Ö/g, 'oe').replace(/Ü/g, 'ue');
+        return baseNormalize(prepared.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             .replace(/[’']/g, '').replace(/[!?;.:-]/g, ''));
     };
 
@@ -46,14 +53,17 @@
             .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    function item(question, answer, formula, solution, kind) {
-        return {
+    function item(question, answer, formula, solution, kind, section) {
+        const out = {
             q: question,
             a: String(answer),
             f: formula || '<p><strong>Merksatz.</strong> Lies die Aufgabe genau, bestimme den gesuchten Begriff und pruefe die Einheit bzw. Sprachform.</p>',
-            s: solution || solutionFor(answer, 'Curriculum-orientierter Schueler-Top-up v72.'),
+            s: solution || solutionFor(answer, 'Curriculum-orientierter Schueler-Top-up v75.'),
             kind: kind || 'curriculum'
         };
+        const itemSection = section || (kind === 'vocab' ? 'vocab' : kind === 'grammar' ? 'grammar' : undefined);
+        if (itemSection) out.section = itemSection;
+        return out;
     }
 
     function solutionFor(answer, source) {
@@ -66,7 +76,7 @@
     function ensureSubjectOrder(classObj) {
         const existing = classObj.subjects || [];
         const merged = SUBJECT_ORDER.filter(function (subject) {
-            return existing.includes(subject) || LANGUAGE_SUBJECTS.includes(subject);
+            return existing.includes(subject) || ADDED_SUBJECTS.includes(subject);
         });
         existing.forEach(function (subject) {
             if (!merged.includes(subject)) merged.push(subject);
@@ -88,7 +98,7 @@
             extra.push(factory(index, cfg.pool.length + index));
         }
         cfg.pool = cfg.pool.concat(extra);
-        cfg.note = (cfg.note || '') + ' Zielstand v72: 200 Aufgaben mit Training und 10-Fragen-Quiz.';
+        cfg.note = (cfg.note || '') + ' Zielstand v75: 200 Aufgaben mit Training und 10-Fragen-Quiz.';
     }
 
     function topupCoreSubjects() {
@@ -267,6 +277,171 @@
         return item(question, row[0], formula, solutionFor(row[0], 'NRW-Kernlehrplan Geschichte Sekundarstufe I; chronologische und begriffliche Grundbildung.'), 'curriculum');
     }
 
+    const DEUTSCH_ROWS = {
+        k5: [
+            ['sprache', 'Welche Wortart ist <code>laufen</code>?', 'verb', 'Verben bezeichnen Taetigkeiten, Vorgaenge oder Zustaende.'],
+            ['sprache', 'Welche Wortart ist <code>Haus</code>?', 'nomen', 'Nomen bezeichnen Lebewesen, Dinge, Begriffe oder Gefuehle und werden grossgeschrieben.'],
+            ['sprache', 'Welches Satzglied antwortet auf die Frage <em>Wer oder was?</em>?', 'subjekt', 'Das Subjekt steht im Nominativ und nennt den Traeger der Handlung.'],
+            ['sprache', 'Welches Satzglied bildet den Verbkern des Satzes?', 'praedikat', 'Das Praedikat sagt, was geschieht oder ist.'],
+            ['sprache', 'In welchem Kasus steht <code>den Hund</code>?', 'akkusativ', 'Der Akkusativ antwortet haeufig auf Wen oder was?'],
+            ['rechtschreibung', 'Wie schreibt man Nomen im Deutschen?', 'gross', 'Nomen und substantivierte Woerter werden grossgeschrieben.'],
+            ['rechtschreibung', 'Welches Zeichen trennt Glieder einer Aufzaehlung?', 'komma', 'Kommas trennen gleichrangige Woerter oder Wortgruppen in Aufzaehlungen.'],
+            ['schreiben', 'Welche Textsorte nutzt Anfang, Konflikt, Hoehepunkt und Schluss?', 'erzaehlung', 'Erzaehlungen bauen Spannung ueber eine geordnete Handlung auf.'],
+            ['schreiben', 'Welche Fragen strukturieren einen Bericht?', 'w-fragen', 'Berichte klaeren Wer, Was, Wann, Wo, Wie und Warum.'],
+            ['literatur', 'Welche Textsorte beginnt oft mit <code>Es war einmal</code>?', 'maerchen', 'Maerchen nutzen typische Formeln, Gegensaetze und wunderbare Elemente.'],
+            ['literatur', 'Welche kurze Tiergeschichte endet mit einer Lehre?', 'fabel', 'Fabeln uebertragen menschliche Eigenschaften auf Tiere.'],
+            ['literatur', 'Wie nennt man die wichtigste Figur einer Geschichte?', 'hauptfigur', 'Die Hauptfigur traegt den Kern der Handlung.'],
+            ['literatur', 'Wie heisst ein Erzaehler, der <code>ich</code> sagt?', 'ich-erzaehler', 'Der Ich-Erzaehler berichtet aus der eigenen Perspektive.'],
+            ['lesen', 'Was hilft, einen Sachtext vor dem Lesen grob zu erfassen?', 'ueberschrift', 'Ueberschriften, Bilder und Zwischenueberschriften aktivieren Vorwissen.'],
+            ['lesen', 'Wie nennt man eine bedeutungsaehnliche Alternative zu einem Wort?', 'synonym', 'Synonyme haben eine aehnliche Bedeutung.'],
+            ['lesen', 'Wie nennt man ein Wort mit gegensaetzlicher Bedeutung?', 'antonym', 'Antonyme stehen in einem Bedeutungsgegensatz.'],
+            ['medien', 'Welche Textsorte erklaert ein Thema sachlich?', 'sachtext', 'Sachtexte informieren und nutzen Fakten, Beispiele und Fachbegriffe.'],
+            ['sprache', 'Welche Zeitform erzaehlt haeufig Vergangenes in Geschichten?', 'praeteritum', 'Das Praeteritum ist die typische Erzaehlzeit.'],
+            ['sprache', 'Wie nennt man direkte Rede mit Anfuehrungszeichen?', 'woertliche rede', 'Woertliche Rede gibt eine Aeusserung direkt wieder.'],
+            ['schreiben', 'Was trennt Sinnabschnitte in einem laengeren Text?', 'absatz', 'Absaetze ordnen Gedankenschritte sichtbar.']
+        ],
+        k6: [
+            ['sprache', 'Wie heisst ein Satz, der allein stehen kann?', 'hauptsatz', 'Ein Hauptsatz ist grammatisch selbststaendig.'],
+            ['sprache', 'Wie heisst ein abhaengiger Satz mit gebeugtem Verb am Ende?', 'nebensatz', 'Nebensaetze haengen von einem Hauptsatz ab.'],
+            ['rechtschreibung', 'Welches Zeichen steht zwischen Hauptsatz und Nebensatz?', 'komma', 'Nebensaetze werden mit Komma vom Hauptsatz getrennt.'],
+            ['sprache', 'Welche Konjunktion leitet einen Grund ein?', 'weil', 'Weil leitet einen kausalen Nebensatz ein.'],
+            ['sprache', 'Welche Zeitform nutzt <code>ich bin gegangen</code>?', 'perfekt', 'Das Perfekt besteht aus Hilfsverb und Partizip II.'],
+            ['sprache', 'Wie heisst die Grundform eines Verbs?', 'infinitiv', 'Der Infinitiv ist die unveraenderte Grundform.'],
+            ['schreiben', 'Welche Textsorte beschreibt eine Abfolge von Handlungen genau?', 'vorgangsbeschreibung', 'Vorgangsbeschreibungen sind sachlich, genau und chronologisch.'],
+            ['schreiben', 'Welche Textsorte fasst einen gelesenen Text knapp zusammen?', 'inhaltsangabe', 'Eine Inhaltsangabe nennt das Wesentliche sachlich und kurz.'],
+            ['literatur', 'Welche Textsorte erzaehlt von Helden oder Gruendungserklaerungen?', 'sage', 'Sagen verbinden reale Orte mit wunderbaren Motiven.'],
+            ['literatur', 'Wie nennt man Reim am Ende zweier Verse?', 'endreim', 'Endreime strukturieren Gedichte klanglich.'],
+            ['literatur', 'Wie heisst eine Zeile im Gedicht?', 'vers', 'Ein Vers ist eine Gedichtzeile.'],
+            ['literatur', 'Wie heisst eine Gruppe von Versen?', 'strophe', 'Strophen gliedern Gedichte.'],
+            ['lesen', 'Welche Lesestrategie markiert zentrale Woerter?', 'schluesselwoerter', 'Schluesselwoerter tragen die Hauptinformation.'],
+            ['medien', 'Wie nennt man eine Nachricht mit sachlicher Ueberschrift und Fakten?', 'meldung', 'Meldungen informieren knapp und faktenorientiert.'],
+            ['medien', 'Welche Quelle sollte man bei Internetinformationen pruefen?', 'absender', 'Der Absender hilft, Zuverlaessigkeit und Interesse einer Quelle einzuschaetzen.'],
+            ['sprache', 'Wie nennt man ein gebeugtes Verb?', 'finite verbform', 'Finite Verbformen zeigen Person, Numerus, Tempus und Modus.'],
+            ['sprache', 'Welcher Kasus antwortet auf <em>Wem?</em>?', 'dativ', 'Der Dativ antwortet auf Wem?'],
+            ['schreiben', 'Was nennt man die planvolle Reihenfolge von Einleitung, Hauptteil, Schluss?', 'aufbau', 'Ein klarer Aufbau macht Texte nachvollziehbar.'],
+            ['rechtschreibung', 'Welche Probe hilft bei Doppelkonsonanten nach kurzem Vokal?', 'silbenprobe', 'Silbenprobe und deutliches Sprechen helfen bei kurzer Vokallaenge.'],
+            ['lesen', 'Wie nennt man eine knappe Wiedergabe mit eigenen Worten?', 'zusammenfassung', 'Zusammenfassungen kuerzen und ordnen Informationen.']
+        ],
+        k7: [
+            ['sprache', 'Wie heisst die Moeglichkeitsform fuer indirekte Rede?', 'konjunktiv i', 'Konjunktiv I markiert indirekte Rede.'],
+            ['sprache', 'Wie heisst die Form <code>Der Brief wird geschrieben</code>?', 'passiv', 'Das Passiv stellt den Vorgang in den Vordergrund.'],
+            ['sprache', 'Welches Relativpronomen passt zu <code>das Buch, ___ ich lese</code>?', 'das', 'Relativpronomen beziehen sich auf ein Nomen und leiten Nebensaetze ein.'],
+            ['rechtschreibung', 'Welches Zeichen trennt eingeschobene Nebensaetze?', 'komma', 'Eingeschobene Nebensaetze werden durch Kommas eingeschlossen.'],
+            ['schreiben', 'Wie nennt man Behauptung plus Begruendung plus Beispiel?', 'argument', 'Ein Argument verbindet These, Begruendung und Beispiel.'],
+            ['schreiben', 'Wie heisst ein kurzer Text, der eine Meinung begruendet?', 'stellungnahme', 'Stellungnahmen machen Position und Gruende transparent.'],
+            ['schreiben', 'Welche Textsorte informiert sachlich ueber ein Ereignis?', 'bericht', 'Berichte sind knapp, sachlich und chronologisch.'],
+            ['literatur', 'Welche epische Kurzform zeigt oft einen Wendepunkt?', 'kurzgeschichte', 'Kurzgeschichten verdichten Alltagssituationen und haben oft offene Schluesse.'],
+            ['literatur', 'Welche Gedichtform erzaehlt eine dramatische Handlung?', 'ballade', 'Balladen verbinden epische, lyrische und dramatische Elemente.'],
+            ['literatur', 'Wie nennt man bildhaften Vergleich ohne <code>wie</code>?', 'metapher', 'Metaphern uebertragen Bedeutung bildhaft.'],
+            ['literatur', 'Wie nennt man Vermenschlichung von Dingen?', 'personifikation', 'Personifikation schreibt Dingen menschliche Eigenschaften zu.'],
+            ['lesen', 'Wie nennt man eine belegte Deutung eines Textes?', 'interpretation', 'Interpretation verbindet Beobachtung, Beleg und Deutung.'],
+            ['lesen', 'Welches Zeichen kennzeichnet ein direktes Zitat?', 'anfuehrungszeichen', 'Direkte Zitate stehen in Anfuehrungszeichen.'],
+            ['medien', 'Wie nennt man eine nicht wertende Zeitungs-Textform?', 'nachricht', 'Nachrichten trennen Information von Kommentar.'],
+            ['medien', 'Wie heisst ein wertender Meinungstext in der Zeitung?', 'kommentar', 'Kommentare bewerten ein Thema aus einer Position heraus.'],
+            ['sprache', 'Wie nennt man die Bedeutungsverschiebung durch Wortwahl?', 'konnotation', 'Konnotationen sind Nebenbedeutungen und Wertungen.'],
+            ['schreiben', 'Was steht am Anfang einer Inhaltsangabe?', 'basissatz', 'Der Basissatz nennt Autor, Titel, Textsorte, Thema.'],
+            ['sprache', 'Welche Satzart endet meist mit Fragezeichen?', 'fragesatz', 'Fragesaetze erfragen Information.'],
+            ['rechtschreibung', 'Welches Wort leitet haeufig Infinitivgruppen ein?', 'zu', 'Infinitivgruppen mit zu koennen kommarelevant sein.'],
+            ['lesen', 'Wie nennt man eine begruendete Vermutung zum Text?', 'deutungshypothese', 'Deutungshypothesen lenken die Analyse.']
+        ],
+        k8: [
+            ['schreiben', 'Welche Erörterung folgt Pro- und Contra-Argumenten?', 'dialektische eroerterung', 'Dialektische Eroerterungen waegen Gegenseiten ab.'],
+            ['schreiben', 'Welche Erörterung stuetzt nur eine Position?', 'lineare eroerterung', 'Lineare Eroerterungen entfalten Argumente in eine Richtung.'],
+            ['schreiben', 'Wie nennt man die zentrale Behauptung eines Arguments?', 'these', 'Thesen formulieren eine Position.'],
+            ['schreiben', 'Was macht ein Argument anschaulich und pruefbar?', 'beispiel', 'Beispiele konkretisieren Begruendungen.'],
+            ['literatur', 'Welche Textform ist fuer die Buehne geschrieben?', 'drama', 'Dramen bestehen aus Figurenrede und Szenen.'],
+            ['literatur', 'Wie heisst ein Abschnitt im Drama?', 'szene', 'Szenen gliedern dramatische Handlung.'],
+            ['literatur', 'Welche Redeform spricht eine Figur allein auf der Buehne?', 'monolog', 'Monologe zeigen Gedanken einer Figur.'],
+            ['literatur', 'Welche Redeform besteht aus Wechselrede?', 'dialog', 'Dialoge entwickeln Konflikte und Beziehungen.'],
+            ['sprache', 'Wie heisst die Wirklichkeitsform des Verbs?', 'indikativ', 'Der Indikativ stellt Aussagen als wirklich dar.'],
+            ['sprache', 'Wie heisst die Wunsch-/Irrealitaetsform?', 'konjunktiv ii', 'Konjunktiv II drueckt Irreales, Hoeflichkeit oder Moeglichkeit aus.'],
+            ['sprache', 'Wie nennt man eine Beifuegung im gleichen Kasus?', 'apposition', 'Appositionen erlaeutern ein Nomen.'],
+            ['rechtschreibung', 'Welches Zeichen gliedert laengere Satzgefuege stark?', 'semikolon', 'Semikolons trennen eng verbundene Hauptsaetze staerker als Kommas.'],
+            ['lesen', 'Was verbindet Textstelle und eigene Deutung?', 'beleg', 'Belege sichern Analyseaussagen am Text.'],
+            ['lesen', 'Wie nennt man die Erzählhaltung gegenueber Figuren?', 'erzaehlverhalten', 'Erzaehlverhalten beschreibt Naehe, Wissen und Perspektive.'],
+            ['medien', 'Welche Frage prueft Online-Quellen auf Zuverlaessigkeit?', 'quellencheck', 'Quellenchecks pruefen Absender, Datum, Belege und Interesse.'],
+            ['medien', 'Wie nennt man bewusste Beeinflussung durch einseitige Darstellung?', 'manipulation', 'Manipulation lenkt Wahrnehmung verdeckt.'],
+            ['sprache', 'Wie nennt man Fachwortschatz eines Bereichs?', 'fachsprache', 'Fachsprache ist praezise und adressatenbezogen.'],
+            ['schreiben', 'Wie heisst der Schluss, der Argumente zusammenfuehrt?', 'fazit', 'Ein Fazit buendelt Ergebnis und Bewertung.'],
+            ['literatur', 'Wie nennt man Gegensatz in einem Bild oder Satz?', 'antithese', 'Antithesen stellen Gegensaetze heraus.'],
+            ['lesen', 'Welche Methode gliedert einen Text in Sinnabschnitte?', 'strukturieren', 'Strukturieren ordnet Inhalt und Argumentation.']
+        ],
+        k9: [
+            ['schreiben', 'Welche Textsorte bewirbt eine Person bei einem Betrieb?', 'bewerbung', 'Bewerbungen verbinden Anschreiben, Lebenslauf und Nachweise.'],
+            ['schreiben', 'Welcher Teil der Bewerbung zeigt Stationen tabellarisch?', 'lebenslauf', 'Der Lebenslauf ordnet Bildungs- und Erfahrungsstationen.'],
+            ['schreiben', 'Wie nennt man sachliches Mitschreiben von Ergebnissen?', 'protokoll', 'Protokolle sichern Verlauf oder Ergebnisse.'],
+            ['schreiben', 'Was ist die Gegenposition zu einer These?', 'antithese', 'Antithesen machen Gegenargumente sichtbar.'],
+            ['literatur', 'Welche literarische Form ist laenger als Kurzgeschichte und kuerzer als Roman?', 'novelle', 'Novellen konzentrieren sich oft auf ein unerhoertes Ereignis.'],
+            ['literatur', 'Wie nennt man das zentrale Problem einer Handlung?', 'konflikt', 'Konflikte treiben literarische Handlung an.'],
+            ['literatur', 'Welche Redeweise meint das Gegenteil des Gesagten?', 'ironie', 'Ironie erzeugt Bedeutung durch Gegensatz von Aussage und gemeintem Sinn.'],
+            ['literatur', 'Wie nennt man starke Uebertreibung?', 'hyperbel', 'Hyperbeln steigern Wirkung durch Uebertreibung.'],
+            ['sprache', 'Wie heisst Sprache einer Region?', 'dialekt', 'Dialekte sind regionale Sprachvarietaeten.'],
+            ['sprache', 'Wie nennt man Sprache einer sozialen Gruppe?', 'soziolekt', 'Soziolekte markieren soziale Gruppenzugehoerigkeit.'],
+            ['sprache', 'Welche Redeform gibt fremde Rede mit Quellenabstand wieder?', 'indirekte rede', 'Indirekte Rede nutzt haeufig Konjunktiv I.'],
+            ['rechtschreibung', 'Was muss bei direkten Zitaten immer angegeben werden?', 'quelle', 'Zitate brauchen genaue Quellenangaben.'],
+            ['lesen', 'Wie nennt man Wiedergabe mit eigenen Worten?', 'paraphrase', 'Paraphrasen erklaeren Inhalt ohne direkte Uebernahme.'],
+            ['lesen', 'Welcher Analyse-Dreischritt ist zentral?', 'beobachtung beleg deutung', 'Analyse verbindet Beobachtung, Textbeleg und Deutung.'],
+            ['medien', 'Wie nennt man absichtlich falsche Information?', 'desinformation', 'Desinformation soll taeuschen oder beeinflussen.'],
+            ['medien', 'Wie nennt man Auswahl gleicher Meinungen durch Algorithmen?', 'filterblase', 'Filterblasen verengen Informationsvielfalt.'],
+            ['schreiben', 'Was nennt man den roten Faden eines Textes?', 'kohärenz', 'Kohaerenz entsteht durch logische Verknuepfung.'],
+            ['sprache', 'Welcher Ausdruck verweist auf vorher Genanntes?', 'pronomen', 'Pronomen koennen Wiederholungen vermeiden und Bezug herstellen.'],
+            ['literatur', 'Welche Perspektive kennt mehr als eine Figur?', 'auktorial', 'Auktoriales Erzaehlen kann kommentieren und ueberblicken.'],
+            ['schreiben', 'Was prueft man am Ende eines Textes systematisch?', 'ueberarbeitung', 'Ueberarbeiten prueft Inhalt, Aufbau, Sprache und Richtigkeit.']
+        ],
+        k10: [
+            ['schreiben', 'Welche Schreibform nutzt Material, um eine eigene Darstellung zu verfassen?', 'materialgestuetztes schreiben', 'Materialgestuetztes Schreiben integriert Quellen geordnet und eigenstaendig.'],
+            ['schreiben', 'Welche Aufgabe verlangt Begruendung eines Urteils am Text?', 'textgebundene eroerterung', 'Textgebundene Eroerterung verbindet Analyse und Stellungnahme.'],
+            ['schreiben', 'Welcher Operator verlangt Zerlegen und Untersuchen?', 'analysieren', 'Analysieren untersucht Aufbau, Sprache, Inhalt und Wirkung.'],
+            ['schreiben', 'Welcher Operator verlangt begruendetes Urteil?', 'bewerten', 'Bewerten stuetzt ein Urteil auf Kriterien und Belege.'],
+            ['literatur', 'Welche Analyse untersucht Verse, Bilder und Klang?', 'gedichtanalyse', 'Gedichtanalyse verbindet Form, Sprache und Deutung.'],
+            ['literatur', 'Welche Analyse untersucht Szenen, Figurenrede und Konflikte?', 'dramenanalyse', 'Dramenanalyse betrachtet Dialog, Regieanweisung, Konflikt und Figurenkonstellation.'],
+            ['literatur', 'Wie nennt man Entwicklung einer Figur im Text?', 'figurenentwicklung', 'Figurenentwicklung zeigt Veraenderungen durch Konflikte.'],
+            ['literatur', 'Wie nennt man Beziehungsmuster zwischen Figuren?', 'figurenkonstellation', 'Figurenkonstellationen ordnen Beziehungen und Konflikte.'],
+            ['sprache', 'Wie nennt man Wirkung eines sprachlichen Mittels?', 'funktion', 'Sprachmittel muessen mit ihrer Funktion im Text erklaert werden.'],
+            ['sprache', 'Welche Ebene betrachtet Satzbau?', 'syntax', 'Syntax beschreibt Bau und Verknuepfung von Saetzen.'],
+            ['sprache', 'Welche Ebene betrachtet Wortbedeutung?', 'semantik', 'Semantik untersucht Bedeutungen.'],
+            ['rechtschreibung', 'Was trennt Quellenangabe und eigenes Argument sauber?', 'zitiertechnik', 'Zitiertechnik macht fremde Gedanken nachvollziehbar.'],
+            ['lesen', 'Wie nennt man eine leitende Deutung vor der Analyse?', 'deutungshypothese', 'Deutungshypothesen werden an Belegen geprueft.'],
+            ['lesen', 'Wie nennt man die Aussageabsicht eines Sachtextes?', 'intention', 'Intention beschreibt, was ein Text erreichen will.'],
+            ['medien', 'Wie nennt man Bewertung von Medien nach Quelle, Beleg und Absicht?', 'medienkritik', 'Medienkritik prueft Zuverlaessigkeit und Wirkung.'],
+            ['medien', 'Welche Darstellungsform verbindet Bild, Text und Ton online?', 'multimodal', 'Multimodale Texte nutzen mehrere Zeichenkanaele.'],
+            ['schreiben', 'Was sichert Zusammenhang zwischen Absaetzen?', 'ueberleitung', 'Ueberleitungen verbinden Gedankenschritte.'],
+            ['sprache', 'Welche Sprachebene passt zu Bewerbung und Analyse?', 'standardsprache', 'Standardsprache ist situationsangemessen und ueberregional.'],
+            ['literatur', 'Wie nennt man wiederkehrendes bedeutungsvolles Element?', 'motiv', 'Motive strukturieren Themen und Deutungen.'],
+            ['schreiben', 'Was steht am Ende einer Analyse als gebuendeltes Ergebnis?', 'schluss', 'Der Schluss fasst Deutung und Ergebnis knapp zusammen.']
+        ]
+    };
+
+    function makeDeutschPool(classId) {
+        const out = [];
+        for (let index = 0; index < 200; index++) out.push(deutschItem(classId, index));
+        return out;
+    }
+
+    function deutschItem(classId, index) {
+        const rows = DEUTSCH_ROWS[classId];
+        const row = rows[index % rows.length];
+        const grade = CLASS_NO[classId];
+        const domain = row[0];
+        const question = `Deutsch Klasse ${grade} ${domain} ${index + 1}: ${row[1]}`;
+        const answer = row[2];
+        const formula = '<p><strong>Merksatz.</strong> ' + escapeHtml(row[3]) + '</p>'
+            + '<p><strong>Strategie.</strong> Ordne die Aufgabe einem Kompetenzbereich zu: Sprache untersuchen, Schreiben, Lesen/Literatur oder Medien.</p>';
+        return item(question, answer, formula,
+            solutionFor(answer, 'NRW-Kernlehrplan Deutsch Sekundarstufe I; Kompetenzbereiche Rezeption, Produktion, Sprache und Medien.'),
+            'deutsch', domain);
+    }
+
+    function installDeutschPools() {
+        CLASSES.forEach(function (classId) {
+            SCH.content[classId + '.deutsch'] = {
+                mode: 'pool',
+                pool: makeDeutschPool(classId),
+                note: 'Deutsch Klasse ' + CLASS_NO[classId] + ': 200 Aufgaben zu Grammatik/Rechtschreibung, Schreiben, Lesen/Literatur, Sachtexten und Medien.'
+            };
+        });
+    }
+
     function makeLanguagePool(language, classId) {
         return makeVocabItems(language, classId, 200).concat(makeGrammarItems(language, classId, 200));
     }
@@ -314,26 +489,26 @@
             if (index < 100) {
                 const number = startNumber + index;
                 const word = numberWord(language, number);
-                out.push(vocabItem(language, classId, `Welche Zahl bedeutet <code>${escapeHtml(word)}</code>?`, String(number), 'Zahlenwort'));
+                out.push(vocabItem(language, classId, `Welche Zahl bedeutet <code>${escapeHtml(word)}</code>?`, String(number), 'Zahlenwort', 'numbers'));
             } else {
                 const semanticIndex = (index - 100 + (grade - 5) * 17) % SEMANTIC_VOCAB.length;
                 const row = SEMANTIC_VOCAB[semanticIndex];
                 const target = translationFor(language, row);
                 const german = row[0];
                 if (index % 2 === 0) {
-                    out.push(vocabItem(language, classId, `Uebersetze ins Deutsche: <code>${escapeHtml(target)}</code>`, german, 'Grundwortschatz'));
+                    out.push(vocabItem(language, classId, `Uebersetze ins Deutsche: <code>${escapeHtml(target)}</code>`, german, 'Grundwortschatz', 'vocab'));
                 } else {
-                    out.push(vocabItem(language, classId, `Uebersetze in ${languageLabel(language)}: <code>${escapeHtml(german)}</code>`, target, 'Grundwortschatz'));
+                    out.push(vocabItem(language, classId, `Uebersetze in ${languageLabel(language)}: <code>${escapeHtml(german)}</code>`, target, 'Grundwortschatz', 'vocab'));
                 }
             }
         }
         return out;
     }
 
-    function vocabItem(language, classId, question, answer, topic) {
+    function vocabItem(language, classId, question, answer, topic, section) {
         const formula = '<p><strong>Vokabelstrategie.</strong> Erst Bedeutung aktiv abrufen, dann Schreibweise pruefen. Zahlenwoerter gehoeren zum Kernwortschatz.</p>';
         return item(`${languageLabel(language)} Klasse ${CLASS_NO[classId]} Vokabel ${topic}: ${question}`, answer, formula,
-            solutionFor(answer, sourceForLanguage(language, 'vocab')), 'vocab');
+            solutionFor(answer, sourceForLanguage(language, 'vocab')), 'vocab', section);
     }
 
     function makeGrammarItems(language, classId, count) {
@@ -524,5 +699,6 @@
     }
 
     topupCoreSubjects();
+    installDeutschPools();
     installLanguagePools();
 })();

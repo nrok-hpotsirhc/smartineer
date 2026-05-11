@@ -10,6 +10,7 @@ function Schueler() {
     const [trainingIdx, setTrainingIdx] = useState(0);
     const [showTrainingSolution, setShowTrainingSolution] = useState(false);
     const [showTrainingFormula, setShowTrainingFormula] = useState(false);
+    const [selectedSection, setSelectedSection] = useState(null);
     const schuelerProgress = useSchuelerProgress();
 
     const drillRef = useKaTeX([stage, idx]);
@@ -27,20 +28,86 @@ function Schueler() {
         const qid = stableQid({ q: item && item.q, a: item && item.a });
         return `${klassId}.${subjId}|${qid || itemIdx}`;
     };
+    const foreignLanguageSubjects = ['englisch', 'franzoesisch', 'latein'];
+    const languageSections = [
+        { id: 'numbers', label: 'Zahlen', desc: 'Zahlenwoerter sicher erkennen und schreiben.' },
+        { id: 'vocab', label: 'Vokabeln', desc: 'Grundwortschatz in beide Richtungen abrufen.' },
+        { id: 'grammar', label: 'Grammatik', desc: 'Formen, Satzbau und typische Regeln trainieren.' }
+    ];
+    const isForeignLanguageSubject = (subjId) => foreignLanguageSubjects.includes(subjId);
+    const sectionLabel = (sectionId) => {
+        const found = languageSections.find(section => section.id === sectionId);
+        return found ? found.label : '';
+    };
+    const itemSection = (item) => {
+        if (!item) return 'vocab';
+        if (item.section) return item.section;
+        if (item.kind === 'grammar') return 'grammar';
+        if (item.kind === 'vocab' && /Zahlenwort/i.test(item.q || '')) return 'numbers';
+        return item.kind === 'vocab' ? 'vocab' : 'vocab';
+    };
+    const poolForSection = (cfg, sectionId) => {
+        if (!cfg || !Array.isArray(cfg.pool)) return [];
+        if (!sectionId) return cfg.pool;
+        return cfg.pool.filter(item => itemSection(item) === sectionId);
+    };
+    const renderLanguageSections = (klassId, subjId, cfg, trainingReady) => {
+        if (!isForeignLanguageSubject(subjId) || !cfg || !Array.isArray(cfg.pool)) return null;
+        return (
+            <div className="mt-4 border-t border-slate-200 pt-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Abschnitte</div>
+                <div className="space-y-2">
+                    {languageSections.map(section => {
+                        const count = poolForSection(cfg, section.id).length;
+                        return (
+                            <details key={section.id} className="rounded-lg border border-slate-200 bg-slate-50/80">
+                                <summary className="cursor-pointer px-3 py-2 text-sm font-bold text-slate-800">
+                                    <span className="inline-flex w-full items-center justify-between gap-3">
+                                        <span>{section.label}</span>
+                                        <span className="text-xs font-bold px-2 py-1 rounded-full bg-white border border-slate-200 text-slate-600">{count} Aufgaben</span>
+                                    </span>
+                                </summary>
+                                <div className="px-3 pb-3">
+                                    <p className="text-xs text-slate-600 mb-3">{section.desc}</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {trainingReady && count > 0 && (
+                                            <button onClick={() => startTraining(klassId, subjId, 0, section.id)}
+                                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">
+                                                Training
+                                            </button>
+                                        )}
+                                        {count > 0 && (
+                                            <button onClick={() => startQuiz(klassId, subjId, section.id)}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">
+                                                Quiz
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </details>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    };
 
-    const startTraining = (klassId, subjId, startAt) => {
+    const startTraining = (klassId, subjId, startAt, sectionId) => {
         const key = `${klassId}.${subjId}`;
         const cfg = SCH.content[key];
         if (!hasSchuelerTraining(klassId, cfg)) return;
+        const pool = poolForSection(cfg, sectionId);
+        if (!pool.length) return;
         setKlass(klassId); setSubject(subjId);
-        setItems(cfg.pool.slice());
+        setItems(pool.slice());
         setTrainingIdx(typeof startAt === 'number' ? startAt : 0);
+        setSelectedSection(sectionId || null);
         setShowTrainingSolution(false);
         setShowTrainingFormula(false);
         setStage('training');
     };
 
-    const startQuiz = (klassId, subjId) => {
+    const startQuiz = (klassId, subjId, sectionId) => {
         const key = `${klassId}.${subjId}`;
         const cfg = SCH.content[key];
         if (!cfg || cfg.mode === 'stub') return;
@@ -48,7 +115,7 @@ function Schueler() {
         if (cfg.mode === 'generated') {
             for (let i = 0; i < 10; i++) arr.push(cfg.gen());
         } else if (cfg.mode === 'pool') {
-            const pool = cfg.pool.slice();
+            const pool = poolForSection(cfg, sectionId).slice();
             for (let i = 0; i < 10 && pool.length; i++) {
                 const k = Math.floor(Math.random() * pool.length);
                 arr.push(pool.splice(k, 1)[0]);
@@ -56,6 +123,7 @@ function Schueler() {
         }
         setKlass(klassId); setSubject(subjId);
         setItems(arr); setIdx(0); setAnswers([]); setVal('');
+        setSelectedSection(sectionId || null);
         setShowTrainingSolution(false);
         setShowTrainingFormula(false);
         setStage('quiz');
@@ -81,7 +149,7 @@ function Schueler() {
                     <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
                          className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
                     <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schüler-Bereich</h1>
-                    <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–10; Mittelstufen-Mathematik und Naturwissenschaften (Physik, Chemie und Biologie ab Klasse 5, gemäß Rahmenlehrplan/KLP SI) bieten getrenntes Training mit Formeln/Musterlösungen und ein 10-Fragen-Quiz. Englisch folgt.</p>
+                    <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–10; ab Klasse 5 kommen Deutsch, Naturwissenschaften, Geschichte sowie Englisch, Französisch und Latein dazu. Alle Mittelstufenfächer bieten getrenntes Training mit Formeln/Merksätzen, Musterlösungen und ein 10-Fragen-Quiz.</p>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                     {SCH.classes.map((c, i) => {
@@ -132,19 +200,22 @@ function Schueler() {
                                 <h3 className="text-xl font-bold text-slate-800 mb-2">{SCH.subjects[s].label}</h3>
                                 <p className="text-sm text-slate-600 mb-3">{ready && cfg.note ? cfg.note : 'In Vorbereitung. Bald verfügbar.'}</p>
                                 {ready ? (
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        {trainingReady && (
-                                            <button onClick={() => startTraining(klass, s)}
-                                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
-                                                Training öffnen
+                                    <>
+                                        <div className="flex flex-wrap gap-2 items-center">
+                                            {trainingReady && (
+                                                <button onClick={() => startTraining(klass, s)}
+                                                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
+                                                    Training öffnen
+                                                </button>
+                                            )}
+                                            <button onClick={() => startQuiz(klass, s)}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
+                                                10-Fragen-Quiz
                                             </button>
-                                        )}
-                                        <button onClick={() => startQuiz(klass, s)}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
-                                            10-Fragen-Quiz
-                                        </button>
-                                        {poolCount != null && <span className="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600">{poolCount} Aufgaben</span>}
-                                    </div>
+                                            {poolCount != null && <span className="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600">{poolCount} Aufgaben</span>}
+                                        </div>
+                                        {renderLanguageSections(klass, s, cfg, trainingReady)}
+                                    </>
                                 ) : (
                                     <span className="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-500">in Vorbereitung</span>
                                 )}
@@ -179,10 +250,11 @@ function Schueler() {
                         <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">Schüler-Training</div>
                         <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                             {klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}
+                            {selectedSection && <span className="text-slate-500"> · {sectionLabel(selectedSection)}</span>}
                         </h1>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        <button onClick={() => startQuiz(klass, subject)}
+                        <button onClick={() => startQuiz(klass, subject, selectedSection)}
                             className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition">Quiz starten</button>
                         <button onClick={() => setStage('subjects')}
                             className="px-4 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition">Fachübersicht</button>
@@ -274,7 +346,7 @@ function Schueler() {
             <section className="view-fade max-w-2xl mx-auto" ref={drillRef}>
                 <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
                     <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                        Quiz · Aufgabe {idx + 1} von {items.length}
+                        Quiz{selectedSection ? ` · ${sectionLabel(selectedSection)}` : ''} · Aufgabe {idx + 1} von {items.length}
                     </div>
                     <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) setStage('subjects'); }}
                         className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
@@ -321,7 +393,7 @@ function Schueler() {
             <section className="view-fade max-w-3xl mx-auto" ref={resultRef}>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
                     <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Auswertung</h2>
-                    <p className="text-slate-600 mb-6">{klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}</p>
+                    <p className="text-slate-600 mb-6">{klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}{selectedSection ? ` · ${sectionLabel(selectedSection)}` : ''}</p>
                     <div className="flex justify-center gap-8 mb-4">
                         <div>
                             <div className="text-5xl font-extrabold text-emerald-600">{correct}</div>
@@ -359,12 +431,12 @@ function Schueler() {
                     </ol>
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center">
-                    <button onClick={() => startQuiz(klass, subject)}
+                    <button onClick={() => startQuiz(klass, subject, selectedSection)}
                         className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
                         Neues Quiz (10 Aufgaben)
                     </button>
                     {hasSchuelerTraining(klass, SCH.content[`${klass}.${subject}`]) && (
-                        <button onClick={() => startTraining(klass, subject)}
+                        <button onClick={() => startTraining(klass, subject, 0, selectedSection)}
                             className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition">
                             Training öffnen
                         </button>
