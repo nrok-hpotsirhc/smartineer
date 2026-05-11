@@ -5,6 +5,7 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 const STORAGE_KEY = 'wissen_reloaded_progress_v1';
+const SCHUELER_PROGRESS_KEY = 'smartineer_schueler_progress_v1';
 const INSTALL_DISMISS_KEY = 'smartineer_install_dismissed_v1';
 const THEME_KEY = 'smartineer_theme_v1'; // 'dark' | 'light' (Default: 'light')
 // Schulungen-State (Stand v2): wie v1, mit Versions-Bump fuer Stable-QID-Symmetrie.
@@ -48,7 +49,7 @@ const ADMIN_GLOBAL_KEY = 'smartineer_admin_global_v1'; // reserviert fuer kuenft
 // gerätespezifisch und werden NICHT exportiert.
 const EXPORT_FORMAT = 'smartineer-progress';
 const EXPORT_VERSION = 1;
-const EXPORT_KEYS = [STORAGE_KEY, SCHULUNGEN_KEY, SRS_KEY, READER_NOTES_KEY, READER_BOOKMARKS_KEY];
+const EXPORT_KEYS = [STORAGE_KEY, SCHUELER_PROGRESS_KEY, SCHULUNGEN_KEY, SRS_KEY, READER_NOTES_KEY, READER_BOOKMARKS_KEY];
 
 function buildExportPayload() {
     const data = {};
@@ -268,6 +269,26 @@ function useProgress() {
     }, [progress, persist]);
     const isSolved = useCallback((catId, lvl, idx) =>
         !!progress[`${catId}|${lvl}|${idx}`], [progress]);
+    const reset = useCallback(() => persist({}), [persist]);
+    return { progress, isSolved, setSolved, reset };
+}
+
+function useSchuelerProgress() {
+    const [progress, setProgress] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(SCHUELER_PROGRESS_KEY)) || {}; }
+        catch (e) { return {}; }
+    });
+    const persist = useCallback((next) => {
+        setProgress(next);
+        try { localStorage.setItem(SCHUELER_PROGRESS_KEY, JSON.stringify(next)); } catch (e) { /* quota */ }
+    }, []);
+    const setSolved = useCallback((taskKey, solved) => {
+        if (!taskKey) return;
+        const next = { ...progress };
+        if (solved) next[taskKey] = 1; else delete next[taskKey];
+        persist(next);
+    }, [progress, persist]);
+    const isSolved = useCallback((taskKey) => !!progress[taskKey], [progress]);
     const reset = useCallback(() => persist({}), [persist]);
     return { progress, isSolved, setSolved, reset };
 }
@@ -1327,22 +1348,45 @@ function Cheatsheet({ data, order }) {
 // ---------------------------------------------------------------- Schüler-Bereich
 function Schueler() {
     const SCH = window.SCHUELER;
-    const [stage, setStage] = useState('classes'); // classes | subjects | drill | result
+    const [stage, setStage] = useState('classes'); // classes | subjects | training | quiz | result
     const [klass, setKlass] = useState(null);
     const [subject, setSubject] = useState(null);
     const [items, setItems] = useState([]);
     const [idx, setIdx] = useState(0);
     const [answers, setAnswers] = useState([]);
     const [val, setVal] = useState('');
+    const [trainingIdx, setTrainingIdx] = useState(0);
+    const [showTrainingSolution, setShowTrainingSolution] = useState(false);
+    const schuelerProgress = useSchuelerProgress();
 
     const drillRef = useKaTeX([stage, idx]);
     const resultRef = useKaTeX([stage, answers.length]);
+    const trainingRef = useKaTeX([stage, klass, subject, trainingIdx, showTrainingSolution, Object.keys(schuelerProgress.progress).length]);
 
     if (!SCH) {
         return <section className="view-fade p-8 text-red-700">Schüler-Daten nicht geladen. Prüfe <code>js/data/schueler.js</code> in <code>index.html</code>.</section>;
     }
 
-    const startDrill = (klassId, subjId) => {
+    const isMittelstufeClass = (klassId) => /^k(?:[5-9]|10)$/.test(klassId || '');
+    const hasSchuelerTraining = (klassId, cfg) => !!(cfg && cfg.mode === 'pool' && isMittelstufeClass(klassId)
+        && Array.isArray(cfg.pool) && cfg.pool.some(it => it && (it.f || it.s)));
+    const studentTaskKey = (klassId, subjId, item, itemIdx) => {
+        const qid = stableQid({ q: item && item.q, a: item && item.a });
+        return `${klassId}.${subjId}|${qid || itemIdx}`;
+    };
+
+    const startTraining = (klassId, subjId, startAt) => {
+        const key = `${klassId}.${subjId}`;
+        const cfg = SCH.content[key];
+        if (!hasSchuelerTraining(klassId, cfg)) return;
+        setKlass(klassId); setSubject(subjId);
+        setItems(cfg.pool.slice());
+        setTrainingIdx(typeof startAt === 'number' ? startAt : 0);
+        setShowTrainingSolution(false);
+        setStage('training');
+    };
+
+    const startQuiz = (klassId, subjId) => {
         const key = `${klassId}.${subjId}`;
         const cfg = SCH.content[key];
         if (!cfg || cfg.mode === 'stub') return;
@@ -1358,14 +1402,15 @@ function Schueler() {
         }
         setKlass(klassId); setSubject(subjId);
         setItems(arr); setIdx(0); setAnswers([]); setVal('');
-        setStage('drill');
+        setShowTrainingSolution(false);
+        setStage('quiz');
     };
 
     const submit = () => {
         if (!val.trim()) return;
         const item = items[idx];
         const correct = SCH.normalize(val) === SCH.normalize(item.a);
-        const next = answers.concat([{ q: item.q, expected: item.a, given: val, correct }]);
+        const next = answers.concat([{ q: item.q, expected: item.a, given: val, correct, formula: item.f, solution: item.s }]);
         setAnswers(next); setVal('');
         if (idx + 1 >= items.length) setStage('result');
         else setIdx(idx + 1);
@@ -1381,7 +1426,7 @@ function Schueler() {
                     <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
                          className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
                     <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schüler-Bereich</h1>
-                    <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–4; Mittelstufen-Naturwissenschaften (Physik, Chemie und Biologie ab Klasse 5, gemäß NRW-Kernlehrplan SI) enthalten je 50 Drill-Fragen pro Klasse/Fach. Mathematik 5–10 und Englisch folgen.</p>
+                    <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–4; Mittelstufen-Naturwissenschaften (Physik, Chemie und Biologie ab Klasse 5, gemäß NRW-Kernlehrplan SI) bieten getrenntes Training mit Formeln/Musterlösungen und ein 10-Fragen-Quiz. Mathematik 5–10 und Englisch folgen.</p>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                     {SCH.classes.map((c, i) => {
@@ -1422,18 +1467,130 @@ function Schueler() {
                     {klassObj.subjects.map(s => {
                         const cfg = SCH.content[`${klass}.${s}`];
                         const ready = cfg && cfg.mode !== 'stub';
+                        const trainingReady = hasSchuelerTraining(klass, cfg);
+                        const poolCount = cfg && Array.isArray(cfg.pool) ? cfg.pool.length : null;
                         return (
-                            <button key={s}
-                                onClick={() => { if (ready) startDrill(klass, s); }}
-                                disabled={!ready}
+                            <div key={s}
                                 className={`text-left bg-white rounded-2xl border border-slate-200 p-6 transition ${ready
                                     ? 'hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer'
                                     : 'opacity-60 cursor-not-allowed'}`}>
                                 <h3 className="text-xl font-bold text-slate-800 mb-2">{SCH.subjects[s].label}</h3>
                                 <p className="text-sm text-slate-600 mb-3">{ready && cfg.note ? cfg.note : 'In Vorbereitung. Bald verfügbar.'}</p>
-                                <span className={`text-xs font-bold px-2 py-1 rounded-full ${ready ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                                    {ready ? '10 Aufgaben starten' : 'in Vorbereitung'}
-                                </span>
+                                {ready ? (
+                                    <div className="flex flex-wrap gap-2 items-center">
+                                        {trainingReady && (
+                                            <button onClick={() => startTraining(klass, s)}
+                                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
+                                                Training öffnen
+                                            </button>
+                                        )}
+                                        <button onClick={() => startQuiz(klass, s)}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
+                                            10-Fragen-Quiz
+                                        </button>
+                                        {poolCount != null && <span className="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600">{poolCount} Aufgaben</span>}
+                                    </div>
+                                ) : (
+                                    <span className="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-500">in Vorbereitung</span>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            </section>
+        );
+    }
+
+    // ---------- Stage: Training (Mittelstufe, einzelne Aufgaben) ----------
+    if (stage === 'training') {
+        const item = items[trainingIdx];
+        const cfg = SCH.content[`${klass}.${subject}`];
+        if (!item || !hasSchuelerTraining(klass, cfg)) { setStage('subjects'); return null; }
+        const klassObj = SCH.classes.find(c => c.id === klass);
+        const taskKey = studentTaskKey(klass, subject, item, trainingIdx);
+        const solved = schuelerProgress.isSolved(taskKey);
+        const solvedCount = items.reduce((sum, it, i) => sum + (schuelerProgress.isSolved(studentTaskKey(klass, subject, it, i)) ? 1 : 0), 0);
+        const pct = items.length ? Math.round((solvedCount / items.length) * 100) : 0;
+        const goTo = (nextIdx) => {
+            const bounded = (nextIdx + items.length) % items.length;
+            setTrainingIdx(bounded);
+            setShowTrainingSolution(false);
+        };
+        return (
+            <section className="view-fade max-w-5xl mx-auto" ref={trainingRef}>
+                <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+                    <div>
+                        <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">Schüler-Training</div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+                            {klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}
+                        </h1>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <button onClick={() => startQuiz(klass, subject)}
+                            className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition">Quiz starten</button>
+                        <button onClick={() => setStage('subjects')}
+                            className="px-4 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition">Fachübersicht</button>
+                    </div>
+                </div>
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-5">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">Aufgabe {trainingIdx + 1} von {items.length}</div>
+                        <div className="text-sm font-bold text-emerald-700">{solvedCount} gelöst · {pct}%</div>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 transition-all duration-500"
+                             style={{ width: `${pct}%` }}></div>
+                    </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 task-fade" key={`${klass}-${subject}-${trainingIdx}`}>
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                        <div className={`text-xs font-bold px-2 py-1 rounded-full ${solved ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                            {solved ? 'gelöst' : 'offen'}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => goTo(trainingIdx - 1)} className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">← Vorherige</button>
+                            <span className="text-sm text-slate-500">{trainingIdx + 1} / {items.length}</span>
+                            <button onClick={() => goTo(trainingIdx + 1)} className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Nächste →</button>
+                        </div>
+                    </div>
+                    <div className="bg-gradient-to-br from-slate-50 to-emerald-50/30 p-5 rounded-xl border border-slate-200 mb-5">
+                        <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Aufgabe</h2>
+                        <div className="text-lg md:text-xl text-slate-900 font-semibold math-block" dangerouslySetInnerHTML={{ __html: item.q }} />
+                    </div>
+                    <div className="bg-cyan-50 border-l-4 border-cyan-400 p-4 mb-5 rounded-r-lg">
+                        <h3 className="text-sm font-bold text-cyan-800 uppercase tracking-wide mb-2">Formel / Merksatz</h3>
+                        <div className="text-cyan-950 math-block" dangerouslySetInnerHTML={{ __html: item.f || '<p>Nutze den passenden Fachbegriff und pruefe die Einheit.</p>' }} />
+                    </div>
+                    <div className="flex flex-wrap gap-3 mb-5">
+                        <button onClick={() => setShowTrainingSolution(v => !v)}
+                            className="bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 px-4 rounded-lg transition">
+                            {showTrainingSolution ? 'Musterlösung ausblenden' : 'Musterlösung zeigen'}
+                        </button>
+                        <button onClick={() => schuelerProgress.setSolved(taskKey, !solved)}
+                            className={`font-medium py-2 px-4 rounded-lg transition text-white ${solved
+                                ? 'bg-slate-500 hover:bg-slate-600'
+                                : 'bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/30'}`}>
+                            {solved ? 'Gelöst zurücknehmen' : 'Als gelöst markieren'}
+                        </button>
+                    </div>
+                    {showTrainingSolution && (
+                        <div className="bg-emerald-50 border border-emerald-200 p-5 rounded-xl slide-in">
+                            <h3 className="text-sm font-bold text-emerald-800 uppercase tracking-wide mb-3 border-b border-emerald-200 pb-2">Musterlösung</h3>
+                            <div className="text-emerald-950 math-block" dangerouslySetInnerHTML={{ __html: item.s }} />
+                        </div>
+                    )}
+                </div>
+                <div className="mt-5 grid grid-cols-10 sm:grid-cols-12 gap-2">
+                    {items.map((it, i) => {
+                        const pillSolved = schuelerProgress.isSolved(studentTaskKey(klass, subject, it, i));
+                        return (
+                            <button key={i} onClick={() => goTo(i)} title={`Aufgabe ${i + 1}${pillSolved ? ' gelöst' : ''}`}
+                                className={`h-8 rounded text-xs font-bold border transition ${i === trainingIdx
+                                    ? 'bg-blue-600 border-blue-700 text-white'
+                                    : pillSolved
+                                        ? 'bg-emerald-100 border-emerald-300 text-emerald-800 hover:bg-emerald-200'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                                {i + 1}
                             </button>
                         );
                     })}
@@ -1442,17 +1599,17 @@ function Schueler() {
         );
     }
 
-    // ---------- Stage: Drill (10 Aufgaben) ----------
-    if (stage === 'drill') {
+    // ---------- Stage: Quiz (10 Aufgaben) ----------
+    if (stage === 'quiz') {
         const item = items[idx];
         if (!item) { setStage('classes'); return null; }
         return (
             <section className="view-fade max-w-2xl mx-auto" ref={drillRef}>
                 <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
                     <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                        Aufgabe {idx + 1} von {items.length}
+                        Quiz · Aufgabe {idx + 1} von {items.length}
                     </div>
-                    <button onClick={() => { if (window.confirm('Drill abbrechen? Antworten gehen verloren.')) setStage('classes'); }}
+                    <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) setStage('subjects'); }}
                         className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-2 mb-6 overflow-hidden">
@@ -1482,7 +1639,7 @@ function Schueler() {
                         className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
                         Antwort prüfen
                     </button>
-                    <p className="text-xs text-slate-500 text-center mt-3">Hinweis: Rechne wenn nötig im Heft, gib hier nur das Endergebnis ein.</p>
+                    <p className="text-xs text-slate-500 text-center mt-3">Hinweis: Im Quiz werden Formel und Musterlösung erst in der Auswertung sichtbar.</p>
                 </div>
             </section>
         );
@@ -1523,15 +1680,28 @@ function Schueler() {
                                     Deine Antwort: <strong className={a.correct ? 'text-emerald-700' : 'text-rose-700'}>{a.given || '—'}</strong>
                                     {!a.correct && <span className="text-slate-700"> · richtig: <strong>{a.expected}</strong></span>}
                                 </div>
+                                {(a.formula || a.solution) && (
+                                    <details className="mt-2">
+                                        <summary className="cursor-pointer text-xs font-bold text-slate-600 hover:text-slate-900">Formel und Musterlösung</summary>
+                                        {a.formula && <div className="mt-2 text-sm text-cyan-950 math-block" dangerouslySetInnerHTML={{ __html: a.formula }} />}
+                                        {a.solution && <div className="mt-2 text-sm text-emerald-950 math-block" dangerouslySetInnerHTML={{ __html: a.solution }} />}
+                                    </details>
+                                )}
                             </li>
                         ))}
                     </ol>
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center">
-                    <button onClick={() => startDrill(klass, subject)}
+                    <button onClick={() => startQuiz(klass, subject)}
                         className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
-                        Neuer Durchgang (10 Aufgaben)
+                        Neues Quiz (10 Aufgaben)
                     </button>
+                    {hasSchuelerTraining(klass, SCH.content[`${klass}.${subject}`]) && (
+                        <button onClick={() => startTraining(klass, subject)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition">
+                            Training öffnen
+                        </button>
+                    )}
                     <button onClick={() => setStage('subjects')}
                         className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">
                         Anderes Fach
@@ -3746,6 +3916,7 @@ function App() {
         const msg = 'Wirklich allen lokalen Fortschritt zuruecksetzen?\n\n'
             + 'Es werden geleert:\n'
             + '  - Trainings-Fortschritt (gelloeste Aufgaben)\n'
+            + '  - Schueler-Training-Fortschritt (geloeste Mittelstufen-Aufgaben)\n'
             + '  - Schulungen-Lesefortschritt + Quiz-Bestleistungen + Prufungs-Historie\n'
             + '  - Spaced-Repetition-Karten (alle Tracks)\n'
             + '  - Reader-Notizen, Bookmarks und Typografie-Einstellungen\n\n'
@@ -3755,6 +3926,7 @@ function App() {
         try {
             reset();           // STORAGE_KEY (Ingenieurs-Track)
             resetSRS();        // SRS_KEY (alle Tracks inkl. __training__)
+            localStorage.removeItem(SCHUELER_PROGRESS_KEY);
             localStorage.removeItem(SCHULUNGEN_KEY);
             localStorage.removeItem(READER_NOTES_KEY);
             localStorage.removeItem(READER_BOOKMARKS_KEY);

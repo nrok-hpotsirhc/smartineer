@@ -384,6 +384,7 @@ function validateSchueler(win) {
     Object.keys(s.content).forEach((key) => {
         const c = s.content[key];
         const where = `SCHUELER.content["${key}"]`;
+        const needsTrainingFields = /^k(?:[5-9]|10)\.(physik|chemie|biologie)$/.test(key);
         if (!c || typeof c !== 'object') {
             err(file, where, 'Eintrag ist kein Objekt.');
             return;
@@ -404,6 +405,10 @@ function validateSchueler(win) {
                             || typeof it.q !== 'string' || it.q.trim() === ''
                             || typeof it.a !== 'string' || it.a.trim() === '') {
                         err(file, `${where}.pool[${i}]`, 'Pool-Item benoetigt {q:string, a:string}.');
+                    }
+                    if (needsTrainingFields && (!it || typeof it.f !== 'string' || it.f.trim() === ''
+                            || typeof it.s !== 'string' || it.s.trim() === '')) {
+                        err(file, `${where}.pool[${i}]`, 'Mittelstufen-NW-Item benoetigt zusaetzlich {f:string, s:string}.');
                     }
                 });
             }

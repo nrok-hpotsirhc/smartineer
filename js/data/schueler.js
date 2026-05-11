@@ -980,7 +980,7 @@
             ]),
             biologie: natwiTopup('Klasse 6 Biologie Extra', [
                 ['knorpel', 'Welches elastische Gewebe polstert viele Gelenkflaechen?'],
-                ['luftröhre', 'Welches Rohr leitet Atemluft vom Kehlkopf zu den Bronchien?'],
+                ['luftroehre', 'Welches Rohr leitet Atemluft vom Kehlkopf zu den Bronchien?'],
                 ['naehrstoffe', 'Wie nennt man verwertbare Stoffe aus der Nahrung allgemein?']
             ])
         },
@@ -1045,8 +1045,7 @@
                 ['propanon', 'Wie heisst das einfachste Keton mit drei Kohlenstoffatomen?']
             ]),
             biologie: natwiTopup('Klasse 10 Biologie Extra', [
-                ['mrna', 'Welche RNA-Form transportiert die Geninformation zum Ribosom?'],
-                ['naturschutzgebiet', 'Wie nennt man ein ausgewiesenes Gebiet zum Schutz von Arten und Lebensraeumen?']
+                ['mrna', 'Welche RNA-Form transportiert die Geninformation zum Ribosom?']
             ])
         }
     };
