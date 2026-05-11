@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v71-impressum-sensorik-geschichte-formel-toggle';
+const CACHE_VERSION = 'smartineer-v72-ai-models-category';
 const APP_SHELL = [
     './',
     './index.html',
@@ -29,6 +29,7 @@ const APP_SHELL = [
     './js/data/fuegetechniken.js',
     './js/data/agentic_ai.js',
     './js/data/sensorik.js',
+    './js/data/ai_models.js',
     './js/data/schueler.js',
     './js/data/schulung_securityx.js',
     './js/data/schulung_starter.js',
