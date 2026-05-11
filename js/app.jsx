@@ -948,7 +948,7 @@ function Sidebar({ data, order, currentCat, isSolved, srsState, onSelect }) {
                                     <span className={`text-xs ${s.pct === 100 ? 'text-emerald-600 font-bold' : 'text-slate-500'}`}>{s.done}/{s.total}</span>
                                 </div>
                                 {srsState && (
-                                    <div className="flex items-center gap-1 mt-2" title={`Mastery (SRS): ${MASTERY_LABELS[mIdx]}`}>
+                                    <div className="flex items-center gap-1 mt-2" title={mIdx === 0 ? 'Mastery (SRS): noch keine Wiederholungen — Karten entstehen, sobald du Aufgaben bewertest.' : `Mastery (SRS): ${MASTERY_LABELS[mIdx]}`}>
                                         {[1, 2, 3, 4].map((lvl) => (
                                             <span key={lvl}
                                                 className={`inline-block w-2 h-2 rounded-full ${lvl <= mIdx ? MASTERY_DOT_CLASS[mIdx] : 'bg-slate-200'}`}></span>
@@ -1381,7 +1381,7 @@ function Schueler() {
                     <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
                          className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
                     <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schüler-Bereich</h1>
-                    <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–4. Klassen 5–10 sind in Vorbereitung; Englisch folgt ab Klasse 5.</p>
+                    <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–4; Mittelstufen-Naturwissenschaften (Biologie ab Klasse 5, Physik & Chemie ab Klasse 7) sind als Skeletons verfügbar. Mathematik 5–10 und Englisch folgen.</p>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                     {SCH.classes.map((c, i) => {
@@ -1887,7 +1887,7 @@ function srsTrainingCard(srsState, catId, task) {
 }
 
 // Mastery-Stufen (P-LP-MASTERY): aus der Karteikarte abgeleitet.
-// 0 = unbekannt (keine Karte), 1 = familiar (1 reps oder lapses),
+// 0 = neu (keine Karte / noch nicht wiederholt), 1 = familiar (1 reps oder lapses),
 // 2 = practiced (>=2 reps), 3 = proficient (>=4 reps, ease >=2.5),
 // 4 = mastered (>=6 reps, ease >=2.6, lapses<=1).
 function srsMasteryLevel(card) {
@@ -1902,7 +1902,10 @@ function srsMasteryLevel(card) {
     return 0;
 }
 
-const MASTERY_LABELS = ['unbekannt', 'familiar', 'practiced', 'proficient', 'mastered'];
+// P-UI-MASTERY-LABEL-NEU: Stufe 0 (keine SRS-Karte) heisst nicht mehr "unbekannt"
+// — das wurde von Nutzern als Fehlermeldung interpretiert. "neu" ist klar als
+// "noch nicht wiederholt" lesbar; tooltip am Sidebar-Eintrag ergaenzt die Bedeutung.
+const MASTERY_LABELS = ['neu', 'familiar', 'practiced', 'proficient', 'mastered'];
 const MASTERY_DOT_CLASS = [
     'bg-slate-300',           // 0
     'bg-amber-400',           // 1
@@ -2277,6 +2280,17 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
     const readerRef = useKaTeX([stage, tid, cid, page]);
     const quizRef = useKaTeX([stage, quizIdx]);
     const resultRef = useKaTeX([stage, quizAnswers.length]);
+
+    // P-UI-READER-SCROLL-TOP: bei Seitenwechsel im Reader (auch bei Sprung via TOC /
+    // Seite-Jump / Resume) zum Seitenanfang zurueckspringen — sonst landet man dort,
+    // wo man auf der Vorgaengerseite gescrollt hatte.
+    useEffect(() => {
+        if (stage !== 'reader') return;
+        try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { /* no-op */ }
+        if (readerRef && readerRef.current && typeof readerRef.current.scrollIntoView === 'function') {
+            try { readerRef.current.scrollIntoView({ block: 'start' }); } catch (e) { /* no-op */ }
+        }
+    }, [stage, tid, cid, page]);
 
     if (!trainings.length) {
         return <section className="view-fade p-8 text-red-700">
@@ -2848,9 +2862,9 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
 
                 {/* TOC Overlay */}
                 {tocOpen && (
-                    <div className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 fade-in"
+                    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in overflow-y-auto"
                         onClick={() => setTocOpen(false)}>
-                        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-y-auto slide-up" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[85vh] overflow-y-auto slide-up my-auto" onClick={(e) => e.stopPropagation()}>
                             <div className="border-b border-slate-200 px-5 py-3 flex items-center justify-between">
                                 <h3 className="font-bold text-slate-800">Inhaltsverzeichnis</h3>
                                 <button onClick={() => setTocOpen(false)} className="text-slate-400 hover:text-slate-700 text-xl leading-none w-7 h-7 rounded-full hover:bg-slate-100" aria-label="Schließen">×</button>
@@ -2871,7 +2885,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
 
                 {/* Page-Jump Overlay */}
                 {jumpOpen && (
-                    <div className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in"
+                    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in overflow-y-auto"
                         onClick={() => setJumpOpen(false)}>
                         <div className="bg-white rounded-2xl shadow-2xl max-w-xs w-full p-5 slide-up" onClick={(e) => e.stopPropagation()}>
                             <h3 className="font-bold text-slate-800 mb-3">Zu Seite springen</h3>
@@ -3722,8 +3736,32 @@ function App() {
     // Resume-Kandidat: juengste Schulungens-Aktivitaet aus Storage + Schulungs-Liste.
     const resumeCandidate = useMemo(() => computeResumeCandidate(), [view]);
 
+    // P-UI-RESET-ALL: bisher leerte onReset nur den Ingenieurs-Track (STORAGE_KEY).
+    // Schulungen-Lesefortschritt, SRS-Karten, Reader-Notizen/Bookmarks und Typografie
+    // blieben hingegen liegen — entsprach nicht der User-Erwartung von „Fortschritt
+    // zurueecksetzen". Wir leeren jetzt alle persistenten Lern-Tracks (NICHT Theme,
+    // NICHT Install-Dismiss, NICHT Auth) und laden anschliessend neu, damit alle
+    // Hooks den frischen Storage sehen.
     const onReset = () => {
-        if (window.confirm('Wirklich allen lokalen Fortschritt zurücksetzen?')) reset();
+        const msg = 'Wirklich allen lokalen Fortschritt zuruecksetzen?\n\n'
+            + 'Es werden geleert:\n'
+            + '  - Trainings-Fortschritt (gelloeste Aufgaben)\n'
+            + '  - Schulungen-Lesefortschritt + Quiz-Bestleistungen + Prufungs-Historie\n'
+            + '  - Spaced-Repetition-Karten (alle Tracks)\n'
+            + '  - Reader-Notizen, Bookmarks und Typografie-Einstellungen\n\n'
+            + 'Theme, Login und der App-Install-Hinweis bleiben erhalten.\n'
+            + 'Die App laedt anschliessend neu.';
+        if (!window.confirm(msg)) return;
+        try {
+            reset();           // STORAGE_KEY (Ingenieurs-Track)
+            resetSRS();        // SRS_KEY (alle Tracks inkl. __training__)
+            localStorage.removeItem(SCHULUNGEN_KEY);
+            localStorage.removeItem(READER_NOTES_KEY);
+            localStorage.removeItem(READER_BOOKMARKS_KEY);
+            localStorage.removeItem(READER_TYPO_KEY);
+        } catch (e) { /* quota */ }
+        // Reload (timeout, damit React den State-Reset zuerst commiten kann).
+        setTimeout(() => { try { window.location.reload(); } catch (e) {} }, 50);
     };
 
     // ---------- Export / Import Fortschritt

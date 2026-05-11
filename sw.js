@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v64-dashboard-resume-empty-reader';
+const CACHE_VERSION = 'smartineer-v65-fixes-naturwiss';
 const APP_SHELL = [
     './',
     './index.html',

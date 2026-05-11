@@ -447,7 +447,14 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 | 2      | generated| Plus/Minus bis 100, Vorübung Einmaleins (×2, ×5, ×10).                                 |
 | 3      | pool     | Vollständiges kleines 1×1, Geteilt aus 1×1, schriftliche Addition/Subtraktion bis 1000.|
 | 4      | pool     | Halbschriftliches/schriftliches Mal/Geteilt, Division mit Rest, einfache Sachaufgaben.  |
-| 5–10   | stub     | Mathematik in Vorbereitung; Englisch ab Klasse 5 ebenfalls in Vorbereitung.            |
+| 5      | pool     | **Naturwissenschaften (Skeleton):** Biologie (Pflanzen/Tiere/Mensch). Mathe + Englisch in Vorbereitung. |
+| 6      | pool     | **Naturwissenschaften (Skeleton):** Biologie (Mensch, Wirbeltiere, Oekologie). Mathe + Englisch in Vorbereitung. |
+| 7      | pool     | **Naturwissenschaften (Skeleton):** Physik (Mechanik, Einheiten), Chemie (Aggregatzustaende, Summenformeln), Biologie (Zelle, Oekosystem). Mathe + Englisch in Vorbereitung. |
+| 8      | pool     | **Naturwissenschaften (Skeleton):** Physik (Elektrik, Arbeit/Leistung), Chemie (Atombau, Periodensystem), Biologie (Atmung, Verdauung, Kreislauf). Mathe + Englisch in Vorbereitung. |
+| 9      | pool     | **Naturwissenschaften (Skeleton):** Physik (Newton, Energie, Druck), Chemie (Saeuren/Basen, Salze), Biologie (Genetik-Grundlagen, Evolution). Mathe + Englisch in Vorbereitung. |
+| 10     | pool     | **Naturwissenschaften (Skeleton):** Physik (Atombau, Optik), Chemie (Organische Chemie Einstieg), Biologie (Molekularbiologie, Biodiversitaet). Mathe + Englisch in Vorbereitung. |
+
+**Naturwissenschaften-Pools (Klasse 5–10, seit v65):** Pro (Klasse, Fach) ein kuratierter Pool von ~10 Aufgaben mit `{q, a}`-Schema. Formeln werden via KaTeX (`$...$`) im Frage-Stem dargestellt; Antworten sind kurze Strings (Zahl, Begriff, Summenformel) und werden ueber `normalize()` (trim, whitespace weg, Komma->Punkt, Kleinschreibung) verglichen. Aufgaben sind handgeprueft gegen Standardlehrplaene Mittelstufe DE (§8 Wissenschaftliche Korrektheit). Skeleton-Status: Pools werden inkrementell ergaenzt, bevorzugt **anhaengen** (gleiche Idx-Stabilitaetsregel wie §17.4-Pools, AGENTS §11).
 
 ### 17.4 Erweiterungsregeln
 
