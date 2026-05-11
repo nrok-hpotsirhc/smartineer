@@ -133,13 +133,73 @@ function Schueler() {
         if (!val.trim()) return;
         const item = items[idx];
         const correct = SCH.normalize(val) === SCH.normalize(item.a);
-        const next = answers.concat([{ q: item.q, expected: item.a, given: val, correct, formula: item.f, solution: item.s }]);
+        const meta = splitQuestionMeta(item.q, klass, subject, selectedSection);
+        const next = answers.concat([{ q: item.q, body: meta.body, crumbs: meta.crumbs, expected: item.a, given: val, correct, formula: item.f, solution: item.s }]);
         setAnswers(next); setVal('');
         if (idx + 1 >= items.length) setStage('result');
         else setIdx(idx + 1);
     };
 
     const onKey = (e) => { if (e.key === 'Enter') submit(); };
+
+    // P-UI-SCHUELER-QUESTION-LAYOUT: Trenne den Aufgaben-Stamm vom Metadaten-Prefix
+    // ("Englisch Klasse 5 Vokabel Zahlenwort: ...") und liefere getrennt Crumbs +
+    // bereinigten Body. Crumbs werden aus Kontext (Fach, Klasse, Section) und ggf.
+    // einem zusaetzlichen Topic-Token aus dem Prefix aufgebaut.
+    const klassLabelOf = (klassId) => { const k = SCH.classes && SCH.classes.find(c => c.id === klassId); return k ? k.label : ''; };
+    const subjectLabelOf = (subjId) => (SCH.subjects && SCH.subjects[subjId] ? SCH.subjects[subjId].label : '');
+    const splitQuestionMeta = (rawQ, klassId, subjId, sectionId) => {
+        const fach = subjectLabelOf(subjId);
+        const klassL = klassLabelOf(klassId);
+        const sectionL = sectionId ? sectionLabel(sectionId) : '';
+        let body = (rawQ == null ? '' : String(rawQ));
+        let topic = '';
+        const colonIdx = body.indexOf(':');
+        if (colonIdx > 0 && colonIdx < 120) {
+            const head = body.slice(0, colonIdx);
+            // Prefix nur strippen, wenn er kein HTML enthaelt und Fach- oder
+            // Klassen-Kennung traegt.
+            if (!/[<>]/.test(head) && (/klasse\s*\d+/i.test(head) || (fach && head.toLowerCase().includes(fach.toLowerCase())))) {
+                let rest = head;
+                if (fach) rest = rest.replace(new RegExp('^' + fach.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '').trim();
+                rest = rest.replace(/^klasse\s*\d+/i, '').trim();
+                rest = rest.replace(/\s+\d+$/, '').trim();
+                // Falls die Section bereits im Prefix steht (Vokabel/Grammatik/Numbers),
+                // nehmen wir den verbleibenden Rest als Topic-Crumb.
+                if (sectionL) {
+                    rest = rest.replace(new RegExp('^' + sectionL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '').trim();
+                }
+                rest = rest.replace(/^(vokabel|grammatik|sprache|literatur|sachtext|schreiben)\b/i, '').trim();
+                topic = rest;
+                body = body.slice(colonIdx + 1).trim();
+            }
+        }
+        const crumbs = [];
+        if (fach) crumbs.push(fach);
+        if (klassL) crumbs.push(klassL);
+        if (sectionL) crumbs.push(sectionL);
+        if (topic && !crumbs.some(c => c.toLowerCase() === topic.toLowerCase())) {
+            const capped = topic.charAt(0).toUpperCase() + topic.slice(1);
+            crumbs.push(capped);
+        }
+        return { crumbs, body };
+    };
+    const Crumbs = ({ items: list, tone }) => {
+        if (!list || !list.length) return null;
+        const palette = tone === 'light'
+            ? 'text-slate-500'
+            : 'text-slate-500';
+        return (
+            <nav aria-label="Kategorie" className={`flex flex-wrap items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] ${palette}`}>
+                {list.map((c, i) => (
+                    <span key={i} className="flex items-center gap-1.5">
+                        {i > 0 && <span className="text-slate-300" aria-hidden="true">›</span>}
+                        <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">{c}</span>
+                    </span>
+                ))}
+            </nav>
+        );
+    };
 
     // ---------- Stage: Klassen-Auswahl ----------
     if (stage === 'classes') {
@@ -281,10 +341,12 @@ function Schueler() {
                             <button onClick={() => goTo(trainingIdx + 1)} className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Nächste →</button>
                         </div>
                     </div>
+                    {(() => { const meta = splitQuestionMeta(item.q, klass, subject, selectedSection); return (
                     <div className="bg-gradient-to-br from-slate-50 to-emerald-50/30 p-5 rounded-xl border border-slate-200 mb-5">
-                        <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Aufgabe</h2>
-                        <div className="text-lg md:text-xl text-slate-900 font-semibold math-block" dangerouslySetInnerHTML={{ __html: item.q }} />
+                        <div className="mb-3"><Crumbs items={meta.crumbs} /></div>
+                        <div className="text-xl md:text-2xl text-slate-900 font-semibold leading-snug math-block" dangerouslySetInnerHTML={{ __html: meta.body }} />
                     </div>
+                    ); })()}
                     <div className="bg-cyan-50 border-l-4 border-cyan-400 p-4 mb-5 rounded-r-lg">
                         <div className="flex items-center justify-between gap-3 mb-2">
                             <h3 className="text-sm font-bold text-cyan-800 uppercase tracking-wide">Formel / Merksatz</h3>
@@ -356,8 +418,11 @@ function Schueler() {
                          style={{ width: `${(idx / items.length) * 100}%` }}></div>
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 task-fade" key={idx}>
-                    <div className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-8 math-block"
-                         dangerouslySetInnerHTML={{ __html: item.q }} />
+                    {(() => { const meta = splitQuestionMeta(item.q, klass, subject, selectedSection); return (<>
+                        <div className="flex justify-center mb-4"><Crumbs items={meta.crumbs} /></div>
+                        <div className="text-3xl md:text-4xl font-bold text-slate-900 text-center leading-tight mb-8 math-block"
+                             dangerouslySetInnerHTML={{ __html: meta.body }} />
+                    </>); })()}
                     {/* P-UI-SCHUELER-INPUTMODE: Mobile-Tastatur passend zur erwarteten Antwort.
                         Reine Zahl (mit/ohne Komma/Punkt/Minus) -> `decimal`-Ziffernblock.
                         Sonstige Antworten (z.B. `7R3` bei Division-mit-Rest, oder Englisch) -> Text. */}
@@ -413,8 +478,12 @@ function Schueler() {
                     <ol className="flex flex-col gap-3">
                         {answers.map((a, i) => (
                             <li key={i} className={`p-3 rounded-lg border-l-4 ${a.correct ? 'border-emerald-400 bg-emerald-50' : 'border-rose-400 bg-rose-50'}`}>
+                                {a.crumbs && a.crumbs.length > 0 && (
+                                    <div className="mb-1"><Crumbs items={a.crumbs} /></div>
+                                )}
                                 <div className="font-bold text-slate-800">
-                                    <span>{i + 1}. </span><span className="math-block" dangerouslySetInnerHTML={{ __html: a.q }} />
+                                    <span className="text-slate-500 mr-1">{i + 1}.</span>
+                                    <span className="math-block" dangerouslySetInnerHTML={{ __html: a.body || a.q }} />
                                 </div>
                                 <div className="text-sm mt-1">
                                     Deine Antwort: <strong className={a.correct ? 'text-emerald-700' : 'text-rose-700'}>{a.given || '—'}</strong>

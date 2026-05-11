@@ -215,9 +215,9 @@
                 ['halbschatten', 'Wie heisst der teilweise beleuchtete Bereich eines Schattens?'],
                 ['reflexion', 'Wie nennt man das Zurueckwerfen von Licht an einer Oberflaeche?'],
                 ['thermometer', 'Welches Messgeraet misst die Temperatur?'],
-                ['celsius', 'Welche Temperaturskala nutzt im Alltag das Symbol $^\\circ$C?'],
-                ['0', 'Bei welcher Temperatur in $^\\circ$C gefriert Wasser bei Normaldruck?'],
-                ['100', 'Bei welcher Temperatur in $^\\circ$C siedet Wasser bei Normaldruck?'],
+                ['celsius', 'Welche Temperaturskala nutzt im Alltag das Symbol ${}^\\circ$C?'],
+                ['0', 'Bei welcher Temperatur in ${}^\\circ$C gefriert Wasser bei Normaldruck?'],
+                ['100', 'Bei welcher Temperatur in ${}^\\circ$C siedet Wasser bei Normaldruck?'],
                 ['temperatur', 'Welche Groesse beschreibt, wie warm oder kalt ein Koerper ist?'],
                 ['waerme', 'Wie nennt man Energie, die wegen Temperaturunterschied uebertragen wird?'],
                 ['ausdehnung', 'Wie nennt man es, wenn sich Stoffe beim Erwaermen vergroessern?'],
@@ -1820,8 +1820,8 @@
             { q: 'Wie nennt man einen Stoff, der den Strom nicht leitet (Stichwort)?', a: 'isolator' },
             { q: 'Was entsteht, wenn ein lichtundurchlaessiger Koerper im Lichtweg steht?', a: 'schatten' },
             { q: 'Wie nennt man eine Lichtquelle, die selbst leuchtet (Beispiel Sonne, Lampe)?', a: 'selbstleuchter' },
-            { q: 'Bei welcher Temperatur (in $^\\circ$C) schmilzt Eis bei Normaldruck?', a: '0' },
-            { q: 'Bei welcher Temperatur (in $^\\circ$C) siedet Wasser bei Normaldruck?', a: '100' }
+            { q: 'Bei welcher Temperatur (in ${}^\\circ$C) schmilzt Eis bei Normaldruck?', a: '0' },
+            { q: 'Bei welcher Temperatur (in ${}^\\circ$C) siedet Wasser bei Normaldruck?', a: '100' }
         ], 'k5', 'physik');
     }
 
@@ -1911,7 +1911,7 @@
             { q: 'Welche physikalische Groesse hat die Einheit Joule?', a: 'energie' },
             { q: 'Berechne die Dichte (in g/cm$^3$): $m = 200\\,\\text{g}$, $V = 50\\,\\text{cm}^3$.', a: '4' },
             { q: 'Wie heisst der Aggregatzustand zwischen fluessig und gasfoermig (Phasenuebergang Verdampfen)?', a: 'gasfoermig' },
-            { q: 'Bei welcher Temperatur (in $^\\circ$C) gefriert reines Wasser bei Normaldruck?', a: '0' }
+            { q: 'Bei welcher Temperatur (in ${}^\\circ$C) gefriert reines Wasser bei Normaldruck?', a: '0' }
         ], 'k7', 'physik');
     }
 

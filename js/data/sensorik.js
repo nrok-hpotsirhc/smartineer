@@ -16,7 +16,7 @@
  *
  * Konventionen:
  *   - SI-Einheiten, schmale Schutzraeume via `\,`.
- *   - Pt100: Bezugswiderstand $R_0 = 100\,\Omega$ bei $0\,^\circ\text{C}$,
+ *   - Pt100: Bezugswiderstand $R_0 = 100\,\Omega$ bei $0\,{}^\circ\text{C}$,
  *     Temperaturkoeffizient $\alpha = 3{,}851\cdot 10^{-3}\,\text{K}^{-1}$
  *     (Klasse W0.00385, Industriestandard nach DIN EN 60751).
  *   - Thermoelement Typ K (NiCr-Ni): mittlere Empfindlichkeit
@@ -45,10 +45,10 @@
             <strong>Pt100 (DIN EN 60751:2009)</strong><br>
             Linearer Bereich: $R(\\vartheta) \\approx R_0 (1 + \\alpha\\,\\vartheta)$ mit
             $R_0 = 100\\,\\Omega$, $\\alpha = 3{,}851\\cdot 10^{-3}\\,\\text{K}^{-1}$.<br>
-            Quadratisch (Callendar–Van-Dusen, $0\\,^\\circ\\text{C} \\le \\vartheta \\le 850\\,^\\circ\\text{C}$):
+            Quadratisch (Callendar–Van-Dusen, $0\\,{}^\\circ\\text{C} \\le \\vartheta \\le 850\\,{}^\\circ\\text{C}$):
             $R(\\vartheta) = R_0[1 + A\\vartheta + B\\vartheta^2]$ mit
             $A=3{,}9083\\cdot 10^{-3}$, $B=-5{,}775\\cdot 10^{-7}$.<br>
-            Toleranzklassen: AA ($\\pm 0{,}1\\,\\text{K}$ bei $0\\,^\\circ\\text{C}$), A ($\\pm 0{,}15$), B ($\\pm 0{,}3$).<br><br>
+            Toleranzklassen: AA ($\\pm 0{,}1\\,\\text{K}$ bei $0\\,{}^\\circ\\text{C}$), A ($\\pm 0{,}15$), B ($\\pm 0{,}3$).<br><br>
 
             <strong>Thermoelement (Seebeck-Effekt, DIN EN 60584-1)</strong><br>
             $U_\\text{th} = \\int_{T_\\text{ref}}^{T} (S_A(T)-S_B(T))\\,dT$ — Spannung
@@ -127,10 +127,10 @@
                 {
                     q: 'Welcher Bezugswiderstand $R_0$ und welcher Temperaturkoeffizient $\\alpha$ gehören laut <strong>DIN EN 60751:2009</strong> zu einem Pt100, Klasse W0.00385?',
                     h: 'Industriestandard, Klasse W0.00385 (entspricht IEC 751).',
-                    s: '$R_0 = 100{,}00\\,\\Omega$ bei $0\\,^\\circ\\text{C}$.<br>'
+                    s: '$R_0 = 100{,}00\\,\\Omega$ bei $0\\,{}^\\circ\\text{C}$.<br>'
                         + '$\\alpha = (R_{100}-R_0)/(R_0\\cdot 100\\,\\text{K}) = 3{,}851\\cdot 10^{-3}\\,\\text{K}^{-1}$.<br>'
                         + '$$\\boxed{R_0=100\\,\\Omega,\\ \\alpha=3{,}851\\cdot 10^{-3}\\,\\text{K}^{-1}}$$'
-                        + 'Toleranzklassen: AA ($\\pm 0{,}1\\,\\text{K}$), A ($\\pm 0{,}15$), B ($\\pm 0{,}3$) bei $0\\,^\\circ\\text{C}$.'
+                        + 'Toleranzklassen: AA ($\\pm 0{,}1\\,\\text{K}$), A ($\\pm 0{,}15$), B ($\\pm 0{,}3$) bei $0\\,{}^\\circ\\text{C}$.'
                 },
                 {
                     q: 'Warum benötigt ein Thermoelement zwingend eine <strong>Vergleichsstelle</strong> (cold junction)?',
@@ -177,7 +177,7 @@
                         + '<tr><td class="pr-3">Drehrate</td><td class="pr-3">$\\text{rad/s}$</td><td>$\\pm 125\\ldots\\pm 2000\\,°/\\text{s}$ (MEMS)</td></tr>'
                         + '<tr><td class="pr-3">Druck (Prozess)</td><td class="pr-3">$\\text{Pa}$</td><td>$0\\ldots 1000\\,\\text{bar}$, $1\\,\\text{bar}=10^5\\,\\text{Pa}$</td></tr>'
                         + '<tr><td class="pr-3">Kraft</td><td class="pr-3">$\\text{N}$</td><td>$10\\,\\text{mN}\\ldots 10\\,\\text{kN}$ (DMS)</td></tr>'
-                        + '<tr><td class="pr-3">Temperatur</td><td class="pr-3">$\\text{K}$ (oder $^\\circ\\text{C}$)</td><td>$-200\\ldots +850\\,^\\circ\\text{C}$ (Pt100)</td></tr>'
+                        + '<tr><td class="pr-3">Temperatur</td><td class="pr-3">$\\text{K}$ (oder ${}^\\circ\\text{C}$)</td><td>$-200\\ldots +850\\,{}^\\circ\\text{C}$ (Pt100)</td></tr>'
                         + '</tbody></table>'
                         + 'Konvertierung Drehrate: $\\omega[\\text{rad/s}] = \\omega[°/\\text{s}]\\cdot \\pi/180$.'
                 },
@@ -212,10 +212,10 @@
             // ============================== LEVEL 2 ==============================
             [
                 {
-                    q: 'Ein Pt100 wird bei $\\vartheta=120\\,^\\circ\\text{C}$ betrieben. Berechne $R(\\vartheta)$ <em>linear</em> und <em>nach Callendar–Van-Dusen</em> und vergleiche den Fehler der linearen Näherung.',
+                    q: 'Ein Pt100 wird bei $\\vartheta=120\\,{}^\\circ\\text{C}$ betrieben. Berechne $R(\\vartheta)$ <em>linear</em> und <em>nach Callendar–Van-Dusen</em> und vergleiche den Fehler der linearen Näherung.',
                     h: 'Linear: $R_0(1+\\alpha\\vartheta)$. CVD (positive $\\vartheta$): $R_0[1+A\\vartheta+B\\vartheta^2]$.',
                     s: '<strong>Linear:</strong> $R = 100\\cdot(1+3{,}851\\cdot 10^{-3}\\cdot 120) = 100\\cdot 1{,}46212 = 146{,}212\\,\\Omega$.<br>'
-                        + '<strong>CVD ($0\\le\\vartheta\\le 850\\,^\\circ\\text{C}$):</strong> $R = 100[1 + 3{,}9083\\cdot 10^{-3}\\cdot 120 + (-5{,}775\\cdot 10^{-7})\\cdot 120^2]$.<br>'
+                        + '<strong>CVD ($0\\le\\vartheta\\le 850\\,{}^\\circ\\text{C}$):</strong> $R = 100[1 + 3{,}9083\\cdot 10^{-3}\\cdot 120 + (-5{,}775\\cdot 10^{-7})\\cdot 120^2]$.<br>'
                         + '$=100[1 + 0{,}469 - 8{,}316\\cdot 10^{-3}] = 100\\cdot 1{,}46064 = 146{,}064\\,\\Omega$.<br>'
                         + 'Differenz: $146{,}212 - 146{,}064 = 0{,}148\\,\\Omega$, entspricht $\\approx 0{,}38\\,\\text{K}$.<br>'
                         + '$$\\boxed{R_\\text{lin}\\approx 146{,}21\\,\\Omega,\\ R_\\text{CVD}\\approx 146{,}06\\,\\Omega,\\ \\Delta\\vartheta\\approx 0{,}4\\,\\text{K}}$$'
@@ -320,7 +320,7 @@
             // ============================== LEVEL 3 ==============================
             [
                 {
-                    q: 'Berechne die <strong>kleinste auflösbare Temperaturdifferenz</strong> bei einem Pt100 mit 4-Leiter-Anschluss und einem 24-Bit-Sigma-Delta-ADC bei Vollaussteuerung $\\pm 250\\,\\Omega$ ($-200\\ldots+400\\,^\\circ\\text{C}$). Effektive Auflösung (ENOB) sei 20 Bit.',
+                    q: 'Berechne die <strong>kleinste auflösbare Temperaturdifferenz</strong> bei einem Pt100 mit 4-Leiter-Anschluss und einem 24-Bit-Sigma-Delta-ADC bei Vollaussteuerung $\\pm 250\\,\\Omega$ ($-200\\ldots+400\\,{}^\\circ\\text{C}$). Effektive Auflösung (ENOB) sei 20 Bit.',
                     h: 'Pro LSB: $\\Delta R = R_\\text{FS}/2^\\text{ENOB}$. Umrechnung mit $S=R_0\\alpha$.',
                     s: 'LSB-Widerstand: $\\Delta R = 500\\,\\Omega/2^{20} = 500/1\\,048\\,576\\,\\Omega \\approx 0{,}477\\,\\text{m}\\Omega$.<br>'
                         + 'Pt100-Empfindlichkeit: $S=R_0\\alpha = 100\\cdot 3{,}851\\cdot 10^{-3}=0{,}3851\\,\\Omega/\\text{K}$.<br>'
@@ -395,7 +395,7 @@
                         + 'Magnetometer wird oft im Indoor-Bereich deaktiviert, da Stör-Eisenstrukturen den Heading verfälschen.'
                 },
                 {
-                    q: 'Berechne den <strong>Schaltabstands-Drift</strong> eines induktiven Näherungssensors über den Temperaturbereich $-25\\,^\\circ\\text{C}$ bis $+70\\,^\\circ\\text{C}$ bei einem Temperaturkoeffizienten von $\\alpha_T=\\pm 10\\,\\%$ über den genannten Bereich (typischer Industriewert). Was bedeutet das für die Auslegung des nominalen Schaltabstands?',
+                    q: 'Berechne den <strong>Schaltabstands-Drift</strong> eines induktiven Näherungssensors über den Temperaturbereich $-25\\,{}^\\circ\\text{C}$ bis $+70\\,{}^\\circ\\text{C}$ bei einem Temperaturkoeffizienten von $\\alpha_T=\\pm 10\\,\\%$ über den genannten Bereich (typischer Industriewert). Was bedeutet das für die Auslegung des nominalen Schaltabstands?',
                     h: 'Effektiver Schaltabstand $s_a$ muss innerhalb der Toleranz bleiben.',
                     s: 'IEC 60947-5-2 unterscheidet drei Schaltabstands-Größen:<br>'
                         + '<ul class="list-disc list-inside text-sm"><li>$s_n$ — nominaler Schaltabstand (Datenblatt-Wert, ohne Toleranzen)</li>'
@@ -430,7 +430,7 @@
                         + '$P = I^2 R = (10^{-3})^2\\cdot 100 = 10^{-4}\\,\\text{W} = 0{,}1\\,\\text{mW}$.<br>'
                         + 'Eigenerwärmung: $\\Delta\\vartheta = P/G_\\text{th} = 0{,}1\\,\\text{mW}/20\\,\\text{mW/K} = 5\\,\\text{mK}$.<br>'
                         + '$$\\boxed{\\Delta\\vartheta_\\text{self} \\approx 5\\,\\text{mK}}$$'
-                        + 'Allerdings: bei höheren Temperaturen (z.B. $400\\,^\\circ\\text{C}$) ist $R\\approx 247\\,\\Omega$ und damit $P\\approx 0{,}247\\,\\text{mW}\\to\\Delta\\vartheta\\approx 12{,}3\\,\\text{mK}$.<br>'
+                        + 'Allerdings: bei höheren Temperaturen (z.B. $400\\,{}^\\circ\\text{C}$) ist $R\\approx 247\\,\\Omega$ und damit $P\\approx 0{,}247\\,\\text{mW}\\to\\Delta\\vartheta\\approx 12{,}3\\,\\text{mK}$.<br>'
                         + 'Praktische Konsequenzen:<br>'
                         + '<ul class="list-disc list-inside text-sm"><li>Messstrom möglichst klein halten ($\\le 1\\,\\text{mA}$).</li>'
                         + '<li>Pulsförmiger Messstrom (z.B. $5\\,\\text{ms}$ ein / $50\\,\\text{ms}$ aus) reduziert mittlere Leistung um Faktor 10.</li>'

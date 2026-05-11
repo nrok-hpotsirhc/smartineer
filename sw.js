@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v76-schueler-html-render';
+const CACHE_VERSION = 'smartineer-v77-question-crumbs-katex-fix';
 const APP_SHELL = [
     './',
     './index.html',

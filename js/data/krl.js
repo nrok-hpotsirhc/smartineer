@@ -239,7 +239,7 @@
                     s: 'Mit dem Optionspaket <code>KUKA.ForceTorqueControl</code> (FTC) laesst sich der Roboter so betreiben, dass er an einem oder mehreren TCP-Freiheitsgraden eine Soll-Kraft/Moment regelt statt einer Soll-Position &mdash; das nennt sich <em>Hybrid-Position-Force-Control</em> oder <em>kartesische Impedanz</em>.<br>'
                         + 'Skelett (vereinfacht):'
                         + code('KRL', 'FT_INIT()\nFT_SET_FT_MAGNITUDE(20.0, 0.0, 0.0, 0.0, 0.0, 0.0)   ; Sollkraft Fx = 20 N\nFT_SET_STIFFNESS(2000, 5000, 5000, 200, 200, 200)    ; K_xx ... K_cc\nFT_ON()\nLIN P_TARGET\nFT_OFF()')
-                        + 'Steifigkeit $K$ ist im Wesentlichen eine <strong>diagonale 6x6-Matrix</strong> mit Eintraegen pro kartesischem DoF (translatorisch in N/m, rotatorisch in Nm/rad bzw. Nm/$^\\circ$). In KRL wird sie als sechs Skalare uebergeben.<br>'
+                        + 'Steifigkeit $K$ ist im Wesentlichen eine <strong>diagonale 6x6-Matrix</strong> mit Eintraegen pro kartesischem DoF (translatorisch in N/m, rotatorisch in Nm/rad bzw. Nm/${}^\\circ$). In KRL wird sie als sechs Skalare uebergeben.<br>'
                         + 'Reglergleichung (Impedanz):<br>'
                         + '$$F_\\text{ext} = K(\\mathbf{x}_\\text{ist} - \\mathbf{x}_\\text{soll}) + D\\dot{\\mathbf{x}} + M\\ddot{\\mathbf{x}}$$'
                         + 'mit Steifigkeit $K$, Daempfung $D$ (typisch automatisch ueber kritische Daempfung gesetzt) und virtueller Traegheit $M$ (FTC: meist gleich der gemessenen Last).<br>'

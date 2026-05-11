@@ -89,7 +89,7 @@
                 {
                     q: 'Berechne $T = T_1\\cdot T_2$ mit $T_1$ = Translation $(2,0,0)$ und $T_2$ = Rotation $R_z(90°)$. Wende auf $p_2 = (1,0,0,1)^T$ an.',
                     h: 'Im selben Frame interpretiert: zuerst $T_2$ angewendet, dann $T_1$.',
-                    s: '$T_2 \\cdot p_2 = R_z(90°)(1,0,0)^T = (0,1,0)^T \\Rightarrow$ in homogenen Koord. $(0,1,0,1)^T$.<br>$T_1 \\cdot$ das = $(0+2,1,0,1)^T=(2,1,0,1)^T$.<br>$$\\boxed{p\\,\\,\'=(2,1,0)^T}$$'                }
+                    s: '$T_2 \\cdot p_2 = R_z(90°)(1,0,0)^T = (0,1,0)^T \\Rightarrow$ in homogenen Koord. $(0,1,0,1)^T$.<br>$T_1 \\cdot$ das = $(0+2,1,0,1)^T=(2,1,0,1)^T$.<br>$$\\boxed{p\'=(2,1,0)^T}$$'                }
             ],
             // L2
             [
