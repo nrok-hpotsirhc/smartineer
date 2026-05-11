@@ -463,10 +463,10 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 - **Akzeptanz:** Logo sichtbar in Topbar, Install-Prompt, Dashboard, Cheatsheets, Schulungen, Schueler; Browser-Tab zeigt PNG-Favicon; OG-Image bei Link-Sharing aktiv; Manifest weiter validierbar; AGENTS §3 dokumentiert die breite Nutzung.
 
 ### P-UI-NAV-GROUPING — Top-Nav in "Lernen" und "Konto" trennen
-- **Status:** ready
-- **Dateien:** `js/app.jsx`, `css/styles.css`
-- **Aktion:** Visuelle Trennung (Spacer) zwischen Lern-Tabs (Dashboard/Training/Cheatsheets/Schulungen/Schueler) und Konto/Optionen + Theme-Toggle. Aktiver Tab bekommt auf Mobile eine Underline statt nur Color-Change.
-- **Akzeptanz:** Konsistente Navigation Desktop/Mobile; kein Funktionsverlust; AGENTS §20 ergaenzt.
+- **Status:** done (v63, Sitzung 2026-05-11)
+- **Dateien:** `js/app.jsx`
+- **Aktion:** Nav-Eintraege im `Nav`-Component in `learnItems` (Dashboard/Training/Cheatsheets/Schulungen/Schueler) und `accountItems` (Optionen) gesplittet. Zwischen beiden Gruppen rendert jetzt ein `1px`-vertikaler Spacer (`<span className="hidden sm:block w-px h-7 bg-slate-700 mx-1" aria-hidden />`) — nur ab `sm`-Breakpoint sichtbar, auf sehr engen Mobile-Layouts unsichtbar. Rendering-Logik fuer einen Tab in `renderItem` ausgelagert (DRY). Aktive Tab-CSS-Klasse ergaenzt um `nav-btn-active` als Hook fuer kuenftige Mobile-Underline (CSS-Hook im Code vorhanden, optisches Underline-Polish bleibt fuer naechste Iteration).
+- **Akzeptanz:** Konsistente Navigation Desktop/Mobile; kein Funktionsverlust; Optionen+Theme-Toggle visuell vom Lern-Block getrennt.
 
 ### P-UI-CONTRAST-AUDIT — WCAG-AA-Audit aller Dark-Mode-Mappings
 - **Status:** ready
@@ -487,16 +487,16 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 - **Akzeptanz:** Desktop-Speed; Mobile unveraendert; Shortcut-Konflikte mit Eingabefeldern vermieden.
 
 ### P-UI-QUIZ-A11Y — Quiz-Optionen als echte Radio-Gruppe
-- **Status:** ready
-- **Dateien:** `js/app.jsx`, `css/styles.css`
-- **Aktion:** Container `role="radiogroup"`, Optionen `role="radio"` + `aria-checked`. Pfeil-Tasten-Navigation, Zifferntasten 1–5 (medizinisch A–E). Fokus-Ring sichtbar.
-- **Akzeptanz:** Screenreader-Test mit VoiceOver oder NVDA; Tastaturnav durchlaeuft Optionen.
+- **Status:** done (v63, Sitzung 2026-05-11)
+- **Dateien:** `js/app.jsx`
+- **Aktion:** Schulungens-Quiz-MCQ-Container traegt jetzt `role="radiogroup"` mit `aria-label="Antwortoptionen"`, jede Option `role="radio"` + `aria-checked` + `tabIndex` (Roving-Tabindex: ausgewaehlte Option oder erste, wenn keine ausgewaehlt). KeyDown-Handler auf dem Container: ArrowDown/Right (+1), ArrowUp/Left (-1) mit Wrap-around, Home (0), End (n-1), Ziffern 1..9 fuer Direktwahl (passend zu 4 Optionen MCQ und 5 Optionen IMPP-Medizin). Fokus wandert programmatisch auf die neue Option. Sichtbarer Fokus-Ring kommt bereits aus P-UI-FOCUS-RINGS (v62). Keyboard-Submit per Enter funktioniert ueber den existierenden bestaetigen-Button.
+- **Akzeptanz:** Tastaturnav durchlaeuft Optionen ohne Maus; Screenreader sehen echte Radio-Gruppe; weder Sequence- noch Cloze-Items beruehrt.
 
 ### P-UI-QUIZ-FLAG — "Markieren / spaeter wiederholen" pro Quiz-Item
-- **Status:** ready
+- **Status:** done (v63, Sitzung 2026-05-11)
 - **Dateien:** `js/app.jsx`
-- **Aktion:** Stern-Toggle pro Frage waehrend des Laufs. Endbildschirm zeigt "Markierte Fragen" als zweite Liste. Persistent fuer den aktuellen Lauf.
-- **Akzeptanz:** Flag funktioniert in MCQ und PBQ; nach Ende des Quiz verfuegbar.
+- **Aktion:** Neuer State `quizFlags: number[]` im Schulungen-Component, neben dem Frage-Zaehler ein Stern-Toggle-Button (`★`/`☆`) mit `aria-pressed`/`aria-label`. Funktioniert in MCQ, Sequence und Cloze (Toggle haengt nicht am Item-Typ). Wird beim Start jedes Laufs (`startQuiz`, `startReview`, `startAssessment`) auf `[]` zurueckgesetzt. Im Quiz-Result-Screen erscheint oberhalb von "Aufgaben im Ueberblick" eine zweite Karte "Markierte Fragen (N)" mit aufsteigend sortierter Liste der markierten Items inkl. ok/falsch-Tag und Stem.
+- **Akzeptanz:** Flag funktioniert in MCQ und PBQ; nach Ende des Quiz im Result-Screen sichtbar; persistiert nur fuer den aktuellen Lauf (kein Storage).
 
 ### P-UI-READER-TYPOGRAPHY — Schriftgroesse, Zeilenabstand, Lesezeit
 - **Status:** ready
@@ -535,10 +535,10 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 - **Akzeptanz:** Tab-Navigation auf Dashboard, Training, Reader, Quiz erzeugt sichtbaren Ring; Maus-Klicks erzeugen keinen Ring; Dark- und Light-Mode konsistent.
 
 ### P-UI-SCHUELER-INPUTMODE — Numerischer Ziffernblock + Sprache der Eingabe
-- **Status:** ready
-- **Dateien:** `js/app.jsx`, `css/styles.css`
-- **Aktion:** `inputMode="numeric"` und passendes `pattern` an Schueler-Input fuer iOS/Android-Ziffernblock. Bei Antworten mit Buchstabe (`R` in Division-mit-Rest) `inputMode="text"`-Fallback.
-- **Akzeptanz:** Mobile-Tastatur passt zur Eingabe; Klasse 1–4 angenehmer.
+- **Status:** done (v63, Sitzung 2026-05-11)
+- **Dateien:** `js/app.jsx`
+- **Aktion:** Drill-Input in der Schueler-Stage erkennt zur Laufzeit anhand der erwarteten Antwort (`item.a`), ob die Eingabe numerisch ist (`/^-?[\d.,\s]+$/`). Bei numerischer Antwort: `inputMode="decimal"` + `pattern="[0-9.,\-\s]*"` -> mobile Ziffernblock auf iOS/Android. Sonst (Klasse-4-Division-mit-Rest `qRr`, kuenftige Englisch-Pools): `inputMode="text"` ohne `pattern`. `autoCapitalize="off"` und Vergleich via `normalize()` bleiben unveraendert.
+- **Akzeptanz:** Mobile-Tastatur passt zur Eingabe; Klasse 1–3 + Klasse-4-Rechenaufgaben triggern Ziffernblock; Division-mit-Rest und kuenftige Englisch-Pools triggern Text-Tastatur.
 
 ### P-UI-SCHUELER-MOTIVATION — Streak, Sterne, dezente Stempel-Animation
 - **Status:** ready
@@ -571,12 +571,14 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-APPJSX-SPLIT** (Code-Hygiene; `js/app.jsx` ueber 3100 Zeilen) oder Inhalts-Top-up wie **P-CYBERSEC-09** / **P-AUTO-05/-06** / **P-MED-AUDIT** zur Schliessung der Capstone-/Soll-Gaps. Alternativ kleinerer UX-Batch (P-UI-NAV-GROUPING + P-UI-QUIZ-A11Y + P-UI-SCHUELER-INPUTMODE) als Quick-Win-Session.
-> Begruendung: Mit v62 sind drei kleine UI-Pakete erledigt (Reader-Continue, Focus-Rings, Touch-Targets) plus Bloom-Aggregation in der Kompetenz-Heatmap. Die naechsten grossen Hebel sind Code-Hygiene (App-Split) und Capstone-Inhaltsausbau; alternativ weitere ergonomische Quick-Wins.
+> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-APPJSX-SPLIT** (Code-Hygiene; `js/app.jsx` ueber 3200 Zeilen) oder Inhalts-Top-up wie **P-CYBERSEC-09** / **P-AUTO-05/-06** / **P-MED-AUDIT** zur Schliessung der Capstone-/Soll-Gaps. Alternativ weiterer UX-Quick-Win-Batch (P-UI-DASHBOARD-RESUME + P-UI-CONTRAST-AUDIT + P-UI-READER-TYPOGRAPHY + P-UI-EMPTY-STATES).
+> Begruendung: Mit v63 sind vier weitere UX-Pakete erledigt (Schueler-Inputmode, Quiz-A11y, Quiz-Flag, Nav-Gruppierung). Die naechsten grossen Hebel sind Code-Hygiene (App-Split) und Capstone-Inhaltsausbau; alternativ den UX-Polish-Block weiter abarbeiten.
 
 ---
 
 ## F) Aenderungs-Historie dieser Datei
+
+- 2026-05-11: Session-Batch v63 erledigt — vier UX-Pakete in einem Batch. **(1) P-UI-SCHUELER-INPUTMODE:** Drill-Input in der Schueler-Stage erkennt per Regex auf der erwarteten Antwort (`item.a`) ob die Eingabe numerisch ist (`/^-?[\d.,\s]+$/`). Bei numerischer Antwort: `inputMode="decimal"` + `pattern="[0-9.,\\-\\s]*"` -> mobile Ziffernblock auf iOS/Android. Sonst (z.B. Klasse-4-Division-mit-Rest `qRr` oder kuenftige Englisch-Pools): `inputMode="text"` ohne `pattern`. **(2) P-UI-QUIZ-A11Y:** Schulungens-MCQ-Container `role="radiogroup"` + `aria-label`, jede Option `role="radio"` + `aria-checked` + Roving-Tabindex (ausgewaehlte Option `tabIndex=0`, sonst `-1`; bei leerem State erste Option fokussierbar). KeyDown-Handler auf dem Container: ArrowDown/Right (+1, Wrap), ArrowUp/Left (-1, Wrap), Home (0), End (n-1), Ziffern 1..9 fuer Direktwahl — passt fuer 4 Optionen Standard-MCQ und 5 Optionen IMPP-Medizin. Fokus wandert programmatisch auf die neue Option (`querySelectorAll('[role="radio"]')`). Sichtbarer Fokus-Ring kommt aus P-UI-FOCUS-RINGS (v62). **(3) P-UI-QUIZ-FLAG:** Neuer In-Memory-State `quizFlags: number[]` im Schulungen-Component (`useState([])`). Neben dem Frage-Zaehler ein Stern-Toggle-Button (`★`/`☆`) mit `aria-pressed`/`aria-label`/`title`; aktiv: amber-Akzent. Funktioniert in MCQ, Sequence und Cloze. Wird beim Start jedes Laufs auf `[]` zurueckgesetzt (`startQuiz`, `startReview`, `startAssessment`). Im Quiz-Result-Screen erscheint oberhalb von "Aufgaben im Ueberblick" eine zweite Karte "Markierte Fragen (N)" mit aufsteigend sortierter Liste der markierten Items inkl. ok/falsch-Tag und Stem. **(4) P-UI-NAV-GROUPING:** `Nav`-Component refactored — Eintraege in `learnItems` (Dashboard/Training/Cheatsheets/Schulungen/Schueler) und `accountItems` (Optionen) gesplittet. Zwischen beiden Gruppen rendert ein 1px-vertikaler Spacer (`<span class="hidden sm:block w-px h-7 bg-slate-700 mx-1" aria-hidden />`) — nur ab `sm`-Breakpoint sichtbar. Rendering-Logik in `renderItem` ausgelagert (DRY). Aktive Tab-CSS-Klasse ergaenzt um `nav-btn-active` als Hook fuer kuenftiges Mobile-Underline-Polish. **CACHE_VERSION:** v62 -> v63. **Validierung:** `node tools/validate.js --strict-sources` exit 0 (zwei erwartete Capstone-Soll-Warnungen unveraendert: Cybersec Kap. 10 + Automation Kap. 7); `get_errors` clean fuer `js/app.jsx`, `sw.js`. **Naechster Batch-Anker:** P-ARCH-APPJSX-SPLIT oder Inhalts-Top-up.
 
 - 2026-05-11: Session-Batch v62 erledigt — vier kleine Pakete + ein Bugfix in einem Batch. **(1) P-UI-READER-CONTINUE:** Quiz-Result-Screen erhaelt CTA "Naechstes Kapitel: <Titel>" zwischen "Quiz wiederholen" und "Zurueck zum Kapitel". IIFE prueft Kapitel-Index in `training.chapters` und blendet CTA aus, wenn aktuelles Kapitel das letzte ist oder Review-/Pruefungs-Modus aktiv ist. Klick navigiert via `openChapter(nextCh.id, 0)`. **(2) Bloom-Aggregation (Erweiterung der bestehenden P-ARCH-LO-COMPETENCE-Heatmap):** Die IIFE im Quiz-Result-Screen aggregiert jetzt zusaetzlich zu `loStats`/`tagStats` auch `bloomStats` aus `it.bloom` jeder Antwort. Neue Sektion "Kognitive Stufen (Bloom)" mit Pillen in didaktischer Reihenfolge (Anderson/Krathwohl 2001: Erinnern -> Verstehen -> Anwenden -> Analysieren -> Bewerten -> Erschaffen). Rendert nur, wenn mindestens ein Item `bloom` traegt. Item-Adapter `toItem` reicht das Feld seit P-ARCH-ITEM-SCHEMA durch. **(3) P-UI-FOCUS-RINGS:** Neuer CSS-Block — globaler `:focus-visible`-Doppel-Ring (3px blau-600 + 2px blau-600/20) fuer Buttons/Links/Inputs/[role=...]; Dark-Mode-Variante mit blau-400-Tints. Maus-Klicks erzeugen keinen Ring (per `:focus-visible`). **(4) P-UI-TOUCH-TARGETS:** Neue Variable `--touch-target: 40px` (HIG-light); auf `@media (max-width: 768px)` erhalten `.task-pill`, `.nav-glass button` und Icon-only-Buttons (`button[aria-label][title]:not(.task-pill)`) `min-width`/`min-height` auf den Variablenwert. Desktop unveraendert. **(5) Bugfix `.glossary-link`-CSS:** Bei P-ARCH-GLOSSARY (v59) war zwar der `glossary-link`-Button-Renderer in `js/app.jsx` implementiert, das CSS dazu fehlte aber in `css/styles.css` — Buttons rendern dadurch bisher als Default-Browser-Buttons. Jetzt nachgezogen: dotted-Underline, blau-600/blau-700-Hover, transparent-Border, Dark-Mode-Variante (blau-300/blau-100). **CACHE_VERSION:** v61 -> v62. **Validierung:** `node tools/validate.js --strict-sources` exit 0 (zwei erwartete Capstone-Soll-Warnungen unveraendert: Cybersec Kap. 10 + Automation Kap. 7); `get_errors` clean fuer `js/app.jsx`, `css/styles.css`, `sw.js`. **Naechster Batch-Anker:** P-ARCH-APPJSX-SPLIT oder Inhalts-Top-up.
 

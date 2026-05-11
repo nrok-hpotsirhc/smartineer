@@ -604,14 +604,34 @@ const NAV_ICONS = {
 };
 
 function Nav({ view, setView, theme, onToggleTheme }) {
-    const items = [
+    // P-UI-NAV-GROUPING: Lern-Tabs (Dashboard/Training/Cheatsheets/Schulungen/Schueler)
+    // visuell von Konto/Theme (Optionen + Theme-Toggle) trennen.
+    const learnItems = [
         { id: 'dashboard', label: 'Dashboard' },
         { id: 'training', label: 'Training' },
         { id: 'cheatsheet', label: 'Cheatsheets' },
         { id: 'schulungen', label: 'Schulungen' },
-        { id: 'schueler', label: 'Schüler' },
+        { id: 'schueler', label: 'Schüler' }
+    ];
+    const accountItems = [
         { id: 'optionen', label: 'Optionen' }
     ];
+    const renderItem = (it) => {
+        const active = view === it.id;
+        return (
+            <button key={it.id}
+                onClick={() => setView(it.id)}
+                title={it.label}
+                aria-label={it.label}
+                aria-current={active ? 'page' : undefined}
+                className={`nav-btn inline-flex items-center justify-center gap-2 whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${active
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30 nav-btn-active'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-700/60'}`}>
+                <span className="md:hidden flex" aria-hidden="true">{NAV_ICONS[it.id]}</span>
+                <span className="hidden md:inline">{it.label}</span>
+            </button>
+        );
+    };
     return (
         <nav className="nav-glass sticky top-0 z-40 backdrop-blur-md bg-slate-900/90 text-white shadow-lg border-b border-slate-700/50 w-full">
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -622,22 +642,9 @@ function Nav({ view, setView, theme, onToggleTheme }) {
                         <span className="hidden sm:inline text-base sm:text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent truncate">Smartineer</span>
                     </a>
                     <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                        {items.map(it => {
-                            const active = view === it.id;
-                            return (
-                                <button key={it.id}
-                                    onClick={() => setView(it.id)}
-                                    title={it.label}
-                                    aria-label={it.label}
-                                    aria-current={active ? 'page' : undefined}
-                                    className={`nav-btn inline-flex items-center justify-center gap-2 whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${active
-                                        ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30'
-                                        : 'text-slate-300 hover:text-white hover:bg-slate-700/60'}`}>
-                                    <span className="md:hidden flex" aria-hidden="true">{NAV_ICONS[it.id]}</span>
-                                    <span className="hidden md:inline">{it.label}</span>
-                                </button>
-                            );
-                        })}
+                        {learnItems.map(renderItem)}
+                        <span className="hidden sm:block w-px h-7 bg-slate-700 mx-1" aria-hidden="true" />
+                        {accountItems.map(renderItem)}
                         <button onClick={onToggleTheme}
                             title={theme === 'dark' ? 'Auf hell umschalten' : 'Auf dunkel umschalten'}
                             aria-label="Farbschema umschalten"
@@ -1431,10 +1438,21 @@ function Schueler() {
                     <div className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-8 math-block">
                         {item.q}
                     </div>
-                    <input type="text" inputMode="text" autoComplete="off" autoCapitalize="off" autoFocus
-                        value={val} onChange={(e) => setVal(e.target.value)} onKeyDown={onKey}
-                        placeholder="Deine Antwort"
-                        className="schueler-input mb-4" />
+                    {/* P-UI-SCHUELER-INPUTMODE: Mobile-Tastatur passend zur erwarteten Antwort.
+                        Reine Zahl (mit/ohne Komma/Punkt/Minus) -> `decimal`-Ziffernblock.
+                        Sonstige Antworten (z.B. `7R3` bei Division-mit-Rest, oder Englisch) -> Text. */}
+                    {(() => {
+                        const isNumeric = typeof item.a === 'string' && /^-?[\d.,\s]+$/.test(item.a);
+                        return (
+                            <input type="text"
+                                inputMode={isNumeric ? 'decimal' : 'text'}
+                                pattern={isNumeric ? '[0-9.,\\-\\s]*' : undefined}
+                                autoComplete="off" autoCapitalize="off" autoFocus
+                                value={val} onChange={(e) => setVal(e.target.value)} onKeyDown={onKey}
+                                placeholder="Deine Antwort"
+                                className="schueler-input mb-4" />
+                        );
+                    })()}
                     <button onClick={submit} disabled={!val.trim()}
                         className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
                         Antwort prüfen
@@ -2149,6 +2167,9 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
     const [, setNowTick] = useState(0);
     // P-ARCH-GLOSSARY: aktuell geoeffneter Glossar-Eintrag (null oder {id, term, definition, source}).
     const [glossaryEntry, setGlossaryEntry] = useState(null);
+    // P-UI-QUIZ-FLAG: pro Quiz-Lauf gemerkte Fragen-Indizes (in `quizSet`).
+    // Nur in-memory; wird bei jedem startQuiz/startReview/startAssessment zurueckgesetzt.
+    const [quizFlags, setQuizFlags] = useState([]);
 
     const readerRef = useKaTeX([stage, tid, cid, page]);
     const quizRef = useKaTeX([stage, quizIdx]);
@@ -2259,7 +2280,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
         const sample = picked.map(i => pool[i]);
         const refs = picked.map(i => ({ tid, cid, idx: i, qid: stableQid(pool[i]) }));
         setReviewMode(false);
-        setQuizSet(sample); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]);
+        setQuizSet(sample); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]); setQuizFlags([]);
         setQuizInput(sample.length ? defaultInputForItem(sample[0]) : null);
         setStage('quiz');
     };
@@ -2285,7 +2306,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
         const items = sample.map(s => s.item);
         const refs = sample.map(s => ({ tid: s.trainingId, cid: s.chapterId, idx: s.idx, qid: s.qid }));
         setReviewMode(true);
-        setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]);
+        setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]); setQuizFlags([]);
         setQuizInput(items.length ? defaultInputForItem(items[0]) : null);
         setStage('quiz');
     };
@@ -2324,7 +2345,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
         setCurrentAssessment(asmt);
         const dl = (asmt.timeLimit > 0) ? (Date.now() + asmt.timeLimit * 60 * 1000) : null;
         setDeadlineMs(dl);
-        setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]);
+        setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]); setQuizFlags([]);
         setQuizInput(items.length ? defaultInputForItem(items[0]) : null);
         setStage('quiz');
     };
@@ -2768,13 +2789,30 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                     );
                 })()}
                 <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-                    <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                        Frage {quizIdx + 1} von {quizSet.length}
+                    <div className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                        <span>Frage {quizIdx + 1} von {quizSet.length}</span>
                         {itype !== 'mcq' && (
-                            <span className="ml-2 px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-[10px]">
+                            <span className="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-[10px]">
                                 {itype === 'sequence' ? 'Reihenfolge' : 'Lückentext'}
                             </span>
                         )}
+                        {/* P-UI-QUIZ-FLAG: Stern-Toggle pro Frage. Im Endergebnis erscheinen markierte Fragen separat. */}
+                        {(() => {
+                            const flagged = quizFlags.indexOf(quizIdx) !== -1;
+                            return (
+                                <button onClick={() => setQuizFlags(flagged
+                                        ? quizFlags.filter(x => x !== quizIdx)
+                                        : quizFlags.concat([quizIdx]))}
+                                    title={flagged ? 'Markierung entfernen' : 'Frage markieren (spaeter wiederholen)'}
+                                    aria-label={flagged ? 'Markierung entfernen' : 'Frage markieren'}
+                                    aria-pressed={flagged}
+                                    className={`text-base leading-none px-2 py-0.5 rounded-full border transition ${flagged
+                                        ? 'border-amber-400 bg-amber-100 text-amber-700'
+                                        : 'border-slate-300 bg-white text-slate-400 hover:text-amber-600 hover:border-amber-300'}`}>
+                                    {flagged ? '★' : '☆'}
+                                </button>
+                            );
+                        })()}
                     </div>
                     <button onClick={() => {
                         const msg = assessmentMode
@@ -2799,11 +2837,37 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                         dangerouslySetInnerHTML={{ __html: unifiedItem ? unifiedItem.stem : item.q }} />
 
                     {itype === 'mcq' && (
-                        <div className="flex flex-col gap-2 mb-5">
+                        <div className="flex flex-col gap-2 mb-5"
+                            role="radiogroup"
+                            aria-label="Antwortoptionen"
+                            onKeyDown={(e) => {
+                                // P-UI-QUIZ-A11Y: Pfeil-Tasten + Home/End + 1..9 Direktwahl.
+                                const n = item.options.length;
+                                let next = null;
+                                if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = (typeof quizInput === 'number' ? quizInput + 1 : 0);
+                                else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next = (typeof quizInput === 'number' ? quizInput - 1 : 0);
+                                else if (e.key === 'Home') next = 0;
+                                else if (e.key === 'End') next = n - 1;
+                                else if (/^[1-9]$/.test(e.key)) {
+                                    const idx = parseInt(e.key, 10) - 1;
+                                    if (idx < n) next = idx;
+                                }
+                                if (next !== null) {
+                                    e.preventDefault();
+                                    const wrapped = ((next % n) + n) % n;
+                                    setQuizInput(wrapped);
+                                    const btns = e.currentTarget.querySelectorAll('[role="radio"]');
+                                    if (btns[wrapped]) btns[wrapped].focus();
+                                }
+                            }}>
                             {item.options.map((opt, i) => {
                                 const sel = quizInput === i;
                                 return (
-                                    <button key={i} onClick={() => setQuizInput(i)}
+                                    <button key={i}
+                                        role="radio"
+                                        aria-checked={sel}
+                                        tabIndex={sel || (typeof quizInput !== 'number' && i === 0) ? 0 : -1}
+                                        onClick={() => setQuizInput(i)}
                                         className={`text-left px-4 py-3 rounded-lg border transition ${sel
                                             ? 'border-blue-500 bg-blue-50 text-blue-900 shadow'
                                             : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800'}`}>
@@ -3002,6 +3066,27 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                         </div>
                     );
                 })()}
+                {/* P-UI-QUIZ-FLAG: Liste der waehrend des Quiz markierten Fragen, falls vorhanden. */}
+                {quizFlags.length > 0 && (
+                    <div className="bg-amber-50 rounded-2xl border border-amber-200 p-6 mb-6">
+                        <h3 className="font-bold text-amber-900 mb-2">Markierte Fragen ({quizFlags.length})</h3>
+                        <p className="text-xs text-amber-800 mb-3">Fragen, die du waehrend des Laufs zur Wiederholung markiert hast.</p>
+                        <ul className="flex flex-col gap-2">
+                            {quizFlags.slice().sort((a, b) => a - b).map(fi => {
+                                const a = quizAnswers[fi];
+                                if (!a) return null;
+                                return (
+                                    <li key={fi} className="text-sm text-slate-800 bg-white rounded-lg border border-amber-200 px-3 py-2">
+                                        <span className="font-bold text-amber-700 mr-2">Frage {fi + 1}.</span>
+                                        <span className={a.ok ? 'text-emerald-700' : 'text-rose-700'}>{a.ok ? 'richtig' : 'falsch'}</span>
+                                        <span className="text-slate-700"> — </span>
+                                        <span className="text-slate-600" dangerouslySetInnerHTML={{ __html: a.item.q }} />
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                )}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
                     <h3 className="font-bold text-slate-800 mb-4">Aufgaben im Überblick</h3>
                     <ol className="flex flex-col gap-3">
