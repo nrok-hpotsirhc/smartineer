@@ -103,6 +103,71 @@
     // ueber `normalize()` (trim, whitespace weg, Komma→Punkt, Kleinschreibung).
     // Endergebnisse werden ohne Einheit eingegeben, die Aufgabe sagt das jeweils.
 
+    // Klasse 5 / 6: NRW-Kernlehrplan Naturwissenschaften (integrierter NW-Unterricht
+    // an Gesamtschulen/Realschulen, parallele Faecher am Gymnasium). Schwerpunkte
+    // gem. KLP NW SI: Magnetismus, Elektrizitaet, Licht/Schatten, Temperatur,
+    // Stoffe & Aggregatzustaende, Wasser/Luft, Optik, Schall, Stofftrennung.
+
+    function pool_k5_physik() {
+        return [
+            { q: 'Welcher Pol eines Magneten zieht den Nordpol eines anderen Magneten an?', a: 'sued' },
+            { q: 'Wie nennt man die unsichtbaren Linien um einen Magneten, an denen sich Eisenfeilspaene ausrichten?', a: 'feldlinien' },
+            { q: 'Aus welchem Material besteht der Magnetkern der Erde hauptsaechlich?', a: 'eisen' },
+            { q: 'Welche drei Bauteile braucht ein einfacher Stromkreis (mind. einer)? Antwort: ___quelle.', a: 'spannung' },
+            { q: 'Wie nennt man einen Stoff, der Strom gut leitet (Stichwort)?', a: 'leiter' },
+            { q: 'Wie nennt man einen Stoff, der den Strom nicht leitet (Stichwort)?', a: 'isolator' },
+            { q: 'Was entsteht, wenn ein lichtundurchlaessiger Koerper im Lichtweg steht?', a: 'schatten' },
+            { q: 'Wie nennt man eine Lichtquelle, die selbst leuchtet (Beispiel Sonne, Lampe)?', a: 'selbstleuchter' },
+            { q: 'Bei welcher Temperatur (in $^\\circ$C) schmilzt Eis bei Normaldruck?', a: '0' },
+            { q: 'Bei welcher Temperatur (in $^\\circ$C) siedet Wasser bei Normaldruck?', a: '100' }
+        ];
+    }
+
+    function pool_k5_chemie() {
+        return [
+            { q: 'Welche drei Aggregatzustaende kann Wasser annehmen? Antwort als einer der drei: fest, fluessig oder ___ ?', a: 'gasfoermig' },
+            { q: 'Wie heisst der Uebergang von fluessig zu fest (Beispiel: Wasser wird zu Eis)?', a: 'erstarren' },
+            { q: 'Wie heisst der Uebergang von fest zu fluessig?', a: 'schmelzen' },
+            { q: 'Wie nennt man Wasser im gasfoermigen Zustand (Wort fuer "unsichtbarer Wasserdampf")?', a: 'wasserdampf' },
+            { q: 'Welcher Hauptbestandteil unserer Atemluft (in Volumenprozent ca. 78 %) ist gemeint?', a: 'stickstoff' },
+            { q: 'Welcher Bestandteil der Luft macht ca. 21 Volumenprozent aus?', a: 'sauerstoff' },
+            { q: 'Wie nennt man die Eigenschaft eines Stoffs, sich in Wasser zu loesen (Stichwort)?', a: 'loeslichkeit' },
+            { q: 'Wie heisst der Vorgang, wenn Wasser an einer kalten Glasflaeche kleine Troepfchen bildet?', a: 'kondensieren' },
+            { q: 'Wie nennt man Gemische, in denen man die Bestandteile mit blossem Auge unterscheiden kann (z.B. Sand und Eisenspaene)?', a: 'heterogen' },
+            { q: 'Welcher Reinstoff hat die Summenformel H$_2$O?', a: 'wasser' }
+        ];
+    }
+
+    function pool_k6_physik() {
+        return [
+            { q: 'Wie heisst das Gesetz "Einfallswinkel = Ausfallswinkel" bei Reflexion (Stichwort)?', a: 'reflexion' },
+            { q: 'Welches Bauteil buendelt Lichtstrahlen in einem Brennpunkt (Stichwort, Form)?', a: 'sammellinse' },
+            { q: 'Aus welchen Farben besteht weisses Licht (Stichwort, das Phaenomen beim Prisma)?', a: 'spektrum' },
+            { q: 'Wie nennt man die Zerlegung von weissem Licht in seine Farben?', a: 'dispersion' },
+            { q: 'Wie heisst die Einheit der Frequenz (Symbol)?', a: 'hz' },
+            { q: 'Welche Groesse beschreibt, wie oft ein Schall pro Sekunde schwingt?', a: 'frequenz' },
+            { q: 'Wie nennt man den Bereich, den der Mensch hoeren kann (ca. 16 Hz bis 20 000 Hz)?', a: 'hoerbereich' },
+            { q: 'Wie nennt man Schwingungen ueber 20 kHz, die der Mensch nicht mehr hoert?', a: 'ultraschall' },
+            { q: 'Wie nennt man die Uebertragung von Waerme durch stroemende Fluessigkeiten oder Gase?', a: 'konvektion' },
+            { q: 'Wie nennt man die Uebertragung von Waerme durch direkten Kontakt (z.B. heisser Loeffel in Teetasse)?', a: 'waermeleitung' }
+        ];
+    }
+
+    function pool_k6_chemie() {
+        return [
+            { q: 'Mit welchem Trennverfahren trennt man Sand von Wasser (poroeses Material)?', a: 'filtrieren' },
+            { q: 'Mit welchem Trennverfahren trennt man Salz aus Salzwasser (Wasser entweicht)?', a: 'eindampfen' },
+            { q: 'Mit welchem Trennverfahren trennt man zwei Fluessigkeiten mit unterschiedlichem Siedepunkt?', a: 'destillation' },
+            { q: 'Wie nennt man das Verfahren, mit dem man Farbstoffe aus Tinte mit Wasser auf Papier auftrennt?', a: 'chromatographie' },
+            { q: 'Wie nennt man Eisen-Sand-Gemische, die man mit einem Magneten trennen kann?', a: 'magnetisch' },
+            { q: 'Wie nennt man eine Mischung, in der man die Bestandteile mit blossem Auge nicht unterscheiden kann (z.B. Zuckerwasser)?', a: 'homogen' },
+            { q: 'Welcher Haushaltsstoff ist sauer (pH < 7, Beispiel)?', a: 'zitronensaft' },
+            { q: 'Welcher Haushaltsstoff ist basisch (pH > 7, Beispiel typisch)?', a: 'seifenlauge' },
+            { q: 'Wie nennt man Indikator-Papier, das die Saeurestaerke einer Loesung anzeigt?', a: 'lackmus' },
+            { q: 'Welcher Reinstoff besteht aus genau einer Atomsorte (Definition)?', a: 'element' }
+        ];
+    }
+
     function pool_k5_biologie() {
         return [
             { q: 'Wie nennt man den gruenen Farbstoff in Blaettern, der fuer die Fotosynthese gebraucht wird?', a: 'chlorophyll' },
@@ -360,8 +425,8 @@
             { id: 'k2',  label: 'Klasse 2',  subjects: ['mathe'] },
             { id: 'k3',  label: 'Klasse 3',  subjects: ['mathe'] },
             { id: 'k4',  label: 'Klasse 4',  subjects: ['mathe'] },
-            { id: 'k5',  label: 'Klasse 5',  subjects: ['mathe', 'englisch', 'biologie'] },
-            { id: 'k6',  label: 'Klasse 6',  subjects: ['mathe', 'englisch', 'biologie'] },
+            { id: 'k5',  label: 'Klasse 5',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] },
+            { id: 'k6',  label: 'Klasse 6',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] },
             { id: 'k7',  label: 'Klasse 7',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] },
             { id: 'k8',  label: 'Klasse 8',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] },
             { id: 'k9',  label: 'Klasse 9',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] },
@@ -388,44 +453,52 @@
                            note: 'Halbschriftliches und schriftliches Multiplizieren/Dividieren, Sachaufgaben. Bitte handschriftlich rechnen.' },
             'k5.mathe':  { mode: 'stub' },
             'k5.englisch': { mode: 'stub' },
+            'k5.physik':   { mode: 'pool', pool: pool_k5_physik(),
+                             note: 'NRW-KLP NW SI Klasse 5/6: Magnetismus, einfacher Stromkreis, Licht & Schatten, Temperatur (Skeleton).' },
+            'k5.chemie':   { mode: 'pool', pool: pool_k5_chemie(),
+                             note: 'NRW-KLP NW SI Klasse 5/6: Stoffe & Eigenschaften, Aggregatzustaende, Wasser & Luft (Skeleton).' },
             'k5.biologie': { mode: 'pool', pool: pool_k5_biologie(),
-                             note: 'Pflanzen, Tiere und Mensch — Einstieg in die Biologie (Skeleton, AGENTS §17.4).' },
+                             note: 'NRW-KLP NW SI Klasse 5/6: Pflanzen, Tiere und Mensch — Einstieg in die Biologie (Skeleton).' },
             'k6.mathe':  { mode: 'stub' },
             'k6.englisch': { mode: 'stub' },
+            'k6.physik':   { mode: 'pool', pool: pool_k6_physik(),
+                             note: 'NRW-KLP NW SI Klasse 5/6: Optik (Reflexion, Linsen, Farben), Schall, Waermetransport (Skeleton).' },
+            'k6.chemie':   { mode: 'pool', pool: pool_k6_chemie(),
+                             note: 'NRW-KLP NW SI Klasse 5/6: Stofftrennung (Filtrieren, Destillieren, Chromatographie), Indikatoren, Reinstoffe (Skeleton).' },
             'k6.biologie': { mode: 'pool', pool: pool_k6_biologie(),
-                             note: 'Mensch, Wirbeltiere, oekologische Grundbegriffe (Skeleton).' },
+                             note: 'NRW-KLP NW SI Klasse 5/6: Mensch, Wirbeltiere, oekologische Grundbegriffe (Skeleton).' },
             'k7.mathe':  { mode: 'stub' },
             'k7.englisch': { mode: 'stub' },
             'k7.physik':   { mode: 'pool', pool: pool_k7_physik(),
-                             note: 'Mechanik-Grundlagen (Geschwindigkeit, Kraft, Dichte, Einheiten) — Endergebnis ohne Einheit eintragen.' },
+                             note: 'NRW-KLP Physik SI Klasse 7/8: Mechanik-Grundlagen (Geschwindigkeit, Kraft, Dichte, Einheiten) — Endergebnis ohne Einheit eintragen.' },
             'k7.chemie':   { mode: 'pool', pool: pool_k7_chemie(),
-                             note: 'Aggregatzustaende, Summenformeln, Stoffeigenschaften (Skeleton).' },
+                             note: 'NRW-KLP Chemie SI Klasse 7/8: Aggregatzustaende, Summenformeln, Stoffeigenschaften (Skeleton).' },
             'k7.biologie': { mode: 'pool', pool: pool_k7_biologie(),
-                             note: 'Zelle, Oekosystem, Pflanzen vertieft (Skeleton).' },
+                             note: 'NRW-KLP Biologie SI Klasse 7/8: Zelle, Oekosystem, Pflanzen vertieft (Skeleton).' },
             'k8.mathe':  { mode: 'stub' },
             'k8.englisch': { mode: 'stub' },
             'k8.physik':   { mode: 'pool', pool: pool_k8_physik(),
-                             note: 'Elektrik (Ohmsches Gesetz, Reihen-/Parallelschaltung), Arbeit & Leistung — Endergebnis ohne Einheit.' },
+                             note: 'NRW-KLP Physik SI Klasse 7/8: Elektrik (Ohmsches Gesetz, Reihen-/Parallelschaltung), Arbeit & Leistung — Endergebnis ohne Einheit.' },
             'k8.chemie':   { mode: 'pool', pool: pool_k8_chemie(),
-                             note: 'Atombau, Periodensystem-Grundlagen, einfache Summenformeln (Skeleton).' },
+                             note: 'NRW-KLP Chemie SI Klasse 7/8: Atombau, Periodensystem-Grundlagen, einfache Summenformeln (Skeleton).' },
             'k8.biologie': { mode: 'pool', pool: pool_k8_biologie(),
-                             note: 'Atmung, Verdauung, Blutkreislauf (Skeleton).' },
+                             note: 'NRW-KLP Biologie SI Klasse 7/8: Atmung, Verdauung, Blutkreislauf (Skeleton).' },
             'k9.mathe':  { mode: 'stub' },
             'k9.englisch': { mode: 'stub' },
             'k9.physik':   { mode: 'pool', pool: pool_k9_physik(),
-                             note: 'Newton, Energie, Elektromagnetismus, Druck — Endergebnis ohne Einheit.' },
+                             note: 'NRW-KLP Physik SI Klasse 9/10: Newton, Energie, Elektromagnetismus, Druck — Endergebnis ohne Einheit.' },
             'k9.chemie':   { mode: 'pool', pool: pool_k9_chemie(),
-                             note: 'pH-Wert, Saeuren & Basen, Neutralisation, Ionenbindung (Skeleton).' },
+                             note: 'NRW-KLP Chemie SI Klasse 9/10: pH-Wert, Saeuren & Basen, Neutralisation, Ionenbindung (Skeleton).' },
             'k9.biologie': { mode: 'pool', pool: pool_k9_biologie(),
-                             note: 'Genetik-Grundlagen (DNA, Mitose, Meiose), Evolution (Skeleton).' },
+                             note: 'NRW-KLP Biologie SI Klasse 9/10: Genetik-Grundlagen (DNA, Mitose, Meiose), Evolution (Skeleton).' },
             'k10.mathe': { mode: 'stub' },
             'k10.englisch': { mode: 'stub' },
             'k10.physik':   { mode: 'pool', pool: pool_k10_physik(),
-                             note: 'Atombau, Radioaktivitaet, Optik (Skeleton) — Endergebnis ohne Einheit.' },
+                             note: 'NRW-KLP Physik SI Klasse 9/10: Atombau, Radioaktivitaet, Optik (Skeleton) — Endergebnis ohne Einheit.' },
             'k10.chemie':   { mode: 'pool', pool: pool_k10_chemie(),
-                             note: 'Organische Chemie — Einstieg (Alkane, Alkohole, Carbonsaeuren) (Skeleton).' },
+                             note: 'NRW-KLP Chemie SI Klasse 9/10: Organische Chemie — Einstieg (Alkane, Alkohole, Carbonsaeuren) (Skeleton).' },
             'k10.biologie': { mode: 'pool', pool: pool_k10_biologie(),
-                             note: 'Molekularbiologie (DNA/RNA, Proteinbiosynthese), Biodiversitaet (Skeleton).' }
+                             note: 'NRW-KLP Biologie SI Klasse 9/10: Molekularbiologie (DNA/RNA, Proteinbiosynthese), Biodiversitaet (Skeleton).' }
         },
         // Antwort-Vergleich (tolerant): trim + Komma->Punkt + Kleinschreibung; "R" Groß/klein egal.
         normalize: function (s) {

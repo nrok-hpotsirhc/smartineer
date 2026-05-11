@@ -1381,7 +1381,7 @@ function Schueler() {
                     <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
                          className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
                     <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schüler-Bereich</h1>
-                    <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–4; Mittelstufen-Naturwissenschaften (Biologie ab Klasse 5, Physik & Chemie ab Klasse 7) sind als Skeletons verfügbar. Mathematik 5–10 und Englisch folgen.</p>
+                    <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–4; Mittelstufen-Naturwissenschaften (Physik, Chemie und Biologie ab Klasse 5, gemäß NRW-Kernlehrplan SI) sind als Skeletons verfügbar. Mathematik 5–10 und Englisch folgen.</p>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                     {SCH.classes.map((c, i) => {
