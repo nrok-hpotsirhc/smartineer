@@ -548,6 +548,7 @@ Quiz-Items duerfen zusaetzlich die optionalen Lernplattform-Metadaten `lo`, `blo
 - Seitenformat: `html` als sauberes Plain-HTML (keine Inline-Styles, keine Scripts, keine externen Bilder). Erlaubte Elemente: `<p>`, `<h3>`, `<h4>`, `<ul>/<ol>/<li>`, `<table>/<thead>/<tbody>/<tr>/<th>/<td>`, `<strong>`, `<em>`, `<code>`, `<blockquote>`.
 - Mathe wenn nötig via KaTeX (`$...$`, `$$...$$`, Backslashes verdoppeln).
 - Sprache: Deutsch. Fachbegriffe in Klammern auf Englisch wenn üblich (z.B. „Zero Trust Architecture (ZTA)").
+- **Optionaler Inline-Selbstcheck (P-LP-INLINE-CHECK, seit v53):** Eine Lehrseite darf zusaetzlich ein optionales Feld `check = { stem, options:[...], correct:<idx>, explanation }` tragen. Der Reader rendert darunter eine formative MCQ-Box mit "Pruefen"/"Erneut versuchen". Keine Persistenz, keine SRS-Karte, keine Wertung — die Frage zaehlt nicht zum Kapitel-Quiz. Das eigentliche Kapitel-Quiz bleibt im `quiz`-Array (§18.1) die einzige bewertete Pruefung. Empfehlung: nicht jede Seite braucht einen Check; setze ihn dort, wo eine konzeptionelle Schluesselentscheidung typische Fehleinordnungen provoziert (z.B. Scoring-Priorisierung, Verteilung von Pflichten, Schluesselwahl).
 
 ### 18.7 Anti-Pattern
 

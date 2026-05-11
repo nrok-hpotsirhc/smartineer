@@ -2357,6 +2357,22 @@
     PAGE_RISK_SCORING.lo     = ['LO-RISK-5'];
     PAGE_RISK_SCORING.tags   = ['CVSS-v4', 'EPSS', 'CISA-KEV', 'FAIR', 'OCTAVE-Allegro'];
 
+    // P-LP-INLINE-CHECK: formativer Selbstcheck am Ende einer Lehrseite (keine Wertung,
+    // nur didaktisches Feedback). Schema: { stem, options:[...], correct:<idx>, explanation }.
+    // Demo an PAGE_RISK_SCORING — die uebrigen Lehrseiten bleiben unveraendert; weitere
+    // Checks werden im Rahmen kuenftiger Top-up-Pakete ergaenzt.
+    PAGE_RISK_SCORING.check = {
+        stem: 'Eine Schwachstelle hat CVSS-v4 Base 9.8, EPSS 0.02 und steht NICHT auf der CISA KEV. Welche Priorisierung ist nach gaengiger Risiko-Praxis am sinnvollsten?',
+        options: [
+            'Hochrisiko: sofort patchen, EPSS und KEV sind irrelevant, der Base-Score entscheidet allein.',
+            'Mittlere Prioritaet: hoher Base-Score bei niedriger realer Ausnutzungs-Wahrscheinlichkeit (EPSS 2 %) und ohne KEV-Listung. Patch im regulaeren Wartungsfenster, Kompensationskontrollen pruefen.',
+            'Niedrig: ohne KEV-Listung besteht kein Handlungsbedarf, Base-Score kann ignoriert werden.',
+            'Hoch, aber nur weil EPSS < 5 % — EPSS ist ein Schweregrad-Indikator wie CVSS Base.'
+        ],
+        correct: 1,
+        explanation: 'CVSS v4 Base beschreibt nur die intrinsische technische Schwere; EPSS schaetzt die Wahrscheinlichkeit aktiver Ausnutzung in den naechsten 30 Tagen, KEV markiert nachweislich ausgenutzte Schwachstellen. FIRST SIG empfiehlt, alle drei zu kombinieren: hoher Base + niedriges EPSS + keine KEV-Listung -> regulaeres Patch-Fenster, keine Notfall-Eskalation. (FIRST EPSS Model v3 (2023) §3; CISA KEV Catalog Policy (2024).)'
+    };
+
     // ----------------------------------------------------------------------
     // Kapitel 6 — AI-Security und vertrauenswuerdige Systeme (PRODUKTIV)
     // Quellen: Goodfellow/Shlens/Szegedy "Explaining and Harnessing Adversarial

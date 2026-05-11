@@ -235,6 +235,23 @@ html.theme-dark, body.theme-dark {
 .theme-dark .task-pill { background: #334155; color: #cbd5e1; border-color: transparent; }
 .theme-dark .task-pill:hover { background: #475569; }
 .theme-dark .task-pill.solved { background: #064e3b; color: #6ee7b7; }
+/* Dark-Mode: aktive (= aktuell ausgewaehlte) Pille deutlich kontrastreicher als im Light-Mode.
+   Hellerer Farbverlauf, weisser Ring + dickerer Border, kraeftigerer Schatten und leicht
+   groesserer Skalierungs-Hub heben die Auswahl klar vom dunklen Panel ab. */
+.theme-dark .task-pill.active {
+    background: linear-gradient(135deg, #60a5fa, #22d3ee);
+    color: #0f172a;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(96,165,250,0.35), 0 6px 16px -2px rgba(34,211,238,0.55);
+    transform: scale(1.1);
+    font-weight: 800;
+}
+.theme-dark .task-pill.solved.active {
+    background: linear-gradient(135deg, #34d399, #2dd4bf);
+    color: #022c22;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(52,211,153,0.35), 0 6px 16px -2px rgba(45,212,191,0.55);
+}
 .theme-dark ::-webkit-scrollbar-thumb { background: #475569; }
 .theme-dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 .theme-dark .nav-glass { background: rgba(15,23,42,0.85); border-bottom-color: #1e293b; }

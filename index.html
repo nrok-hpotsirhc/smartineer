@@ -24,14 +24,14 @@
 
     <link rel="stylesheet" href="css/styles.css">
 
-    <!-- Pre-Paint Theme: setzt theme-Klasse vor Render, vermeidet Flicker. Default = dark. -->
+    <!-- Pre-Paint Theme: setzt theme-Klasse vor Render, vermeidet Flicker. Default = light. -->
     <script>
         (function () {
             try {
-                var t = localStorage.getItem('smartineer_theme_v1') || 'dark';
+                var t = localStorage.getItem('smartineer_theme_v1') || 'light';
                 document.documentElement.classList.add('theme-' + t);
             } catch (e) {
-                document.documentElement.classList.add('theme-dark');
+                document.documentElement.classList.add('theme-light');
             }
         })();
     </script>

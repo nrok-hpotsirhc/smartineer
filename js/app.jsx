@@ -6,7 +6,7 @@ const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 const STORAGE_KEY = 'wissen_reloaded_progress_v1';
 const INSTALL_DISMISS_KEY = 'smartineer_install_dismissed_v1';
-const THEME_KEY = 'smartineer_theme_v1'; // 'dark' | 'light' (Default: 'dark')
+const THEME_KEY = 'smartineer_theme_v1'; // 'dark' | 'light' (Default: 'light')
 // Schulungen-State (Stand v2): wie v1, mit Versions-Bump fuer Stable-QID-Symmetrie.
 // Shape unveraendert: { [trainingId]: { [chapterId]: { lastPage, quizBest, quizLast } } }.
 const SCHULUNGEN_KEY = 'smartineer_schulungen_v2';
@@ -803,18 +803,18 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
                             {dailyMix.length === 0 ? (
                                 <p className="text-slate-500 text-sm italic">Noch keine Aufgaben verfuegbar.</p>
                             ) : (
-                                <ol ref={dailyMixRef} className="flex flex-col gap-2">
+                                <ol ref={dailyMixRef} className="flex flex-col gap-3">
                                     {dailyMix.map((entry, i) => {
                                         const stem = (entry.task && (entry.task.q || '')) + '';
                                         const short = stem.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
                                         const cat = data[entry.catId];
                                         const catName = cat ? cat.name : entry.catId;
                                         return (
-                                            <li key={`${entry.catId}-${entry.level}-${entry.idx}`} className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg p-3 hover:border-emerald-400 transition">
-                                                <span className="text-xs font-bold text-slate-400 w-6 flex-shrink-0">{i + 1}.</span>
+                                            <li key={`${entry.catId}-${entry.level}-${entry.idx}`} className="flex items-center gap-4 bg-white border border-slate-200 rounded-lg px-4 py-3 hover:border-emerald-400 transition">
+                                                <span className="text-sm font-bold text-slate-400 w-6 flex-shrink-0 text-center">{i + 1}.</span>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="text-xs uppercase tracking-wide text-slate-500">{catName} · L{entry.level + 1} · #{entry.idx + 1}</div>
-                                                    <div className="text-sm text-slate-700 truncate">{short || '(Aufgabe)'}</div>
+                                                    <div className="text-[11px] uppercase tracking-wide text-slate-500 mb-1">{catName} · L{entry.level + 1} · #{entry.idx + 1}</div>
+                                                    <div className="text-sm text-slate-700 truncate leading-snug">{short || '(Aufgabe)'}</div>
                                                 </div>
                                                 <button onClick={() => onOpenTrainingAt && onOpenTrainingAt(entry.catId, entry.level, entry.idx)}
                                                     className="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition flex-shrink-0">
@@ -1838,6 +1838,69 @@ function trainingProgress(training, tState) {
     return { readPct, quizPct, chapterCount: training.chapters.length };
 }
 
+// P-LP-INLINE-CHECK: formativer Selbstcheck am Ende einer Lehrseite.
+// Optionales Feld `pages[i].check = { stem, options:[...], correct, explanation }`.
+// Keine Persistenz, keine Wertung — rein didaktisches Feedback beim Lesen.
+function InlineCheck({ check }) {
+    const [selected, setSelected] = React.useState(null);
+    const [submitted, setSubmitted] = React.useState(false);
+    const ref = useKaTeX([submitted, check && check.stem]);
+    if (!check || !Array.isArray(check.options) || check.options.length < 2) return null;
+    const correctIdx = check.correct | 0;
+    const isCorrect = submitted && selected === correctIdx;
+    return (
+        <div ref={ref} className="mt-6 border-t border-slate-200 pt-5">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 md:p-5">
+                <div className="flex items-center gap-2 mb-3">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">?</span>
+                    <h4 className="text-sm font-bold text-blue-900 uppercase tracking-wide">Selbstcheck</h4>
+                    <span className="text-[11px] text-blue-700/80">formativ, keine Wertung</span>
+                </div>
+                <p className="text-slate-800 mb-3" dangerouslySetInnerHTML={{ __html: check.stem }} />
+                <ul className="flex flex-col gap-2 mb-3">
+                    {check.options.map((opt, i) => {
+                        const isSel = selected === i;
+                        const isRight = submitted && i === correctIdx;
+                        const isWrongSel = submitted && isSel && i !== correctIdx;
+                        let cls = 'border border-slate-300 bg-white hover:border-blue-400';
+                        if (submitted) {
+                            if (isRight) cls = 'border-2 border-emerald-500 bg-emerald-50';
+                            else if (isWrongSel) cls = 'border-2 border-rose-500 bg-rose-50';
+                            else cls = 'border border-slate-300 bg-white opacity-70';
+                        } else if (isSel) {
+                            cls = 'border-2 border-blue-500 bg-blue-50';
+                        }
+                        return (
+                            <li key={i}>
+                                <button type="button" disabled={submitted}
+                                    onClick={() => setSelected(i)}
+                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${cls} disabled:cursor-default`}>
+                                    <span className="font-bold mr-2 text-slate-500">{String.fromCharCode(65 + i)}.</span>
+                                    <span dangerouslySetInnerHTML={{ __html: opt }} />
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ul>
+                {!submitted && (
+                    <button type="button" onClick={() => setSubmitted(true)} disabled={selected === null}
+                        className="px-4 py-1.5 text-sm bg-blue-600 text-white font-bold rounded-lg shadow hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                        Pruefen
+                    </button>
+                )}
+                {submitted && (
+                    <div className={`mt-2 rounded-lg p-3 text-sm ${isCorrect ? 'bg-emerald-100 border border-emerald-300 text-emerald-900' : 'bg-rose-100 border border-rose-300 text-rose-900'}`}>
+                        <div className="font-bold mb-1">{isCorrect ? 'Richtig.' : 'Nicht ganz.'}</div>
+                        <div dangerouslySetInnerHTML={{ __html: check.explanation || '' }} />
+                        <button type="button" onClick={() => { setSelected(null); setSubmitted(false); }}
+                            className="mt-2 text-xs underline text-slate-700 hover:text-slate-900">Erneut versuchen</button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
     const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
     const { state, setLastPage, recordQuiz } = useSchulungenState();
@@ -2151,6 +2214,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                     <article className="p-5 md:p-7 task-fade book-page" key={`${cid}-${page}`}>
                         <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 mb-4">{cur.title}</h2>
                         <div className="prose-book text-slate-800" dangerouslySetInnerHTML={{ __html: cur.html }} />
+                        {cur.check && <InlineCheck check={cur.check} key={`check-${cid}-${page}`} />}
                     </article>
                     <div className="border-t border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between gap-2 flex-wrap">
                         <button onClick={() => goPage(page - 1)} disabled={page <= 0}
@@ -2800,10 +2864,10 @@ function App() {
     // sowie Schulungen durchgereicht, damit alle Tracks denselben SRS-Storage sehen.
     const { state: srsState, gradeMany: srsGradeMany, reset: resetSRS } = useSRSState();
 
-    // Theme: Default dunkel. Pre-paint-Skript in index.html setzt die Klasse bereits am <html>,
+    // Theme: Default hell. Pre-paint-Skript in index.html setzt die Klasse bereits am <html>,
     // hier wird der State synchron daraus initialisiert und bei Änderung sowohl <html> als auch <body> markiert.
     const [theme, setTheme] = useState(() => {
-        try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch (e) { return 'dark'; }
+        try { return localStorage.getItem(THEME_KEY) || 'light'; } catch (e) { return 'light'; }
     });
     useEffect(() => {
         const el = document.documentElement;
