@@ -135,12 +135,32 @@ function Schueler() {
             return 'zelle';
         }
         if (subjId === 'geschichte') {
-            if (/steinzeit|jaeger|jäger|aegypten|ägypten|pharao|pyramide|griech|rom\b|roem|römer|caesar|republik|antik|senat|legion|olymp/.test(text)) return 'antike';
-            if (/mittelalter|ritter|burg\b|kirche|kaiser karl|karl der|lehnswesen|kreuzzug|papst|hanse|gilde|mönch|moench/.test(text)) return 'mittelalter';
-            if (/reformation|luther|absolutismus|aufkl|renaissance|gutenberg|buchdruck|kolumbus|entdeck|dreissigjaehrig|dreißigjährig|ludwig xiv/.test(text)) return 'fruehneuzeit';
-            if (/franzoesische revolution|französische revolution|napoleon|industrialisier|dampf|industrie|wiener kongress|1789|1848|fabrik/.test(text)) return 'revolution';
-            if (/bismarck|wilhelm ii|kaiserreich|reichsgruendung|reichsgründung|erster weltkrieg|weimar|1871|1914|1918/.test(text)) return 'kaiserreich';
-            if (/zweiter weltkrieg|nationalsoz|hitler|shoah|holocaust|kalter krieg|wiedervereinigung|berliner mauer|1939|1945|1989|nato|warschauer/.test(text)) return 'modern';
+            // Primaere Heuristik: erste plausible Jahreszahl im Text (3- oder
+            // 4-stellig). Jahreszahlen sind deutlich verlaesslicher als
+            // generische Stichworte wie "kirche" oder "papst", die in
+            // Reformation/Kulturkampf/Bismarck-Kontexten quer durch alle
+            // Epochen erscheinen.
+            const yearMatch = text.match(/\b(\d{3,4})(?:\s*(?:v\.?\s*chr|bc|n\.?\s*chr|ad))?\b/);
+            if (yearMatch) {
+                const y = parseInt(yearMatch[1], 10);
+                const isBC = /v\.?\s*chr|bc/.test(text.slice(yearMatch.index, yearMatch.index + 20));
+                if (isBC) return 'antike';
+                if (y >= 100 && y < 500) return 'antike';
+                if (y >= 500 && y < 1500) return 'mittelalter';
+                if (y >= 1500 && y < 1789) return 'fruehneuzeit';
+                if (y >= 1789 && y < 1871) return 'revolution';
+                if (y >= 1871 && y < 1939) return 'kaiserreich';
+                if (y >= 1939) return 'modern';
+            }
+            // Sekundaere Heuristik: epochenspezifische Stichworte. Bewusst
+            // weggelassen: 'kirche', 'papst' (zu breit, kollidiert mit
+            // Reformation/Kulturkampf/Investiturstreit ueber Epochen hinweg).
+            if (/steinzeit|jaeger|jäger|aegypten|ägypten|pharao|pyramide|griech|rom\b|roem|römer|caesar|republik|antik\b|senat|legion|olymp|hieroglyph/.test(text)) return 'antike';
+            if (/mittelalter|ritter|burg\b|kaiser karl|karl der|lehnswesen|lehnswesen|kreuzzug|hanse|gilde|mönch|moench|staufer|hohenstauf|barbarossa|investiturstreit|gotik|romanik|otto i|otto der/.test(text)) return 'mittelalter';
+            if (/reformation|luther|absolutismus|aufkl|renaissance|gutenberg|buchdruck|kolumbus|entdeck|dreissigjaehrig|dreißigjährig|ludwig xiv|westfaelisch|westfälisch|preussen|preußen.*friedrich/.test(text)) return 'fruehneuzeit';
+            if (/franzoesische revolution|französische revolution|napoleon|industrialisier|dampfmaschine|wiener kongress|vormaerz|vormärz|paulskirche|fabrik|maschinenbau|hambacher|metternich/.test(text)) return 'revolution';
+            if (/bismarck|wilhelm ii|kaiserreich|reichsgruendung|reichsgründung|erster weltkrieg|weimar|kulturkampf|sozialgesetz|kolonia|tirpitz|versailles|spartak/.test(text)) return 'kaiserreich';
+            if (/zweiter weltkrieg|nationalsoz|hitler|shoah|holocaust|kalter krieg|wiedervereinigung|berliner mauer|nato|warschauer|ddr\b|brd\b|gruendung der bundesrepublik|gründung der bundesrepublik|grundgesetz|globalisier/.test(text)) return 'modern';
             const byGrade = { k5: 'antike', k6: 'mittelalter', k7: 'fruehneuzeit', k8: 'revolution', k9: 'kaiserreich', k10: 'modern' };
             return byGrade[klassId] || null;
         }
