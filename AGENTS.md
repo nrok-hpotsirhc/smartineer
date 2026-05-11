@@ -146,6 +146,21 @@ Eine Aufgabe ist ein Objekt:
 { q: 'Frage als HTML-String', h: 'Hinweis-HTML', s: 'Musterlösung-HTML' }
 ```
 
+Optional duerfen Aufgaben zusaetzlich eine **Hint-Leiter** (P-LP-HINT-LADDER, Brilliant-/OpenStax-Pattern) tragen:
+
+```js
+{
+    q: 'Frage als HTML-String',
+    h1: 'Hinweis-Stufe 1 (Idee/Konzept, lenkt nur)',
+    h2: 'Hinweis-Stufe 2 (Strategie/Methodenwahl)',
+    h3: 'Hinweis-Stufe 3 (konkrete Formel/Schritt)',
+    h:  'Klassischer Schluss-Hinweis (wird als letzte Leiter-Stufe gerendert; bleibt Pflichtfeld)',
+    s:  'Musterlösung-HTML'
+}
+```
+
+Reihenfolge im UI: `h1` -> `h2` -> `h3` -> `h`. Der Klassik-Hinweis `h` bleibt **Pflicht** und wird automatisch als letzte Stufe angezeigt. `h1/h2/h3` sind **optional** und einzeln weglassbar — Aufgaben ohne Hint-Leiter rendern wie bisher einstufig. Im Renderer (`TaskView` in `js/app.jsx`) sieht der Lernende einen Button „Hinweis 1 / N", der bei jedem Klick die naechste Stufe aufdeckt; danach „Naechster Hinweis (k / N)", bis alle Stufen offen sind.
+
 ### Pflichtfelder
 
 | Feld | Typ | Pflicht | Hinweise |

@@ -192,6 +192,10 @@
                 {
                     q: 'IMC (Internal Model Control): Strecke $G_S(s)$ minimalphasig, Wunsch-Filterzeitkonstante $\\lambda$. Gib den IMC-Regler $G_R$ und den äquivalenten klassischen Regler $G_C$ an.',
                     h: 'IMC-Regler: $G_R = G_S^{-1} F$ mit $F(s)=1/(1+\\lambda s)^n$. Klassisch: $G_C=G_R/(1-G_R G_S)$.',
+                    // Hint-Leiter (P-LP-HINT-LADDER, AGENTS §5): didaktische Stufung vor dem Schluss-Hinweis `h`.
+                    h1: 'Idee von IMC: Der Regler enthaelt explizit ein Streckenmodell $\\hat G_S$. Bei perfekter Modellkenntnis ($\\hat G_S = G_S$) ist der effektive Rueckkopplungspfad nur die Modellabweichung — der Entwurf reduziert sich auf die Wahl eines Filters $F(s)$.',
+                    h2: 'Wenn $G_S$ minimalphasig ist (keine RHS-Nullstellen, keine Totzeit), darf invertiert werden: setze $G_R = G_S^{-1} \\cdot F(s)$. $F$ macht $G_R$ kausal und proper — typische Wahl $F(s) = 1/(1+\\lambda s)^n$ mit $n$ so gross, dass Zaehlergrad $\\le$ Nennergrad von $G_R$.',
+                    h3: 'Aequivalenter klassischer Regler aus dem IMC-Block-Schaubild durch Block-Algebra: $G_C = G_R / (1 - G_R \\, \\hat G_S)$. Mit perfektem Modell und $G_R = G_S^{-1} F$ kuerzt sich $G_S$ heraus.',
                     s: 'Filterordnung $n$ so wählen, dass $G_R$ kausal ist (Zähler-grad $\\le$ Nenner-grad).<br>$G_R=G_S^{-1}\\cdot\\dfrac{1}{(1+\\lambda s)^n}$.<br>Äquivalenz: $G_C(s)=\\dfrac{G_R(s)}{1-G_R(s)G_S(s)}=\\dfrac{1}{G_S(s)\\,((1+\\lambda s)^n-1)}$.<br>Vorteil: ein einziger Tuning-Parameter $\\lambda$ (Trade-off Performance vs. Robustheit). Für $\\lambda\\to 0$: aggressives Verhalten; für $\\lambda\\to\\infty$: weiches Verhalten.<br>$$\\boxed{G_C(s)=\\dfrac{1}{G_S(s)\\,((1+\\lambda s)^n-1)}}$$',
                     // Beispiel optionaler Metadaten gemaess AGENTS §22 (einheitliches Item-Schema):
                     lo: 'control.imc.equivalence',

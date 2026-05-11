@@ -473,6 +473,12 @@ function toItem(legacy, ctx) {
         stem: legacy.q,
         // Training-Felder
         h: legacy.h,
+        // Optionale Hint-Leiter (P-LP-HINT-LADDER, AGENTS §5):
+        // h1/h2/h3 = mehrstufige Hinweise (Brilliant/OpenStax-Pattern). Abwaertskompatibel:
+        // Aufgaben ohne h1/h2/h3 fallen auf den klassischen einstufigen `h`-Hinweis zurueck.
+        h1: legacy.h1,
+        h2: legacy.h2,
+        h3: legacy.h3,
         s: legacy.s,
         // Schueler-Feld
         a: legacy.a,
@@ -920,18 +926,36 @@ function TaskPills({ tasks, currentIdx, setIdx, isSolved, catId, lvl }) {
 }
 
 function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMark, srsCard, onGrade }) {
-    const [showHint, setShowHint] = useState(false);
+    const [revealedHints, setRevealedHints] = useState(0);
     const [showSolution, setShowSolution] = useState(false);
-    useEffect(() => { setShowHint(false); setShowSolution(false); }, [catId, lvl, idx]);
+    useEffect(() => { setRevealedHints(0); setShowSolution(false); }, [catId, lvl, idx]);
 
     // Einheitliches Item-Schema (siehe AGENTS §22). Verhalten unveraendert: Stem/Hint/Solution
     // werden ueber den Adapter gelesen, der Legacy-Felder `q`/`h`/`s` 1:1 auf `stem`/`h`/`s` mappt.
     const item = toItem(task, { kind: 'training', catId, level: lvl, idx });
     const stem = item ? item.stem : (task && task.q);
-    const hintHtml = item ? item.h : (task && task.h);
     const solutionHtml = item ? item.s : (task && task.s);
 
-    const ref = useKaTeX([catId, lvl, idx, stem, showHint, showSolution]);
+    // Hint-Leiter (P-LP-HINT-LADDER, AGENTS §5). Reihenfolge: h1 -> h2 -> h3 -> h
+    // (Legacy-Einzelhinweis als letzte Stufe). Aufgaben ohne h1/h2/h3 bleiben einstufig.
+    const hintLadder = [];
+    if (item) {
+        if (typeof item.h1 === 'string' && item.h1.trim()) hintLadder.push(item.h1);
+        if (typeof item.h2 === 'string' && item.h2.trim()) hintLadder.push(item.h2);
+        if (typeof item.h3 === 'string' && item.h3.trim()) hintLadder.push(item.h3);
+        if (typeof item.h === 'string' && item.h.trim()) hintLadder.push(item.h);
+    } else if (task && typeof task.h === 'string' && task.h.trim()) {
+        hintLadder.push(task.h);
+    }
+    const totalHints = hintLadder.length;
+    const hasMoreHints = revealedHints < totalHints;
+    const hintButtonLabel = totalHints <= 1
+        ? 'Formel / Ansatz'
+        : (revealedHints === 0
+            ? `Hinweis 1${totalHints > 1 ? ` / ${totalHints}` : ''}`
+            : `Nächster Hinweis (${revealedHints + 1} / ${totalHints})`);
+
+    const ref = useKaTeX([catId, lvl, idx, stem, revealedHints, showSolution]);
     const solved = isSolved(catId, lvl, idx);
 
     if (!task) {
@@ -960,10 +984,15 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
             </div>
 
             <div className="flex flex-wrap gap-3 mb-6">
-                <button onClick={() => setShowHint(true)}
-                    className="bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 font-medium py-2 px-4 rounded-lg transition">
-                    Formel / Ansatz
-                </button>
+                {totalHints > 0 && (
+                    <button onClick={() => setRevealedHints((n) => Math.min(n + 1, totalHints))}
+                        disabled={!hasMoreHints}
+                        className={`border font-medium py-2 px-4 rounded-lg transition ${hasMoreHints
+                            ? 'bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100'
+                            : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                        {hasMoreHints ? hintButtonLabel : `Alle Hinweise (${totalHints}/${totalHints})`}
+                    </button>
+                )}
                 <button onClick={() => setShowSolution(true)}
                     className="bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 px-4 rounded-lg transition">
                     Musterlösung
@@ -976,12 +1005,14 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
                 </button>
             </div>
 
-            {showHint && (
-                <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-lg slide-in">
-                    <h4 className="text-sm font-bold text-amber-800 mb-1">Formel / Ansatz</h4>
+            {hintLadder.slice(0, revealedHints).map((hintHtml, i) => (
+                <div key={i} className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-lg slide-in">
+                    <h4 className="text-sm font-bold text-amber-800 mb-1">
+                        {totalHints > 1 ? `Hinweis ${i + 1} / ${totalHints}` : 'Formel / Ansatz'}
+                    </h4>
                     <div className="text-amber-900 math-block" dangerouslySetInnerHTML={{ __html: hintHtml }} />
                 </div>
-            )}
+            ))}
             {showSolution && (
                 <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-xl slide-in">
                     <h4 className="text-sm font-bold text-emerald-800 uppercase tracking-wide mb-3 border-b border-emerald-200 pb-2">Musterlösung &amp; Rechenweg</h4>
