@@ -218,7 +218,7 @@ function App() {
                 )}
             </main>
             <footer className="bg-slate-900 text-slate-400 py-6 text-center text-sm mt-auto">
-                <p>Smartineer · Wissen Reloaded © 2026 · Ingenieur-Brain-Update</p>
+                <p>Smartineer · Wissen Reloaded © 2026 · Ingenieur-Brain-Update · Christoph Korn</p>
                 <p className="mt-2">
                     <button onClick={() => setImpressumOpen(true)}
                         className="text-slate-300 hover:text-white underline-offset-2 hover:underline transition">

@@ -91,7 +91,7 @@ function ImpressumModal({ open, onClose }) {
                     <div>
                         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Anbieter</h3>
                         <p className="font-semibold text-slate-900">Christoph Korn</p>
-                        <p>Riemkeestraße 159</p>
+                        <p>Riemkestraße 159</p>
                         <p>33102 Paderborn</p>
                         <p>Deutschland</p>
                     </div>

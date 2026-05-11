@@ -356,9 +356,8 @@ function Schueler() {
                          style={{ width: `${(idx / items.length) * 100}%` }}></div>
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 task-fade" key={idx}>
-                    <div className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-8 math-block">
-                        {item.q}
-                    </div>
+                    <div className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-8 math-block"
+                         dangerouslySetInnerHTML={{ __html: item.q }} />
                     {/* P-UI-SCHUELER-INPUTMODE: Mobile-Tastatur passend zur erwarteten Antwort.
                         Reine Zahl (mit/ohne Komma/Punkt/Minus) -> `decimal`-Ziffernblock.
                         Sonstige Antworten (z.B. `7R3` bei Division-mit-Rest, oder Englisch) -> Text. */}
@@ -414,7 +413,9 @@ function Schueler() {
                     <ol className="flex flex-col gap-3">
                         {answers.map((a, i) => (
                             <li key={i} className={`p-3 rounded-lg border-l-4 ${a.correct ? 'border-emerald-400 bg-emerald-50' : 'border-rose-400 bg-rose-50'}`}>
-                                <div className="font-bold text-slate-800">{i + 1}. {a.q}</div>
+                                <div className="font-bold text-slate-800">
+                                    <span>{i + 1}. </span><span className="math-block" dangerouslySetInnerHTML={{ __html: a.q }} />
+                                </div>
                                 <div className="text-sm mt-1">
                                     Deine Antwort: <strong className={a.correct ? 'text-emerald-700' : 'text-rose-700'}>{a.given || '—'}</strong>
                                     {!a.correct && <span className="text-slate-700"> · richtig: <strong>{a.expected}</strong></span>}
