@@ -96,7 +96,7 @@
         return out;
     }
 
-    // ---------- Mittelstufe: Naturwissenschaften (50er Pools, AGENTS §17) ----------
+    // ---------- Mittelstufe: Naturwissenschaften (erweiterte Pools, AGENTS §17) ----------
     // Klasse 5–10: Physik, Chemie, Biologie als kuratierte Pools.
     // Inhalte sind handgeprueft (Standardlehrplaene Mittelstufe DE) und enthalten
     // Formeln via KaTeX ($...$). Antworten sind kurze Strings — die Drill-UI vergleicht
@@ -1914,7 +1914,7 @@
 
     function pool_k7_chemie() {
         return withNatwiTopup([
-            { q: 'Welcher Aggregatzustand hat Wasser bei $25\\,^\\circ\\text{C}$ und Normaldruck?', a: 'fluessig' },
+            { q: 'Welcher Aggregatzustand hat Wasser bei $25^\\circ\\text{C}$ und Normaldruck?', a: 'fluessig' },
             { q: 'Wie heisst der Uebergang von fest zu fluessig?', a: 'schmelzen' },
             { q: 'Wie heisst der Uebergang von fluessig zu gasfoermig?', a: 'verdampfen' },
             { q: 'Wie heisst der direkte Uebergang von fest zu gasfoermig?', a: 'sublimieren' },
@@ -2004,7 +2004,7 @@
 
     function pool_k9_chemie() {
         return withNatwiTopup([
-            { q: 'Welchen pH-Wert hat eine neutrale waessrige Loesung bei $25\\,^\\circ\\text{C}$?', a: '7' },
+            { q: 'Welchen pH-Wert hat eine neutrale waessrige Loesung bei $25^\\circ\\text{C}$?', a: '7' },
             { q: 'Ist eine Loesung mit pH 3 sauer, neutral oder basisch?', a: 'sauer' },
             { q: 'Ist eine Loesung mit pH 11 sauer, neutral oder basisch?', a: 'basisch' },
             { q: 'Was ist die Summenformel von Salzsaeure (geloest in Wasser)?', a: 'hcl' },
@@ -2154,56 +2154,56 @@
                            note: 'Mathematik Klasse 5: Rechnen mit natuerlichen Zahlen, Bruechen, Dezimalzahlen, Groessen und Rechtecken — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k5.englisch': { mode: 'stub' },
             'k5.physik':   { mode: 'pool', pool: pool_k5_physik(),
-                             note: 'NRW-KLP NW SI Klasse 5/6: Magnetismus, einfacher Stromkreis, Licht & Schatten, Temperatur — 50er Pool.' },
+                             note: 'NRW-KLP NW SI Klasse 5/6: Magnetismus, einfacher Stromkreis, Licht & Schatten, Temperatur — erweiterter Rahmenplan-Pool.' },
             'k5.chemie':   { mode: 'pool', pool: pool_k5_chemie(),
-                             note: 'NRW-KLP NW SI Klasse 5/6: Stoffe & Eigenschaften, Aggregatzustaende, Wasser & Luft — 50er Pool.' },
+                             note: 'NRW-KLP NW SI Klasse 5/6: Stoffe & Eigenschaften, Aggregatzustaende, Wasser & Luft — erweiterter Rahmenplan-Pool.' },
             'k5.biologie': { mode: 'pool', pool: pool_k5_biologie(),
-                             note: 'NRW-KLP NW SI Klasse 5/6: Pflanzen, Tiere und Mensch — Einstieg in die Biologie — 50er Pool.' },
+                             note: 'NRW-KLP NW SI Klasse 5/6: Pflanzen, Tiere und Mensch — Einstieg in die Biologie — erweiterter Rahmenplan-Pool.' },
             'k6.mathe':  { mode: 'pool', pool: pool_k6_mathe(),
                            note: 'Mathematik Klasse 6: Bruchteile, Prozentrechnung, ganze Zahlen, Gleichungen und Dreiecksgeometrie — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k6.englisch': { mode: 'stub' },
             'k6.physik':   { mode: 'pool', pool: pool_k6_physik(),
-                             note: 'NRW-KLP NW SI Klasse 5/6: Optik (Reflexion, Linsen, Farben), Schall, Waermetransport — 50er Pool.' },
+                             note: 'NRW-KLP NW SI Klasse 5/6: Optik (Reflexion, Linsen, Farben), Schall, Waermetransport — erweiterter Rahmenplan-Pool.' },
             'k6.chemie':   { mode: 'pool', pool: pool_k6_chemie(),
-                             note: 'NRW-KLP NW SI Klasse 5/6: Stofftrennung (Filtrieren, Destillieren, Chromatographie), Indikatoren, Reinstoffe — 50er Pool.' },
+                             note: 'NRW-KLP NW SI Klasse 5/6: Stofftrennung (Filtrieren, Destillieren, Chromatographie), Indikatoren, Reinstoffe — erweiterter Rahmenplan-Pool.' },
             'k6.biologie': { mode: 'pool', pool: pool_k6_biologie(),
-                             note: 'NRW-KLP NW SI Klasse 5/6: Mensch, Wirbeltiere, oekologische Grundbegriffe — 50er Pool.' },
+                             note: 'NRW-KLP NW SI Klasse 5/6: Mensch, Wirbeltiere, oekologische Grundbegriffe — erweiterter Rahmenplan-Pool.' },
             'k7.mathe':  { mode: 'pool', pool: pool_k7_mathe(),
                            note: 'Mathematik Klasse 7: lineare Gleichungen, Proportionalitaet, Prozentrechnung, lineare Funktionen und Terme — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k7.englisch': { mode: 'stub' },
             'k7.physik':   { mode: 'pool', pool: pool_k7_physik(),
                              note: 'NRW-KLP Physik SI Klasse 7/8: Mechanik-Grundlagen (Geschwindigkeit, Kraft, Dichte, Einheiten) — Endergebnis ohne Einheit eintragen.' },
             'k7.chemie':   { mode: 'pool', pool: pool_k7_chemie(),
-                             note: 'NRW-KLP Chemie SI Klasse 7/8: Aggregatzustaende, Summenformeln, Stoffeigenschaften — 50er Pool.' },
+                             note: 'NRW-KLP Chemie SI Klasse 7/8: Aggregatzustaende, Summenformeln, Stoffeigenschaften — erweiterter Rahmenplan-Pool.' },
             'k7.biologie': { mode: 'pool', pool: pool_k7_biologie(),
-                             note: 'NRW-KLP Biologie SI Klasse 7/8: Zelle, Oekosystem, Pflanzen vertieft — 50er Pool.' },
+                             note: 'NRW-KLP Biologie SI Klasse 7/8: Zelle, Oekosystem, Pflanzen vertieft — erweiterter Rahmenplan-Pool.' },
             'k8.mathe':  { mode: 'pool', pool: pool_k8_mathe(),
                            note: 'Mathematik Klasse 8: Steigung, Gleichungssysteme, Pythagoras, Potenzen und binomische Formeln — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k8.englisch': { mode: 'stub' },
             'k8.physik':   { mode: 'pool', pool: pool_k8_physik(),
                              note: 'NRW-KLP Physik SI Klasse 7/8: Elektrik (Ohmsches Gesetz, Reihen-/Parallelschaltung), Arbeit & Leistung — Endergebnis ohne Einheit.' },
             'k8.chemie':   { mode: 'pool', pool: pool_k8_chemie(),
-                             note: 'NRW-KLP Chemie SI Klasse 7/8: Atombau, Periodensystem-Grundlagen, einfache Summenformeln — 50er Pool.' },
+                             note: 'NRW-KLP Chemie SI Klasse 7/8: Atombau, Periodensystem-Grundlagen, einfache Summenformeln — erweiterter Rahmenplan-Pool.' },
             'k8.biologie': { mode: 'pool', pool: pool_k8_biologie(),
-                             note: 'NRW-KLP Biologie SI Klasse 7/8: Atmung, Verdauung, Blutkreislauf — 50er Pool.' },
+                             note: 'NRW-KLP Biologie SI Klasse 7/8: Atmung, Verdauung, Blutkreislauf — erweiterter Rahmenplan-Pool.' },
             'k9.mathe':  { mode: 'pool', pool: pool_k9_mathe(),
                            note: 'Mathematik Klasse 9: quadratische Gleichungen, Trigonometrie, Wahrscheinlichkeit, Aehnlichkeit und Statistik — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k9.englisch': { mode: 'stub' },
             'k9.physik':   { mode: 'pool', pool: pool_k9_physik(),
                              note: 'NRW-KLP Physik SI Klasse 9/10: Newton, Energie, Elektromagnetismus, Druck — Endergebnis ohne Einheit.' },
             'k9.chemie':   { mode: 'pool', pool: pool_k9_chemie(),
-                             note: 'NRW-KLP Chemie SI Klasse 9/10: pH-Wert, Saeuren & Basen, Neutralisation, Ionenbindung — 50er Pool.' },
+                             note: 'NRW-KLP Chemie SI Klasse 9/10: pH-Wert, Saeuren & Basen, Neutralisation, Ionenbindung — erweiterter Rahmenplan-Pool.' },
             'k9.biologie': { mode: 'pool', pool: pool_k9_biologie(),
-                             note: 'NRW-KLP Biologie SI Klasse 9/10: Genetik-Grundlagen (DNA, Mitose, Meiose), Evolution — 50er Pool.' },
+                             note: 'NRW-KLP Biologie SI Klasse 9/10: Genetik-Grundlagen (DNA, Mitose, Meiose), Evolution — erweiterter Rahmenplan-Pool.' },
             'k10.mathe': { mode: 'pool', pool: pool_k10_mathe(),
                            note: 'Mathematik Klasse 10: Exponentialfunktionen, Potenzen, Trigonometrie, Koerpergeometrie und quadratische Gleichungen — 100er Pool mit Training und 10-Fragen-Quiz.' },
             'k10.englisch': { mode: 'stub' },
             'k10.physik':   { mode: 'pool', pool: pool_k10_physik(),
-                             note: 'NRW-KLP Physik SI Klasse 9/10: Atombau, Radioaktivitaet, Optik — 50er Pool; Endergebnis ohne Einheit.' },
+                             note: 'NRW-KLP Physik SI Klasse 9/10: Atombau, Radioaktivitaet, Optik — erweiterter Rahmenplan-Pool; Endergebnis ohne Einheit.' },
             'k10.chemie':   { mode: 'pool', pool: pool_k10_chemie(),
-                             note: 'NRW-KLP Chemie SI Klasse 9/10: Organische Chemie — Einstieg (Alkane, Alkohole, Carbonsaeuren) — 50er Pool.' },
+                             note: 'NRW-KLP Chemie SI Klasse 9/10: Organische Chemie — Einstieg (Alkane, Alkohole, Carbonsaeuren) — erweiterter Rahmenplan-Pool.' },
             'k10.biologie': { mode: 'pool', pool: pool_k10_biologie(),
-                             note: 'NRW-KLP Biologie SI Klasse 9/10: Molekularbiologie (DNA/RNA, Proteinbiosynthese), Biodiversitaet — 50er Pool.' }
+                             note: 'NRW-KLP Biologie SI Klasse 9/10: Molekularbiologie (DNA/RNA, Proteinbiosynthese), Biodiversitaet — erweiterter Rahmenplan-Pool.' }
         },
         // Antwort-Vergleich (tolerant): trim + Komma->Punkt + Kleinschreibung; "R" Groß/klein egal.
         normalize: function (s) {
