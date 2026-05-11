@@ -308,3 +308,79 @@ html.theme-dark, body.theme-dark {
 @media (max-width: 640px) {
     .book-page { font-size: 1rem; }
 }
+
+/* ============================================================
+   P-ARCH-GLOSSARY — Glossar-Links im Reader/Quiz-Result
+   Klickbare Begriffe (Marker `[[glossary:id]]`) werden zu Buttons.
+   Inline-Optik: gestrichelte Unterstreichung statt Vollunterstreichung,
+   damit sie sich von normalen Links abheben.
+   ============================================================ */
+.glossary-link {
+    display: inline;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: #2563eb;
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    border-radius: 0.2rem;
+}
+.glossary-link:hover { color: #1d4ed8; text-decoration-style: solid; }
+.theme-dark .glossary-link { color: #93c5fd; }
+.theme-dark .glossary-link:hover { color: #dbeafe; }
+
+/* ============================================================
+   P-UI-FOCUS-RINGS — globale :focus-visible-Regeln
+   Konsistenter, sichtbarer Tastatur-Fokus-Ring (WCAG-AA 2.4.7).
+   :focus-visible verhindert, dass Mausklicks den Ring zeigen.
+   ============================================================ */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+[role="radio"]:focus-visible,
+[role="tab"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5), 0 0 0 5px rgba(37, 99, 235, 0.2);
+    border-radius: 0.5rem;
+}
+.theme-dark button:focus-visible,
+.theme-dark a:focus-visible,
+.theme-dark [role="button"]:focus-visible,
+.theme-dark [role="radio"]:focus-visible,
+.theme-dark [role="tab"]:focus-visible,
+.theme-dark input:focus-visible,
+.theme-dark textarea:focus-visible,
+.theme-dark select:focus-visible {
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.7), 0 0 0 5px rgba(96, 165, 250, 0.25);
+}
+/* schueler-input und task-pill bringen eigene Fokus-Styles mit (siehe oben);
+   :focus-visible-Schatten dort additiv ohne Konflikt. */
+
+/* ============================================================
+   P-UI-TOUCH-TARGETS — Mobile Touch-Mindestgroessen (HIG/Material)
+   Auf Mobile mindestens 40x40 (HIG-light) fuer Task-Pills und
+   Nav-Icon-Buttons. CSS-Variable erlaubt spaetere Anpassung.
+   ============================================================ */
+:root {
+    --touch-target: 40px;
+}
+@media (max-width: 768px) {
+    .task-pill {
+        min-width: var(--touch-target);
+        min-height: var(--touch-target);
+    }
+    /* Mobile-Nav-Icon-Buttons (siehe NAV_ICONS in app.jsx) und allgemeine
+       Icon-only-Buttons: Mindestgroesse erreichen, auch wenn sie als
+       <button class="w-9 h-9 ..."> gerendert sind. */
+    .nav-glass button,
+    button[aria-label][title]:not(.task-pill) {
+        min-width: var(--touch-target);
+        min-height: var(--touch-target);
+    }
+}

@@ -505,10 +505,10 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 - **Akzeptanz:** Speicherung in `smartineer_reader_v1`; AGENTS §14b ergaenzt.
 
 ### P-UI-READER-CONTINUE — Naechstes Kapitel direkt nach Quiz-Ende
-- **Status:** ready
+- **Status:** done (v62, Sitzung 2026-05-11)
 - **Dateien:** `js/app.jsx`
-- **Aktion:** Quiz-Result-Screen bekommt CTA "Naechstes Kapitel starten". Globaler "Weiterlesen"-Block auf Dashboard ("Du warst zuletzt bei …").
-- **Akzeptanz:** Kapitel-Continuation in 2 Klicks; Resume-Block sichtbar wenn `lastPage` vorhanden.
+- **Aktion:** Quiz-Result-Screen bekommt CTA "Naechstes Kapitel: <Titel>" zwischen "Quiz wiederholen" und "Zurueck zum Kapitel". CTA erscheint nur, wenn kein Review-/Pruefungs-Modus aktiv ist und das aktuelle Kapitel nicht das letzte der Schulung ist. Klick navigiert via `openChapter(nextCh.id, 0)`. Globaler Dashboard-Resume-Block bleibt P-UI-DASHBOARD-RESUME vorbehalten.
+- **Akzeptanz:** Kapitel-Continuation in 1 Klick aus dem Quiz-Result; CTA verschwindet beim letzten Kapitel; Review-/Pruefungs-Ende unveraendert.
 
 ### P-UI-DASHBOARD-RESUME — Eine prominente Resume-Karte auf Dashboard
 - **Status:** ready
@@ -529,10 +529,10 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 - **Akzeptanz:** DRY; konsistente Tonalitaet; alle bisherigen ad-hoc-Empties ersetzt.
 
 ### P-UI-FOCUS-RINGS — Globale `:focus-visible`-Regeln
-- **Status:** ready
+- **Status:** done (v62, Sitzung 2026-05-11)
 - **Dateien:** `css/styles.css`
-- **Aktion:** Globaler `:focus-visible`-Ring fuer Buttons/Links/Inputs. `outline-none` nur in Verbindung mit eigenem Ring. Konsistent fuer Light- und Dark-Mode.
-- **Akzeptanz:** Tastaturnavigation auf allen Views sichtbar.
+- **Aktion:** Globaler `:focus-visible`-Doppel-Ring (3px blau-600 + 2px blau-600/20) fuer `button`, `a`, `[role=button|radio|tab]`, `input`, `textarea`, `select`. Dark-Mode-Variante mit blau-400-Tints. Bestehende Komponenten-eigene Fokus-Styles (`.schueler-input:focus`, `.task-pill.active`) bleiben unveraendert; `:focus-visible` rendert nur bei Tastaturnavigation. Zusatz: in selber Session das fehlende `.glossary-link`-CSS aus v59 nachgezogen (dotted-Underline, Hover-Style, Dark-Mode-Variante).
+- **Akzeptanz:** Tab-Navigation auf Dashboard, Training, Reader, Quiz erzeugt sichtbaren Ring; Maus-Klicks erzeugen keinen Ring; Dark- und Light-Mode konsistent.
 
 ### P-UI-SCHUELER-INPUTMODE — Numerischer Ziffernblock + Sprache der Eingabe
 - **Status:** ready
@@ -547,10 +547,10 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 - **Akzeptanz:** Duolingo-light; kein neuer CDN-Abhaengigkeit; AGENTS §17 ergaenzt.
 
 ### P-UI-TOUCH-TARGETS — Mindestgroesse Pills/Icons auf Mobile
-- **Status:** ready
+- **Status:** done (v62, Sitzung 2026-05-11)
 - **Dateien:** `css/styles.css`
-- **Aktion:** Task-Pills (heute 34x34) und Icon-Buttons in der Mobile-Nav auf min. 40x40 (HIG-light) bzw. 44x44 (HIG-strict) anheben. CSS-Variable `--touch-target`.
-- **Akzeptanz:** HIG/Material-konform; Layout-Regression vermieden.
+- **Aktion:** Neue CSS-Variable `--touch-target: 40px` (HIG-light). Auf `@media (max-width: 768px)` wird `min-width`/`min-height` fuer `.task-pill` (vorher 34x34) sowie fuer Mobile-Nav-Icon-Buttons (`.nav-glass button`) und allgemeine Icon-only-Buttons (`button[aria-label][title]:not(.task-pill)`) auf den Variablenwert gehoben. Desktop unveraendert (34x34 Pills bleiben kompakt).
+- **Akzeptanz:** Mobile-Touch-Ziele erreichen die HIG-light-Mindestgroesse; Layout-Regression vermieden, da nur `min-*` (additiv, kein Hardcode-Override).
 
 ---
 
@@ -571,12 +571,14 @@ Block I ergaenzt das bestehende **D)** ohne es zu ersetzen. Reihenfolge ist nur 
 
 ## E) Naechste empfohlene Session
 
-> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-APPJSX-SPLIT** (Code-Hygiene; `js/app.jsx` ueber 3100 Zeilen) oder Inhalts-Top-up wie **P-CYBERSEC-09** / **P-AUTO-05/-06** / **P-MED-AUDIT** zur Schliessung der Capstone-/Soll-Gaps. Alternativ **P-LP-MASTERY** (Bloom-Aggregation) als letztes offenes Block-H-Paket.
-> Begruendung: Mit v61 ist das Brand-Logo zusaetzlich zur Hero-Praesenz auch als PWA-App-Kachel (Android-/iOS-Home-Screen, Windows-Pin) konfiguriert. Naechste Hebel: Code-Hygiene (App-Split) oder Inhaltsausbau auf den noch duennen Capstone-Kapiteln (Cybersec Kap.10, Automation Kap.7).
+> **Naechster Batch-Anker (vom Agent gesetzt):** **P-ARCH-APPJSX-SPLIT** (Code-Hygiene; `js/app.jsx` ueber 3100 Zeilen) oder Inhalts-Top-up wie **P-CYBERSEC-09** / **P-AUTO-05/-06** / **P-MED-AUDIT** zur Schliessung der Capstone-/Soll-Gaps. Alternativ kleinerer UX-Batch (P-UI-NAV-GROUPING + P-UI-QUIZ-A11Y + P-UI-SCHUELER-INPUTMODE) als Quick-Win-Session.
+> Begruendung: Mit v62 sind drei kleine UI-Pakete erledigt (Reader-Continue, Focus-Rings, Touch-Targets) plus Bloom-Aggregation in der Kompetenz-Heatmap. Die naechsten grossen Hebel sind Code-Hygiene (App-Split) und Capstone-Inhaltsausbau; alternativ weitere ergonomische Quick-Wins.
 
 ---
 
 ## F) Aenderungs-Historie dieser Datei
+
+- 2026-05-11: Session-Batch v62 erledigt — vier kleine Pakete + ein Bugfix in einem Batch. **(1) P-UI-READER-CONTINUE:** Quiz-Result-Screen erhaelt CTA "Naechstes Kapitel: <Titel>" zwischen "Quiz wiederholen" und "Zurueck zum Kapitel". IIFE prueft Kapitel-Index in `training.chapters` und blendet CTA aus, wenn aktuelles Kapitel das letzte ist oder Review-/Pruefungs-Modus aktiv ist. Klick navigiert via `openChapter(nextCh.id, 0)`. **(2) Bloom-Aggregation (Erweiterung der bestehenden P-ARCH-LO-COMPETENCE-Heatmap):** Die IIFE im Quiz-Result-Screen aggregiert jetzt zusaetzlich zu `loStats`/`tagStats` auch `bloomStats` aus `it.bloom` jeder Antwort. Neue Sektion "Kognitive Stufen (Bloom)" mit Pillen in didaktischer Reihenfolge (Anderson/Krathwohl 2001: Erinnern -> Verstehen -> Anwenden -> Analysieren -> Bewerten -> Erschaffen). Rendert nur, wenn mindestens ein Item `bloom` traegt. Item-Adapter `toItem` reicht das Feld seit P-ARCH-ITEM-SCHEMA durch. **(3) P-UI-FOCUS-RINGS:** Neuer CSS-Block — globaler `:focus-visible`-Doppel-Ring (3px blau-600 + 2px blau-600/20) fuer Buttons/Links/Inputs/[role=...]; Dark-Mode-Variante mit blau-400-Tints. Maus-Klicks erzeugen keinen Ring (per `:focus-visible`). **(4) P-UI-TOUCH-TARGETS:** Neue Variable `--touch-target: 40px` (HIG-light); auf `@media (max-width: 768px)` erhalten `.task-pill`, `.nav-glass button` und Icon-only-Buttons (`button[aria-label][title]:not(.task-pill)`) `min-width`/`min-height` auf den Variablenwert. Desktop unveraendert. **(5) Bugfix `.glossary-link`-CSS:** Bei P-ARCH-GLOSSARY (v59) war zwar der `glossary-link`-Button-Renderer in `js/app.jsx` implementiert, das CSS dazu fehlte aber in `css/styles.css` — Buttons rendern dadurch bisher als Default-Browser-Buttons. Jetzt nachgezogen: dotted-Underline, blau-600/blau-700-Hover, transparent-Border, Dark-Mode-Variante (blau-300/blau-100). **CACHE_VERSION:** v61 -> v62. **Validierung:** `node tools/validate.js --strict-sources` exit 0 (zwei erwartete Capstone-Soll-Warnungen unveraendert: Cybersec Kap. 10 + Automation Kap. 7); `get_errors` clean fuer `js/app.jsx`, `css/styles.css`, `sw.js`. **Naechster Batch-Anker:** P-ARCH-APPJSX-SPLIT oder Inhalts-Top-up.
 
 - 2026-05-11: P-UI-APP-TILE erledigt — Brand-Logo `icons/smartineer-logo.png` jetzt auch als PWA-App-Kachel auf Android-/iOS-Home-Screen und als Windows-Pin-Tile. **manifest.webmanifest:** Icons-Array neu sortiert: Brand-PNG steht an erster Stelle mit drei Eintraegen (`sizes: "any"`, `192x192`, `512x512`, alle mit `purpose: "any maskable"`), gefolgt von den drei SVG-Eintraegen (`icon.svg` als `any maskable`, `icon-192.svg` und `icon-512.svg` als `any`). Damit waehlen PWA-Installer (Chromium-Launcher, Edge, iOS Safari "Zum Home-Bildschirm") bevorzugt das PNG fuer die Home-Screen-Kachel und nutzen den Maskable-Purpose fuer Android Adaptive Icons. **index.html:** Zusaetzliche `<link rel="apple-touch-icon" sizes="192x192">` und `sizes="512x512">` fuer iOS Touch-Icon-Auswahl; weitere `<link rel="icon" type="image/png" sizes="...">` fuer 192/512 PNG; neue Windows-Tile-Metas `msapplication-TileColor` (`#1e3a8a`, passend zu `theme_color`) und `msapplication-TileImage` (Brand-PNG) — Windows "An Start anheften" / Edge-Pin nutzt jetzt das Logo. **AGENTS.md §3:** Brand-PNG-Exception erweitert um die App-Kachel-Rolle ("seit v61 zugleich die primaere App-Kachel (Home-Screen-Icon)"), inkl. Liste der Manifest-Groessen und `msapplication-Tile*`. **sw.js:** CACHE_VERSION v60 -> v61. Keine APP_SHELL-Aenderung noetig (PNG seit v58 enthalten). Validierung: `node tools/validate.js --strict-sources` exit 0 (zwei erwartete Capstone-Soll-Warnungen unveraendert), `get_errors` clean fuer `manifest.webmanifest`, `index.html`, `sw.js`. Naechster Batch-Anker: P-ARCH-APPJSX-SPLIT oder Inhalts-Top-up.
 

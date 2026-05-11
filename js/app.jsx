@@ -2898,12 +2898,13 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                         <p className="text-xs text-slate-500 mt-4">Karteikarten wurden aktualisiert. Falsche Antworten kommen morgen wieder, richtige nach gestaffelten Intervallen (Spaced Repetition).</p>
                     )}
                 </div>
-                {/* P-ARCH-LO-COMPETENCE: Kompetenz-Heatmap (richtig/total je LO und Tag).
-                    Wird nur gerendert, wenn das Kapitel learningObjectives definiert oder Items lo/tags tragen. */}
+                {/* P-ARCH-LO-COMPETENCE + P-LP-MASTERY: Kompetenz-Heatmap (richtig/total je LO, Tag und Bloom-Stufe).
+                    Wird nur gerendert, wenn das Kapitel learningObjectives definiert oder Items lo/tags/bloom tragen. */}
                 {(() => {
                     const losCh = (chapter && chapter.learningObjectives) || [];
                     const loStats = {};
                     const tagStats = {};
+                    const bloomStats = {};
                     quizAnswers.forEach(a => {
                         const it = a.item || {};
                         (it.lo || []).forEach(loId => {
@@ -2916,10 +2917,26 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                             tagStats[tg].total += 1;
                             if (a.ok) tagStats[tg].ok += 1;
                         });
+                        if (it.bloom) {
+                            bloomStats[it.bloom] = bloomStats[it.bloom] || { ok: 0, total: 0 };
+                            bloomStats[it.bloom].total += 1;
+                            if (a.ok) bloomStats[it.bloom].ok += 1;
+                        }
                     });
                     const loKeys = Object.keys(loStats);
                     const tagKeys = Object.keys(tagStats);
-                    if (!loKeys.length && !tagKeys.length) return null;
+                    // Bloom-Stufen in didaktischer Reihenfolge (Anderson/Krathwohl 2001).
+                    const BLOOM_ORDER = ['remember', 'understand', 'apply', 'analyze', 'evaluate', 'create'];
+                    const BLOOM_LABEL = {
+                        remember: 'Erinnern',
+                        understand: 'Verstehen',
+                        apply: 'Anwenden',
+                        analyze: 'Analysieren',
+                        evaluate: 'Bewerten',
+                        create: 'Erschaffen'
+                    };
+                    const bloomKeys = BLOOM_ORDER.filter(b => bloomStats[b]);
+                    if (!loKeys.length && !tagKeys.length && !bloomKeys.length) return null;
                     const heatColor = (ok, total) => {
                         if (!total) return 'bg-slate-100 text-slate-500 border-slate-200';
                         const pct = ok / total;
@@ -2960,6 +2977,22 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                                             return (
                                                 <span key={tg} className={`text-xs font-medium px-3 py-1.5 rounded-full border ${heatColor(s.ok, s.total)}`}>
                                                     {tg} · {s.ok}/{s.total} · {pct}%
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                            {bloomKeys.length > 0 && (
+                                <div className="mt-5">
+                                    <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">Kognitive Stufen (Bloom)</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {bloomKeys.map(bk => {
+                                            const s = bloomStats[bk];
+                                            const pct = Math.round((s.ok / s.total) * 100);
+                                            return (
+                                                <span key={bk} className={`text-xs font-medium px-3 py-1.5 rounded-full border ${heatColor(s.ok, s.total)}`}>
+                                                    {BLOOM_LABEL[bk] || bk} · {s.ok}/{s.total} · {pct}%
                                                 </span>
                                             );
                                         })}
@@ -3064,6 +3097,20 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                     ) : (
                         <>
                             <button onClick={startQuiz} className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">Quiz wiederholen</button>
+                            {/* P-UI-READER-CONTINUE: direkter Sprung in das naechste Kapitel der Schulung,
+                                falls vorhanden. Vermeidet den Umweg ueber die Kapiteluebersicht. */}
+                            {(() => {
+                                if (!chapter || !training) return null;
+                                const idx = training.chapters.findIndex(c => c.id === chapter.id);
+                                if (idx < 0 || idx >= training.chapters.length - 1) return null;
+                                const nextCh = training.chapters[idx + 1];
+                                return (
+                                    <button onClick={() => openChapter(nextCh.id, 0)}
+                                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">
+                                        Naechstes Kapitel: {nextCh.title}
+                                    </button>
+                                );
+                            })()}
                             <button onClick={() => setStage('reader')} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Zurück zum Kapitel</button>
                             <button onClick={() => setStage('chapters')} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">Anderes Kapitel</button>
                         </>
