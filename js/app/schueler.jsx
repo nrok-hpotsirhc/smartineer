@@ -28,65 +28,168 @@ function Schueler() {
         const qid = stableQid({ q: item && item.q, a: item && item.a });
         return `${klassId}.${subjId}|${qid || itemIdx}`;
     };
-    const foreignLanguageSubjects = ['englisch', 'franzoesisch', 'latein'];
+    // P-UI-SCHUELER-SECTIONS-ALL (v78): Lehrplan-orientierte Abschnitte fuer alle
+    // Mittelstufen-Faecher. Sprachfaecher haben tagged data (`section`-Feld via
+    // `kind`/Datenpflege), die anderen Faecher werden heuristisch nach NRW-KLP-
+    // Domaenen (Mathe: Arithmetik/Funktionen/Geometrie/Stochastik; Physik:
+    // Mechanik/Elektrik/Optik/Waerme/Atom; Chemie: Stoffe/Atomare/Saeurebase/
+    // Organik; Biologie: Zelle/Mensch/Natur/Oekologie; Geschichte: Antike/MA/
+    // FNZ/Revolution/Kaiserreich/Modern; Deutsch: existing) zugeordnet.
     const languageSections = [
         { id: 'numbers', label: 'Zahlen', desc: 'Zahlenwoerter sicher erkennen und schreiben.' },
         { id: 'vocab', label: 'Vokabeln', desc: 'Grundwortschatz in beide Richtungen abrufen.' },
         { id: 'grammar', label: 'Grammatik', desc: 'Formen, Satzbau und typische Regeln trainieren.' }
     ];
-    const isForeignLanguageSubject = (subjId) => foreignLanguageSubjects.includes(subjId);
-    const sectionLabel = (sectionId) => {
-        const found = languageSections.find(section => section.id === sectionId);
-        return found ? found.label : '';
+    const SUBJECT_SECTIONS = {
+        englisch: languageSections,
+        franzoesisch: languageSections,
+        latein: languageSections,
+        deutsch: [
+            { id: 'sprache', label: 'Sprache & Grammatik', desc: 'Wortarten, Satzbau, Tempora, Kasus.' },
+            { id: 'rechtschreibung', label: 'Rechtschreibung', desc: 'Gross-/Kleinschreibung, Kommasetzung, Dehnung.' },
+            { id: 'schreiben', label: 'Schreiben', desc: 'Bericht, Eroerterung, Bewerbung, Analyse.' },
+            { id: 'literatur', label: 'Literatur', desc: 'Maerchen, Gedicht, Ballade, Drama, Novelle.' },
+            { id: 'lesen', label: 'Lesen / Sachtexte', desc: 'Textverstaendnis und Argumentationsstruktur.' },
+            { id: 'medien', label: 'Medien', desc: 'Medienkritik und Informationsbewertung.' }
+        ],
+        mathe: [
+            { id: 'arithmetik', label: 'Arithmetik & Algebra', desc: 'Rechnen, Brueche, Gleichungen, Potenzen.' },
+            { id: 'funktionen', label: 'Funktionen', desc: 'Lineare, quadratische, trigonometrische, exponentielle Funktionen.' },
+            { id: 'geometrie', label: 'Geometrie', desc: 'Flaechen, Volumen, Pythagoras, Trigonometrie.' },
+            { id: 'stochastik', label: 'Stochastik', desc: 'Wahrscheinlichkeit, Mittelwert, Statistik.' }
+        ],
+        physik: [
+            { id: 'mechanik', label: 'Mechanik', desc: 'Kraft, Geschwindigkeit, Energie, Druck.' },
+            { id: 'elektrik', label: 'Elektrik & Magnetismus', desc: 'Strom, Spannung, Widerstand, Magnetfeld.' },
+            { id: 'optik', label: 'Optik & Akustik', desc: 'Licht, Reflexion, Linsen, Schall, Wellen.' },
+            { id: 'waerme', label: 'Waerme & Energie', desc: 'Temperatur, Energieformen, Aggregatzustaende.' },
+            { id: 'atom', label: 'Atom & Kern', desc: 'Atommodelle, Radioaktivitaet, Strahlung.' }
+        ],
+        chemie: [
+            { id: 'stoffe', label: 'Stoffe & Aggregate', desc: 'Aggregatzustaende, Trennverfahren, Reinstoffe.' },
+            { id: 'atomare', label: 'Atome & Reaktionen', desc: 'Atombau, Periodensystem, Reaktionsgleichungen.' },
+            { id: 'saeurebase', label: 'Saeuren, Basen, Salze', desc: 'pH-Wert, Indikatoren, Neutralisation.' },
+            { id: 'organik', label: 'Organische Chemie', desc: 'Kohlenstoffverbindungen, Alkane, Alkohole.' }
+        ],
+        biologie: [
+            { id: 'zelle', label: 'Zelle & Genetik', desc: 'Zellbau, DNA, Chromosomen, Vererbung.' },
+            { id: 'mensch', label: 'Mensch & Gesundheit', desc: 'Organsysteme, Atmung, Verdauung, Kreislauf.' },
+            { id: 'natur', label: 'Pflanzen & Tiere', desc: 'Fotosynthese, Wirbeltiere, Insekten, Pflanzenteile.' },
+            { id: 'oekologie', label: 'Oekologie & Evolution', desc: 'Oekosystem, Nahrungskette, Evolution.' }
+        ],
+        geschichte: [
+            { id: 'antike', label: 'Steinzeit & Antike', desc: 'Steinzeit, Aegypten, Griechen, Roemer.' },
+            { id: 'mittelalter', label: 'Mittelalter', desc: 'Ritter, Burg, Kirche, Kaiser.' },
+            { id: 'fruehneuzeit', label: 'Fruehe Neuzeit', desc: 'Reformation, Absolutismus, Aufklaerung.' },
+            { id: 'revolution', label: 'Revolution & Industrie', desc: 'Franzoesische Revolution, Industrialisierung.' },
+            { id: 'kaiserreich', label: 'Kaiserreich & WK1', desc: 'Bismarck, Wilhelm II., Erster Weltkrieg.' },
+            { id: 'modern', label: 'WK2 & Gegenwart', desc: 'Zweiter Weltkrieg, Kalter Krieg, Wiedervereinigung.' }
+        ]
     };
-    const itemSection = (item) => {
-        if (!item) return 'vocab';
+    const sectionsFor = (subjId) => SUBJECT_SECTIONS[subjId] || null;
+    const hasSubjectSections = (subjId) => Array.isArray(sectionsFor(subjId));
+    const sectionLabel = (sectionId, subjId) => {
+        if (!sectionId) return '';
+        const list = subjId ? sectionsFor(subjId) : null;
+        if (list) {
+            const m = list.find(s => s.id === sectionId);
+            if (m) return m.label;
+        }
+        // Fallback ueber alle Subjects (z.B. wenn subjId nicht gesetzt ist)
+        for (const k of Object.keys(SUBJECT_SECTIONS)) {
+            const m = SUBJECT_SECTIONS[k].find(s => s.id === sectionId);
+            if (m) return m.label;
+        }
+        return '';
+    };
+    const deriveSection = (item, subjId, klassId) => {
+        if (!item) return null;
         if (item.section) return item.section;
         if (item.kind === 'grammar') return 'grammar';
-        if (item.kind === 'vocab' && /Zahlenwort/i.test(item.q || '')) return 'numbers';
-        return item.kind === 'vocab' ? 'vocab' : 'vocab';
+        if (item.kind === 'vocab') return /Zahlenwort/i.test(item.q || '') ? 'numbers' : 'vocab';
+        const text = ((item.q || '') + ' ' + (item.a || '') + ' ' + (item.f || '')).toLowerCase();
+        if (subjId === 'mathe') {
+            if (/wahrscheinlich|stochastik|mittelwert|median|erwartungswert|zufalls|laplace/.test(text)) return 'stochastik';
+            if (/funktion|steigung|gerade durch|parabel|sinus|cosinus|tangens|exponential|logarithm|nullstelle|scheitel/.test(text)) return 'funktionen';
+            if (/dreieck|rechteck|quadrat\b|kreis|kugel|quader|zylinder|pythagoras|volumen|flaeche|fläche|winkel|trigonomet|umfang|prisma|pyramide|koerper|körper/.test(text)) return 'geometrie';
+            return 'arithmetik';
+        }
+        if (subjId === 'physik') {
+            if (/magnet|strom|spannung|widerstand|volt|ampere|ohm|schaltung|elektr|leiter|kondensator/.test(text)) return 'elektrik';
+            if (/licht|reflexion|linse|brechung|spiegel|prisma|schall|welle|frequenz|akustik|farbe/.test(text)) return 'optik';
+            if (/atom|kern|radioaktiv|strahlung|alpha|beta|gamma|isotop|neutron|proton|quanten|huelle|hülle|elektronenh/.test(text)) return 'atom';
+            if (/waerme|wärme|temperatur|joule|thermo|aggregat|schmelz|verdampf|kondens|kelvin/.test(text)) return 'waerme';
+            return 'mechanik';
+        }
+        if (subjId === 'chemie') {
+            if (/saeure|säure|base|salz|ph[-\s]|lauge|indikator|neutral|sauer|basisch/.test(text)) return 'saeurebase';
+            if (/alkan|methan|ethan|propan|butan|kohlenstoff|organisch|alkohol|ester|aromat|kohlenwasserstoff|alken|alkin/.test(text)) return 'organik';
+            if (/atom|proton|neutron|elektron|periodensystem|modell|schale|element|reaktionsgleichung|edukt|produkt|valenz|bindung|molekuel|molekül/.test(text)) return 'atomare';
+            return 'stoffe';
+        }
+        if (subjId === 'biologie') {
+            if (/dna|gen\b|chromosom|mitose|meiose|erbe|vererb|replikation|protein|allel|nukleo/.test(text)) return 'zelle';
+            if (/herz|lunge|niere|magen|muskel|knochen|atem|verdauung|blut|hormon|pubertaet|pubertät|gehirn|nerv|sinnes/.test(text)) return 'mensch';
+            if (/oekosystem|ökosystem|nahrungsk|symbiose|konkurrenz|evolution|selektion|darwin|biodivers|umwelt|stoffkreislauf|art\b/.test(text)) return 'oekologie';
+            if (/pflanze|tier|blatt|wurzel|insekt|saeugetier|säugetier|vogel|fisch|wirbel|fotosynthese|chloroph|bluete|blüte/.test(text)) return 'natur';
+            return 'zelle';
+        }
+        if (subjId === 'geschichte') {
+            if (/steinzeit|jaeger|jäger|aegypten|ägypten|pharao|pyramide|griech|rom\b|roem|römer|caesar|republik|antik|senat|legion|olymp/.test(text)) return 'antike';
+            if (/mittelalter|ritter|burg\b|kirche|kaiser karl|karl der|lehnswesen|kreuzzug|papst|hanse|gilde|mönch|moench/.test(text)) return 'mittelalter';
+            if (/reformation|luther|absolutismus|aufkl|renaissance|gutenberg|buchdruck|kolumbus|entdeck|dreissigjaehrig|dreißigjährig|ludwig xiv/.test(text)) return 'fruehneuzeit';
+            if (/franzoesische revolution|französische revolution|napoleon|industrialisier|dampf|industrie|wiener kongress|1789|1848|fabrik/.test(text)) return 'revolution';
+            if (/bismarck|wilhelm ii|kaiserreich|reichsgruendung|reichsgründung|erster weltkrieg|weimar|1871|1914|1918/.test(text)) return 'kaiserreich';
+            if (/zweiter weltkrieg|nationalsoz|hitler|shoah|holocaust|kalter krieg|wiedervereinigung|berliner mauer|1939|1945|1989|nato|warschauer/.test(text)) return 'modern';
+            const byGrade = { k5: 'antike', k6: 'mittelalter', k7: 'fruehneuzeit', k8: 'revolution', k9: 'kaiserreich', k10: 'modern' };
+            return byGrade[klassId] || null;
+        }
+        return null;
     };
-    const poolForSection = (cfg, sectionId) => {
+    const itemSection = (item, subjId, klassId) => deriveSection(item, subjId, klassId);
+    const poolForSection = (cfg, sectionId, subjId, klassId) => {
         if (!cfg || !Array.isArray(cfg.pool)) return [];
         if (!sectionId) return cfg.pool;
-        return cfg.pool.filter(item => itemSection(item) === sectionId);
+        return cfg.pool.filter(item => deriveSection(item, subjId, klassId) === sectionId);
     };
-    const renderLanguageSections = (klassId, subjId, cfg, trainingReady) => {
-        if (!isForeignLanguageSubject(subjId) || !cfg || !Array.isArray(cfg.pool)) return null;
+    const renderSubjectSections = (klassId, subjId, cfg, trainingReady) => {
+        const sections = sectionsFor(subjId);
+        if (!sections || !cfg || !Array.isArray(cfg.pool)) return null;
+        // Sektionen mit 0 Aufgaben blenden wir aus, damit Heuristik-Luecken nicht
+        // als leere Abschnitte erscheinen.
+        const rows = sections
+            .map(section => ({ section, count: poolForSection(cfg, section.id, subjId, klassId).length }))
+            .filter(r => r.count > 0);
+        if (!rows.length) return null;
         return (
             <div className="mt-4 border-t border-slate-200 pt-4">
                 <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Abschnitte</div>
                 <div className="space-y-2">
-                    {languageSections.map(section => {
-                        const count = poolForSection(cfg, section.id).length;
-                        return (
-                            <details key={section.id} className="rounded-lg border border-slate-200 bg-slate-50/80">
-                                <summary className="cursor-pointer px-3 py-2 text-sm font-bold text-slate-800">
-                                    <span className="inline-flex w-full items-center justify-between gap-3">
-                                        <span>{section.label}</span>
-                                        <span className="text-xs font-bold px-2 py-1 rounded-full bg-white border border-slate-200 text-slate-600">{count} Aufgaben</span>
-                                    </span>
-                                </summary>
-                                <div className="px-3 pb-3">
-                                    <p className="text-xs text-slate-600 mb-3">{section.desc}</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {trainingReady && count > 0 && (
-                                            <button onClick={() => startTraining(klassId, subjId, 0, section.id)}
-                                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">
-                                                Training
-                                            </button>
-                                        )}
-                                        {count > 0 && (
-                                            <button onClick={() => startQuiz(klassId, subjId, section.id)}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">
-                                                Quiz
-                                            </button>
-                                        )}
-                                    </div>
+                    {rows.map(({ section, count }) => (
+                        <details key={section.id} className="schueler-section rounded-lg border border-slate-200 bg-slate-50">
+                            <summary className="cursor-pointer px-3 py-2 text-sm font-bold text-slate-800">
+                                <span className="inline-flex w-full items-center justify-between gap-3">
+                                    <span>{section.label}</span>
+                                    <span className="schueler-section-count text-xs font-bold px-2 py-1 rounded-full bg-white border border-slate-200 text-slate-600">{count} Aufgaben</span>
+                                </span>
+                            </summary>
+                            <div className="px-3 pb-3">
+                                <p className="text-xs text-slate-600 mb-3">{section.desc}</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {trainingReady && (
+                                        <button onClick={() => startTraining(klassId, subjId, 0, section.id)}
+                                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">
+                                            Training
+                                        </button>
+                                    )}
+                                    <button onClick={() => startQuiz(klassId, subjId, section.id)}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">
+                                        Quiz
+                                    </button>
                                 </div>
-                            </details>
-                        );
-                    })}
+                            </div>
+                        </details>
+                    ))}
                 </div>
             </div>
         );
@@ -96,7 +199,7 @@ function Schueler() {
         const key = `${klassId}.${subjId}`;
         const cfg = SCH.content[key];
         if (!hasSchuelerTraining(klassId, cfg)) return;
-        const pool = poolForSection(cfg, sectionId);
+        const pool = poolForSection(cfg, sectionId, subjId, klassId);
         if (!pool.length) return;
         setKlass(klassId); setSubject(subjId);
         setItems(pool.slice());
@@ -115,7 +218,7 @@ function Schueler() {
         if (cfg.mode === 'generated') {
             for (let i = 0; i < 10; i++) arr.push(cfg.gen());
         } else if (cfg.mode === 'pool') {
-            const pool = poolForSection(cfg, sectionId).slice();
+            const pool = poolForSection(cfg, sectionId, subjId, klassId).slice();
             for (let i = 0; i < 10 && pool.length; i++) {
                 const k = Math.floor(Math.random() * pool.length);
                 arr.push(pool.splice(k, 1)[0]);
@@ -151,7 +254,7 @@ function Schueler() {
     const splitQuestionMeta = (rawQ, klassId, subjId, sectionId) => {
         const fach = subjectLabelOf(subjId);
         const klassL = klassLabelOf(klassId);
-        const sectionL = sectionId ? sectionLabel(sectionId) : '';
+        const sectionL = sectionId ? sectionLabel(sectionId, subjId) : '';
         let body = (rawQ == null ? '' : String(rawQ));
         let topic = '';
         const colonIdx = body.indexOf(':');
@@ -165,11 +268,13 @@ function Schueler() {
                 rest = rest.replace(/^klasse\s*\d+/i, '').trim();
                 rest = rest.replace(/\s+\d+$/, '').trim();
                 // Falls die Section bereits im Prefix steht (Vokabel/Grammatik/Numbers),
-                // nehmen wir den verbleibenden Rest als Topic-Crumb.
+                // entfernen wir das Section-Wort, weil es bereits als sectionL-Crumb
+                // dargestellt wird. Ohne aktive Section behalten wir das Topic-Wort,
+                // damit z.B. fuer Deutsch 'Sprache' weiterhin als Crumb sichtbar ist.
                 if (sectionL) {
                     rest = rest.replace(new RegExp('^' + sectionL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '').trim();
+                    rest = rest.replace(/^(vokabel|grammatik|sprache|literatur|sachtext|schreiben|rechtschreibung|lesen|medien)\b\s*/i, '').trim();
                 }
-                rest = rest.replace(/^(vokabel|grammatik|sprache|literatur|sachtext|schreiben)\b/i, '').trim();
                 topic = rest;
                 body = body.slice(colonIdx + 1).trim();
             }
@@ -193,8 +298,8 @@ function Schueler() {
             <nav aria-label="Kategorie" className={`flex flex-wrap items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] ${palette}`}>
                 {list.map((c, i) => (
                     <span key={i} className="flex items-center gap-1.5">
-                        {i > 0 && <span className="text-slate-300" aria-hidden="true">›</span>}
-                        <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">{c}</span>
+                        {i > 0 && <span className="schueler-crumb-sep text-slate-300" aria-hidden="true">›</span>}
+                        <span className="schueler-crumb-pill bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">{c}</span>
                     </span>
                 ))}
             </nav>
@@ -274,7 +379,7 @@ function Schueler() {
                                             </button>
                                             {poolCount != null && <span className="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600">{poolCount} Aufgaben</span>}
                                         </div>
-                                        {renderLanguageSections(klass, s, cfg, trainingReady)}
+                                        {renderSubjectSections(klass, s, cfg, trainingReady)}
                                     </>
                                 ) : (
                                     <span className="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-500">in Vorbereitung</span>
@@ -310,7 +415,7 @@ function Schueler() {
                         <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">Schüler-Training</div>
                         <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                             {klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}
-                            {selectedSection && <span className="text-slate-500"> · {sectionLabel(selectedSection)}</span>}
+                            {selectedSection && <span className="text-slate-500"> · {sectionLabel(selectedSection, subject)}</span>}
                         </h1>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -408,7 +513,7 @@ function Schueler() {
             <section className="view-fade max-w-2xl mx-auto" ref={drillRef}>
                 <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
                     <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                        Quiz{selectedSection ? ` · ${sectionLabel(selectedSection)}` : ''} · Aufgabe {idx + 1} von {items.length}
+                        Quiz{selectedSection ? ` · ${sectionLabel(selectedSection, subject)}` : ''} · Aufgabe {idx + 1} von {items.length}
                     </div>
                     <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) setStage('subjects'); }}
                         className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
@@ -457,7 +562,7 @@ function Schueler() {
             <section className="view-fade max-w-3xl mx-auto" ref={resultRef}>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
                     <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Auswertung</h2>
-                    <p className="text-slate-600 mb-6">{klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}{selectedSection ? ` · ${sectionLabel(selectedSection)}` : ''}</p>
+                    <p className="text-slate-600 mb-6">{klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}{selectedSection ? ` · ${sectionLabel(selectedSection, subject)}` : ''}</p>
                     <div className="flex justify-center gap-8 mb-4">
                         <div>
                             <div className="text-5xl font-extrabold text-emerald-600">{correct}</div>

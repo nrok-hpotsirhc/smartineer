@@ -276,6 +276,29 @@ html.theme-dark, body.theme-dark {
 .theme-dark .schueler-input { background: #1e293b; color: #e2e8f0; border-color: #334155; }
 .theme-dark .schueler-input:focus { border-color: #60a5fa; }
 
+/* P-UI-SCHUELER-DARK-CONTRAST (v78): Lehrplan-Abschnitte und Breadcrumb-Pillen
+   im Schueler-Bereich. Im Dark-Mode kollidiert das urspruengliche
+   `bg-slate-50/80`-Panel mit dem dunklen Hintergrund (Tailwind-Mapping greift
+   nur fuer `bg-slate-50`, nicht fuer das `/80`-Alpha-Modifier). Eigene Klassen
+   geben uns klare Kontrolle ohne globale Tailwind-Overrides zu beruehren. */
+.schueler-section { background-color: #f8fafc; }
+.theme-dark .schueler-section {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+.theme-dark .schueler-section > summary { color: #e2e8f0; }
+.theme-dark .schueler-section .schueler-section-count {
+    background-color: #0f172a;
+    color: #cbd5e1;
+    border-color: #475569;
+}
+.theme-dark .schueler-section .text-slate-600 { color: #94a3b8; }
+.theme-dark .schueler-crumb-pill {
+    background-color: #334155;
+    color: #e2e8f0;
+}
+.theme-dark .schueler-crumb-sep { color: #64748b; }
+
 /* Schulungen — Book-Reader & Quiz */
 .book-page {
     font-family: Georgia, 'Times New Roman', 'Iowan Old Style', serif;
