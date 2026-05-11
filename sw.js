@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v70-schueler-mathe-natwi-topup';
+const CACHE_VERSION = 'smartineer-v71-impressum-sensorik-geschichte-formel-toggle';
 const APP_SHELL = [
     './',
     './index.html',
@@ -28,6 +28,7 @@ const APP_SHELL = [
     './js/data/krl.js',
     './js/data/fuegetechniken.js',
     './js/data/agentic_ai.js',
+    './js/data/sensorik.js',
     './js/data/schueler.js',
     './js/data/schulung_securityx.js',
     './js/data/schulung_starter.js',

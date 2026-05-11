@@ -149,6 +149,9 @@
             if (q.includes('atmung') || q.includes('kreislauf') || q.includes('verdauung') || q.includes('blut')) return '<p><strong>Merksatz.</strong> Organe werden ueber ihre Funktion erkannt: Aufnahme, Transport, Umwandlung oder Ausscheidung von Stoffen.</p>';
             return '<p><strong>Merksatz.</strong> In der Biologie fuehrt die Frage meist von Struktur zu Funktion: Welcher Teil uebernimmt welche Aufgabe?</p>';
         }
+        if (subject === 'geschichte') {
+            return '<p><strong>Merksatz.</strong> Ordne Ereignis, Jahr, Ort und Akteur zu. Pruefe Ursache &rarr; Verlauf &rarr; Folge und nutze Schluesselbegriffe (z.B. Lehnswesen, Aufklaerung, Reformation, Industrialisierung, Kalter Krieg) als Anker.</p>';
+        }
         return '<p><strong>Merksatz.</strong> Nutze die im Unterricht eingefuehrte Regel oder Definition und pruefe das Endergebnis.</p>';
     }
 
@@ -161,7 +164,7 @@
         return '<p><strong>Musterloesung.</strong> Lies die gesuchte Groesse bzw. den gesuchten Fachbegriff aus der Aufgabenstellung ab und vergleiche ihn mit dem Merksatz.</p>'
             + '<p>Die passende Antwort fuer diese Aufgabe ist <strong>' + answer + '</strong>.</p>'
             + boxed
-            + '<p class="text-xs text-slate-500"><em>Quelle: NRW-Kernlehrplan Sekundarstufe I, Naturwissenschaften bzw. Physik/Chemie/Biologie; schuluebliche SI-Lehrbuchkonventionen.</em></p>';
+            + '<p class="text-xs text-slate-500"><em>Quelle: NRW-Kernlehrplan Sekundarstufe I, Naturwissenschaften bzw. Physik/Chemie/Biologie/Geschichte; schuluebliche SI-Lehrbuchkonventionen.</em></p>';
     }
 
     function enrichSchuelerTrainingItems(items, classId, subject) {
@@ -2077,6 +2080,413 @@
         ], 'k10', 'biologie');
     }
 
+    // ---------- Geschichte Klassen 5-10 (Pool) ----------
+    // Quellenbasis: NRW-Kernlehrplan Geschichte SI 2019/2020 (Realschule/Gesamtschule/Gymnasium G9),
+    // schueluebliche Lehrwerke (Klett "Geschichte und Geschehen", Cornelsen "Forum Geschichte",
+    // Westermann "Zeit fuer Geschichte"). Antworten sind Plain-Text (Jahreszahl, Begriff, Name);
+    // tolerant via normalize() (trim, Komma->Punkt, Kleinschreibung). Umlaute durch ae/oe/ue/ss
+    // ersetzt, damit die Tastatur-Eingabe (z.B. iPad ohne deutsches Layout) zuverlaessig funktioniert.
+
+    function pool_k5_geschichte() {
+        // K5: Steinzeit, Aegypten, Antikes Griechenland — Einstieg in Geschichte.
+        return enrichSchuelerTrainingItems([
+            // --- Steinzeit / Altsteinzeit / Jungsteinzeit ---
+            { q: 'Wie nennt man die aelteste Epoche der Menschheitsgeschichte, in der die Menschen als Jaeger und Sammler lebten?', a: 'altsteinzeit' },
+            { q: 'In welcher Epoche wurden die Menschen erstmals sesshaft und begannen Ackerbau und Viehzucht?', a: 'jungsteinzeit' },
+            { q: 'Aus welchem Material stellten die Menschen der Altsteinzeit die meisten ihrer Werkzeuge her?', a: 'stein' },
+            { q: 'Welches Tier wurde in der Jungsteinzeit als erstes vom Menschen domestiziert (Haustier)?', a: 'hund' },
+            { q: 'Wie nennt man den Uebergang von Jaegern und Sammlern zu sesshaften Bauern (Fachbegriff)?', a: 'neolithische revolution' },
+            { q: 'In welchem Erdteil entwickelte sich die Landwirtschaft zuerst (Region)?', a: 'fruchtbarer halbmond' },
+            { q: 'Welches Metall verarbeiteten die Menschen in der Bronzezeit (Hauptbestandteil)?', a: 'kupfer' },
+            { q: 'Aus welchen zwei Metallen besteht Bronze?', a: 'kupfer und zinn' },
+            { q: 'Wie heisst der beruehmte Eismann aus dem Oetztal (Fund 1991)?', a: 'oetzi' },
+            { q: 'Wie nennt man Hoehlenmalereien, die in der Altsteinzeit entstanden (Stichwort)?', a: 'felsmalerei' },
+
+            // --- Aegypten ---
+            { q: 'An welchem Fluss entwickelte sich die Hochkultur Aegypten?', a: 'nil' },
+            { q: 'Wie hiess der Herrscher im alten Aegypten?', a: 'pharao' },
+            { q: 'Wie heissen die monumentalen Grabbauten der aegyptischen Pharaonen?', a: 'pyramiden' },
+            { q: 'In welcher Stadt steht die beruehmteste Pyramide Aegyptens?', a: 'gizeh' },
+            { q: 'Wie heisst die aegyptische Bilderschrift?', a: 'hieroglyphen' },
+            { q: 'Womit konservierten die Aegypter ihre Toten, damit sie im Jenseits weiterleben?', a: 'mumifizierung' },
+            { q: 'Wer entzifferte die Hieroglyphen mithilfe des Steins von Rosette (Name)?', a: 'champollion' },
+            { q: 'Welche Goettin galt im alten Aegypten als Goettin der Liebe und Mutterschaft?', a: 'isis' },
+            { q: 'Wie heisst der Sonnengott der alten Aegypter?', a: 'ra' },
+            { q: 'Wie nannten die Aegypter ihren Sonnenkalender mit 365 Tagen (Fachbegriff)?', a: 'sonnenkalender' },
+            { q: 'Was schrieben die Aegypter mit Schilf auf? (Material)', a: 'papyrus' },
+
+            // --- Antikes Griechenland ---
+            { q: 'In welchem Land entwickelte sich die antike Demokratie zuerst?', a: 'griechenland' },
+            { q: 'In welcher griechischen Stadt entstand die erste Demokratie?', a: 'athen' },
+            { q: 'Wie nennt man die kleinen, selbststaendigen Stadtstaaten im antiken Griechenland?', a: 'polis' },
+            { q: 'Wie nannten die Griechen ihren Stadtberg mit Tempel?', a: 'akropolis' },
+            { q: 'In welchem Jahr fanden die ersten Olympischen Spiele der Antike statt (Jahr)?', a: '776 v.chr.' },
+            { q: 'Wie hiess der wichtigste Gott im griechischen Pantheon?', a: 'zeus' },
+            { q: 'Wie hiess der griechische Philosoph, der Schueler von Sokrates und Lehrer von Aristoteles war?', a: 'platon' },
+            { q: 'Wie hiess der Philosoph, dem der Satz "Ich weiss, dass ich nichts weiss" zugeschrieben wird?', a: 'sokrates' },
+            { q: 'Wie hiess der griechische Eroberer, der bis nach Indien zog?', a: 'alexander der grosse' },
+            { q: 'In welcher Stadt kaempften die Spartaner 480 v.Chr. gegen die Perser?', a: 'thermopylen' },
+            { q: 'Wie hiess der erste grosse griechische Dichter (Ilias, Odyssee)?', a: 'homer' },
+            { q: 'Wie nannten die Griechen die kriegerischen Sportwettkaempfe zu Ehren von Zeus?', a: 'olympische spiele' },
+
+            // --- Roemisches Reich (Einstieg) ---
+            { q: 'In welchem Jahr wurde Rom der Sage nach gegruendet?', a: '753 v.chr.' },
+            { q: 'Wer waren laut Sage die Gruender Roms?', a: 'romulus und remus' },
+            { q: 'Wie heisst die Regierungsform Roms vor der Kaiserzeit?', a: 'republik' },
+            { q: 'Welches Volk eroberte Rom mehrmals fast vollstaendig (Stichwort: Brennus)?', a: 'gallier' },
+            { q: 'Wie nannten die Roemer ihre Stadt-Gemeinschaft (lateinischer Begriff)?', a: 'res publica' },
+            { q: 'Wer war der erste Kaiser des Roemischen Reiches?', a: 'augustus' },
+            { q: 'In welchem Jahr starb Julius Caesar (Jahr)?', a: '44 v.chr.' },
+            { q: 'An welchem Fluss errichteten die Roemer den Limes als Grenze zu Germanien?', a: 'rhein' },
+            { q: 'Wie heisst das Bauwerk, das die Roemer als Grenzwall errichteten?', a: 'limes' },
+            { q: 'In welcher Stadt steht das beruehmte Amphitheater "Kolosseum"?', a: 'rom' },
+            { q: 'Welche Sprache sprachen die Roemer?', a: 'latein' },
+            { q: 'Wie hiess das wichtigste Verkehrsmittel der Roemer fuer lange Strecken (Bauwerk)?', a: 'roemerstrasse' },
+            { q: 'Wer war der germanische Feldherr, der 9 n.Chr. drei roemische Legionen vernichtete?', a: 'arminius' },
+            { q: 'In welcher Schlacht 9 n.Chr. verloren die Roemer drei Legionen unter Varus?', a: 'varusschlacht' },
+            { q: 'In welchem Jahrhundert teilte sich das Roemische Reich in ein West- und Ostreich (Jahrhundert)?', a: '4. jahrhundert' },
+            { q: 'In welchem Jahr endete das Westroemische Reich (Jahr)?', a: '476' },
+            { q: 'Welche Religion wurde im Roemischen Reich unter Konstantin erlaubt und spaeter Staatsreligion?', a: 'christentum' }
+        ], 'k5', 'geschichte');
+    }
+
+    function pool_k6_geschichte() {
+        // K6: Roemisches Reich vertieft, Voelkerwanderung, Mittelalter-Einstieg.
+        return enrichSchuelerTrainingItems([
+            // --- Roemisches Reich vertieft ---
+            { q: 'Wie hiess der oberste Beamte der roemischen Republik (Amt, lateinisch)?', a: 'konsul' },
+            { q: 'Welche zwei Gesellschaftsschichten standen sich in der fruehen Republik gegenueber?', a: 'patrizier und plebejer' },
+            { q: 'Welche Truppe roemischer Berufssoldaten bildete das Rueckgrat des Heeres (Begriff)?', a: 'legion' },
+            { q: 'Wie hiess der beruehmteste Feldherr im Buergerkrieg, der 49 v.Chr. den Rubikon ueberschritt?', a: 'caesar' },
+            { q: 'Welche Schlacht entschied 31 v.Chr. den Endkampf der Republik fuer Octavian (Ort)?', a: 'actium' },
+            { q: 'Was ist die "Pax Romana" (Bedeutung in einem Wort)?', a: 'roemischer frieden' },
+            { q: 'Wer war der christenverfolgende Kaiser, der nach dem Brand Roms 64 n.Chr. die Christen beschuldigte?', a: 'nero' },
+            { q: 'Welche Religion verbot Kaiser Diokletian um 300 n.Chr. besonders streng?', a: 'christentum' },
+            { q: 'Im Toleranzedikt von Mailand 313 erlaubte Kaiser Konstantin welche Religion?', a: 'christentum' },
+            { q: 'Wie hiess der Volksstamm, der 410 n.Chr. Rom pluenderte?', a: 'westgoten' },
+            { q: 'In welcher Stadt regierte spaeter das Ostroemische Reich (auch Byzanz genannt)?', a: 'konstantinopel' },
+
+            // --- Voelkerwanderung ---
+            { q: 'Wie nennt man die Wanderbewegungen germanischer Voelker um 375 n.Chr. (Begriff)?', a: 'voelkerwanderung' },
+            { q: 'Welches Reitervolk aus dem Osten loeste 375 n.Chr. die Voelkerwanderung aus?', a: 'hunnen' },
+            { q: 'Wer war der gefuerchtete Anfuehrer der Hunnen Mitte des 5. Jahrhunderts?', a: 'attila' },
+            { q: 'In welcher Schlacht 451 wurde Attila in Gallien gestoppt (Ort)?', a: 'katalaunische felder' },
+            { q: 'Welches germanische Volk gruendete in Spanien sein Reich (Westen)?', a: 'westgoten' },
+            { q: 'Welches Volk gruendete unter Theoderich ein Reich in Italien?', a: 'ostgoten' },
+            { q: 'Welches germanische Volk eroberte Britannien (Hauptstamm)?', a: 'angelsachsen' },
+
+            // --- Frankenreich / Karl der Grosse ---
+            { q: 'Welches germanische Volk gruendete im 5. Jh. das wichtigste Reich auf dem Gebiet des heutigen Frankreich?', a: 'franken' },
+            { q: 'Wer war der Begruender des Frankenreichs (um 500 getauft)?', a: 'chlodwig' },
+            { q: 'Welches Herrscherhaus folgte 751 den Merowingern?', a: 'karolinger' },
+            { q: 'In welchem Jahr wurde Karl der Grosse zum roemischen Kaiser gekroent?', a: '800' },
+            { q: 'In welcher Stadt war die Lieblingspfalz Karls des Grossen?', a: 'aachen' },
+            { q: 'Welches Volk im Norden Deutschlands eroberte und christianisierte Karl der Grosse?', a: 'sachsen' },
+            { q: 'Wie heisst der Vertrag von 843, der das Frankenreich teilte?', a: 'vertrag von verdun' },
+
+            // --- Mittelalter: Lehnswesen, Staende ---
+            { q: 'Wie heisst die Gesellschaftsordnung des Mittelalters, in der Land gegen Treuedienst verliehen wurde?', a: 'lehnswesen' },
+            { q: 'Wer vergibt im Lehnswesen ein Lehen (Begriff)?', a: 'lehnsherr' },
+            { q: 'Wer empfaengt im Lehnswesen ein Lehen?', a: 'vasall' },
+            { q: 'Welche drei Staende kannte das Mittelalter (Reihenfolge: Gebet, Schwert, Pflug)?', a: 'klerus adel bauern' },
+            { q: 'Welcher Stand besass die meisten Privilegien im Mittelalter (neben Adel)?', a: 'klerus' },
+            { q: 'Welche Bevoelkerungsgruppe stellte den groessten Teil der mittelalterlichen Gesellschaft?', a: 'bauern' },
+            { q: 'Wie nennt man unfreie Bauern, die zu Frondiensten verpflichtet waren?', a: 'leibeigene' },
+
+            // --- Mittelalter: Kaiser & Papst ---
+            { q: 'Wie heisst der beruehmte Streit zwischen Kaiser und Papst um die Bischofsernennung im 11. Jh.?', a: 'investiturstreit' },
+            { q: 'Welcher Papst forderte 1077 in Canossa den Bussgang Heinrichs IV.?', a: 'gregor vii.' },
+            { q: 'Welcher deutsche Koenig ging 1077 nach Canossa?', a: 'heinrich iv.' },
+            { q: 'Welcher Vertrag beendete 1122 den Investiturstreit?', a: 'wormser konkordat' },
+            { q: 'Welcher Staufer-Kaiser ertrank 1190 auf dem Dritten Kreuzzug (Beiname Barbarossa)?', a: 'friedrich i.' },
+
+            // --- Mittelalter: Stadt, Hanse, Klosterleben ---
+            { q: 'Wie nennt man die ummauerten Siedlungen mit Marktrecht im Mittelalter?', a: 'stadt' },
+            { q: 'Welches Recht erhielt eine mittelalterliche Stadt vom Herrscher (Begriff)?', a: 'marktrecht' },
+            { q: 'Wie nennt man den Zusammenschluss norddeutscher Kaufmannsstaedte ab dem 12. Jh.?', a: 'hanse' },
+            { q: 'Welche Stadt war das Zentrum der Hanse?', a: 'luebeck' },
+            { q: 'Wie nennt man die Zusammenschluesse von Handwerkern in einer mittelalterlichen Stadt?', a: 'zunft' },
+            { q: 'Welche religioese Gemeinschaft praegte das geistige und wirtschaftliche Leben im Mittelalter (Stichwort)?', a: 'kloster' },
+            { q: 'Wie nennt man die Schueler, die in mittelalterlichen Klosterschulen schreiben lernten?', a: 'novizen' },
+
+            // --- Kreuzzuege ---
+            { q: 'Wie nennt man die christlichen Feldzuege ins Heilige Land zwischen 1096 und 1291?', a: 'kreuzzuege' },
+            { q: 'Welcher Papst rief 1095 in Clermont zum ersten Kreuzzug auf?', a: 'urban ii.' },
+            { q: 'Welche Stadt wurde 1099 im Ersten Kreuzzug erobert?', a: 'jerusalem' },
+            { q: 'Welcher Ritterorden entstand im Heiligen Land und siedelte spaeter ins Baltikum um?', a: 'deutscher orden' },
+            { q: 'In welchem Jahr endete der letzte Kreuzfahrerstaat mit dem Fall von Akkon?', a: '1291' },
+
+            // --- Mittelalterliche Pestepidemie ---
+            { q: 'Welche Seuche toetete im 14. Jahrhundert ein Drittel der europaeischen Bevoelkerung?', a: 'pest' },
+            { q: 'In welchem Jahr erreichte die grosse Pestwelle ("Schwarzer Tod") Mitteleuropa?', a: '1348' }
+        ], 'k6', 'geschichte');
+    }
+
+    function pool_k7_geschichte() {
+        // K7: Spaetmittelalter, Entdeckungen, Reformation, Absolutismus (Einstieg).
+        return enrichSchuelerTrainingItems([
+            // --- Spaetmittelalter / Reformation Vorlauf ---
+            { q: 'Wer erfand um 1450 den Buchdruck mit beweglichen Lettern?', a: 'gutenberg' },
+            { q: 'In welcher Stadt wirkte Gutenberg?', a: 'mainz' },
+            { q: 'Wie heisst die geistige Bewegung um 1500, die sich an der Antike orientierte?', a: 'humanismus' },
+            { q: 'Wie nennt man die kulturelle Bluetezeit Italiens im 14.-16. Jahrhundert?', a: 'renaissance' },
+            { q: 'Welcher Maler malte das beruehmte Bild "Mona Lisa"?', a: 'leonardo da vinci' },
+            { q: 'Welcher Bildhauer schuf den David in Florenz?', a: 'michelangelo' },
+
+            // --- Entdeckungen ---
+            { q: 'Welcher Seefahrer erreichte 1492 die "neue Welt"?', a: 'kolumbus' },
+            { q: 'In wessen Auftrag segelte Kolumbus?', a: 'spanien' },
+            { q: 'Welcher Seefahrer umrundete 1519-1522 erstmals die Erde (Expeditionsleiter)?', a: 'magellan' },
+            { q: 'Welcher Seefahrer eroeffnete 1498 den Seeweg nach Indien?', a: 'vasco da gama' },
+            { q: 'Welcher Vertrag teilte 1494 die "neue Welt" zwischen Spanien und Portugal auf?', a: 'tordesillas' },
+            { q: 'Welche zwei grossen Reiche der Inka und Azteken zerstoerten die Spanier (Reich der Azteken in welchem Land)?', a: 'mexiko' },
+            { q: 'Wer eroberte 1521 das Reich der Azteken?', a: 'cortes' },
+            { q: 'Wer eroberte 1532 das Reich der Inka?', a: 'pizarro' },
+            { q: 'Wie heisst der Pflanze-Bedeutende Welthandel zwischen Europa-Amerika-Afrika (Stichwort)?', a: 'dreieckshandel' },
+            { q: 'Welche Pflanze brachten die Europaer aus Amerika nach Europa (Hauptnahrungsmittel)?', a: 'kartoffel' },
+
+            // --- Reformation ---
+            { q: 'Wer schlug 1517 in Wittenberg seine Thesen an die Kirchentuer?', a: 'luther' },
+            { q: 'Wie viele Thesen schlug Luther 1517 an?', a: '95' },
+            { q: 'Was kritisierte Luther besonders an der katholischen Kirche (Stichwort)?', a: 'ablasshandel' },
+            { q: 'In welcher Stadt wurde Luther 1521 vor dem Reichstag verhoert?', a: 'worms' },
+            { q: 'Auf welcher Burg uebersetzte Luther die Bibel ins Deutsche?', a: 'wartburg' },
+            { q: 'Welcher Schweizer Reformator wirkte in Genf?', a: 'calvin' },
+            { q: 'Welcher Schweizer Reformator wirkte in Zuerich?', a: 'zwingli' },
+            { q: 'Welcher Frieden beendete 1555 den Konflikt zwischen Katholiken und Protestanten in Deutschland?', a: 'augsburger religionsfrieden' },
+            { q: 'Wie hiess das Prinzip "Wessen Land, dessen Religion" (lateinisch, oder Stichwort)?', a: 'cuius regio eius religio' },
+
+            // --- Dreissigjaehriger Krieg ---
+            { q: 'Welcher Krieg von 1618-1648 verwuestete weite Teile Deutschlands?', a: 'dreissigjaehriger krieg' },
+            { q: 'Welches Ereignis 1618 in Prag loeste den Krieg aus?', a: 'prager fenstersturz' },
+            { q: 'Welcher Frieden beendete 1648 den Dreissigjaehrigen Krieg?', a: 'westfaelischer frieden' },
+            { q: 'In welchen Staedten wurde der Westfaelische Frieden verhandelt (eine nennen)?', a: 'muenster' },
+            { q: 'Welcher schwedische Koenig fiel 1632 in der Schlacht bei Luetzen?', a: 'gustav adolf' },
+
+            // --- Absolutismus ---
+            { q: 'Wie heisst die Regierungsform, bei der der Koenig unbeschraenkt regiert (Stichwort)?', a: 'absolutismus' },
+            { q: 'Welcher franzoesische Koenig (1643-1715) ist das beruehmteste Beispiel des Absolutismus?', a: 'ludwig xiv.' },
+            { q: 'Welches Schloss liess Ludwig XIV. bauen?', a: 'versailles' },
+            { q: 'Welcher Satz wird Ludwig XIV. zugeschrieben (auf Deutsch)?', a: 'der staat bin ich' },
+            { q: 'Welche Wirtschaftslehre praegte den Absolutismus (Stichwort)?', a: 'merkantilismus' },
+            { q: 'Welcher preussische Koenig fuehrte die allgemeine Schulpflicht ein (1717)?', a: 'friedrich wilhelm i.' },
+            { q: 'Welcher preussische Koenig ("der Grosse") regierte 1740-1786?', a: 'friedrich ii.' },
+            { q: 'Wie nennt man die "aufgeklaerte" Form des Absolutismus mit reformerischen Zuegen?', a: 'aufgeklaerter absolutismus' },
+
+            // --- Aufklaerung ---
+            { q: 'Wie heisst die geistige Bewegung des 18. Jahrhunderts mit Vernunft und Bildung im Zentrum?', a: 'aufklaerung' },
+            { q: 'Welcher franzoesische Philosoph schrieb "Vom Gesellschaftsvertrag"?', a: 'rousseau' },
+            { q: 'Welcher franzoesische Philosoph kritisierte Kirche und Staat scharf?', a: 'voltaire' },
+            { q: 'Welcher deutsche Philosoph schrieb "Beantwortung der Frage: Was ist Aufklaerung?"?', a: 'kant' },
+            { q: 'Welche drei Gewalten unterschied Montesquieu (Begriff)?', a: 'gewaltenteilung' },
+            { q: 'Welche drei Staatsgewalten gehoeren zur Gewaltenteilung (Einzelantwort: Gesetzgebung)?', a: 'legislative' },
+            { q: 'Welche drei Staatsgewalten gehoeren zur Gewaltenteilung (Einzelantwort: ausfuehrende Gewalt)?', a: 'exekutive' },
+            { q: 'Welche drei Staatsgewalten gehoeren zur Gewaltenteilung (Einzelantwort: Rechtsprechung)?', a: 'judikative' },
+
+            // --- Amerikanische Unabhaengigkeit ---
+            { q: 'In welchem Jahr erklaerten die USA ihre Unabhaengigkeit?', a: '1776' },
+            { q: 'Wer war der erste Praesident der USA?', a: 'washington' },
+            { q: 'Gegen welche Kolonialmacht erkaempften sich die USA ihre Unabhaengigkeit?', a: 'grossbritannien' }
+        ], 'k7', 'geschichte');
+    }
+
+    function pool_k8_geschichte() {
+        // K8: Franzoesische Revolution, Napoleon, Industrialisierung, Revolution 1848.
+        return enrichSchuelerTrainingItems([
+            // --- Franzoesische Revolution ---
+            { q: 'In welchem Jahr begann die Franzoesische Revolution?', a: '1789' },
+            { q: 'Welches Pariser Gefaengnis wurde am 14. Juli 1789 gestuermt?', a: 'bastille' },
+            { q: 'Welcher franzoesische Koenig wurde 1793 hingerichtet?', a: 'ludwig xvi.' },
+            { q: 'Welche Koenigin wurde 1793 ebenfalls hingerichtet (Vorname Marie ...)?', a: 'marie antoinette' },
+            { q: 'Welche drei Ideale stehen im Mittelpunkt der Revolution (auf Deutsch, kommagetrennt)?', a: 'freiheit gleichheit brueder' },
+            { q: 'Wie heisst die Erklaerung der Menschen- und Buergerrechte von 1789 (Stichwort)?', a: 'menschenrechte' },
+            { q: 'Wie nennt man die radikale Phase der Revolution 1793/94?', a: 'terror' },
+            { q: 'Wer war der Anfuehrer des Wohlfahrtsausschusses (Schreckensherrschaft)?', a: 'robespierre' },
+            { q: 'Welches Hinrichtungsgeraet wurde zum Symbol der Revolution?', a: 'guillotine' },
+            { q: 'Wie hiess die Verfassung Frankreichs von 1791 (Regierungsform)?', a: 'konstitutionelle monarchie' },
+
+            // --- Napoleon ---
+            { q: 'Wer kroente sich 1804 in Paris zum Kaiser der Franzosen?', a: 'napoleon' },
+            { q: 'In welcher Schlacht 1815 wurde Napoleon endgueltig besiegt?', a: 'waterloo' },
+            { q: 'Wie heisst der Vertrag von 1806, mit dem das Heilige Roemische Reich endete?', a: 'rheinbund' },
+            { q: 'Welche Reformen brachte Napoleon nach Deutschland (Stichwort: Buergerrecht)?', a: 'code civil' },
+            { q: 'Welche grosse Niederlage erlitt Napoleon 1812 in Russland (Stadt)?', a: 'moskau' },
+            { q: 'In welcher Schlacht bei Leipzig wurde Napoleon 1813 geschlagen (Begriff)?', a: 'voelkerschlacht' },
+            { q: 'Welcher Kongress ordnete Europa 1814/15 neu?', a: 'wiener kongress' },
+            { q: 'Wer leitete den Wiener Kongress fuer Oesterreich?', a: 'metternich' },
+            { q: 'Welcher Staatenbund entstand nach 1815 in Deutschland?', a: 'deutscher bund' },
+
+            // --- Restauration und Vormaerz ---
+            { q: 'Wie nennt man die Wiederherstellung der vorrevolutionaeren Verhaeltnisse nach 1815?', a: 'restauration' },
+            { q: 'Wie heisst die Zeit zwischen Wiener Kongress und Revolution 1848 in Deutschland?', a: 'vormaerz' },
+            { q: 'Welche Festversammlung 1832 forderte die deutsche Einheit (Ort)?', a: 'hambacher fest' },
+
+            // --- Revolution 1848 ---
+            { q: 'In welchem Jahr fand die deutsche Revolution mit Parlament in der Paulskirche statt?', a: '1848' },
+            { q: 'In welcher Stadt tagte das erste gesamtdeutsche Parlament 1848?', a: 'frankfurt' },
+            { q: 'In welchem Gebaeude tagte das Parlament 1848?', a: 'paulskirche' },
+            { q: 'Welchem preussischen Koenig wurde 1849 die Kaiserkrone angeboten (der sie ablehnte)?', a: 'friedrich wilhelm iv.' },
+            { q: 'Welche Verfassung schuf die Paulskirche 1849 (Stichwort)?', a: 'paulskirchenverfassung' },
+
+            // --- Industrialisierung ---
+            { q: 'In welchem Land begann die Industrielle Revolution um 1750?', a: 'england' },
+            { q: 'Welche Maschine ist das Symbol der Industriellen Revolution (von Watt verbessert)?', a: 'dampfmaschine' },
+            { q: 'Wer verbesserte 1769 die Dampfmaschine entscheidend?', a: 'watt' },
+            { q: 'Welcher Stoff wurde zum wichtigsten Energietraeger der Industrialisierung?', a: 'kohle' },
+            { q: 'In welchem deutschen Industriegebiet praegte Kohle/Stahl die Wirtschaft?', a: 'ruhrgebiet' },
+            { q: 'Wer baute 1814 die erste betriebsfaehige Dampflokomotive?', a: 'stephenson' },
+            { q: 'In welchem Jahr fuhr in Deutschland die erste Eisenbahn (Nuernberg-Fuerth)?', a: '1835' },
+            { q: 'Welche neue Stadt-Typ entstand durch die Industrialisierung (Stichwort: Massensiedlung)?', a: 'industriestadt' },
+            { q: 'Wie heisst die soziale Lage der Arbeiter im 19. Jh. (Stichwort)?', a: 'soziale frage' },
+            { q: 'Welcher Denker schrieb 1848 das "Manifest der Kommunistischen Partei"?', a: 'marx' },
+            { q: 'Mit welchem Mitautor schrieb Marx das Kommunistische Manifest?', a: 'engels' },
+            { q: 'Welcher deutsche Industrielle praegte den Stahlbau im 19. Jh. (Essen)?', a: 'krupp' },
+            { q: 'Welche neue Klasse entstand durch die Industrialisierung neben dem Buergertum?', a: 'arbeiterklasse' },
+            { q: 'Welcher Sozialreformer organisierte ab 1864 die internationale Arbeiterbewegung in London (Stichwort)?', a: 'erste internationale' },
+
+            // --- Reichsgruendung 1871 (Einstieg) ---
+            { q: 'In welchem Jahr wurde das Deutsche Kaiserreich gegruendet?', a: '1871' },
+            { q: 'In welchem Schloss wurde Wilhelm I. 1871 zum Kaiser ausgerufen?', a: 'versailles' },
+            { q: 'Welcher preussische Ministerpraesident betrieb die Reichsgruendung?', a: 'bismarck' },
+            { q: 'In welchem Krieg 1870/71 siegte Preussen vor der Reichsgruendung?', a: 'deutsch-franzoesischer krieg' },
+            { q: 'Welche zwei Provinzen musste Frankreich 1871 an Deutschland abtreten (zusammen, Strichantwort)?', a: 'elsass-lothringen' },
+            { q: 'Wie heisst die Politik Bismarcks gegen die katholische Kirche?', a: 'kulturkampf' },
+            { q: 'Welche Sozialgesetze fuehrte Bismarck in den 1880er Jahren ein (Oberbegriff)?', a: 'sozialgesetzgebung' }
+        ], 'k8', 'geschichte');
+    }
+
+    function pool_k9_geschichte() {
+        // K9: Kaiserreich, WK1, Weimarer Republik, Anfaenge NS.
+        return enrichSchuelerTrainingItems([
+            // --- Kaiserreich ---
+            { q: 'Wer war der erste deutsche Kaiser ab 1871?', a: 'wilhelm i.' },
+            { q: 'Wer war Reichskanzler des Kaiserreichs bis 1890?', a: 'bismarck' },
+            { q: 'Welcher Kaiser entliess 1890 Bismarck?', a: 'wilhelm ii.' },
+            { q: 'Wie heisst Bismarcks System der Buendnisvertraege zur Sicherung Deutschlands?', a: 'buendnissystem' },
+            { q: 'Welches Dreierbuendnis schloss Deutschland 1882 (mit wem, kommagetrennt)?', a: 'oesterreich italien' },
+            { q: 'Wie nennt man die deutsche Kolonialpolitik unter Wilhelm II.?', a: 'weltpolitik' },
+            { q: 'Welche grosse Flotte baute Deutschland ab 1898 auf (Stichwort)?', a: 'hochseeflotte' },
+            { q: 'Welcher Marinerueststreit mit England praegte die Vorkriegszeit (Stichwort)?', a: 'flottenwettruesten' },
+
+            // --- Erster Weltkrieg ---
+            { q: 'In welchem Jahr begann der Erste Weltkrieg?', a: '1914' },
+            { q: 'Welches Attentat in Sarajewo loeste den Ersten Weltkrieg aus (Opfer)?', a: 'franz ferdinand' },
+            { q: 'In welcher Stadt wurde Franz Ferdinand 1914 ermordet?', a: 'sarajewo' },
+            { q: 'Welche zwei Buendnisse standen sich 1914 gegenueber (Mittelmaechte vs.)?', a: 'entente' },
+            { q: 'In welchem Land lag die wichtigste Westfront-Schlacht 1916 (Verdun)?', a: 'frankreich' },
+            { q: 'Wie heisst die grosse franzoesische Festung, die 1916 monatelang umkaempft war?', a: 'verdun' },
+            { q: 'Welcher Plan sah einen schnellen Angriff auf Frankreich vor (1914)?', a: 'schlieffen-plan' },
+            { q: 'Welche neue Waffe pruefte die Schlacht an der Somme 1916?', a: 'panzer' },
+            { q: 'In welchem Jahr traten die USA in den Ersten Weltkrieg ein?', a: '1917' },
+            { q: 'In welchem Jahr endete der Erste Weltkrieg?', a: '1918' },
+            { q: 'In welchem Wald wurde 1918 der Waffenstillstand unterzeichnet?', a: 'compiegne' },
+            { q: 'Wie heisst der Friedensvertrag, der 1919 Deutschland Bedingungen auferlegte?', a: 'versailler vertrag' },
+            { q: 'Welche Kriegsschuld-Klausel wurde im Versailler Vertrag festgeschrieben (Artikel-Nummer)?', a: '231' },
+            { q: 'Welche grossen Reparationen musste Deutschland nach 1919 zahlen (Stichwort)?', a: 'reparationen' },
+
+            // --- Russische Revolution ---
+            { q: 'In welchem Jahr fand die Oktoberrevolution in Russland statt?', a: '1917' },
+            { q: 'Wer fuehrte die Bolschewiki an?', a: 'lenin' },
+            { q: 'Welche Familie wurde 1918 als Zarenfamilie hingerichtet?', a: 'romanow' },
+            { q: 'Welches neue Staatsgebilde entstand 1922 aus Russland?', a: 'sowjetunion' },
+
+            // --- Weimarer Republik ---
+            { q: 'In welcher Stadt tagte die deutsche Nationalversammlung 1919?', a: 'weimar' },
+            { q: 'Wer war der erste Reichspraesident der Weimarer Republik?', a: 'ebert' },
+            { q: 'Welcher Reichspraesident folgte 1925 auf Ebert?', a: 'hindenburg' },
+            { q: 'Welcher Putschversuch fand 1920 in Berlin statt (Name)?', a: 'kapp-putsch' },
+            { q: 'Welcher Putschversuch fand 1923 in Muenchen statt (Anfuehrer Hitler)?', a: 'hitler-putsch' },
+            { q: 'Wie heisst die Inflationskrise 1923 (Stichwort: Wert der Mark)?', a: 'hyperinflation' },
+            { q: 'Welcher Politiker stabilisierte 1923/24 die deutsche Waehrung als Reichskanzler?', a: 'stresemann' },
+            { q: 'Welche Goldene Zwanziger nennt man die Bluetezeit der Weimarer Republik (Jahre, ab ...)?', a: '1924' },
+            { q: 'Welcher Weltwirtschaftskrise begann 1929 in den USA (Stichwort: New York)?', a: 'boersencrash' },
+            { q: 'In welchem Jahr begann die grosse Weltwirtschaftskrise?', a: '1929' },
+
+            // --- Aufstieg NS / Machtergreifung ---
+            { q: 'In welchem Jahr wurde Hitler zum Reichskanzler ernannt?', a: '1933' },
+            { q: 'Wer ernannte Hitler 1933 zum Reichskanzler?', a: 'hindenburg' },
+            { q: 'Welche Partei nannte Hitler "NSDAP" (Vollname: Nationalsozialistische ...)?', a: 'nationalsozialistische deutsche arbeiterpartei' },
+            { q: 'Welche Gewaltorganisation der NSDAP entstand bereits 1921 (Sturmabteilung)?', a: 'sa' },
+            { q: 'Welche Eliteeinheit baute Himmler ab 1929 auf?', a: 'ss' },
+            { q: 'Welches Gesetz schaltete 1933 das Parlament aus?', a: 'ermaechtigungsgesetz' },
+            { q: 'Welcher Reichstagsbrand 1933 wurde als Vorwand fuer Notverordnungen genutzt (Stadt)?', a: 'berlin' },
+            { q: 'Wie nennt man die antijuedischen Gesetze 1935 (Stadt)?', a: 'nuernberger gesetze' },
+            { q: 'Welche Reichsweite Pogromnacht fand am 9./10. November 1938 statt?', a: 'reichspogromnacht' },
+            { q: 'Wie hiess der Geheime Staatspolizei der NS (Abkuerzung)?', a: 'gestapo' },
+            { q: 'Welches Konzentrationslager wurde 1933 als erstes errichtet (bei Muenchen)?', a: 'dachau' },
+            { q: 'In welchem Vertrag 1938 erlaubten Frankreich/UK Deutschland die Annexion des Sudetenlands?', a: 'muenchner abkommen' }
+        ], 'k9', 'geschichte');
+    }
+
+    function pool_k10_geschichte() {
+        // K10: WK2, Shoah, geteiltes Deutschland, Kalter Krieg, Wiedervereinigung, Globalisierung.
+        return enrichSchuelerTrainingItems([
+            // --- Zweiter Weltkrieg ---
+            { q: 'In welchem Jahr begann der Zweite Weltkrieg?', a: '1939' },
+            { q: 'Mit dem Ueberfall auf welches Land begann der Zweite Weltkrieg?', a: 'polen' },
+            { q: 'Welcher Nichtangriffspakt 1939 ermoeglichte den Krieg gegen Polen?', a: 'hitler-stalin-pakt' },
+            { q: 'Welches Land erlitt 1940 die Niederlage gegen Deutschland binnen sechs Wochen?', a: 'frankreich' },
+            { q: 'Welcher Luftkrieg 1940 gegen Grossbritannien scheiterte (Stichwort)?', a: 'luftschlacht um england' },
+            { q: 'In welchem Jahr begann der deutsche Ueberfall auf die Sowjetunion (Unternehmen Barbarossa)?', a: '1941' },
+            { q: 'Welche Schlacht 1942/43 markierte die Wende im Osten?', a: 'stalingrad' },
+            { q: 'In welcher Konferenz 1942 wurde die "Endloesung" beschlossen?', a: 'wannsee-konferenz' },
+            { q: 'Wie nennt man den Voelkermord an den europaeischen Juden?', a: 'shoah' },
+            { q: 'Etwa wie viele Juden ermordete der NS-Staat (gerundet in Millionen)?', a: '6' },
+            { q: 'Welches Vernichtungslager im besetzten Polen ist das bekannteste Symbol der Shoah?', a: 'auschwitz' },
+            { q: 'Mit welcher Landung in der Normandie eroeffneten die Alliierten 1944 die zweite Front?', a: 'd-day' },
+            { q: 'Welches Datum ist der D-Day (Tag-Monat-Jahr)?', a: '6.6.1944' },
+            { q: 'In welchem Monat 1945 endete der Krieg in Europa?', a: 'mai' },
+            { q: 'An welchem Tag 1945 wurde in Berlin die bedingungslose Kapitulation unterzeichnet?', a: '8.5.1945' },
+            { q: 'Welche Atombombenstaedte beendeten den Krieg in Asien (Stadt 1)?', a: 'hiroshima' },
+            { q: 'Welche Atombombenstaedte beendeten den Krieg in Asien (Stadt 2)?', a: 'nagasaki' },
+            { q: 'In welchem Jahr endete der Zweite Weltkrieg endgueltig?', a: '1945' },
+
+            // --- Nachkriegszeit / Besatzung ---
+            { q: 'In wie viele Besatzungszonen wurde Deutschland 1945 eingeteilt?', a: '4' },
+            { q: 'Welche vier Besatzungsmaechte teilten Deutschland (Mitgliedsland mit eigenem Sektor in Berlin: UdSSR, USA, UK und ...)?', a: 'frankreich' },
+            { q: 'In welcher Konferenz 1945 wurde die Nachkriegsordnung beschlossen (Schloss bei Berlin)?', a: 'potsdam' },
+            { q: 'In welchen Prozessen 1945/46 wurden NS-Hauptverbrecher angeklagt (Stadt)?', a: 'nuernberg' },
+
+            // --- Zwei deutsche Staaten ---
+            { q: 'In welchem Jahr wurden Bundesrepublik und DDR gegruendet?', a: '1949' },
+            { q: 'Wer war der erste Bundeskanzler der BRD?', a: 'adenauer' },
+            { q: 'Welcher Politiker praegte die Sozialdemokratie der BRD (Wirtschaftswunder)?', a: 'erhard' },
+            { q: 'Welcher Staatschef leitete die DDR von 1949 bis 1971?', a: 'ulbricht' },
+            { q: 'Welcher Staatschef folgte 1971 in der DDR auf Ulbricht?', a: 'honecker' },
+            { q: 'Welche Partei dominierte die DDR?', a: 'sed' },
+            { q: 'Wie heisst die Berliner Blockade-Versorgung der West-Sektoren 1948/49?', a: 'luftbruecke' },
+            { q: 'Welcher Volksaufstand erschuetterte 1953 die DDR (Datum)?', a: '17. juni' },
+            { q: 'In welchem Jahr wurde die Berliner Mauer gebaut?', a: '1961' },
+            { q: 'In welche militaerische Allianz trat die BRD 1955 ein?', a: 'nato' },
+            { q: 'In welcher Allianz war die DDR Mitglied?', a: 'warschauer pakt' },
+            { q: 'Welcher Bundeskanzler praegte die "Ostpolitik" der Annaeherung?', a: 'brandt' },
+            { q: 'Wie hiess der Vertrag 1972 zwischen BRD und DDR?', a: 'grundlagenvertrag' },
+
+            // --- Kalter Krieg ---
+            { q: 'Wie nennt man den Konflikt USA vs. UdSSR nach 1945?', a: 'kalter krieg' },
+            { q: 'Welche Krise 1962 brachte die Welt an den Rand eines Atomkriegs?', a: 'kubakrise' },
+            { q: 'Welcher Krieg fuehrte 1965-1973 zu massiver US-Intervention in Suedostasien?', a: 'vietnamkrieg' },
+            { q: 'Welche politische Doktrin Reagans pflegte den Ruestungswettlauf der 1980er (Stichwort)?', a: 'sdi' },
+
+            // --- Wiedervereinigung ---
+            { q: 'In welchem Jahr fiel die Berliner Mauer?', a: '1989' },
+            { q: 'Welcher Tag im November 1989 ist Mauerfall-Datum?', a: '9.11.1989' },
+            { q: 'In welchem Jahr wurde Deutschland wiedervereinigt?', a: '1990' },
+            { q: 'An welchem Datum 1990 trat die DDR der BRD bei?', a: '3.10.1990' },
+            { q: 'Welcher Bundeskanzler praegte die Wiedervereinigung?', a: 'kohl' },
+            { q: 'Welcher Vertrag 1990 regelte die internationale Anerkennung der Wiedervereinigung (Format)?', a: 'zwei-plus-vier-vertrag' },
+            { q: 'Welcher sowjetische Reformer ermoeglichte die Wiedervereinigung (Glasnost/Perestroika)?', a: 'gorbatschow' },
+            { q: 'Wie nannte man die friedliche Revolution in der DDR 1989?', a: 'friedliche revolution' },
+            { q: 'Welche Stadt war 1989 ein zentraler Ort der Montagsdemonstrationen?', a: 'leipzig' },
+
+            // --- Europa & Globalisierung ---
+            { q: 'In welchem Jahr trat die BRD der Europaeischen Gemeinschaft bei (Gruendungsmitglied: Roemische Vertraege)?', a: '1957' },
+            { q: 'Welcher Vertrag begruendete 1992 die Europaeische Union?', a: 'maastricht' },
+            { q: 'In welchem Jahr wurde der Euro als Bargeld eingefuehrt?', a: '2002' },
+            { q: 'In welchem Jahr fanden die Anschlaege auf das World Trade Center statt?', a: '2001' }
+        ], 'k10', 'geschichte');
+    }
+
     // ---------- Klasse 4: Mathematik (Pool) ----------
     // Großes Einmaleins / Halbschriftliches Multiplizieren (zweistellig × einstellig),
     // schriftliche Multiplikation / Division mit Rest, Sachaufgaben (einfach).
@@ -2124,19 +2534,20 @@
             { id: 'k2',  label: 'Klasse 2',  subjects: ['mathe'] },
             { id: 'k3',  label: 'Klasse 3',  subjects: ['mathe'] },
             { id: 'k4',  label: 'Klasse 4',  subjects: ['mathe'] },
-            { id: 'k5',  label: 'Klasse 5',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] },
-            { id: 'k6',  label: 'Klasse 6',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] },
-            { id: 'k7',  label: 'Klasse 7',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] },
-            { id: 'k8',  label: 'Klasse 8',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] },
-            { id: 'k9',  label: 'Klasse 9',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] },
-            { id: 'k10', label: 'Klasse 10', subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie'] }
+            { id: 'k5',  label: 'Klasse 5',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie', 'geschichte'] },
+            { id: 'k6',  label: 'Klasse 6',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie', 'geschichte'] },
+            { id: 'k7',  label: 'Klasse 7',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie', 'geschichte'] },
+            { id: 'k8',  label: 'Klasse 8',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie', 'geschichte'] },
+            { id: 'k9',  label: 'Klasse 9',  subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie', 'geschichte'] },
+            { id: 'k10', label: 'Klasse 10', subjects: ['mathe', 'englisch', 'physik', 'chemie', 'biologie', 'geschichte'] }
         ],
         subjects: {
             mathe: { label: 'Mathematik' },
             englisch: { label: 'Englisch' },
             physik: { label: 'Physik' },
             chemie: { label: 'Chemie' },
-            biologie: { label: 'Biologie' }
+            biologie: { label: 'Biologie' },
+            geschichte: { label: 'Geschichte' }
         },
         // mode: 'generated' → gen() liefert beliebig viele Aufgaben.
         //       'pool'      → 10 Aufgaben werden zufällig aus pool gezogen (ohne Wiederholung im Set).
@@ -2203,7 +2614,19 @@
             'k10.chemie':   { mode: 'pool', pool: pool_k10_chemie(),
                              note: 'NRW-KLP Chemie SI Klasse 9/10: Organische Chemie — Einstieg (Alkane, Alkohole, Carbonsaeuren) — erweiterter Rahmenplan-Pool.' },
             'k10.biologie': { mode: 'pool', pool: pool_k10_biologie(),
-                             note: 'NRW-KLP Biologie SI Klasse 9/10: Molekularbiologie (DNA/RNA, Proteinbiosynthese), Biodiversitaet — erweiterter Rahmenplan-Pool.' }
+                             note: 'NRW-KLP Biologie SI Klasse 9/10: Molekularbiologie (DNA/RNA, Proteinbiosynthese), Biodiversitaet — erweiterter Rahmenplan-Pool.' },
+            'k5.geschichte':  { mode: 'pool', pool: pool_k5_geschichte(),
+                                note: 'NRW-KLP Geschichte SI Klasse 5/6: Steinzeit, Altes Aegypten, Antikes Griechenland, Roemisches Reich — Einstieg in die Geschichte.' },
+            'k6.geschichte':  { mode: 'pool', pool: pool_k6_geschichte(),
+                                note: 'NRW-KLP Geschichte SI Klasse 5/6: Roemisches Reich vertieft, Voelkerwanderung, Mittelalter (Karl der Grosse, Lehnswesen, Stadt, Hanse, Kreuzzuege).' },
+            'k7.geschichte':  { mode: 'pool', pool: pool_k7_geschichte(),
+                                note: 'NRW-KLP Geschichte SI Klasse 7/8: Renaissance, Entdeckungen, Reformation, Dreissigjaehriger Krieg, Absolutismus, Aufklaerung.' },
+            'k8.geschichte':  { mode: 'pool', pool: pool_k8_geschichte(),
+                                note: 'NRW-KLP Geschichte SI Klasse 7/8: Franzoesische Revolution, Napoleon, Restauration, 1848, Industrialisierung, Reichsgruendung 1871.' },
+            'k9.geschichte':  { mode: 'pool', pool: pool_k9_geschichte(),
+                                note: 'NRW-KLP Geschichte SI Klasse 9/10: Kaiserreich, Erster Weltkrieg, Russische Revolution, Weimarer Republik, Aufstieg des Nationalsozialismus.' },
+            'k10.geschichte': { mode: 'pool', pool: pool_k10_geschichte(),
+                                note: 'NRW-KLP Geschichte SI Klasse 9/10: Zweiter Weltkrieg, Shoah, Nachkriegszeit, geteiltes Deutschland, Kalter Krieg, Wiedervereinigung 1989/90, Globalisierung.' }
         },
         // Antwort-Vergleich (tolerant): trim + Komma->Punkt + Kleinschreibung; "R" Groß/klein egal.
         normalize: function (s) {

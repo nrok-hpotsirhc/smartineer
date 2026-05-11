@@ -1357,11 +1357,12 @@ function Schueler() {
     const [val, setVal] = useState('');
     const [trainingIdx, setTrainingIdx] = useState(0);
     const [showTrainingSolution, setShowTrainingSolution] = useState(false);
+    const [showTrainingFormula, setShowTrainingFormula] = useState(false);
     const schuelerProgress = useSchuelerProgress();
 
     const drillRef = useKaTeX([stage, idx]);
     const resultRef = useKaTeX([stage, answers.length]);
-    const trainingRef = useKaTeX([stage, klass, subject, trainingIdx, showTrainingSolution, Object.keys(schuelerProgress.progress).length]);
+    const trainingRef = useKaTeX([stage, klass, subject, trainingIdx, showTrainingSolution, showTrainingFormula, Object.keys(schuelerProgress.progress).length]);
 
     if (!SCH) {
         return <section className="view-fade p-8 text-red-700">Schüler-Daten nicht geladen. Prüfe <code>js/data/schueler.js</code> in <code>index.html</code>.</section>;
@@ -1383,6 +1384,7 @@ function Schueler() {
         setItems(cfg.pool.slice());
         setTrainingIdx(typeof startAt === 'number' ? startAt : 0);
         setShowTrainingSolution(false);
+        setShowTrainingFormula(false);
         setStage('training');
     };
 
@@ -1403,6 +1405,7 @@ function Schueler() {
         setKlass(klassId); setSubject(subjId);
         setItems(arr); setIdx(0); setAnswers([]); setVal('');
         setShowTrainingSolution(false);
+        setShowTrainingFormula(false);
         setStage('quiz');
     };
 
@@ -1515,6 +1518,7 @@ function Schueler() {
             const bounded = (nextIdx + items.length) % items.length;
             setTrainingIdx(bounded);
             setShowTrainingSolution(false);
+            setShowTrainingFormula(false);
         };
         return (
             <section className="view-fade max-w-5xl mx-auto" ref={trainingRef}>
@@ -1558,8 +1562,19 @@ function Schueler() {
                         <div className="text-lg md:text-xl text-slate-900 font-semibold math-block" dangerouslySetInnerHTML={{ __html: item.q }} />
                     </div>
                     <div className="bg-cyan-50 border-l-4 border-cyan-400 p-4 mb-5 rounded-r-lg">
-                        <h3 className="text-sm font-bold text-cyan-800 uppercase tracking-wide mb-2">Formel / Merksatz</h3>
-                        <div className="text-cyan-950 math-block" dangerouslySetInnerHTML={{ __html: item.f || '<p>Nutze den passenden Fachbegriff und pruefe die Einheit.</p>' }} />
+                        <div className="flex items-center justify-between gap-3 mb-2">
+                            <h3 className="text-sm font-bold text-cyan-800 uppercase tracking-wide">Formel / Merksatz</h3>
+                            <button onClick={() => setShowTrainingFormula(v => !v)}
+                                aria-expanded={showTrainingFormula}
+                                className="text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white py-1 px-3 rounded transition">
+                                {showTrainingFormula ? 'Ausblenden' : 'Tipp anzeigen'}
+                            </button>
+                        </div>
+                        {showTrainingFormula ? (
+                            <div className="text-cyan-950 math-block slide-in" dangerouslySetInnerHTML={{ __html: item.f || '<p>Nutze den passenden Fachbegriff und pruefe die Einheit.</p>' }} />
+                        ) : (
+                            <p className="text-xs italic text-cyan-700">Versuche es zuerst selbst. Bei Bedarf den Tipp einblenden.</p>
+                        )}
                     </div>
                     <div className="flex flex-wrap gap-3 mb-5">
                         <button onClick={() => setShowTrainingSolution(v => !v)}
@@ -3617,6 +3632,60 @@ function InstallPrompt({ open, onClose, deferredEvent, platform }) {
     );
 }
 
+// ---------------------------------------------------------------- Impressum
+// TMG §5 / DSG-VVO-konformes Impressum-Modal. Reine Anbieter-Kennzeichnung,
+// kein Tracking, keine Datenerhebung — Smartineer ist eine statische PWA.
+function ImpressumModal({ open, onClose }) {
+    if (!open) return null;
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 fade-in"
+            onClick={onClose}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative slide-up" onClick={(e) => e.stopPropagation()}>
+                <button onClick={onClose}
+                    className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 transition text-xl leading-none" aria-label="Schließen">×</button>
+                <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Impressum</h2>
+                <p className="text-xs text-slate-500 mb-4">Angaben gemäß § 5 TMG</p>
+
+                <div className="space-y-4 text-sm text-slate-700">
+                    <div>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Anbieter</h3>
+                        <p className="font-semibold text-slate-900">Christoph Korn</p>
+                        <p>Riemkeestraße 159</p>
+                        <p>33102 Paderborn</p>
+                        <p>Deutschland</p>
+                    </div>
+
+                    <div>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Verantwortlich für den Inhalt</h3>
+                        <p>Christoph Korn (Anschrift wie oben)</p>
+                    </div>
+
+                    <div>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Haftungshinweis</h3>
+                        <p className="text-xs text-slate-600">Smartineer ist ein privates, nicht-kommerzielles Lernprojekt und dient ausschließlich
+                        der Reaktivierung von Studienwissen. Trotz sorgfältiger inhaltlicher Kontrolle wird keine Gewähr für die
+                        Richtigkeit, Vollständigkeit und Aktualität der bereitgestellten Inhalte übernommen. Für den Inhalt
+                        externer Standards und Quellen sind ausschließlich deren Herausgeber verantwortlich.</p>
+                    </div>
+
+                    <div>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Datenschutz</h3>
+                        <p className="text-xs text-slate-600">Diese Anwendung ist eine statische Progressive Web App ohne Backend.
+                        Es findet keine Erhebung, Speicherung oder Übertragung personenbezogener Daten an den Anbieter statt.
+                        Lernfortschritt und Einstellungen werden ausschließlich lokal im Browser (<code>localStorage</code>) gespeichert.</p>
+                    </div>
+                </div>
+
+                <div className="flex justify-end mt-6">
+                    <button onClick={onClose}
+                        className="bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold py-2 px-5 rounded-lg transition">
+                        Schließen
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
 // ---------------------------------------------------------------- Optionen
 // Tabs: Konto, Kategorien, Daten (Export/Import + Reset), Store (Skeleton),
 // PWA (Install), Admin (nur fuer admin-Rolle).
@@ -3851,6 +3920,7 @@ function App() {
     // PWA Install
     const [deferredEvent, setDeferredEvent] = useState(null);
     const [installOpen, setInstallOpen] = useState(false);
+    const [impressumOpen, setImpressumOpen] = useState(false);
     const [platform] = useState(() => detectPlatform());
 
     useEffect(() => {
@@ -4038,9 +4108,16 @@ function App() {
             </main>
             <footer className="bg-slate-900 text-slate-400 py-6 text-center text-sm mt-auto">
                 <p>Smartineer · Wissen Reloaded © 2026 · Ingenieur-Brain-Update</p>
+                <p className="mt-2">
+                    <button onClick={() => setImpressumOpen(true)}
+                        className="text-slate-300 hover:text-white underline-offset-2 hover:underline transition">
+                        Impressum
+                    </button>
+                </p>
             </footer>
             <InstallPrompt open={installOpen} onClose={closeInstall}
                 deferredEvent={deferredEvent} platform={platform} />
+            <ImpressumModal open={impressumOpen} onClose={() => setImpressumOpen(false)} />
             <input ref={fileInputRef} type="file" accept="application/json,.json"
                 onChange={onImportFile}
                 style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}

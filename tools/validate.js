@@ -384,7 +384,7 @@ function validateSchueler(win) {
     Object.keys(s.content).forEach((key) => {
         const c = s.content[key];
         const where = `SCHUELER.content["${key}"]`;
-        const needsTrainingFields = /^k(?:[5-9]|10)\.(mathe|physik|chemie|biologie)$/.test(key);
+        const needsTrainingFields = /^k(?:[5-9]|10)\.(mathe|physik|chemie|biologie|geschichte)$/.test(key);
         const needsHundredMathItems = /^k(?:[5-9]|10)\.mathe$/.test(key);
         if (!c || typeof c !== 'object') {
             err(file, where, 'Eintrag ist kein Objekt.');
