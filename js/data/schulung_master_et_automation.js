@@ -2246,6 +2246,28 @@
         name: 'Master Elektrotechnik — Automatisierungstechnik',
         short: 'MA-ET Automation',
         desc: 'Vertiefungsstudium Elektrotechnik mit Fokus Automatisierungstechnik: fortgeschrittene Regelungstechnik, SPS-Programmierung nach IEC 61131-3 / 61499, Feldbusse und OPC UA, Antriebs- und Leistungselektronik, Industrierobotik, Industrie 4.0 und Digital Twin.',
+        // P-ARCH-CROSS-CHAPTER-EXAM (AGENTS §18.10): Master-Modul-Mock-Pruefung.
+        // 30 Items aus allen Kapiteln 1-6 (Capstone Kap. 7 ausgeklammert), 60 min, 60 %.
+        // Zweite Pruefung: Antrieb- und Feldbus-Fokus fuer gezieltes Coaching.
+        assessments: [
+            {
+                id: 'master-mock-final',
+                title: 'Modul-Mock-Pruefung Automatisierung',
+                type: 'module',
+                poolFilter: { chapter: ['control', 'sps', 'fieldbus', 'drives', 'robotics', 'i40'] },
+                count: 30,
+                timeLimit: 60,
+                passScore: 0.6
+            },
+            {
+                id: 'fieldbus-drives-practice',
+                title: 'Feldbusse & Antriebe — Uebungspruefung',
+                type: 'practice',
+                poolFilter: { chapter: ['fieldbus', 'drives'] },
+                count: 20,
+                passScore: 0.7
+            }
+        ],
         chapters: [
             {
                 id: 'control',

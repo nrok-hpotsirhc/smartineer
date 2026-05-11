@@ -935,6 +935,20 @@
         name: 'CompTIA SecurityX (CASP+)',
         short: 'SecurityX',
         desc: 'Expert-Level Cybersecurity: Architektur, Engineering, Operations, GRC. Vollständig ausgearbeitete Schulung — gemäß den offiziellen CAS-005 Exam Objectives, NIST SPs und MITRE ATT&CK.',
+        // P-ARCH-CROSS-CHAPTER-EXAM (AGENTS §18.10): CASP+-Mock-Pruefung. 50 Items aus
+        // allen vier Kapiteln, 90 min, Bestehensgrenze 75 % (CompTIA-Praxis: Scaled-Score
+        // 750/900 entspricht ~75 % Raw). Reproduzierbar via `seed`.
+        assessments: [
+            {
+                id: 'casp-mock-final',
+                title: 'CASP+ Mock-Pruefung (CAS-005)',
+                type: 'final',
+                poolFilter: {},
+                count: 50,
+                timeLimit: 90,
+                passScore: 0.75
+            }
+        ],
         chapters: [
             {
                 id: 'grc',

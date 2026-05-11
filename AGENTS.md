@@ -598,7 +598,8 @@ Seit v54 (`P-ARCH-ASSESSMENT-ENGINE`) unterstuetzt der Schulungen-Track einen **
     },
     count: 30,                   // Pflicht. Anzahl Items pro Versuch (Fisher-Yates aus dem Pool).
     timeLimit: 60,               // Optional, in Minuten. 0/undefined = ohne Zeitlimit.
-    passScore: 0.6               // Optional, 0..1. Anteil korrekter Antworten zum Bestehen.
+    passScore: 0.6,              // Optional, 0..1. Anteil korrekter Antworten zum Bestehen.
+    seed: 'mock-final-v1'        // Optional. String. Wenn gesetzt, deterministischer Shuffle ueber mulberry32(hashStringToSeed(tid+asmtId+seed)) - selbe Item-Auswahl bei jedem Versuch. Geeignet fuer Mock-Pruefungen mit fixem Pool; weglassen fuer reine Stichprobenpruefungen.
 }
 ```
 
@@ -611,6 +612,7 @@ Seit v54 (`P-ARCH-ASSESSMENT-ENGINE`) unterstuetzt der Schulungen-Track einen **
 - **SRS-Integration**: Antworten werden zusaetzlich als SRS-Updates an die zugehoerigen Karten geschickt (gleiche `srsGradeMany`-Logik wie Kapitel-Quiz). Pruefungs-Versuch traegt also zum Lernstand bei.
 - **Persistenz**: `state[trainingId].__assessments[asmtId] = { attempts, lastResult: { score, total, date, passed }, bestScore: { score, total, date, ratio } }`. Doppelter Underscore-Prefix `__assessments` verhindert Kollision mit Kapitel-IDs im selben Tree. Gespeichert im Storage-Key `smartineer_schulungen_v2`.
 - **Abbruch** via Cancel-Button: Versuch wird **nicht** gezaehlt (kein `attempts++`, kein `lastResult`). Zeit-Ablauf hingegen zaehlt als regulaer beendeter Versuch.
+- **Reproduzierbarkeit via `seed`** (seit v55, P-ARCH-CROSS-CHAPTER-EXAM): Ist `seed` gesetzt, baut `startAssessment` den Shuffle aus `mulberry32(hashStringToSeed(<tid>:<asmtId>:<seed>))` anstelle von `Math.random`. Resultat: jeder Versuch derselben Pruefung zieht *dieselben* Items in derselben Reihenfolge. Geeignet fuer Mock-Pruefungen, die zwischen Lernenden vergleichbar sein sollen. Wer Variation will, laesst `seed` weg.
 
 **Erweiterungsregeln:**
 
@@ -628,7 +630,7 @@ Seit v54 (`P-ARCH-ASSESSMENT-ENGINE`) unterstuetzt der Schulungen-Track einen **
 - `id` einer Pruefung umbenennen — Persistenz bricht. Stattdessen neue Pruefung anlegen.
 - `count` so hoch setzen, dass `count > pool.length`. Validator faengt das; UI deaktiviert Start-Button bei leerem Pool.
 
-**Referenz-Implementierung:** `js/data/schulung_master_et_cybersec.js` Top-Level-Feld `assessments` (zwei Pruefungen: 30-Item-Modul-Mock und 20-Item-Risk-Fokus).
+**Referenz-Implementierung:** Alle produktiven Schulungen tragen seit v55 ein Top-Level-Feld `assessments` mit mindestens einer Mock-Pruefung. Vorlage / Erstausstattung: `js/data/schulung_master_et_cybersec.js` (Modul-Mock + Risk-Fokus, ohne `seed`). Seed-Beispiele (deterministischer Shuffle): `schulung_starter.js` (Security+, CySA+, PenTest+ — je 40-Item-Final + 20-Item-Domain-Practice), `schulung_securityx.js` (CASP+-Final), `schulung_master_et_automation.js` (Modul-Mock + Antrieb/Feldbus-Practice), `schulung_allgemeinmedizin.js` (M1-/M2-/Facharzt-Mocks).
 
 ---
 

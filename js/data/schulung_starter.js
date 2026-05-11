@@ -34,6 +34,29 @@
         name: 'CompTIA Security+',
         short: 'Security+',
         desc: 'Foundation-Level Cybersecurity. Vier Domänen: General Concepts, Threats/Vulns/Mitigations, Architecture, Operations.',
+        // P-ARCH-CROSS-CHAPTER-EXAM (AGENTS §18.10): SY0-701-Mock-Pruefung.
+        // 40 Items aus allen vier Domänen, 90 min, Bestehensgrenze 75 % (CompTIA-
+        // Scaled-Score 750/900 ~ 75 % Raw, vgl. Security+ Exam Objectives v5.0).
+        assessments: [
+            {
+                id: 'security-plus-mock-final',
+                title: 'Security+ Mock-Pruefung (SY0-701)',
+                type: 'final',
+                poolFilter: {},
+                count: 40,
+                timeLimit: 90,
+                passScore: 0.75,
+                seed: 'sec-plus-mock-v1'
+            },
+            {
+                id: 'security-plus-threats-practice',
+                title: 'Threats, Vulnerabilities & Mitigations — Uebungspruefung',
+                type: 'practice',
+                poolFilter: { chapter: ['threats'] },
+                count: 20,
+                passScore: 0.7
+            }
+        ],
         chapters: [
             {
                 id: 'concepts',
@@ -964,6 +987,29 @@
         name: 'CompTIA CySA+',
         short: 'CySA+',
         desc: 'Cybersecurity Analyst — vier Domänen: Security Operations, Vulnerability Management, Incident Response, Reporting & Communication.',
+        // P-ARCH-CROSS-CHAPTER-EXAM (AGENTS §18.10): CS0-003-Mock-Pruefung.
+        // 40 Items aus allen vier Domänen, 90 min, Bestehensgrenze 75 % (CompTIA-
+        // Scaled-Score 750/900 ~ 75 % Raw, vgl. CySA+ Exam Objectives).
+        assessments: [
+            {
+                id: 'cysa-plus-mock-final',
+                title: 'CySA+ Mock-Pruefung (CS0-003)',
+                type: 'final',
+                poolFilter: {},
+                count: 40,
+                timeLimit: 90,
+                passScore: 0.75,
+                seed: 'cysa-plus-mock-v1'
+            },
+            {
+                id: 'cysa-plus-ir-practice',
+                title: 'Incident Response — Uebungspruefung',
+                type: 'practice',
+                poolFilter: { chapter: ['ir'] },
+                count: 20,
+                passScore: 0.7
+            }
+        ],
         chapters: [
             {
                 id: 'sec_ops',
@@ -2106,6 +2152,29 @@
         name: 'CompTIA PenTest+',
         short: 'PenTest+',
         desc: 'Offensive Security: Planning & Scoping, Information Gathering, Attacks & Exploits, Reporting & Communication.',
+        // P-ARCH-CROSS-CHAPTER-EXAM (AGENTS §18.10): PT0-002-Mock-Pruefung.
+        // 40 Items aus allen vier Domänen, 90 min, Bestehensgrenze 75 % (CompTIA-
+        // Scaled-Score 750/900 ~ 75 % Raw, vgl. PenTest+ Exam Objectives).
+        assessments: [
+            {
+                id: 'pentest-plus-mock-final',
+                title: 'PenTest+ Mock-Pruefung (PT0-002)',
+                type: 'final',
+                poolFilter: {},
+                count: 40,
+                timeLimit: 90,
+                passScore: 0.75,
+                seed: 'pentest-plus-mock-v1'
+            },
+            {
+                id: 'pentest-plus-attacks-practice',
+                title: 'Attacks & Exploits — Uebungspruefung',
+                type: 'practice',
+                poolFilter: { chapter: ['attacks'] },
+                count: 20,
+                passScore: 0.7
+            }
+        ],
         chapters: [
             {
                 id: 'planning',

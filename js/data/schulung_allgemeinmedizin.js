@@ -2884,6 +2884,43 @@
         name: 'Allgemeinmedizin & Medizinstudium',
         short: 'Allgemeinmedizin',
         desc: 'Vorlesungsbegleitende Selbststudium-Schulung entlang der ÄApprO: Vorklinik (M1), Klinik (M2), PJ und Facharzt-Weiterbildung Allgemeinmedizin. Inhalte basieren auf aktuellen Lehrbüchern (Schmidt/Lang Physiologie 32. Aufl., Rassow Biochemie 5. Aufl., Herold Innere 2024, Aktories Pharmakologie 13. Aufl., Kochen Allgemeinmedizin 5. Aufl.) und Leitlinien (DEGAM, NVL, ESC 2021/2023, GINA 2024, GOLD 2024, PRISCUS 2.0, STOPP/START V3, STIKO 2024).',
+        // P-ARCH-CROSS-CHAPTER-EXAM (AGENTS §18.10): IMPP-Stil-Mock-Pruefungen.
+        // M2-Examen (Hammerexamen) ist die zeitintensivste und pruefungsrelevanteste
+        // Phase, deshalb dort der grosse Pool (60 Items, 120 min, 60 %); zusaetzlich
+        // M1- und Facharzt-Fokus-Pruefungen. Bestehensgrenze 60 % entspricht der IMPP-
+        // Bestehensregel (M1/M2: >= 60 % oder Sitzungsbestehensgrenze; vereinfacht).
+        assessments: [
+            {
+                id: 'med-m1-mock',
+                title: 'M1 Vorklinik — Mock-Pruefung',
+                type: 'module',
+                poolFilter: { chapter: ['vorklinik_m1'] },
+                count: 40,
+                timeLimit: 80,
+                passScore: 0.6,
+                seed: 'med-m1-mock-v1'
+            },
+            {
+                id: 'med-m2-mock',
+                title: 'M2 Hammerexamen — Mock-Pruefung',
+                type: 'final',
+                poolFilter: { chapter: ['klinik_m2'] },
+                count: 60,
+                timeLimit: 120,
+                passScore: 0.6,
+                seed: 'med-m2-mock-v1'
+            },
+            {
+                id: 'med-fa-mock',
+                title: 'Facharzt Allgemeinmedizin — Uebungspruefung',
+                type: 'practice',
+                poolFilter: { chapter: ['pj_facharzt'] },
+                count: 30,
+                timeLimit: 60,
+                passScore: 0.6,
+                seed: 'med-fa-mock-v1'
+            }
+        ],
         chapters: [
             {
                 id: 'vorklinik_m1',

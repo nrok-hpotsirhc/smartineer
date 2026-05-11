@@ -2101,8 +2101,14 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
             // Wir tolerieren weniger Items als gewuenscht — Pool kann mit der Zeit wachsen.
         }
         const shuffled = pool.slice();
+        // P-ARCH-CROSS-CHAPTER-EXAM: Reproduzierbarkeit. Wenn `asmt.seed` gesetzt ist,
+        // wird der Pool deterministisch gemischt (mulberry32 ueber hashStringToSeed(seed)).
+        // Sonst Math.random (jeder Versuch eine andere Auswahl).
+        const rand = asmt.seed != null
+            ? mulberry32(hashStringToSeed(String(asmt.seed)))
+            : Math.random;
         for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
+            const j = Math.floor(rand() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         const picked = shuffled.slice(0, count);
