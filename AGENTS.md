@@ -397,7 +397,7 @@ Eine PR/Änderung gilt als fertig, wenn:
 
 ---
 
-## 17. Schüler-Bereich (Mathematik Klasse 1–10, später Englisch ab Klasse 5)
+## 17. Schüler-Bereich (Mathematik Klasse 1–4, Naturwissenschaften Klasse 5–10, später Englisch ab Klasse 5)
 
 Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Track:
 
@@ -447,18 +447,19 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 | 2      | generated| Plus/Minus bis 100, Vorübung Einmaleins (×2, ×5, ×10).                                 |
 | 3      | pool     | Vollständiges kleines 1×1, Geteilt aus 1×1, schriftliche Addition/Subtraktion bis 1000.|
 | 4      | pool     | Halbschriftliches/schriftliches Mal/Geteilt, Division mit Rest, einfache Sachaufgaben.  |
-| 5      | pool     | **Naturwissenschaften (Skeleton, NRW-KLP NW SI):** Physik (Magnetismus, Stromkreis, Licht/Schatten, Temperatur), Chemie (Stoffe & Aggregatzustaende, Wasser & Luft), Biologie (Pflanzen/Tiere/Mensch). Mathe + Englisch in Vorbereitung. |
-| 6      | pool     | **Naturwissenschaften (Skeleton, NRW-KLP NW SI):** Physik (Optik, Schall, Waermetransport), Chemie (Stofftrennung, Indikatoren, Reinstoffe), Biologie (Mensch, Wirbeltiere, Oekologie). Mathe + Englisch in Vorbereitung. |
-| 7      | pool     | **Naturwissenschaften (Skeleton):** Physik (Mechanik, Einheiten), Chemie (Aggregatzustaende, Summenformeln), Biologie (Zelle, Oekosystem). Mathe + Englisch in Vorbereitung. |
-| 8      | pool     | **Naturwissenschaften (Skeleton):** Physik (Elektrik, Arbeit/Leistung), Chemie (Atombau, Periodensystem), Biologie (Atmung, Verdauung, Kreislauf). Mathe + Englisch in Vorbereitung. |
-| 9      | pool     | **Naturwissenschaften (Skeleton):** Physik (Newton, Energie, Druck), Chemie (Saeuren/Basen, Salze), Biologie (Genetik-Grundlagen, Evolution). Mathe + Englisch in Vorbereitung. |
-| 10     | pool     | **Naturwissenschaften (Skeleton):** Physik (Atombau, Optik), Chemie (Organische Chemie Einstieg), Biologie (Molekularbiologie, Biodiversitaet). Mathe + Englisch in Vorbereitung. |
+| 5      | pool     | **Naturwissenschaften (50er Pools, NRW-KLP NW SI):** Physik (Magnetismus, Stromkreis, Licht/Schatten, Temperatur), Chemie (Stoffe & Aggregatzustaende, Wasser & Luft), Biologie (Pflanzen/Tiere/Mensch). Mathe + Englisch in Vorbereitung. |
+| 6      | pool     | **Naturwissenschaften (50er Pools, NRW-KLP NW SI):** Physik (Optik, Schall, Waermetransport), Chemie (Stofftrennung, Indikatoren, Reinstoffe), Biologie (Mensch, Wirbeltiere, Oekologie). Mathe + Englisch in Vorbereitung. |
+| 7      | pool     | **Naturwissenschaften (50er Pools):** Physik (Mechanik, Einheiten), Chemie (Aggregatzustaende, Summenformeln), Biologie (Zelle, Oekosystem). Mathe + Englisch in Vorbereitung. |
+| 8      | pool     | **Naturwissenschaften (50er Pools):** Physik (Elektrik, Arbeit/Leistung), Chemie (Atombau, Periodensystem), Biologie (Atmung, Verdauung, Kreislauf). Mathe + Englisch in Vorbereitung. |
+| 9      | pool     | **Naturwissenschaften (50er Pools):** Physik (Newton, Energie, Druck), Chemie (Saeuren/Basen, Salze), Biologie (Genetik-Grundlagen, Evolution). Mathe + Englisch in Vorbereitung. |
+| 10     | pool     | **Naturwissenschaften (50er Pools):** Physik (Atombau, Optik), Chemie (Organische Chemie Einstieg), Biologie (Molekularbiologie, Biodiversitaet). Mathe + Englisch in Vorbereitung. |
 
-**Naturwissenschaften-Pools (Klasse 5–10, seit v65; NRW-konform um Physik+Chemie in Klasse 5/6 erweitert seit v66):** Pro (Klasse, Fach) ein kuratierter Pool von ~10 Aufgaben mit `{q, a}`-Schema. Themen folgen dem **NRW-Kernlehrplan Sekundarstufe I** (KLP NW SI fuer Klasse 5/6 integrierter Naturwissenschaften-Unterricht; KLP Physik/Chemie/Biologie SI fuer Klasse 7–10). Formeln werden via KaTeX (`$...$`) im Frage-Stem dargestellt; Antworten sind kurze Strings (Zahl, Begriff, Summenformel) und werden ueber `normalize()` (trim, whitespace weg, Komma->Punkt, Kleinschreibung) verglichen. Aufgaben sind handgeprueft gegen NRW-Lehrplaene Mittelstufe (§8 Wissenschaftliche Korrektheit). Skeleton-Status: Pools werden inkrementell ergaenzt, bevorzugt **anhaengen** (gleiche Idx-Stabilitaetsregel wie §17.4-Pools, AGENTS §11).
+**Naturwissenschaften-Pools (Klasse 5–10, seit v65; NRW-konform um Physik+Chemie in Klasse 5/6 erweitert seit v66; 50er Pools seit v68):** Pro (Klasse, Fach) ein kuratierter Pool von **50 Aufgaben** mit `{q, a}`-Schema; aktuell 6 Klassen × 3 Faecher × 50 = 900 NW-Aufgaben. Themen folgen dem **NRW-Kernlehrplan Sekundarstufe I** (KLP NW SI fuer Klasse 5/6 integrierter Naturwissenschaften-Unterricht; KLP Physik/Chemie/Biologie SI fuer Klasse 7–10). Formeln werden via KaTeX (`$...$`) im Frage-Stem dargestellt; Antworten sind kurze Strings (Zahl, Begriff, Summenformel) und werden ueber `normalize()` (trim, whitespace weg, Komma->Punkt, Kleinschreibung) verglichen. Aufgaben sind handgeprueft gegen NRW-Lehrplaene Mittelstufe (§8 Wissenschaftliche Korrektheit). Erweiterungen erfolgen bevorzugt append-only ueber die Top-up-Bank in `js/data/schueler.js` (gleiche Idx-Stabilitaetsregel wie §17.4-Pools, AGENTS §11).
 
 ### 17.4 Erweiterungsregeln
 
 - **Neue Aufgabe für Klasse 3 oder 4 hinzufügen**: an das passende `pool_*`-Array anhängen (Reihenfolge irrelevant — die UI sampelt zufällig).
+- **Neue Naturwissenschaften-Aufgabe für Klasse 5–10 hinzufügen**: append-only in die passende `NATWI_TOPUPS`-Liste oder ans passende `pool_k*_fach()`-Basisarray; keine bestehenden Items verschieben, da SRS/Stable-QID aus Stem+Antwort entsteht und Review-Diffs sonst unnoetig schwer werden.
 - **Neuen Generator (Klasse 1 oder 2)**: rein deterministisches `gen()` schreiben; immer `{ q: string, a: string }` zurückgeben. Antwort als String, damit `normalize()` greift. Schwerere Generatoren (z.B. Zehnerübergang) in eigene Funktion auslagern und in `gen_klasse2_mathe` per Wahrscheinlichkeit einsteuern.
 - **Klasse 5–10 freischalten**: `mode: 'stub'` durch `pool` oder `generated` ersetzen, `pool`/`gen` und `note` ergänzen. UI braucht keine Änderung — die Karten werden automatisch aktiv.
 - **Englisch ab Klasse 5**: gleiches Schema (`{ q, a }`). Da Antworten Texte sein können, muss `normalize()` ggf. erweitert werden (z.B. Bindestriche, Apostrophe). Vor Erweiterung in einem Issue diskutieren.
