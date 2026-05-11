@@ -1,6 +1,6 @@
 # Smartineer — Engineering Knowledge Reloaded
 
-Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 16 Kategorien (inkl. Allgemeinmedizin als Spiegelung der gleichnamigen Schulung sowie KRL, Fügetechniken, Agentic AI und Sensorik), 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–10 sowie Naturwissenschaften und Geschichte für Klasse 5–10 (Mathe 5–10, Physik, Chemie, Biologie und Geschichte mit getrenntem Training plus 10-Fragen-Quiz, Formeln/Musterlösungen und geloest-Markierung; 1.250 NW-Aufgaben, 600 Mathe-Mittelstufenaufgaben, 300 Geschichts-Fragen), ein **Schulungen-Bereich** mit Cert-Prep-Kursen (CompTIA SecurityX/Security+/CySA+/PenTest+) sowie zwei Master-ET-Schulungen in Vorbereitung, ein **Impressum** im Footer und ein **Optionen-Menü** mit Kategorie-Sichtbarkeit, Import/Export, PWA-Install und temporaer deaktiviertem Login.
+Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein erfahrener Ingenieur sein Studienwissen schrittweise reaktivieren kann — über 17 Kategorien (inkl. Allgemeinmedizin als Spiegelung der gleichnamigen Schulung sowie KRL, Fügetechniken, Agentic AI, Sensorik und AI Models), 3 Schwierigkeitsstufen, ~30 Aufgaben je Kategorie und mit isolierten Musterlösungen samt Rechenweg. Ergänzend: ein **Schüler-Bereich** mit Mathematik für die Klassen 1–10 sowie Naturwissenschaften, Geschichte und Sprachen für Klasse 5–10 (Mathe 5–10, Physik, Chemie, Biologie und Geschichte je 200 Aufgaben; Englisch, Französisch und Latein je Klasse mit 200 Vokabel-Abfragen plus 200 Grammatikfragen; getrenntes Training plus 10-Fragen-Quiz, Formeln/Merksätze/Musterlösungen und geloest-Markierung), ein **Schulungen-Bereich** mit Cert-Prep-Kursen (CompTIA SecurityX/Security+/CySA+/PenTest+) sowie zwei Master-ET-Schulungen in Vorbereitung, ein **Impressum** im Footer und ein **Optionen-Menü** mit Kategorie-Sichtbarkeit, Import/Export, PWA-Install und temporaer deaktiviertem Login.
 
 > **Stack**: React 18 (CDN, JSX via Babel-standalone) · Tailwind CSS (CDN) · Chart.js · KaTeX  
 > **Auslieferung**: Klassische Website **und** installierbare PWA (Desktop, Android, iOS)  
@@ -27,14 +27,14 @@ Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein e
 
 ## Features
 
-- **16 Kategorien**: Allgemeinmedizin (Spiegelung der Schulung), Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3), Cyber Security, KUKA Robot Language (KRL), Fügetechniken, Agentic AI, Sensorik
-- **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **10 Aufgaben** = ~**270 Aufgaben** insgesamt
+- **17 Kategorien**: Allgemeinmedizin (Spiegelung der Schulung), Höhere Mathematik, Regelungstechnik, Digitale Regelungstechnik, Robotik, Systemtheorie, Physik, Kryptographie, Blockchain, Neuronale Netze, PLC-Programmierung (IEC 61131-3), Cyber Security, KUKA Robot Language (KRL), Fügetechniken, Agentic AI, Sensorik, AI Models
+- **Drei Schwierigkeitsstufen** pro Kategorie (Grundlagen → Vertiefung → Expertise) mit jeweils ca. **10 Aufgaben** = ~**300 Aufgaben** insgesamt
 - **KaTeX-gerenderte Formeln** in Aufgaben, Hinweisen und Lösungen
 - **React-UI** (Hooks, Functional Components) mit weichen Übergangs-Animationen, Gradient-Hero, animierten Fortschrittsbalken und Hover-Effekten
 - **PWA**: voll installierbar auf Desktop / Android / iOS, **offline-fähig** durch Service-Worker-Caching
 - **Optionen-Menü** mit Kategorie-Toggle, Import/Export, Reset und Install-Prompt; lokaler Konto-Login ueber `js/auth-credentials.js` (gitignored)
 - **Schulungen-Bereich** fuer Cert-Prep und Master-ET-Vorbereitungen; das Frontend-Only Schulungen-Gate ist aktiv (Login ueber Optionen)
-- **Schüler-Bereich**: Mathematik Klasse 1–10 plus Naturwissenschaften und Geschichte Klasse 5–10; Mathe 5–10, Physik, Chemie, Biologie und Geschichte bieten getrenntes Training mit Formel/Merksatz (default eingeklappt, per Klick auf "Tipp anzeigen" einblendbar), Musterlösung und eigener geloest-Markierung sowie ein 10-Fragen-Quiz (1.250 NW-Aufgaben, 600 Mathe-Mittelstufenaufgaben, 300 Geschichts-Fragen nach NRW-KLP)
+- **Schüler-Bereich**: Mathematik Klasse 1–10 plus Naturwissenschaften, Geschichte und Sprachen Klasse 5–10; Mathe 5–10, Physik, Chemie, Biologie und Geschichte bieten je 200 Aufgaben, Englisch/Französisch/Latein je Klasse 200 Vokabel-Abfragen und 200 Grammatikfragen. Alle Mittelstufenfächer nutzen getrenntes Training mit Formel/Merksatz (default eingeklappt, per Klick auf "Tipp anzeigen" einblendbar), Musterlösung und eigener geloest-Markierung sowie ein 10-Fragen-Quiz.
 - **Cheatsheets** je Kategorie mit zwei Reitern:
   1. **Formeln** (kompakte Übersicht)
   2. **Musterlösungen** (vollständig isoliert mit Rechenweg und Kommentaren)
@@ -153,9 +153,12 @@ smartineer/
         ├── krl.js              # KUKA Robot Language
         ├── fuegetechniken.js   # Fügetechniken
         ├── agentic_ai.js       # Agentic AI
+        ├── ai_models.js        # KI-Modell-Benchmarks (MCQ)
+        ├── schueler.js         # Schüler-Basisbereich
+        ├── schueler_200_topups.js # Schüler-Top-ups + Sprachen 5-10
         ├── schulung_master_et_cybersec.js
         ├── schulung_master_et_automation.js
-        └── schueler.js         # Schüler-Bereich
+        └── ...
 ```
 
 Jede Kategorie-Datei registriert sich autonom in `window.APP_DATA[id]` und pusht ihre `id` in `window.APP_ORDER`. Reihenfolge in der UI = Reihenfolge der `<script>`-Tags in `index.html`. React liest beim Mount aus diesen Globals — **keine** `import`-Statements nötig.

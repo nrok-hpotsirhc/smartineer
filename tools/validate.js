@@ -384,8 +384,9 @@ function validateSchueler(win) {
     Object.keys(s.content).forEach((key) => {
         const c = s.content[key];
         const where = `SCHUELER.content["${key}"]`;
-        const needsTrainingFields = /^k(?:[5-9]|10)\.(mathe|physik|chemie|biologie|geschichte)$/.test(key);
-        const needsHundredMathItems = /^k(?:[5-9]|10)\.mathe$/.test(key);
+        const needsTrainingFields = /^k(?:[5-9]|10)\.(mathe|physik|chemie|biologie|geschichte|englisch|franzoesisch|latein)$/.test(key);
+        const needsTwoHundredItems = /^k(?:[5-9]|10)\.(mathe|physik|chemie|biologie|geschichte)$/.test(key);
+        const needsLanguageItems = /^k(?:[5-9]|10)\.(englisch|franzoesisch|latein)$/.test(key);
         if (!c || typeof c !== 'object') {
             err(file, where, 'Eintrag ist kein Objekt.');
             return;
@@ -401,8 +402,15 @@ function validateSchueler(win) {
             if (!Array.isArray(c.pool) || c.pool.length === 0) {
                 err(file, where, 'mode=pool benoetigt ein nicht-leeres pool-Array.');
             } else {
-                if (needsHundredMathItems && c.pool.length < 100) {
-                    err(file, where, 'Mittelstufen-Mathe benoetigt mindestens 100 Pool-Items.');
+                if (needsTwoHundredItems && c.pool.length < 200) {
+                    err(file, where, 'Klasse-5-10-Faecher benoetigen mindestens 200 Pool-Items.');
+                }
+                if (needsLanguageItems) {
+                    const vocabCount = c.pool.filter((it) => it && it.kind === 'vocab').length;
+                    const grammarCount = c.pool.filter((it) => it && it.kind === 'grammar').length;
+                    if (c.pool.length < 400 || vocabCount < 200 || grammarCount < 200) {
+                        err(file, where, 'Sprachfaecher benoetigen mindestens 200 Vokabel-Items und 200 Grammatik-Items.');
+                    }
                 }
                 c.pool.forEach((it, i) => {
                     if (!it || typeof it !== 'object'

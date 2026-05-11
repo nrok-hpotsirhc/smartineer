@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v72-ai-models-category';
+const CACHE_VERSION = 'smartineer-v73-schueler-200-sprachen';
 const APP_SHELL = [
     './',
     './index.html',
@@ -31,6 +31,7 @@ const APP_SHELL = [
     './js/data/sensorik.js',
     './js/data/ai_models.js',
     './js/data/schueler.js',
+    './js/data/schueler_200_topups.js',
     './js/data/schulung_securityx.js',
     './js/data/schulung_starter.js',
     './js/data/schulung_allgemeinmedizin.js',
