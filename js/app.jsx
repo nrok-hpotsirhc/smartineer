@@ -20,6 +20,15 @@ const SCHULUNGEN_KEY_V1 = 'smartineer_schulungen_v1';
 const SRS_KEY = 'smartineer_srs_v2';
 const SRS_KEY_V1 = 'smartineer_srs_v1';
 const SRS_INTERVALS_DAYS = [1, 3, 7, 16, 35, 70, 140]; // SM-2 lite, gestaffelt
+// Reader-Notizen und Bookmarks pro Schulungs-Lehrseite (P-LP-NOTES-BOOKMARKS).
+// Form: { [trainingId]: { [chapterId]: { [pageIdx]: <value> } } }.
+// Notizen-Wert = trimmter String (Plain-Text), Bookmark-Wert = `true`.
+// Identitaet ueber `pageIdx` — Drift bei Seiten-Umsortierung ist akzeptiert
+// (AGENTS §18.3 / §18.8: Seiten werden bevorzugt angehaengt, nicht mittendrin
+// einsortiert). Keine personenbezogenen Daten — Notizen sind reine Lern-
+// Markierungen des Anwenders und werden ueber Export/Import mitgenommen.
+const READER_NOTES_KEY = 'smartineer_reader_notes_v1';
+const READER_BOOKMARKS_KEY = 'smartineer_reader_bookmarks_v1';
 // ----- Optionen / Auth (Schulungen-Bereich, FRONTEND-ONLY UX-CONVENIENCE) -----
 // WICHTIG: Diese Auth ist KEIN echter Schutz — Credentials liegen client-seitig
 // in window.SMARTINEER_AUTH (siehe js/auth-credentials.js, gitignored). Im
@@ -37,7 +46,7 @@ const ADMIN_GLOBAL_KEY = 'smartineer_admin_global_v1'; // reserviert fuer kuenft
 // gerätespezifisch und werden NICHT exportiert.
 const EXPORT_FORMAT = 'smartineer-progress';
 const EXPORT_VERSION = 1;
-const EXPORT_KEYS = [STORAGE_KEY, SCHULUNGEN_KEY, SRS_KEY];
+const EXPORT_KEYS = [STORAGE_KEY, SCHULUNGEN_KEY, SRS_KEY, READER_NOTES_KEY, READER_BOOKMARKS_KEY];
 
 function buildExportPayload() {
     const data = {};
@@ -182,6 +191,47 @@ function mergeProgressKey(key, current, incoming) {
                     mergedC[idx] = (lb >= la) ? b : a;
                 });
                 mergedT[cid] = mergedC;
+            });
+            out[tid] = mergedT;
+        });
+        return out;
+    }
+    if (key === READER_NOTES_KEY) {
+        // { trainingId: { chapterId: { pageIdx: 'text' } } }
+        // Merge pro Seite: laengerer Notiz-Text gewinnt (Anwender hat mehr geschrieben).
+        // Konflikt-Heuristik bewusst simpel — Notizen sind Plain-Text-Markierungen,
+        // keine kollaborative Live-Editor-Datenbank.
+        const out = { ...current };
+        Object.keys(incoming || {}).forEach((tid) => {
+            const curT = out[tid] || {};
+            const incT = incoming[tid] || {};
+            const mergedT = { ...curT };
+            Object.keys(incT).forEach((cid) => {
+                const curC = curT[cid] || {};
+                const incC = incT[cid] || {};
+                const mergedC = { ...curC };
+                Object.keys(incC).forEach((pidx) => {
+                    const a = typeof curC[pidx] === 'string' ? curC[pidx] : '';
+                    const b = typeof incC[pidx] === 'string' ? incC[pidx] : '';
+                    mergedC[pidx] = (b.length > a.length) ? b : (a || b);
+                });
+                mergedT[cid] = mergedC;
+            });
+            out[tid] = mergedT;
+        });
+        return out;
+    }
+    if (key === READER_BOOKMARKS_KEY) {
+        // { trainingId: { chapterId: { pageIdx: true } } } — Set-Vereinigung.
+        const out = { ...current };
+        Object.keys(incoming || {}).forEach((tid) => {
+            const curT = out[tid] || {};
+            const incT = incoming[tid] || {};
+            const mergedT = { ...curT };
+            Object.keys(incT).forEach((cid) => {
+                const curC = curT[cid] || {};
+                const incC = incT[cid] || {};
+                mergedT[cid] = { ...curC, ...incC };
             });
             out[tid] = mergedT;
         });
@@ -1514,6 +1564,59 @@ function useSchulungenState() {
     return { state, setLastPage, recordQuiz, recordAssessment, reset };
 }
 
+// ---------- Reader-Notizen und Bookmarks (P-LP-NOTES-BOOKMARKS) ----------
+// Zwei Storage-Keys, beide mit Shape `{ [tid]: { [cid]: { [pageIdx]: <val> } } }`.
+// Notiz-Werte: getrimmter Plain-Text-String; leerer String / null entfernt die Notiz.
+// Bookmark-Werte: `true` markiert, fehlender Eintrag = nicht markiert.
+function useReaderAnnotations() {
+    const readKey = (k) => {
+        try { return JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { return {}; }
+    };
+    const [notes, setNotes] = useState(() => readKey(READER_NOTES_KEY));
+    const [bookmarks, setBookmarks] = useState(() => readKey(READER_BOOKMARKS_KEY));
+    const writeKey = (k, value) => {
+        try { localStorage.setItem(k, JSON.stringify(value)); } catch (e) { /* quota */ }
+    };
+    const getNote = useCallback((tid, cid, page) => {
+        const t = notes[tid]; if (!t) return '';
+        const c = t[cid]; if (!c) return '';
+        const v = c[page];
+        return typeof v === 'string' ? v : '';
+    }, [notes]);
+    const setNote = useCallback((tid, cid, page, text) => {
+        setNotes(prev => {
+            const next = { ...prev };
+            const t = { ...(next[tid] || {}) };
+            const c = { ...(t[cid] || {}) };
+            const trimmed = typeof text === 'string' ? text.trim() : '';
+            if (trimmed) c[page] = trimmed;
+            else delete c[page];
+            if (Object.keys(c).length) t[cid] = c; else delete t[cid];
+            if (Object.keys(t).length) next[tid] = t; else delete next[tid];
+            writeKey(READER_NOTES_KEY, next);
+            return next;
+        });
+    }, []);
+    const isBookmarked = useCallback((tid, cid, page) => {
+        const t = bookmarks[tid]; if (!t) return false;
+        const c = t[cid]; if (!c) return false;
+        return c[page] === true;
+    }, [bookmarks]);
+    const toggleBookmark = useCallback((tid, cid, page) => {
+        setBookmarks(prev => {
+            const next = { ...prev };
+            const t = { ...(next[tid] || {}) };
+            const c = { ...(t[cid] || {}) };
+            if (c[page]) delete c[page]; else c[page] = true;
+            if (Object.keys(c).length) t[cid] = c; else delete t[cid];
+            if (Object.keys(t).length) next[tid] = t; else delete next[tid];
+            writeKey(READER_BOOKMARKS_KEY, next);
+            return next;
+        });
+    }, []);
+    return { notes, bookmarks, getNote, setNote, isBookmarked, toggleBookmark };
+}
+
 // ---------- Spaced Repetition (SM-2 lite) ----------
 function srsTodayISO() { return new Date().toISOString().slice(0, 10); }
 function srsAddDaysISO(days) {
@@ -1999,12 +2102,14 @@ function InlineCheck({ check }) {
 function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
     const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
     const { state, setLastPage, recordQuiz, recordAssessment } = useSchulungenState();
+    const { getNote, setNote, isBookmarked, toggleBookmark } = useReaderAnnotations();
     const [stage, setStage] = useState('index'); // index | chapters | reader | quiz | quizResult
     const [tid, setTid] = useState(null);
     const [cid, setCid] = useState(null);
     const [page, setPage] = useState(0);
     const [tocOpen, setTocOpen] = useState(false);
     const [jumpOpen, setJumpOpen] = useState(false);
+    const [notesOpen, setNotesOpen] = useState(false);
     const [quizSet, setQuizSet] = useState([]);
     const [quizRefs, setQuizRefs] = useState([]); // parallel zu quizSet: {tid,cid,idx} pro Item
     const [quizIdx, setQuizIdx] = useState(0);
@@ -2420,6 +2525,8 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
         const total = chapter.pages.length;
         const cur = chapter.pages[page];
         const isLast = page >= total - 1;
+        const bookmarked = isBookmarked(tid, cid, page);
+        const noteValue = getNote(tid, cid, page);
         return (
             <section className="view-fade max-w-3xl mx-auto" ref={readerRef}>
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-4">
@@ -2434,6 +2541,19 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                             <button onClick={() => setJumpOpen(true)}
                                 title="Zu Seite springen"
                                 className="px-2 py-1 text-xs bg-white border border-slate-300 hover:bg-slate-100 rounded transition flex-shrink-0">Seite…</button>
+                            <button onClick={() => toggleBookmark(tid, cid, page)}
+                                title={bookmarked ? 'Bookmark entfernen' : 'Diese Seite markieren'}
+                                aria-pressed={bookmarked}
+                                className={`px-2 py-1 text-xs rounded transition flex-shrink-0 border ${bookmarked ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-white border-slate-300 hover:bg-slate-100 text-slate-600'}`}>
+                                <span aria-hidden="true">{bookmarked ? '\u2605' : '\u2606'}</span>
+                                <span className="sr-only">{bookmarked ? 'Bookmark gesetzt' : 'Bookmark setzen'}</span>
+                            </button>
+                            <button onClick={() => setNotesOpen(v => !v)}
+                                title="Notiz zu dieser Seite"
+                                aria-pressed={notesOpen}
+                                className={`px-2 py-1 text-xs rounded transition flex-shrink-0 border ${noteValue ? 'bg-teal-100 border-teal-300 text-teal-800' : 'bg-white border-slate-300 hover:bg-slate-100 text-slate-600'}`}>
+                                Notiz{noteValue ? ' ●' : ''}
+                            </button>
                         </div>
                         <div className="text-xs text-slate-600 font-bold">Seite {page + 1} / {total}</div>
                     </div>
@@ -2448,6 +2568,28 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                         <div className="prose-book text-slate-800" dangerouslySetInnerHTML={{ __html: cur.html }} />
                         {cur.check && <InlineCheck check={cur.check} key={`check-${cid}-${page}`} />}
                     </article>
+                    {notesOpen && (
+                        <div className="border-t border-slate-200 bg-teal-50/50 px-4 py-3 slide-in">
+                            <label className="text-xs font-bold text-teal-800 uppercase tracking-wide block mb-1">
+                                Notiz zu Seite {page + 1} · {cur.title}
+                            </label>
+                            <textarea value={noteValue}
+                                onChange={(e) => setNote(tid, cid, page, e.target.value)}
+                                placeholder="Eigene Notiz, Merksatz oder Querverweis (Plain-Text, wird im Export mitgenommen)…"
+                                rows={4}
+                                className="w-full px-3 py-2 text-sm bg-white border border-teal-200 rounded resize-y focus:outline-none focus:ring-2 focus:ring-teal-400"
+                            />
+                            <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500">
+                                <span>{noteValue ? `${noteValue.length} Zeichen` : 'Leere Notiz wird automatisch entfernt.'}</span>
+                                {noteValue && (
+                                    <button onClick={() => { setNote(tid, cid, page, ''); }}
+                                        className="text-rose-700 hover:text-rose-900 underline">
+                                        Notiz löschen
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                     <div className="border-t border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between gap-2 flex-wrap">
                         <button onClick={() => goPage(page - 1)} disabled={page <= 0}
                             className="px-3 py-1.5 text-sm bg-white border border-slate-300 hover:bg-slate-100 rounded transition disabled:opacity-40 disabled:cursor-not-allowed">← Zurück</button>

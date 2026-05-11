@@ -663,13 +663,15 @@ Da der Fortschritt rein in `localStorage` lebt und damit gerätegebunden ist, bi
   "data": {
     "wissen_reloaded_progress_v1": { "<catId>|<level>|<idx>": 1, ... },
     "smartineer_schulungen_v2": { "<trainingId>": { "<chapterId>": { "lastPage": 0, "quizBest": { "score": 8, "total": 10, "date": "..." } } } },
-    "smartineer_srs_v2": { "<trainingId>": { "<chapterId>": { "<qid>": { "ease": 2.5, "interval": 7, "due": "2026-05-16", "reps": 3, "lapses": 0, "last": "2026-05-09" } } } }
+    "smartineer_srs_v2": { "<trainingId>": { "<chapterId>": { "<qid>": { "ease": 2.5, "interval": 7, "due": "2026-05-16", "reps": 3, "lapses": 0, "last": "2026-05-09" } } } },
+    "smartineer_reader_notes_v1": { "<trainingId>": { "<chapterId>": { "<pageIdx>": "Plain-Text-Notiz" } } },
+    "smartineer_reader_bookmarks_v1": { "<trainingId>": { "<chapterId>": { "<pageIdx>": true } } }
   }
 }
 ```
 
 - Pflichtfelder: `format`, `version`, `data`. `format === 'smartineer-progress'` ist die Validierungs-Magic.
-- Erlaubte Storage-Keys im `data`-Objekt sind ausschließlich die in `EXPORT_KEYS` definierten — derzeit `STORAGE_KEY` (Ingenieurs-Track) und `SCHULUNGEN_KEY` (Schulungen-Track).
+- Erlaubte Storage-Keys im `data`-Objekt sind ausschließlich die in `EXPORT_KEYS` definierten: `STORAGE_KEY` (Ingenieurs-Track), `SCHULUNGEN_KEY` (Schulungen-Track), `SRS_KEY` (Spaced Repetition v2), `READER_NOTES_KEY` (Reader-Notizen, P-LP-NOTES-BOOKMARKS) und `READER_BOOKMARKS_KEY` (Reader-Bookmarks, P-LP-NOTES-BOOKMARKS).
 - **Nicht im Export**: `THEME_KEY`, `INSTALL_DISMISS_KEY`, Schüler-Drill-Zustand. Diese sind gerätespezifisch und sollen beim Wechsel zwischen Geräten **nicht** überschrieben werden.
 
 ### 19.2 Verhalten
@@ -678,6 +680,9 @@ Da der Fortschritt rein in `localStorage` lebt und damit gerätegebunden ist, bi
 - **Import**: liest JSON via `FileReader`, validiert `format`/`version`, führt einen **Merge** durch:
   - Ingenieurs-Track: Vereinigung der Solved-Keys (gelöst bleibt gelöst).
   - Schulungen-Track: pro `(training, chapter)` größtes `lastPage` und besseres `quizBest` (höhere Quote gewinnt) wird übernommen.
+  - SRS-Karteikarten: pro `qid` der spaetere `last`-Stempel gewinnt.
+  - Reader-Notizen (P-LP-NOTES-BOOKMARKS): pro `(tid, cid, pageIdx)` gewinnt der laengere Plain-Text-String (mehr geschriebene Notiz schlaegt kuerzere); leerer String entfernt die Notiz lokal vor dem Schreiben.
+  - Reader-Bookmarks (P-LP-NOTES-BOOKMARKS): Set-Vereinigung pro `(tid, cid)`; ein gesetzter Bookmark bleibt gesetzt.
 - Nach erfolgreichem Import: `window.location.reload()`, damit alle Hooks den neuen Storage-Stand lesen.
 
 ### 19.3 Erweiterungsregeln
@@ -692,6 +697,7 @@ Da der Fortschritt rein in `localStorage` lebt und damit gerätegebunden ist, bi
 - Export per Cloud-Upload an einen Server — widerspricht der Architektur (kein Backend, keine Telemetrie, §1).
 - Import ohne Merge (Hard-Replace als Default) — würde fortgeschrittene Lerner auf dem Zielgerät zurücksetzen.
 - Reset des Fortschritts vor dem Import „zur Sicherheit" — bricht die Merge-Garantien.
+- HTML, Skript oder personenbezogene Daten in Reader-Notizen schreiben — Notizen sind Plain-Text und werden vom Reader nicht als HTML gerendert. Wer Querverweise auf Standards/Quellen pflegen will, nutzt die offizielle `lo`/`tags`/`source`-Metadaten-Pflege (AGENTS §22) oder spaeter das Glossar (P-ARCH-GLOSSARY).
 
 ---
 
