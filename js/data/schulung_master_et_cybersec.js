@@ -5089,12 +5089,160 @@
             'BSI Lagebericht IT-Sicherheit 2024 (Okt. 2024) raet grundsaetzlich von Zahlung ab; OFAC-Listen und EU-Cyber-Sanktionsregime koennen Zahlung sogar verbieten.')
     ];
 
+    // P-ARCH-GLOSSARY: Schulungs-Glossar (>= 30 Eintraege). Marker im HTML:
+    // `[[glossary:id]]` oder `[[glossary:id|Sichtbarer Text]]`. Renderer in
+    // js/app.jsx (applyGlossary) loest auf einen klickbaren `.glossary-link`-Button auf,
+    // der eine Detail-Karte mit Term/Definition/Quelle oeffnet. Quellen pflichtgemaess
+    // (AGENTS §8 / §18.5): Standard + Jahr + Abschnitt.
+    const GLOSSARY_CYBERSEC = [
+        { id: 'isms', term: 'ISMS — Information Security Management System',
+            definition: 'Systematischer Managementrahmen zur Steuerung, Ueberwachung und kontinuierlichen Verbesserung der Informationssicherheit. Nach ISO/IEC 27001:2022 mit 93 Annex-A-Controls.',
+            source: 'ISO/IEC 27001:2022, §4-10 sowie Annex A.' },
+        { id: 'iso27005', term: 'ISO/IEC 27005:2022',
+            definition: 'Standard fuer Informationssicherheits-Risikomanagement; ergaenzt ISO 27001 mit Methodik zur Identifikation, Analyse, Bewertung und Behandlung von Risiken.',
+            source: 'ISO/IEC 27005:2022, §6-10.' },
+        { id: 'iso31000', term: 'ISO 31000:2018',
+            definition: 'Generischer Rahmen fuer Risikomanagement (nicht IT-spezifisch). Grundprinzipien, Rahmenwerk und Prozess; ISO 27005 ist die IT-Security-Auspraegung.',
+            source: 'ISO 31000:2018, §4-6.' },
+        { id: 'bsi-grundschutz', term: 'BSI IT-Grundschutz',
+            definition: 'Methodik und Bausteinkatalog des BSI zur Absicherung von Informationsverbuenden. Edition 2024 mit Schutzbedarfsfeststellung, Modellierung und Basis-/Standard-/Kern-Absicherung.',
+            source: 'BSI IT-Grundschutz, Edition 2024, BSI-Standards 200-1 / 200-2 / 200-3.' },
+        { id: 'nis2', term: 'NIS2-Richtlinie (EU) 2022/2555',
+            definition: 'EU-Richtlinie zur Cybersicherheit kritischer und wichtiger Einrichtungen. Pflichten zu Risikomanagement (Art. 21), Vorfallmeldung (Art. 23, 24h/72h/30d) und Geschaeftsleitungs-Verantwortung. Umsetzungsfrist 17.10.2024.',
+            source: 'Richtlinie (EU) 2022/2555 (NIS2), Art. 21, 23.' },
+        { id: 'cra', term: 'Cyber Resilience Act (EU) 2024/2847',
+            definition: 'EU-Verordnung mit Cybersicherheitspflichten fuer Produkte mit digitalen Elementen: Security-by-Design, SBOM-Pflicht, 24h-Meldung aktiv ausgenutzter Schwachstellen (Art. 14), Konformitaetsbewertung. Geltung gestaffelt ab 11.12.2027.',
+            source: 'Verordnung (EU) 2024/2847 (CRA), Art. 13, 14.' },
+        { id: 'dora', term: 'DORA — Digital Operational Resilience Act',
+            definition: 'EU-Verordnung 2022/2554 fuer den Finanzsektor: IKT-Risikomanagement, Incident-Meldung, Testing (TLPT), Drittanbieter-Aufsicht. Geltung ab 17.01.2025.',
+            source: 'Verordnung (EU) 2022/2554 (DORA), Kapitel II-V.' },
+        { id: 'kritis', term: 'KRITIS — Kritische Infrastrukturen',
+            definition: 'Nationaler deutscher Begriff fuer Infrastrukturen mit erheblicher Bedeutung fuer das Gemeinwesen. Schwellenwerte aus BSI-Kritisverordnung; Pflichten aus BSIG §8a/b. NIS2-Umsetzungsgesetz erweitert den Adressatenkreis stark.',
+            source: 'BSIG §8a-c (Stand 2024) und BSI-Kritisverordnung.' },
+        { id: 'cvss-v4', term: 'CVSS v4.0',
+            definition: 'Common Vulnerability Scoring System Version 4.0 von FIRST (2023). Metriken: Base + Threat + Environmental + Supplemental. Loest CVSS v3.1 ab; bessere Differenzierung von Exploitability vs. Impact.',
+            source: 'FIRST CVSS v4.0 Specification (2023), §2.' },
+        { id: 'epss', term: 'EPSS — Exploit Prediction Scoring System',
+            definition: 'Wahrscheinlichkeit (0..1), dass eine CVE in den naechsten 30 Tagen aktiv ausgenutzt wird. Daten-getriebenes Modell von FIRST. Kombiniert mit CVSS und KEV liefert es eine Priorisierung jenseits reiner Severity.',
+            source: 'FIRST EPSS v3 (2023), §3.' },
+        { id: 'kev', term: 'CISA KEV — Known Exploited Vulnerabilities',
+            definition: 'Oeffentlich gepflegter Katalog aktiv ausgenutzter Schwachstellen der US-CISA. Pflicht-Patch-Frist fuer US-Bundesbehoerden; in der Praxis Standard-Priorisierungsquelle weltweit.',
+            source: 'CISA KEV Catalog, Policy ab BOD 22-01 (2021, fortlaufend).' },
+        { id: 'fair', term: 'FAIR — Factor Analysis of Information Risk',
+            definition: 'Quantitatives Risikoanalyse-Framework von Jack Jones / Open Group. Zerlegt Verlust in Frequenz x Magnitude; arbeitet mit Verteilungen statt Punkt-Schaetzungen.',
+            source: 'Open Group FAIR Standard O-RA (2021).' },
+        { id: 'octave', term: 'OCTAVE Allegro',
+            definition: 'Asset-zentrierte qualitative Risikoanalyse-Methodik des SEI/CERT. 8 Schritte; fokussiert auf Informations-Assets und deren Container.',
+            source: 'CERT/SEI OCTAVE Allegro (2007).' },
+        { id: 'iec62443', term: 'IEC 62443',
+            definition: 'Internationale Normreihe fuer Industrial Automation and Control Systems Security. -3-2 Risiko, -3-3 System-Anforderungen, -4-1 Secure Product Lifecycle, -4-2 Komponenten-Anforderungen. Security Levels SL-T 1..4.',
+            source: 'IEC 62443-3-2:2020, -3-3:2013, -4-1:2018, -4-2:2019.' },
+        { id: 'zta', term: 'Zero Trust Architecture',
+            definition: 'Architekturparadigma: niemals implizit vertrauen, Zugriff je Anfrage authentifizieren und autorisieren, kleinstmoegliche Berechtigung. PEP/PDP-Modell.',
+            source: 'NIST SP 800-207 (2020), §3.' },
+        { id: 'nist-80061r2', term: 'NIST SP 800-61 Rev. 2',
+            definition: 'Computer Security Incident Handling Guide. IR-Lifecycle: Preparation -> Detection & Analysis -> Containment, Eradication, Recovery -> Post-Incident Activity.',
+            source: 'NIST SP 800-61 r2 (2012), §3.' },
+        { id: 'nist-80086', term: 'NIST SP 800-86',
+            definition: 'Guide to Integrating Forensic Techniques into Incident Response. Phasen Collection, Examination, Analysis, Reporting; Reihenfolge der Volatilitaet (RFC 3227).',
+            source: 'NIST SP 800-86 (2006), §3, §4.' },
+        { id: 'iso27037', term: 'ISO/IEC 27037:2012',
+            definition: 'Leitfaden fuer Identifikation, Sammlung, Erfassung und Erhaltung digitaler Beweise. Setzt Anforderungen an Chain of Custody und Hashing.',
+            source: 'ISO/IEC 27037:2012, §6.' },
+        { id: 'mitre-attack', term: 'MITRE ATT&CK',
+            definition: 'Knowledge-Base von Angreifer-Taktiken, -Techniken und -Subtechniken auf Basis realer Vorfaelle. Matrizen Enterprise, Mobile, ICS. Versionierung fortlaufend (zuletzt v15).',
+            source: 'MITRE ATT&CK Framework, attack.mitre.org (v15, 2024).' },
+        { id: 'mitre-atlas', term: 'MITRE ATLAS',
+            definition: 'Adversarial Threat Landscape for AI Systems: ATT&CK-aehnliche Matrix fuer ML-/KI-spezifische Angriffstaktiken (Reconnaissance, Resource Development, ML Model Access, Initial Access, ML Attack Staging, Exfiltration, Impact).',
+            source: 'MITRE ATLAS Project, atlas.mitre.org (2024).' },
+        { id: 'attck-ics', term: 'MITRE ATT&CK for ICS',
+            definition: 'ATT&CK-Matrix fuer industrielle Steuerungssysteme. Taktiken u.a. Initial Access, Execution, Persistence, Lateral Movement, Inhibit Response Function, Impair Process Control, Loss of Control.',
+            source: 'MITRE ATT&CK for ICS v15 (2024).' },
+        { id: 'stride', term: 'STRIDE',
+            definition: 'Bedrohungsmodellierungs-Taxonomie: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege. Microsoft, klassisches Methodengeruest.',
+            source: 'Howard/LeBlanc, Writing Secure Code 2nd ed., Microsoft Press 2003.' },
+        { id: 'linddun', term: 'LINDDUN',
+            definition: 'Bedrohungsmodellierung fuer Privacy: Linking, Identifying, Non-Repudiation, Detecting, Disclosure of Information, Unawareness, Non-Compliance.',
+            source: 'KU Leuven LINDDUN (2010, Update GO 2020).' },
+        { id: 'owasp-top10', term: 'OWASP Top 10:2021',
+            definition: 'Konsolidierte Liste der zehn haeufigsten Risiken in Webanwendungen. A01 Broken Access Control, A02 Cryptographic Failures, A03 Injection, ...',
+            source: 'OWASP Top 10:2021 Release.' },
+        { id: 'owasp-asvs', term: 'OWASP ASVS 4.0.3',
+            definition: 'Application Security Verification Standard. Anforderungskatalog mit Levels L1 (Basis), L2 (Standard), L3 (kritisch). Branchen-Referenz fuer Sicherheits-Tests.',
+            source: 'OWASP ASVS 4.0.3 (2022).' },
+        { id: 'owasp-llm', term: 'OWASP LLM Top 10 v2025',
+            definition: 'Zehn wichtigste Schwachstellen in LLM-Anwendungen. LLM01 Prompt Injection, LLM02 Sensitive Information Disclosure, LLM03 Supply Chain, LLM04 Data and Model Poisoning, LLM05 Improper Output Handling, ...',
+            source: 'OWASP Top 10 for LLM Applications v2025 (2024).' },
+        { id: 'ssdf', term: 'NIST SP 800-218 SSDF',
+            definition: 'Secure Software Development Framework. Praxis-Gruppen Prepare the Organization (PO), Protect the Software (PS), Produce Well-Secured Software (PW), Respond to Vulnerabilities (RV).',
+            source: 'NIST SP 800-218 v1.1 (2022).' },
+        { id: 'slsa', term: 'SLSA — Supply-chain Levels for Software Artifacts',
+            definition: 'Mehrstufiges Framework (Build L1..L3) fuer Lieferketten-Integritaet: Provenance, gehaerteter Build-Service, isolierte Builds.',
+            source: 'SLSA v1.0 (slsa.dev, 2023).' },
+        { id: 'sbom', term: 'SBOM — Software Bill of Materials',
+            definition: 'Maschinenlesbare Stueckliste aller Komponenten einer Software (Name, Version, Lizenz, Hashes). Formate CycloneDX und SPDX. Pflicht u.a. nach US EO 14028 und EU CRA Art. 13.',
+            source: 'CISA SBOM Minimum Elements (2021); ISO/IEC 5962 (SPDX).' },
+        { id: 'sigstore', term: 'Sigstore',
+            definition: 'Open-Source-Stack fuer Software-Signaturen ohne langlebige Schluessel: Cosign (Signierung), Fulcio (kurzlebige Zertifikate), Rekor (Transparenz-Log).',
+            source: 'sigstore.dev Dokumentation (2024).' },
+        { id: 'spiffe-spire', term: 'SPIFFE / SPIRE',
+            definition: 'Open-Source-Workload-Identity-Standard: SPIFFE ID (URI) und SVID (X.509 oder JWT) erlauben mTLS und Authn ohne statische Secrets. SPIRE ist die Referenz-Implementierung.',
+            source: 'CNCF SPIFFE Spec v1.0 (2023).' },
+        { id: 'fips203', term: 'FIPS 203 (ML-KEM)',
+            definition: 'NIST-Standard fuer den Post-Quantum-Schluesselkapselungsmechanismus ML-KEM (basierend auf CRYSTALS-Kyber). Parameter ML-KEM-512 / 768 / 1024.',
+            source: 'NIST FIPS 203 (Aug. 2024).' },
+        { id: 'fips204', term: 'FIPS 204 (ML-DSA)',
+            definition: 'NIST-Standard fuer das Post-Quantum-Signaturschema ML-DSA (basierend auf CRYSTALS-Dilithium). Parameter ML-DSA-44 / 65 / 87.',
+            source: 'NIST FIPS 204 (Aug. 2024).' },
+        { id: 'tls13', term: 'TLS 1.3',
+            definition: 'Transport Layer Security 1.3: AEAD-only, ephemerale (EC)DHE, vereinfachter 1-RTT-Handshake (0-RTT optional, nicht-idempotente Daten verbieten), Forward Secrecy verpflichtend.',
+            source: 'RFC 8446 (2018).' },
+        { id: 'nist-ai-rmf', term: 'NIST AI RMF 1.0',
+            definition: 'Artificial Intelligence Risk Management Framework. Vier Funktionen Govern, Map, Measure, Manage; sieben Trustworthy-AI-Characteristics.',
+            source: 'NIST AI 100-1, AI Risk Management Framework 1.0 (Jan. 2023).' },
+        { id: 'eu-ai-act', term: 'EU AI Act (EU) 2024/1689',
+            definition: 'EU-Verordnung zur kuenstlichen Intelligenz. Risikoklassen (unzulaessig, hochrisiko, begrenzt, minimal); Pflichten fuer Hochrisiko-Systeme (Anhang III) und General-Purpose-AI. Geltung gestaffelt ab 2025/2026.',
+            source: 'Verordnung (EU) 2024/1689 (AI Act).' },
+        { id: 'iso42001', term: 'ISO/IEC 42001:2023',
+            definition: 'Erster Management-System-Standard fuer AI: AI Management System (AIMS) analog ISO 27001 mit Annex-A-Controls fuer KI-spezifische Risiken.',
+            source: 'ISO/IEC 42001:2023.' }
+    ];
+
+    // P-ARCH-GLOSSARY: Demo-Marker auf bereits definierten Seiten und in einer
+    // Quiz-Erlaeuterung einseeden. Nur First-Match-Ersetzung, damit das HTML
+    // sonst unveraendert bleibt und keine Doppel-Marker entstehen.
+    PAGE_RISK_ISMS.html = PAGE_RISK_ISMS.html.replace(
+        '<strong>ISMS</strong>',
+        '<strong>[[glossary:isms|ISMS]]</strong>'
+    );
+    PAGE_RISK_BSI_27005.html = PAGE_RISK_BSI_27005.html.replace(
+        '<strong>ISMS</strong>',
+        '<strong>[[glossary:isms|ISMS]]</strong>'
+    );
+    PAGE_RISK_REGULATIONS.html = PAGE_RISK_REGULATIONS.html
+        .replace('NIS2-Richtlinie (EU) 2022/2555', '[[glossary:nis2|NIS2-Richtlinie (EU) 2022/2555]]')
+        .replace('Cyber Resilience Act', '[[glossary:cra|Cyber Resilience Act]]');
+    PAGE_RISK_SCORING.html = PAGE_RISK_SCORING.html
+        .replace('CVSS v4.0', '[[glossary:cvss-v4|CVSS v4.0]]')
+        .replace('EPSS', '[[glossary:epss|EPSS]]')
+        .replace('CISA KEV', '[[glossary:kev|CISA KEV]]');
+    // Eine Quiz-Erlaeuterung mit Glossar-Marker anreichern (Demo fuer Quiz-Result-Stage).
+    QUIZ_RISK.forEach((it) => {
+        if (it && it.explanation && it.explanation.includes('NIS2-Richtlinie (EU 2022/2555)')) {
+            it.explanation = it.explanation.replace(
+                'NIS2-Richtlinie (EU 2022/2555)',
+                '[[glossary:nis2|NIS2-Richtlinie (EU 2022/2555)]]'
+            );
+        }
+    });
+
     window.SCHULUNGEN.list.push({
         id: 'master_et_cybersec',
         code: 'MA-ET CyberSec',
         name: 'Master Elektrotechnik — Cyber-Security',
         short: 'MA-ET CyberSec',
         desc: 'Vertiefungsstudium Elektrotechnik mit Fokus Cyber-Security: Embedded Security, Netzwerk- und Industriesicherheit (IEC 62443), angewandte Kryptographie, Sichere Softwareentwicklung, Risikomanagement nach ISO 27001 / BSI Grundschutz, AI-Security.',
+        glossary: GLOSSARY_CYBERSEC,
         // P-ARCH-ASSESSMENT-ENGINE (AGENTS §18.10): Pruefungsmodus uebergreifend ueber Kapitel.
         // Pool wird zur Laufzeit aus allen MCQ-Items der gefilterten Kapitel gezogen; Items
         // werden Fisher-Yates-gemischt. Kein Per-Item-Feedback bis zum Ende. Zeitlimit in Minuten.

@@ -95,7 +95,7 @@ smartineer/
 
 **Regeln**:
 - Keine neuen Top-Level-Ordner ohne Diskussion.
-- **Keine Binär-Bilder** (PNG/JPG) — App-Icons sind SVG (Performance + git-friendly). **Ausnahme:** Das Brand-Logo (`icons/smartineer-logo.png`) ist eine vorgegebene 3D-Illustration und liegt als optimiertes PNG mit transparentem Hintergrund vor. Die SVG-Icons (`icons/icon.svg`, `icon-192.svg`, `icon-512.svg`) bleiben Pflicht für Favicon, PWA-Manifest und Maskable. Eine vektorisierte, vereinfachte Variante des Brand-Logos liegt zur freien Verwendung in `logo/smartineer-logo-flat.svg`.
+- **Keine Binär-Bilder** (PNG/JPG) — App-Icons sind SVG (Performance + git-friendly). **Ausnahme:** Das Brand-Logo (`icons/smartineer-logo.png`) ist eine vorgegebene 3D-Illustration und liegt als optimiertes PNG mit transparentem Hintergrund vor. Es wird seit v60 breit genutzt: Topbar, PWA-Install-Prompt, Favicon (`<link rel="icon">`), Apple-Touch-Icon (`<link rel="apple-touch-icon">`), Open-Graph-/Twitter-Share-Bild sowie als zusaetzlicher PNG-Eintrag im Manifest (`purpose: "any"`, 333x333). Innerhalb der App wird es als Hero-Logo in den Stage-Headern Dashboard, Cheatsheets, Schulungen-Index und Schueler-Index gerendert. Die SVG-Icons (`icons/icon.svg`, `icon-192.svg`, `icon-512.svg`) bleiben Pflicht fuer Maskable-Purpose und als Fallback. Eine vektorisierte, vereinfachte Variante des Brand-Logos liegt zur freien Verwendung in `logo/smartineer-logo-flat.svg`.
 - Keine Lockfiles, keine `node_modules/`, keine `package.json` (es gibt kein npm-Projekt).
 - `manifest.webmanifest` und `sw.js` müssen am **Repo-Root** liegen (Service-Worker-Scope = `/`).
 
@@ -646,6 +646,60 @@ Seit v54 (`P-ARCH-ASSESSMENT-ENGINE`) unterstuetzt der Schulungen-Track einen **
 - `count` so hoch setzen, dass `count > pool.length`. Validator faengt das; UI deaktiviert Start-Button bei leerem Pool.
 
 **Referenz-Implementierung:** Alle produktiven Schulungen tragen seit v55 ein Top-Level-Feld `assessments` mit mindestens einer Mock-Pruefung. Vorlage / Erstausstattung: `js/data/schulung_master_et_cybersec.js` (Modul-Mock + Risk-Fokus, ohne `seed`). Seed-Beispiele (deterministischer Shuffle): `schulung_starter.js` (Security+, CySA+, PenTest+ — je 40-Item-Final + 20-Item-Domain-Practice), `schulung_securityx.js` (CASP+-Final), `schulung_master_et_automation.js` (Modul-Mock + Antrieb/Feldbus-Practice), `schulung_allgemeinmedizin.js` (M1-/M2-/Facharzt-Mocks).
+
+### 18.11 Glossar (P-ARCH-GLOSSARY)
+
+Seit v59 darf eine Schulung ein optionales **Glossar** als Top-Level-Feld `glossary: [...]` fuehren. Glossar-Eintraege werden im Lehrtext und in Quiz-Erlaeuterungen via Marker referenziert und im Reader als kompakte Detail-Karte (Modal) aufgeloest. Ziel: Standards/Abkuerzungen (NIS2, CRA, CVSS v4.0, ML-KEM, …) ein Mal sauber definieren und im Kontext verlinken, statt sie auf jeder Lehrseite neu erklaeren zu muessen.
+
+**Schema:**
+
+```js
+{
+    glossary: [
+        {
+            id: 'isms',                                           // Pflicht. snake-/kebab-case, eindeutig je Schulung, nie aendern (Marker-Drift in HTML-Strings!).
+            term: 'ISMS — Information Security Management System',// Pflicht. Anzeige im Modal-Header.
+            definition: 'Systematischer Managementrahmen ...',    // Pflicht. Plain-Text bzw. enges HTML (s.u.).
+            source: 'ISO/IEC 27001:2022, §4-10 sowie Annex A.'    // Pflicht. Standard + Jahr + Abschnitt (AGENTS §8 / §18.5).
+        }
+    ]
+}
+```
+
+**Marker-Syntax** in `pages[*].html` und in `quiz[*].explanation`:
+
+- `[[glossary:id]]` -> rendert den `term` als klickbaren Link.
+- `[[glossary:id|Sichtbarer Text]]` -> rendert „Sichtbarer Text" als klickbaren Link, behaelt aber denselben Eintrag.
+
+Der Adapter `applyGlossary(html, glossaryMap)` in `js/app.jsx` ersetzt jeden Marker durch `<button type="button" class="glossary-link" data-gid="<id>" aria-label="Glossar: <term>">Label</button>`. Ein Document-Level-Click-Listener im `Schulungen`-Component faengt Klicks auf `.glossary-link[data-gid]` und oeffnet das Modal mit Term, Definition und Quelle. Schliessen via Backdrop, „Schliessen"-Button oder ESC-Taste (im Modal-Component).
+
+**UX-Vertrag:**
+
+- Modal ist read-only — keine Verlinkung zu anderen Seiten, keine Bearbeitung. Bei Bedarf in der naechsten Stufe (P-ARCH-CROSSLINK) auf „springe zur Lehrseite" erweitern.
+- Sichtbar nur in Reader-, Quiz- und Quiz-Result-Stage (dort koennen Marker auftauchen). Im Stage-Index/Chapters-Stage wird das Modal nicht eingehaengt — Marker tauchen dort nicht auf.
+- KaTeX in `definition` ist erlaubt; Backslashes wie ueblich verdoppeln.
+
+**HTML-Constraints fuer `definition`:**
+
+- Plain-Text bevorzugt. Erlaubte Tags: `<strong>`, `<em>`, `<code>`, `<br>`, KaTeX (`$...$`, `$$...$$`).
+- **Keine** `<script>`, `<style>`, externen Bilder, Links zu externen URLs, Inline-Eventhandler. Modal rendert via `dangerouslySetInnerHTML` — daher gilt §10 (nur Maintainer-gepflegte Inhalte, **keine** User-Eingaben).
+- Sprache: Deutsch; englische Fachbegriffe in Klammern.
+
+**Erweiterungsregeln:**
+
+- **Neuer Eintrag:** an `glossary`-Array anhaengen. Reihenfolge im Modal irrelevant (Lookup ueber `id`).
+- **Eintrag umbenennen:** `term`/`definition`/`source` aendern erlaubt. `id` **nie** aendern — sonst werden alle existierenden Marker zu „unbekannt".
+- **Marker setzen:** Entweder direkt im HTML-String oder per Post-Process-Mutation der Page-Variable (Beispiel: `PAGE_RISK_REGULATIONS.html = PAGE_RISK_REGULATIONS.html.replace('NIS2-Richtlinie (EU) 2022/2555', '[[glossary:nis2|NIS2-Richtlinie (EU) 2022/2555]]')`). First-Match-Replace bevorzugt, damit das Lehrbild „Begriff einmal verlinkt, danach normal lesen" entsteht.
+- Mindest-Pflege pro Schulung mit aktivem Glossar: **mindestens 30 Eintraege** zum Start (Cybersec-Schulung erfuellt das, siehe `GLOSSARY_CYBERSEC`). Weitere Schulungen werden bei eigenem Glossar-Rollout (z.B. P-ARCH-GLOSSARY-AUTO) inkrementell befuellt.
+
+**Anti-Pattern:**
+
+- `id` einer Glossar-Karte umbenennen — bricht alle bestehenden `[[glossary:id]]`-Marker im Lehrtext.
+- Marker in den Frage-Stem (`q`) oder in Antwort-Optionen (`options[]`) eines Quiz-Items setzen — wuerde die Antwort verraten oder die Lesbarkeit kaputtmachen. Marker gehoeren in `pages[*].html` und in `quiz[*].explanation` (Quiz-Result-Phase).
+- Marker im Schueler-Track (§17) — nicht vorgesehen.
+- Externer Quellverweis (Link auf https://…) im `definition` — widerspricht §1 (keine Telemetrie, keine externe Datenabhaengigkeit).
+
+**Referenz-Implementierung:** `GLOSSARY_CYBERSEC` in `js/data/schulung_master_et_cybersec.js` (37 Eintraege; Standards, Frameworks, kryptographische Primitive). Demo-Marker eingeseedet in `PAGE_RISK_ISMS`, `PAGE_RISK_BSI_27005`, `PAGE_RISK_REGULATIONS`, `PAGE_RISK_SCORING` sowie in einer Quiz-Erlaeuterung in `QUIZ_RISK`.
 
 ---
 

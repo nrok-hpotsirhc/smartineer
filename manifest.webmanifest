@@ -28,6 +28,12 @@
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "icons/smartineer-logo.png",
+      "sizes": "333x333",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

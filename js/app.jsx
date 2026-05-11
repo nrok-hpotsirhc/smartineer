@@ -775,6 +775,8 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
     return (
         <section className="view-fade">
             <div className="text-center max-w-3xl mx-auto mb-10">
+                <img src="icons/smartineer-logo.png" alt="" width="96" height="96"
+                     className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 drop-shadow-lg" />
                 <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-slate-900 via-blue-800 to-cyan-700 bg-clip-text text-transparent">Smartineer — dein Lern-Cockpit.</h1>
                 <p className="text-base md:text-lg text-slate-600">Reaktiviere Ingenieurs-Wissen über drei Schwierigkeitsstufen oder wechsle in den Schüler-Bereich für Mathematik der Klassen 1–10. Fortschritt wird lokal gespeichert.</p>
             </div>
@@ -1209,6 +1211,8 @@ function Cheatsheet({ data, order }) {
     return (
         <section className="view-fade" ref={ref}>
             <div className="text-center max-w-3xl mx-auto mb-8">
+                <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
+                     className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
                 <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Cheatsheets &amp; Isolierte Musterlösungen</h1>
                 <p className="text-slate-600">Zwei strikt getrennte Bereiche: <strong>1)</strong> kompakte Formelsammlung und <strong>2)</strong> isolierter Lösungskatalog mit Rechenweg und Kommentaren.</p>
             </div>
@@ -1342,6 +1346,8 @@ function Schueler() {
         return (
             <section className="view-fade">
                 <div className="text-center max-w-3xl mx-auto mb-8">
+                    <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
+                         className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
                     <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schüler-Bereich</h1>
                     <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–4. Klassen 5–10 sind in Vorbereitung; Englisch folgt ab Klasse 5.</p>
                 </div>
@@ -2099,6 +2105,24 @@ function InlineCheck({ check }) {
     );
 }
 
+// ---------- Glossar (P-ARCH-GLOSSARY) ----------
+// Eine Schulung darf optional `glossary: [{ id, term, definition, source }]` tragen.
+// Marker im HTML: `[[glossary:id]]` oder `[[glossary:id|Sichtbarer Text]]`.
+// Beim Rendern wird der Marker zu einem klickbaren `<button class="glossary-link">`
+// ersetzt. Klick oeffnet eine kleine Detail-Karte mit Term/Definition/Quelle.
+function applyGlossary(html, gmap) {
+    if (!html) return '';
+    if (!gmap) return html;
+    return html.replace(/\[\[glossary:([a-z0-9_-]+)(?:\|([^\]]+))?\]\]/gi, (m, id, custom) => {
+        const e = gmap[id];
+        const fallback = custom || (e && e.term) || id;
+        if (!e) return fallback;
+        const safeLabel = String(fallback).replace(/"/g, '&quot;');
+        const safeTerm = String(e.term).replace(/"/g, '&quot;');
+        return `<button type="button" class="glossary-link" data-gid="${id}" aria-label="Glossar: ${safeTerm}">${safeLabel}</button>`;
+    });
+}
+
 function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
     const trainings = (window.SCHULUNGEN && window.SCHULUNGEN.list) || [];
     const { state, setLastPage, recordQuiz, recordAssessment } = useSchulungenState();
@@ -2123,6 +2147,8 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
     const [currentAssessment, setCurrentAssessment] = useState(null);
     const [deadlineMs, setDeadlineMs] = useState(null);
     const [, setNowTick] = useState(0);
+    // P-ARCH-GLOSSARY: aktuell geoeffneter Glossar-Eintrag (null oder {id, term, definition, source}).
+    const [glossaryEntry, setGlossaryEntry] = useState(null);
 
     const readerRef = useKaTeX([stage, tid, cid, page]);
     const quizRef = useKaTeX([stage, quizIdx]);
@@ -2156,6 +2182,49 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
 
     const training = trainings.find(t => t.id === tid);
     const chapter = training && training.chapters.find(c => c.id === cid);
+
+    // P-ARCH-GLOSSARY: Map id -> entry fuer die aktuelle Schulung. Click-Delegation
+    // faengt jeden Klick auf `.glossary-link` innerhalb des Schulungen-Bereichs ab
+    // und oeffnet die Detail-Karte. Funktioniert in Reader, Quiz und Quiz-Result,
+    // weil das gemeinsame Root-`<section>` den Handler traegt.
+    const glossaryMap = useMemo(() => {
+        const list = (training && training.glossary) || [];
+        const m = {};
+        list.forEach(e => { if (e && e.id) m[e.id] = e; });
+        return m;
+    }, [training]);
+    const onGlossaryClick = useCallback((e) => {
+        const btn = e.target && e.target.closest && e.target.closest('.glossary-link');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const gid = btn.getAttribute('data-gid');
+        const entry = glossaryMap[gid];
+        if (entry) setGlossaryEntry(entry);
+    }, [glossaryMap]);
+    // Global click delegation, damit Marker in Reader-Article, Quiz-Result und
+    // InlineCheck-Explanations gleichermassen reagieren (verschiedene `<section>`-Roots).
+    useEffect(() => {
+        document.addEventListener('click', onGlossaryClick);
+        return () => document.removeEventListener('click', onGlossaryClick);
+    }, [onGlossaryClick]);
+    // Glossar-Modal (geteilt zwischen allen Schulungen-Stages). Wird via {glossaryModal}
+    // direkt vor dem schliessenden `</section>` jeder Stage gerendert.
+    const glossaryModal = glossaryEntry ? (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in"
+            onClick={() => setGlossaryEntry(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 slide-up relative" onClick={(e) => e.stopPropagation()}>
+                <button onClick={() => setGlossaryEntry(null)}
+                    className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 transition text-xl leading-none" aria-label="Schließen">×</button>
+                <div className="text-xs font-bold uppercase tracking-wide text-blue-600 mb-1">Glossar</div>
+                <h3 className="text-xl font-extrabold text-slate-900 mb-3">{glossaryEntry.term}</h3>
+                <p className="text-sm text-slate-700 mb-3" dangerouslySetInnerHTML={{ __html: glossaryEntry.definition || '' }} />
+                {glossaryEntry.source && (
+                    <p className="text-xs text-slate-500 italic border-t border-slate-100 pt-2 mt-2">Quelle: {glossaryEntry.source}</p>
+                )}
+            </div>
+        </div>
+    ) : null;
 
     const openTraining = (trainingId) => {
         setTid(trainingId); setCid(null); setPage(0); setStage('chapters');
@@ -2341,6 +2410,8 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
         return (
             <section className="view-fade">
                 <div className="text-center max-w-3xl mx-auto mb-8">
+                    <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
+                         className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
                     <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schulungen — Zertifikats-Vorbereitung</h1>
                     <p className="text-slate-600">Buchartig aufgebaute, kapitelweise Lernpfade. Fortschritt und letzte Seite werden lokal gespeichert. Am Ende jedes Kapitels wartet ein Quiz mit zufällig gezogenen Fragen.</p>
                 </div>
@@ -2565,7 +2636,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                     </div>
                     <article className="p-5 md:p-7 task-fade book-page" key={`${cid}-${page}`}>
                         <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 mb-4">{cur.title}</h2>
-                        <div className="prose-book text-slate-800" dangerouslySetInnerHTML={{ __html: cur.html }} />
+                        <div className="prose-book text-slate-800" dangerouslySetInnerHTML={{ __html: applyGlossary(cur.html, glossaryMap) }} />
                         {cur.check && <InlineCheck check={cur.check} key={`check-${cid}-${page}`} />}
                     </article>
                     {notesOpen && (
@@ -2643,6 +2714,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                         </div>
                     </div>
                 )}
+                {glossaryModal}
             </section>
         );
     }
@@ -2788,6 +2860,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                         {assessmentMode && quizIdx + 1 >= quizSet.length ? 'Pruefung abgeben' : 'Antwort bestätigen'}
                     </button>
                 </div>
+                {glossaryModal}
             </section>
         );
     }
@@ -2943,7 +3016,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                                             })}
                                         </div>
                                     )}
-                                    {a.explanation && <div className="text-xs text-slate-600 mt-2 italic">{a.explanation}</div>}
+                                    {a.explanation && <div className="text-xs text-slate-600 mt-2 italic" dangerouslySetInnerHTML={{ __html: applyGlossary(a.explanation, glossaryMap) }} />}
                                     {/* P-LP-FEEDBACK-LINKS: bei falscher Antwort Lehrseiten-Vorschlaege via lo/tags-Match.
                                         Reviewmode: ueberspringt (Karteikarten kommen aus mehreren Kapiteln). */}
                                     {!a.ok && !reviewMode && chapter && (() => {
@@ -2996,6 +3069,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany }) {
                         </>
                     )}
                 </div>
+                {glossaryModal}
             </section>
         );
     }
