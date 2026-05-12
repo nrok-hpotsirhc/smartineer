@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v87-welding-krl-min70';
+const CACHE_VERSION = 'smartineer-v88-filter-export-favicon-k1-4';
 const APP_SHELL = [
     './',
     './index.html',
@@ -46,6 +46,7 @@ const APP_SHELL = [
     './js/data/schulung_master_et_cybersec.js',
     './js/data/schulung_master_et_automation.js',
     './icons/icon.svg',
+    './icons/favicon.svg',
     './icons/smartineer-logo.png',
     './icons/icon-192.svg',
     './icons/icon-512.svg'

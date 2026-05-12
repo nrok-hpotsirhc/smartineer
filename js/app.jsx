@@ -308,7 +308,7 @@ function App() {
                         onGoToOptionen={() => setView('optionen')} />
                 )}
                 {view === 'schueler' && (
-                    <Schueler />
+                    <Schueler visibleClassIds={visClasses.visibleClasses} />
                 )}
                 {view === 'schulungen' && (
                     // P-UI-RESTRUCTURE (v85): Direct-Routes auf 'schulungen' werden in den

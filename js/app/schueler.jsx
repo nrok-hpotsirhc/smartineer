@@ -198,10 +198,24 @@ function SchuelerDashboard({ activeProfile, visibleClassIds, onOpenSchueler, onG
     );
 }
 
-function Schueler() {
+function Schueler({ visibleClassIds }) {
     const SCH = window.SCHUELER;
-    const [stage, setStage] = useState('classes'); // classes | subjects | training | quiz | result
-    const [klass, setKlass] = useState(null);
+    // P-UI-CLASS-FILTER-SCHUELER (v88): Klassen-Auswahl auf die im InterestPicker /
+    // Einstellungen freigeschalteten Klassen reduzieren. Leere/Default-Whitelist (alles)
+    // -> alle Klassen wie bisher. Ist nur genau eine Klasse sichtbar, wird der
+    // Klassen-Picker uebersprungen und direkt der Faecher-Picker geoeffnet.
+    const allowedClassSet = React.useMemo(() => {
+        if (!Array.isArray(visibleClassIds) || !visibleClassIds.length) return null;
+        return new Set(visibleClassIds);
+    }, [visibleClassIds]);
+    const visibleClasses = React.useMemo(() => {
+        if (!SCH || !Array.isArray(SCH.classes)) return [];
+        if (!allowedClassSet) return SCH.classes;
+        const filtered = SCH.classes.filter(c => allowedClassSet.has(c.id));
+        return filtered.length ? filtered : SCH.classes;
+    }, [SCH, allowedClassSet]);
+    const [stage, setStage] = useState(() => (visibleClasses.length === 1 ? 'subjects' : 'classes'));
+    const [klass, setKlass] = useState(() => (visibleClasses.length === 1 ? visibleClasses[0].id : null));
     const [subject, setSubject] = useState(null);
     const [items, setItems] = useState([]);
     const [idx, setIdx] = useState(0);
@@ -648,7 +662,7 @@ function Schueler() {
                     <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–10; ab Klasse 5 kommen Deutsch, Naturwissenschaften, Geschichte sowie Englisch, Französisch und Latein dazu. Alle Mittelstufenfächer bieten getrenntes Training mit Formeln/Merksätzen, Musterlösungen und ein 10-Fragen-Quiz.</p>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {SCH.classes.map((c, i) => {
+                    {visibleClasses.map((c, i) => {
                         const ready = c.subjects.some(s => {
                             const cfg = SCH.content[`${c.id}.${s}`];
                             return cfg && cfg.mode !== 'stub';

@@ -212,6 +212,13 @@ function hasAnyLiveScopedData() {
 const EXPORT_FORMAT = 'smartineer-progress';
 const EXPORT_VERSION = 2;
 const EXPORT_KEYS = [STORAGE_KEY, SCHUELER_PROGRESS_KEY, SCHULUNGEN_KEY, SRS_KEY, READER_NOTES_KEY, READER_BOOKMARKS_KEY];
+// P-ARCH-EXPORT-DEVICE-SETTINGS (v88): Optionale Geraete-Einstellungen, die der
+// Nutzer explizit mitnehmen will (Theme, Reader-Schriftgroesse). Werden im
+// Export unter `device` als roher String pro Key gespiegelt — `null` markiert
+// "Key existiert nicht". AUTH_KEY und INSTALL_DISMISS_KEY bleiben bewusst aussen
+// vor (sicherheits-/geraetespezifisch sinnlos zu uebertragen). Format-Version
+// bleibt 2: aeltere Reader ignorieren das unbekannte Feld einfach.
+const DEVICE_EXPORT_KEYS = [THEME_KEY, READER_TYPO_KEY];
 
 function buildExportPayload() {
     // P-ARCH-PROFILES: v2 — alle 5 Profil-Snapshots werden gebuendelt exportiert.
@@ -233,13 +240,23 @@ function buildExportPayload() {
         });
         if (any) profiles[pid] = slot;
     });
+    // Device-Settings als rohe Strings einsammeln (Theme: Plain-String;
+    // Reader-Typo: JSON-Blob — beides bleibt unaendert serialisiert).
+    const device = {};
+    DEVICE_EXPORT_KEYS.forEach(k => {
+        try {
+            const raw = localStorage.getItem(k);
+            if (raw != null) device[k] = raw;
+        } catch (e) { /* ignore */ }
+    });
     return {
         format: EXPORT_FORMAT,
         version: EXPORT_VERSION,
         exportedAt: new Date().toISOString(),
         activeProfile: activePid || null,
         profilesMeta: getProfileMeta(),
-        profiles
+        profiles,
+        device
     };
 }
 
@@ -369,6 +386,22 @@ function applyImportedPayload(payload, mode) {
             allKeys.forEach(k => {
                 if (inc[k] !== undefined) writeForPid(k, inc[k]);
             });
+        });
+        // Device-Settings (THEME, READER_TYPO) zurueckschreiben — geraete-global,
+        // nicht profil-spezifisch. Bei `replace` werden fehlende Keys geloescht;
+        // bei `merge` (Default) nur ueberschrieben, wenn im Import vorhanden.
+        const incDevice = (payload.device && typeof payload.device === 'object') ? payload.device : {};
+        DEVICE_EXPORT_KEYS.forEach(k => {
+            if (Object.prototype.hasOwnProperty.call(incDevice, k)) {
+                const v = incDevice[k];
+                if (v == null) {
+                    if (mode === 'replace') { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } }
+                } else {
+                    try { localStorage.setItem(k, String(v)); } catch (e) { /* quota */ }
+                }
+            } else if (mode === 'replace') {
+                try { localStorage.removeItem(k); } catch (e) { /* ignore */ }
+            }
         });
         return;
     }
