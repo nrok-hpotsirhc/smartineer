@@ -48,6 +48,10 @@ function App() {
     const auth = useAuth();
     const vis = useVisibleCategories(allOrder);
     const order = vis.visibleOrder;
+    // P-UI-RESTRUCTURE (v85): Schueler-Klassenfilter parallel zu Kategoriefilter.
+    // K1..K10 sind die fixen Slot-IDs der Schueler-Datenstruktur.
+    const ALL_CLASS_IDS = ['k1','k2','k3','k4','k5','k6','k7','k8','k9','k10'];
+    const visClasses = useVisibleClasses(ALL_CLASS_IDS);
 
     const readAudienceChoice = () => {
         try {
@@ -60,6 +64,10 @@ function App() {
     const [audienceChoice, setAudienceChoice] = useState(initialAudienceChoice);
     const [audienceDialogOpen, setAudienceDialogOpen] = useState(!initialAudienceChoice);
     const [view, setView] = useState(initialAudienceChoice === 'schueler' ? 'schueler' : 'dashboard');
+    // P-UI-RESTRUCTURE (v85): Sub-Tab innerhalb des Ingenieurbereich-Wrappers.
+    const [ingenieurSub, setIngenieurSub] = useState('training');
+    // P-UI-INTERESTS (v85): Multi-Select-Picker fuer Kategorien/Klassen.
+    const [interestPicker, setInterestPicker] = useState(null); // null | 'ingenieur' | 'schueler'
     const [currentCat, setCurrentCat] = useState(allOrder[0] || null);
     const { isSolved, setSolved, reset } = useProgress();
     // P-LP-SRS-OPEN: SRS-State wird im App-Root gehalten und an Training, Dashboard
@@ -120,17 +128,27 @@ function App() {
         setAudienceChoice(choice);
         setAudienceDialogOpen(false);
         setView(choice === 'schueler' ? 'schueler' : 'dashboard');
+        // P-UI-INTERESTS (v85): Beim ersten Audience-Pick (oder nach Reset) Interessen abfragen.
+        if (!isInterestsPicked()) setInterestPicker(choice);
     };
 
     const resetAudienceChoice = () => {
         try { localStorage.removeItem(AUDIENCE_KEY); } catch (e) { /* quota */ }
         setAudienceChoice(null);
         setAudienceDialogOpen(true);
+        // Auch Interessen zuruecksetzen, damit der naechste Audience-Pick wieder fragt.
+        clearInterestsPicked();
     };
 
     const openCategory = (k, targetView) => {
         setCurrentCat(k);
-        if (targetView) setView(targetView);
+        // P-UI-RESTRUCTURE (v85): Training/Cheatsheets sind jetzt Sub-Views des Ingenieurbereichs.
+        if (targetView === 'training' || targetView === 'cheatsheet') {
+            setIngenieurSub(targetView);
+            setView('ingenieur');
+        } else if (targetView) {
+            setView(targetView);
+        }
     };
 
     // P-LP-DAILY-MIX: oeffnet eine Trainings-Aufgabe an genauer (catId, level, idx)-
@@ -141,7 +159,8 @@ function App() {
     const openTrainingAt = (catId, level, idx) => {
         pendingTrainingPosRef.current = { level, idx };
         setCurrentCat(catId);
-        setView('training');
+        setIngenieurSub('training');
+        setView('ingenieur');
     };
 
     // P-UI-DASHBOARD-RESUME: Ein-Klick-Wiedereinstieg in die zuletzt bearbeitete Schulung.
@@ -150,7 +169,8 @@ function App() {
     const pendingSchulungOpenRef = useRef(null);
     const onResumeSchulung = (tid, cid) => {
         pendingSchulungOpenRef.current = { tid, cid };
-        setView('schulungen');
+        setIngenieurSub('schulungen');
+        setView('ingenieur');
     };
     // Resume-Kandidat: juengste Schulungens-Aktivitaet aus Storage + Schulungs-Liste.
     const resumeCandidate = useMemo(() => computeResumeCandidate(), [view]);
@@ -252,7 +272,15 @@ function App() {
                 activeProfile={activeProfile}
                 onOpenProfileSwitcher={() => setProfileSwitcherOpen(true)} />
             <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {view === 'dashboard' && (
+                {view === 'dashboard' && audienceChoice === 'schueler' && (
+                    <SchuelerDashboard
+                        activeProfile={activeProfile}
+                        visibleClassIds={visClasses.visibleClasses}
+                        onOpenSchueler={() => setView('schueler')}
+                        onGoToOptionen={() => setView('optionen')}
+                        onReset={null} onExport={null} onImport={null} onInstall={null} />
+                )}
+                {view === 'dashboard' && audienceChoice !== 'schueler' && (
                     <Dashboard data={data} order={order} isSolved={isSolved}
                         srsState={srsState}
                         onOpenCategory={openCategory} onOpenTrainingAt={(catId, level, idx) => openTrainingAt(catId, level, idx)}
@@ -262,33 +290,49 @@ function App() {
                         onExport={null} onImport={null}
                         onInstall={null} />
                 )}
-                {view === 'training' && (
-                    <Training data={data} order={order}
+                {view === 'ingenieur' && (
+                    <Ingenieur data={data} order={order} allOrder={allOrder}
                         isSolved={isSolved} setSolved={setSolved}
                         srsState={srsState} srsGradeMany={srsGradeMany}
+                        auth={auth}
                         currentCat={(order.includes(currentCat) ? currentCat : order[0])} setCurrentCat={setCurrentCat}
                         initialLevel={pendingTrainingPosRef.current ? pendingTrainingPosRef.current.level : null}
                         initialIdx={pendingTrainingPosRef.current ? pendingTrainingPosRef.current.idx : null}
                         consumeInitialPos={() => { pendingTrainingPosRef.current = null; }}
-                        />
-                )}
-                {view === 'cheatsheet' && (
-                    <Cheatsheet data={data} order={order} />
+                        subview={ingenieurSub} setSubview={setIngenieurSub}
+                        schulungenGetInitialOpen={() => {
+                            const v = pendingSchulungOpenRef.current;
+                            pendingSchulungOpenRef.current = null;
+                            return v;
+                        }}
+                        onGoToOptionen={() => setView('optionen')} />
                 )}
                 {view === 'schueler' && (
                     <Schueler />
                 )}
                 {view === 'schulungen' && (
-                    <Schulungen auth={auth} onGoToOptionen={() => setView('optionen')}
+                    // P-UI-RESTRUCTURE (v85): Direct-Routes auf 'schulungen' werden in den
+                    // Ingenieurbereich umgeleitet. Diese Branch existiert nur als Fallback fuer
+                    // alte tiefe Links/State und faechert sofort auf den Wrapper auf.
+                    <Ingenieur data={data} order={order} allOrder={allOrder}
+                        isSolved={isSolved} setSolved={setSolved}
                         srsState={srsState} srsGradeMany={srsGradeMany}
-                        getInitialOpen={() => {
+                        auth={auth}
+                        currentCat={(order.includes(currentCat) ? currentCat : order[0])} setCurrentCat={setCurrentCat}
+                        initialLevel={null} initialIdx={null}
+                        consumeInitialPos={() => {}}
+                        subview='schulungen' setSubview={(s) => { setIngenieurSub(s); setView('ingenieur'); }}
+                        schulungenGetInitialOpen={() => {
                             const v = pendingSchulungOpenRef.current;
                             pendingSchulungOpenRef.current = null;
                             return v;
-                        }} />
+                        }}
+                        onGoToOptionen={() => setView('optionen')} />
                 )}
                 {view === 'optionen' && (
-                    <Optionen data={data} allOrder={allOrder} vis={vis} auth={auth}
+                    <Optionen data={data} allOrder={allOrder} vis={vis} visClasses={visClasses}
+                        allClassIds={ALL_CLASS_IDS} classLabels={(window.SCHUELER && window.SCHUELER.classes) || []}
+                        auth={auth}
                         onExport={onExport} onImport={onImportClick} onReset={onReset}
                         onInstall={showInstallButton ? () => setInstallOpen(true) : null}
                         installAvailable={!!showInstallButton}
@@ -309,6 +353,12 @@ function App() {
             <InstallPrompt open={installOpen} onClose={closeInstall}
                 deferredEvent={deferredEvent} platform={platform} />
             <AudienceChooser open={audienceDialogOpen} onChoose={chooseAudience} />
+            <InterestPicker open={!!interestPicker} audience={interestPicker}
+                data={data} allOrder={allOrder}
+                allClassIds={ALL_CLASS_IDS} classLabels={(window.SCHUELER && window.SCHUELER.classes) || []}
+                vis={vis} visClasses={visClasses}
+                onSubmit={() => { markInterestsPicked(); setInterestPicker(null); }}
+                onSkip={() => { markInterestsPicked(); setInterestPicker(null); }} />
             <ImpressumModal open={impressumOpen} onClose={() => setImpressumOpen(false)} />
             <ProfileSwitcher open={profileSwitcherOpen} activeId={activeProfileId}
                 onClose={() => setProfileSwitcherOpen(false)}
@@ -318,6 +368,105 @@ function App() {
                 style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
                 aria-hidden="true" tabIndex={-1} />
         </>
+    );
+}
+
+// ---------------------------------------------------------------- InterestPicker (P-UI-INTERESTS, v85)
+// Multi-Select-Modal nach dem Audience-Pick. Ingenieurs-Pfad zeigt alle Kategorien
+// (window.APP_DATA), Schueler-Pfad zeigt alle 10 Klassen (window.SCHUELER.classes).
+// Die Auswahl wird in `vis.setSelection(...)` bzw. `visClasses.setSelection(...)`
+// uebergeben und im Profil-Storage persistiert. "Ueberspringen" akzeptiert den
+// Default (alle sichtbar). AGENTS §10/§12: keine Emojis, nur Text/SVG.
+function InterestPicker({ open, audience, data, allOrder, allClassIds, classLabels, vis, visClasses, onSubmit, onSkip }) {
+    const isSchueler = audience === 'schueler';
+    const allIds = isSchueler ? (allClassIds || []) : (allOrder || []);
+    const [picked, setPicked] = useState(() => new Set(allIds));
+    useEffect(() => {
+        if (!open) return;
+        // Vor-Auswahl aus aktuell sichtbaren IDs befuellen, damit nachtraegliche Pflege Sinn ergibt.
+        const current = isSchueler ? (visClasses ? visClasses.visibleClasses : allIds)
+                                   : (vis ? vis.visibleOrder : allIds);
+        setPicked(new Set(current && current.length ? current : allIds));
+    }, [open, audience]);
+    if (!open) return null;
+
+    const toggle = (id) => {
+        const next = new Set(picked);
+        if (next.has(id)) next.delete(id); else next.add(id);
+        setPicked(next);
+    };
+    const selectAll = () => setPicked(new Set(allIds));
+    const selectNone = () => setPicked(new Set());
+
+    const submit = () => {
+        const arr = allIds.filter(id => picked.has(id));
+        // Defensive: leere Auswahl waere ein toter Bildschirm — wir akzeptieren leer als
+        // "alle sichtbar" (analog zur useVisibleX-Konvention).
+        const payload = arr.length ? arr : allIds.slice();
+        if (isSchueler && visClasses) visClasses.setSelection(payload);
+        if (!isSchueler && vis) vis.setSelection(payload);
+        onSubmit && onSubmit();
+    };
+
+    const title = isSchueler ? 'Welche Klassen interessieren dich?' : 'Welche Kategorien interessieren dich?';
+    const sub = isSchueler
+        ? 'Wähle eine oder mehrere Klassen. Du kannst die Auswahl jederzeit in den Einstellungen anpassen.'
+        : 'Wähle die Themengebiete, die du reaktivieren willst. Du kannst die Auswahl jederzeit in den Einstellungen anpassen.';
+
+    const items = isSchueler
+        ? allClassIds.map(id => {
+            const cls = (classLabels || []).find(c => c.id === id);
+            return { id, label: cls ? cls.label : id, desc: cls ? ((cls.subjects || []).length + ' Fächer') : '' };
+        })
+        : allOrder.map(id => {
+            const cat = data[id];
+            return { id, label: cat ? cat.name : id, desc: cat ? (cat.desc || '') : '' };
+        });
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="interest-title">
+            <div className="w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl border border-white/70 flex flex-col">
+                <div className="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-200">
+                    <h2 id="interest-title" className="text-2xl sm:text-3xl font-black text-slate-900">{title}</h2>
+                    <p className="mt-2 text-sm text-slate-600">{sub}</p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                        <button onClick={selectAll} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">Alle auswählen</button>
+                        <button onClick={selectNone} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">Keine</button>
+                        <span className="ml-auto text-slate-500 self-center">{picked.size} / {allIds.length} ausgewählt</span>
+                    </div>
+                </div>
+                <div className="px-5 sm:px-7 py-4 overflow-y-auto flex-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {items.map(it => {
+                            const checked = picked.has(it.id);
+                            return (
+                                <label key={it.id}
+                                    className={`flex items-start gap-3 px-3 py-2 rounded-lg border cursor-pointer transition ${checked
+                                        ? 'border-blue-400 bg-blue-50'
+                                        : 'border-slate-200 bg-white hover:bg-slate-50'}`}>
+                                    <input type="checkbox" checked={checked} onChange={() => toggle(it.id)}
+                                        className="mt-1 w-4 h-4 accent-blue-600" />
+                                    <span className="flex-1 min-w-0">
+                                        <span className="block text-sm font-bold text-slate-800">{it.label}</span>
+                                        {it.desc && <span className="block text-xs text-slate-500 mt-0.5 line-clamp-2">{it.desc}</span>}
+                                    </span>
+                                </label>
+                            );
+                        })}
+                    </div>
+                </div>
+                <div className="px-5 sm:px-7 py-4 border-t border-slate-200 flex flex-wrap gap-2 justify-end bg-slate-50">
+                    <button onClick={onSkip}
+                        className="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 font-bold transition">
+                        Überspringen
+                    </button>
+                    <button onClick={submit}
+                        className="px-5 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold shadow-md transition">
+                        Weiter
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }
 

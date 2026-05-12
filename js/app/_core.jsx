@@ -40,7 +40,14 @@ const READER_TYPO_KEY = 'smartineer_reader_typography_v1';
 // Schulungen, nicht fuer regulatorisch sensible Inhalte.
 const AUTH_KEY = 'smartineer_auth_v1'; // { user, role, since (ISO), expires (ISO) }
 const AUTH_TEMPORARILY_DISABLED = false; // P-UI-LOGIN-REACTIVATE (v43): Auth-Gate wieder aktiv.
-const VISIBLE_CATS_KEY = 'smartineer_visible_categories_v1'; // { [catId]: false } — Default: alle sichtbar
+const VISIBLE_CATS_KEY = 'smartineer_visible_categories_v1'; // { [catId]: false } — Default: alle sichtbar (P-UI-INTERESTS v85)
+// P-UI-INTERESTS (v85): Schueler-Klassen-Sichtbarkeitsfilter, parallel zu VISIBLE_CATS_KEY.
+// Default: alle Klassen sichtbar; nur ausgeblendete Klassen werden mit Wert false persistiert.
+const VISIBLE_CLASSES_KEY = 'smartineer_visible_classes_v1';
+// P-UI-INTERESTS (v85): Marker, ob der Erst-Interessens-Picker fuer dieses Profil
+// schon durchlaufen wurde. Existiert er nicht und ein Audience-Wert ist gesetzt,
+// rendert die App den Picker einmalig.
+const INTERESTS_PICKED_KEY = 'smartineer_interests_picked_v1';
 const ADMIN_GLOBAL_KEY = 'smartineer_admin_global_v1'; // reserviert fuer kuenftige globale Settings
 
 // ---------------------------------------------------------------- Multi-Profil (P-ARCH-PROFILES, v84)
@@ -73,6 +80,9 @@ const PROFILE_IDS = PROFILES.map(p => p.id);
 // Diese Keys werden pro Profil snapshotted und beim Wechsel umgeschaltet.
 // AUDIENCE_KEY ist mit dabei, weil jedes Profil seinen Startbereich (Schueler vs Ingenieur)
 // fuer sich behalten soll. THEME/AUTH/INSTALL bleiben geraetespezifisch.
+// P-UI-INTERESTS (v85): Sichtbarkeitsfilter fuer Kategorien/Klassen und der
+// Interessens-Picked-Marker sind ebenfalls profil-spezifisch — verschiedene Profile
+// duerfen sich fuer verschiedene Themen bzw. Klassen interessieren.
 const PROFILE_SCOPED_KEYS = [
     'wissen_reloaded_progress_v1',
     'smartineer_schueler_progress_v1',
@@ -80,7 +90,10 @@ const PROFILE_SCOPED_KEYS = [
     'smartineer_srs_v2',
     'smartineer_reader_notes_v1',
     'smartineer_reader_bookmarks_v1',
-    'smartineer_audience_v1'
+    'smartineer_audience_v1',
+    'smartineer_visible_categories_v1',
+    'smartineer_visible_classes_v1',
+    'smartineer_interests_picked_v1'
 ];
 function profileSlotKey(pid, originalKey) { return 'smartineer_p_' + pid + '_' + originalKey; }
 function getActiveProfileId() {
@@ -609,7 +622,64 @@ function useVisibleCategories(allOrder) {
     const isVisible = useCallback((catId) => !hidden[catId], [hidden]);
     const visibleOrder = useMemo(() => allOrder.filter(k => !hidden[k]), [allOrder, hidden]);
     const reset = useCallback(() => persist({}), [persist]);
-    return { hidden, isVisible, visibleOrder, toggle, reset };
+    // P-UI-INTERESTS (v85): bewusste Wahl "nur diese N anzeigen" \u2014 alle nicht in `picked`
+    // enthaltenen Kategorien werden ausgeblendet. Wenn `picked` leer ist, werden ALLE eingeblendet
+    // (Sicherheitsnetz, damit das UI nie leer wirkt).
+    const setSelection = useCallback((picked) => {
+        const set = Array.isArray(picked) ? new Set(picked) : new Set();
+        const next = {};
+        if (set.size > 0) {
+            allOrder.forEach(k => { if (!set.has(k)) next[k] = true; });
+        }
+        persist(next);
+    }, [allOrder, persist]);
+    return { hidden, isVisible, visibleOrder, toggle, reset, setSelection };
+}
+
+// P-UI-INTERESTS (v85): Schueler-Klassen-Sichtbarkeitsfilter, parallel zu useVisibleCategories.
+// `allClassIds` ist eine flache Liste (z.B. ['k1','k2',...,'k10']). Persistenzform identisch:
+// { [classId]: false } fuer ausgeblendete. Default leer = alle sichtbar.
+function useVisibleClasses(allClassIds) {
+    const [hidden, setHidden] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(VISIBLE_CLASSES_KEY)) || {}; }
+        catch (e) { return {}; }
+    });
+    const persist = useCallback((next) => {
+        setHidden(next);
+        try { localStorage.setItem(VISIBLE_CLASSES_KEY, JSON.stringify(next)); } catch (e) { /* quota */ }
+    }, []);
+    const toggle = useCallback((cid) => {
+        setHidden(prev => {
+            const next = { ...prev };
+            if (next[cid]) delete next[cid]; else next[cid] = true;
+            try { localStorage.setItem(VISIBLE_CLASSES_KEY, JSON.stringify(next)); } catch (e) {}
+            return next;
+        });
+    }, []);
+    const isVisible = useCallback((cid) => !hidden[cid], [hidden]);
+    const visibleClasses = useMemo(() => allClassIds.filter(c => !hidden[c]), [allClassIds, hidden]);
+    const reset = useCallback(() => persist({}), [persist]);
+    const setSelection = useCallback((picked) => {
+        const set = Array.isArray(picked) ? new Set(picked) : new Set();
+        const next = {};
+        if (set.size > 0) {
+            allClassIds.forEach(c => { if (!set.has(c)) next[c] = true; });
+        }
+        persist(next);
+    }, [allClassIds, persist]);
+    return { hidden, isVisible, visibleClasses, toggle, reset, setSelection };
+}
+
+// P-UI-INTERESTS (v85): Marker im localStorage, ob der Erst-Picker fuer das aktive Profil
+// schon durchlaufen wurde. Profil-scoped via PROFILE_SCOPED_KEYS.
+function isInterestsPicked() {
+    try { return localStorage.getItem(INTERESTS_PICKED_KEY) === '1'; } catch (e) { return false; }
+}
+function markInterestsPicked() {
+    try { localStorage.setItem(INTERESTS_PICKED_KEY, '1'); } catch (e) { /* quota */ }
+}
+function clearInterestsPicked() {
+    try { localStorage.removeItem(INTERESTS_PICKED_KEY); } catch (e) {}
 }
 
 function categoryStats(cat, isSolved) {

@@ -21,6 +21,18 @@ html, body {
     overflow-x: hidden;
     overscroll-behavior-x: none;
 }
+/* P-UI-RESTRUCTURE (v85): Zusatz-Verankerung fuer alle App-Shell-Container.
+ * `overflow-x: clip` schneidet Overflow ab, ohne `position: sticky` zu brechen
+ * (anders als `overflow-x: hidden`, das Sticky-Header im Nav deaktivieren wuerde). */
+#react-root,
+#react-root > * ,
+main,
+footer {
+    max-width: 100vw;
+    overflow-x: clip;
+}
+/* Flex-Children duerfen nicht ueber den Container hinausragen: min-width:0 erlaubt Shrink. */
+.nav-glass > div { min-width: 0; }
 body {
     position: relative;
 }

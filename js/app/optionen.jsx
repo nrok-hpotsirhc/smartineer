@@ -1,23 +1,27 @@
 // ---------------------------------------------------------------- Optionen
 // Tabs: Konto, Kategorien, Daten (Export/Import + Reset), Store (Skeleton),
 // PWA (Install), Admin (nur fuer admin-Rolle).
-function Optionen({ data, allOrder, vis, auth, onExport, onImport, onReset, onInstall, installAvailable, audienceChoice, onSetAudience, onResetAudience }) {
+function Optionen({ data, allOrder, vis, visClasses, allClassIds, classLabels, auth, onExport, onImport, onReset, onInstall, installAvailable, audienceChoice, onSetAudience, onResetAudience }) {
     const [tab, setTab] = useState('konto');
+    // P-UI-RESTRUCTURE (v85): Klassen-Tab nur fuer Schueler-Audience sichtbar.
     const tabs = [
         { id: 'start',      label: 'Startbereich' },
         { id: 'konto',      label: 'Konto' },
-        { id: 'kategorien', label: 'Kategorien' },
+        { id: 'kategorien', label: 'Kategorien' }
+    ];
+    if (audienceChoice === 'schueler') tabs.push({ id: 'klassen', label: 'Klassen' });
+    tabs.push(
         { id: 'daten',      label: 'Daten' },
         { id: 'store',      label: 'Store' },
         { id: 'pwa',        label: 'App-Installation' }
-    ];
+    );
     if (auth.isAdmin) tabs.push({ id: 'admin', label: 'Admin' });
 
     return (
         <section className="view-fade max-w-4xl mx-auto">
             <div className="text-center mb-6">
-                <h1 className="text-3xl md:text-4xl font-extrabold mb-2 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Optionen</h1>
-                <p className="text-slate-600 text-sm">Konto, Kategorie-Sichtbarkeit, Daten-Sync, App-Installation.</p>
+                <h1 className="text-3xl md:text-4xl font-extrabold mb-2 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Einstellungen</h1>
+                <p className="text-slate-600 text-sm">Konto, Bereich, sichtbare Kategorien / Klassen, Daten-Sync, App-Installation.</p>
             </div>
             <div className="flex flex-wrap gap-2 mb-5 border-b border-slate-200">
                 {tabs.map(t => (
@@ -31,11 +35,47 @@ function Optionen({ data, allOrder, vis, auth, onExport, onImport, onReset, onIn
             {tab === 'start' && <OptionenStartbereich audienceChoice={audienceChoice} onSetAudience={onSetAudience} onResetAudience={onResetAudience} />}
             {tab === 'konto' && <OptionenKonto auth={auth} />}
             {tab === 'kategorien' && <OptionenKategorien data={data} allOrder={allOrder} vis={vis} />}
+            {tab === 'klassen' && <OptionenKlassen allClassIds={allClassIds} classLabels={classLabels} visClasses={visClasses} />}
             {tab === 'daten' && <OptionenDaten onExport={onExport} onImport={onImport} onReset={onReset} />}
             {tab === 'store' && <OptionenStore auth={auth} />}
             {tab === 'pwa' && <OptionenPwa onInstall={onInstall} installAvailable={installAvailable} />}
             {tab === 'admin' && auth.isAdmin && <OptionenAdmin auth={auth} vis={vis} />}
         </section>
+    );
+}
+
+// ---------------------------------------------------------------- OptionenKlassen (P-UI-RESTRUCTURE, v85)
+// Klassenfilter fuer den Schueler-Track: gleiches Pattern wie OptionenKategorien,
+// aber pro Klasse (k1..k10). Persistiert in VISIBLE_CLASSES_KEY ueber useVisibleClasses.
+function OptionenKlassen({ allClassIds, classLabels, visClasses }) {
+    if (!visClasses) return null;
+    const labelOf = (id) => {
+        const c = (classLabels || []).find(x => x.id === id);
+        return c ? c.label : id;
+    };
+    return (
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <h2 className="text-lg font-bold text-slate-800 mb-1">Sichtbare Klassen</h2>
+            <p className="text-sm text-slate-600 mb-4">Wähle, welche Klassenstufen im Schülerbereich und im Schüler-Dashboard angezeigt werden.</p>
+            <div className="flex flex-wrap gap-2 mb-3">
+                <button onClick={() => visClasses.setSelection(allClassIds.slice())}
+                    className="px-3 py-1.5 text-xs rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">Alle anzeigen</button>
+                <button onClick={visClasses.reset}
+                    className="px-3 py-1.5 text-xs rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">Standard wiederherstellen</button>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {(allClassIds || []).map(id => {
+                    const visible = visClasses.isVisible(id);
+                    return (
+                        <label key={id} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition ${visible ? 'border-blue-400 bg-blue-50' : 'border-slate-200 bg-white hover:bg-slate-50'}`}>
+                            <input type="checkbox" checked={visible} onChange={() => visClasses.toggle(id)}
+                                className="w-4 h-4 accent-blue-600" />
+                            <span className="text-sm font-bold text-slate-800">{labelOf(id)}</span>
+                        </label>
+                    );
+                })}
+            </div>
+        </div>
     );
 }
 

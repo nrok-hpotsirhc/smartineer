@@ -8,31 +8,12 @@ const NAV_ICONS = {
             <rect x="3" y="16" width="7" height="5" />
         </svg>
     ),
-    training: (
+    // P-UI-RESTRUCTURE (v85): Ingenieurbereich kapselt Training, Cheatsheets und Schulungen.
+    ingenieur: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
              strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-            <path d="M12 2v4" />
-            <path d="M5 10l-2 2 2 2" />
-            <path d="M19 10l2 2-2 2" />
-            <circle cx="12" cy="14" r="6" />
-            <path d="M9 14l2 2 4-4" />
-        </svg>
-    ),
-    cheatsheet: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-             strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-            <path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z" />
-            <path d="M8 8h7" />
-            <path d="M8 12h7" />
-            <path d="M8 16h4" />
-        </svg>
-    ),
-    schulungen: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-             strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-            <path d="M3 7l9-4 9 4-9 4-9-4z" />
-            <path d="M3 7v6c0 2 4 4 9 4s9-2 9-4V7" />
-            <path d="M21 11v5" />
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M2 12h3M19 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" />
         </svg>
     ),
     schueler: (
@@ -52,25 +33,23 @@ const NAV_ICONS = {
 };
 
 function Nav({ view, setView, theme, onToggleTheme, activeProfile, onOpenProfileSwitcher }) {
-    // P-UI-NAV-GROUPING: Lern-Tabs (Dashboard/Training/Cheatsheets/Schulungen/Schueler)
-    // visuell von Konto/Theme (Optionen + Theme-Toggle) trennen.
+    // P-UI-RESTRUCTURE (v85): Top-Level-Navigation auf vier Bereiche reduziert.
+    // Cheatsheets und Schulungen ziehen als Sub-Tabs in den Ingenieurbereich um.
     const learnItems = [
-        { id: 'dashboard', label: 'Dashboard' },
-        { id: 'training', label: 'Training' },
-        { id: 'cheatsheet', label: 'Cheatsheets' },
-        { id: 'schulungen', label: 'Schulungen' },
-        { id: 'schueler', label: 'Schüler' }
+        { id: 'dashboard', label: 'Dashboard',        aria: 'Dashboard' },
+        { id: 'ingenieur', label: 'Ingenieur',        aria: 'Ingenieurbereich' },
+        { id: 'schueler',  label: 'Schüler',          aria: 'Schülerbereich' }
     ];
     const accountItems = [
-        { id: 'optionen', label: 'Optionen' }
+        { id: 'optionen', label: 'Einstellungen',     aria: 'Einstellungen' }
     ];
     const renderItem = (it) => {
         const active = view === it.id;
         return (
             <button key={it.id}
                 onClick={() => setView(it.id)}
-                title={it.label}
-                aria-label={it.label}
+                title={it.aria}
+                aria-label={it.aria}
                 aria-current={active ? 'page' : undefined}
                 className={`nav-btn inline-flex items-center justify-center gap-2 whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${active
                     ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30 nav-btn-active'

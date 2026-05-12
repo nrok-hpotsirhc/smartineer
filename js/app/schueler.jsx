@@ -1,3 +1,203 @@
+// ---------------------------------------------------------------- SchuelerDashboard (P-UI-RESTRUCTURE, v85)
+// Audience-spezifische Dashboard-Variante fuer den Schueler-Bereich. Zeigt pro
+// sichtbarer Klasse einen farbigen Fortschrittsbalken (10-Farben-Palette) und
+// optional ein zusammenfassendes Chart.js-Balkendiagramm. Bezieht Fortschritt aus
+// `useSchuelerProgress` (Storage-Key SCHUELER_PROGRESS_KEY).
+const SCHUELER_CLASS_COLORS = [
+    '#10b981', // k1 emerald
+    '#0ea5e9', // k2 sky
+    '#f59e0b', // k3 amber
+    '#f43f5e', // k4 rose
+    '#8b5cf6', // k5 violet
+    '#14b8a6', // k6 teal
+    '#6366f1', // k7 indigo
+    '#ec4899', // k8 pink
+    '#84cc16', // k9 lime
+    '#fb923c'  // k10 orange
+];
+
+function schuelerClassStats(SCH, classId, progress) {
+    const cls = SCH && SCH.classes && SCH.classes.find(c => c.id === classId);
+    if (!cls) return { total: 0, done: 0, pct: 0, mode: 'unknown' };
+    let total = 0, done = 0, hasPool = false, hasGenerated = false;
+    (cls.subjects || []).forEach(sub => {
+        const cfg = SCH.content && SCH.content[`${classId}.${sub}`];
+        if (!cfg) return;
+        if (cfg.mode === 'pool' && Array.isArray(cfg.pool)) {
+            hasPool = true;
+            cfg.pool.forEach((item, idx) => {
+                total++;
+                const qid = stableQid({ q: item && item.q, a: item && item.a });
+                const key = `${classId}.${sub}|${qid || idx}`;
+                if (progress[key]) done++;
+            });
+        } else if (cfg.mode === 'generated') {
+            hasGenerated = true;
+        }
+    });
+    if (!hasPool && hasGenerated) {
+        // K1/K2 (rein generiert): kein fester Pool — wir zaehlen direkt persistierte Items.
+        let gDone = 0;
+        Object.keys(progress).forEach(k => { if (k.indexOf(classId + '.') === 0) gDone++; });
+        return { total: 0, done: gDone, pct: 0, mode: 'generated' };
+    }
+    return { total, done, pct: total ? Math.round((done / total) * 100) : 0, mode: 'pool' };
+}
+
+function SchuelerChart({ classRows }) {
+    const ref = useRef(null);
+    const chartRef = useRef(null);
+    useEffect(() => {
+        if (!ref.current || !window.Chart) return;
+        const labels = classRows.map(r => r.label);
+        const data = classRows.map(r => r.pct);
+        const colors = classRows.map(r => r.color);
+        if (chartRef.current) {
+            chartRef.current.data.labels = labels;
+            chartRef.current.data.datasets[0].data = data;
+            chartRef.current.data.datasets[0].backgroundColor = colors;
+            chartRef.current.update();
+            return;
+        }
+        chartRef.current = new window.Chart(ref.current.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Fortschritt (%)',
+                    data,
+                    backgroundColor: colors,
+                    borderRadius: 6,
+                    maxBarThickness: 28
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                animation: { duration: 700, easing: 'easeOutQuart' },
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } },
+                    y: { ticks: { font: { weight: '600' } } }
+                }
+            }
+        });
+    }, [classRows]);
+    useEffect(() => () => { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; } }, []);
+    return (
+        <div className="schueler-chart-box" style={{ height: Math.max(140, classRows.length * 34) + 'px' }}>
+            <canvas ref={ref}></canvas>
+        </div>
+    );
+}
+
+function SchuelerDashboard({ activeProfile, visibleClassIds, onOpenSchueler, onGoToOptionen, onExport, onImport, onReset, onInstall }) {
+    const SCH = window.SCHUELER;
+    const schuelerProgress = useSchuelerProgress();
+    const allClasses = (SCH && SCH.classes) ? SCH.classes : [];
+    const visibleSet = Array.isArray(visibleClassIds) ? new Set(visibleClassIds) : null;
+    const rows = useMemo(() => {
+        return allClasses
+            .filter(c => !visibleSet || visibleSet.has(c.id))
+            .map((c) => {
+                const idx = allClasses.findIndex(x => x.id === c.id);
+                const color = SCHUELER_CLASS_COLORS[idx % SCHUELER_CLASS_COLORS.length];
+                const stats = schuelerClassStats(SCH, c.id, schuelerProgress.progress || {});
+                return { id: c.id, label: c.label, color, ...stats };
+            });
+    }, [allClasses, visibleSet, schuelerProgress.progress]);
+    const totals = useMemo(() => {
+        let total = 0, done = 0;
+        rows.forEach(r => { if (r.mode === 'pool') { total += r.total; done += r.done; } });
+        return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
+    }, [rows]);
+    const chartRows = rows.filter(r => r.mode === 'pool');
+
+    return (
+        <section className="view-fade">
+            <div className="text-center max-w-3xl mx-auto mb-8">
+                <img src="icons/smartineer-logo.png" alt="" width="80" height="80"
+                     className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-3 drop-shadow-md" />
+                <h1 className="text-3xl md:text-4xl font-extrabold mb-2 bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent">Dein Schüler-Cockpit.</h1>
+                <p className="text-sm md:text-base text-slate-600">Fortschritt pro Klasse, lokal auf diesem Gerät gespeichert.</p>
+                {activeProfile && (
+                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 shadow-sm text-xs text-slate-600">
+                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-md text-xs font-serif font-bold"
+                            style={{ backgroundColor: activeProfile.bg, color: activeProfile.fg }}>{activeProfile.symbol}</span>
+                        <span className="font-bold">{activeProfile.name}</span>
+                        <span className="text-slate-400">·</span>
+                        <span>Schülerbereich</span>
+                    </div>
+                )}
+            </div>
+
+            <div className="bg-gradient-to-br from-white via-white to-emerald-50/40 rounded-2xl shadow-sm border border-slate-200 p-5 md:p-7 mb-6">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
+                    <div className="flex-1 min-w-0">
+                        <h2 className="text-xl font-bold text-slate-800 mb-1">Gesamtfortschritt</h2>
+                        <p className="text-sm text-slate-600 mb-3">{rows.length} sichtbare Klassen · {totals.done} / {totals.total} Pool-Aufgaben gelöst ({totals.pct}%).</p>
+                        <div className="flex flex-wrap gap-2">
+                            <button onClick={onOpenSchueler}
+                                className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-2 px-5 rounded-xl shadow-md hover:shadow-lg transition-all">
+                                Schülerbereich öffnen →
+                            </button>
+                            {onGoToOptionen && (
+                                <button onClick={onGoToOptionen}
+                                    className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-5 rounded-xl transition-all">
+                                    Klassen verwalten
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    {chartRows.length > 0 && (
+                        <div className="w-full md:w-1/2">
+                            <SchuelerChart classRows={chartRows} />
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {rows.map((r, i) => (
+                    <button key={r.id} onClick={onOpenSchueler}
+                        style={{ animationDelay: `${i * 50}ms` }}
+                        className="card-fade group relative overflow-hidden bg-white text-left rounded-2xl border border-slate-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-5">
+                        <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full opacity-15 group-hover:opacity-30 transition-opacity"
+                            style={{ backgroundColor: r.color }}></div>
+                        <div className="flex justify-between items-start mb-2 relative">
+                            <h3 className="font-bold text-slate-800 text-lg">{r.label}</h3>
+                            {r.mode === 'pool' ? (
+                                <span className="text-xs font-bold px-2 py-1 rounded-full text-white"
+                                    style={{ backgroundColor: r.color }}>{r.pct}%</span>
+                            ) : (
+                                <span className="text-xs font-bold px-2 py-1 rounded-full bg-slate-200 text-slate-700">offen</span>
+                            )}
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2 mb-2 overflow-hidden relative">
+                            <div className="h-2 rounded-full transition-all duration-700 ease-out"
+                                style={{ width: (r.mode === 'pool' ? r.pct : 0) + '%', backgroundColor: r.color }}></div>
+                        </div>
+                        <p className="text-xs text-slate-500 relative">
+                            {r.mode === 'pool'
+                                ? <>{r.done} / {r.total} Aufgaben gelöst</>
+                                : <>{r.done} Aufgaben gemeistert (generierte Aufgaben)</>}
+                        </p>
+                    </button>
+                ))}
+            </div>
+
+            {(onExport || onImport || onReset || onInstall) && (
+                <div className="mt-8 flex flex-wrap gap-2 justify-center">
+                    {onExport && <button onClick={onExport} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-lg text-sm transition">Fortschritt exportieren</button>}
+                    {onImport && <button onClick={onImport} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-lg text-sm transition">Fortschritt importieren</button>}
+                    {onReset && <button onClick={onReset} className="bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 font-bold py-2 px-4 rounded-lg text-sm transition">Fortschritt zurücksetzen</button>}
+                    {onInstall && <button onClick={onInstall} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition">Als App installieren</button>}
+                </div>
+            )}
+        </section>
+    );
+}
+
 function Schueler() {
     const SCH = window.SCHUELER;
     const [stage, setStage] = useState('classes'); // classes | subjects | training | quiz | result
