@@ -3214,6 +3214,7 @@
             { q: 'Welches Material wird recycelt: Papier, Stein, Wasser?', a: 'papier' },
             { q: 'Welche Farbe hat die Muelltonne fuer Papier in vielen Staedten?', a: 'blau' },
             { q: 'Welche Farbe hat die Muelltonne fuer Bioabfall haeufig?', a: 'braun' },
+            { q: 'Welche Farbe zeigt eine Fussgaengerampel, wenn man gehen darf?', a: 'gruen' },
             { q: 'In welche Tonne kommt Plastik (gelbe Tonne)?', a: 'gelb' }
         ];
     }
@@ -3317,6 +3318,7 @@
             { q: 'Wie sagt man "Heft" auf Englisch?', a: 'notebook' },
             { q: 'Wie sagt man "Bleistift" auf Englisch?', a: 'pencil' },
             { q: 'Wie sagt man "Stift" auf Englisch?', a: 'pen' },
+            { q: 'Wie sagt man "Lineal" auf Englisch?', a: 'ruler' },
             { q: 'Wie sagt man "Schultasche" auf Englisch?', a: 'school bag' },
             { q: 'Wie sagt man "Pflanze" auf Englisch?', a: 'plant' }
         ];
@@ -3422,6 +3424,7 @@
             { q: 'Welche Form steht in "Schlaf gut!" (Imperativ, Indikativ, Konjunktiv)?', a: 'imperativ' },
             { q: 'Welche Form steht in "Wenn ich ein Vogel waere ..." (Konjunktiv)?', a: 'konjunktiv' },
             { q: 'Welche Wortart ist "sein" (in "sein Buch")? (Possessivpronomen)', a: 'pronomen' },
+            { q: 'Welches Satzzeichen beendet einen Fragesatz?', a: '?' },
             { q: 'Wie heisst die direkte Rede im Text-Element? (Zitat oder woertliche Rede)', a: 'woertliche rede' }
         ];
     }
