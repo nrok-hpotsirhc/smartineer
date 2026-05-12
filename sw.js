@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v88-filter-export-favicon-k1-4';
+const CACHE_VERSION = 'smartineer-v88b-k1-4-expand-doc';
 const APP_SHELL = [
     './',
     './index.html',

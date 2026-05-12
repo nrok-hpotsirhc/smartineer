@@ -456,8 +456,8 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 |--------|----------|----------------------------------------------------------------------------------------|
 | 1      | generated| Plus/Minus im Zahlenraum bis 20 (überwiegend ohne Zehnerübergang).                     |
 | 2      | generated| Plus/Minus bis 100, Vorübung Einmaleins (×2, ×5, ×10).                                 |
-| 3      | pool     | Vollständiges kleines 1×1, Geteilt aus 1×1, schriftliche Addition/Subtraktion bis 1000.|
-| 4      | pool     | Halbschriftliches/schriftliches Mal/Geteilt, Division mit Rest, einfache Sachaufgaben.  |
+| 3      | pool     | **Mathe/Deutsch/Sachunterricht/Englisch** (seit v88). Mathe: kleines 1×1, Geteilt, schriftliche Addition/Subtraktion bis 1000. Deutsch: Anlaute/Silben, Wortarten, Rechtschreibung. Sachunterricht: Natur/Lebenswelt/Verkehr. Englisch ab v88: Grundwortschatz/Zahlen (CEFR Pre-A1). |
+| 4      | pool     | **Mathe/Deutsch/Sachunterricht/Englisch** (seit v88). Mathe: halbschriftliches/schriftliches Mal/Geteilt, Division mit Rest, Sachaufgaben. Deutsch: Wortarten, Satzglieder, Rechtschreibung. Sachunterricht: Natur/Technik/Demokratie/Verkehr. Englisch: erweiterter Wortschatz (CEFR A1). |
 | 5      | pool     | **Mathematik/Deutsch/Physik/Chemie/Biologie/Geschichte je 200 Items.** Sprache: Englisch, Franzoesisch, Latein je 100 Zahlen-, 100 Vokabel- und 200 Grammatikfragen. Themen: Grundrechenarten, Deutsch-Grundgrammatik/Maerchen/Fabel/Sachtext, NW-Einstieg, Steinzeit/Aegypten/Antike, Sprachgrundlagen A1/erste lateinische Formen. |
 | 6      | pool     | **Mathematik/Deutsch/Physik/Chemie/Biologie/Geschichte je 200 Items.** Sprache: Englisch, Franzoesisch, Latein je 100 Zahlen-, 100 Vokabel- und 200 Grammatikfragen. Themen: Brueche/Prozent/Geometrie, Satzgefuege/Vorgangsbeschreibung/Gedicht/Sachtext, Optik/Schall/Stofftrennung/Mensch/Oekologie, Mittelalter, A1/A2-Sprachprogression. |
 | 7      | pool     | **Mathematik/Deutsch/Physik/Chemie/Biologie/Geschichte je 200 Items.** Sprache: Englisch, Franzoesisch, Latein je 100 Zahlen-, 100 Vokabel- und 200 Grammatikfragen. Themen: lineare Gleichungen/Funktionen, Argumentation/Kurzgeschichte/Ballade/Zeitung, Mechanik/Atome/Zelle/Oekosystem, Renaissance/Reformation/Absolutismus, A2-Grammatik/lateinische Kasus und AcI. |
@@ -473,11 +473,13 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 
 **Deutsch-Pools (Klasse 5–10, seit v75):** Pro Klassenstufe ein 200er Pool mit `{q, a, f, s}`-Schema. Themen folgen dem **NRW-Kernlehrplan Deutsch Sekundarstufe I**: Sprache/Grammatik/Rechtschreibung, Schreiben (Bericht, Inhaltsangabe, Argumentation, Bewerbung, materialgestuetztes Schreiben), Lesen/Literatur (Maerchen/Fabel, Gedicht, Ballade, Kurzgeschichte, Drama, Novelle/Roman) sowie Sachtexte/Medienkritik. Antworten sind kurze Strings und werden ueber `normalize()` inkl. Umlaut-Toleranz verglichen.
 
+**Grundschul-Faecher (Klasse 1–4, seit v88):** Pro (Klasse, Fach) ein `pool`-Eintrag im `{q, a}`-Schema. Quellbasis ist der **NRW-Lehrplan Grundschule** (Stand 2021) — Mathe (alle Klassen), Deutsch (alle Klassen), Sachunterricht (alle Klassen), Englisch (ab Klasse 3). Pool-Groesse ist mit ~33-100 Items bewusst kleiner als die K5-K10-200er-Mindestmenge — der Validator pruegt fuer K1-K4 keine Mindestmenge. **Bewusst NICHT** umgesetzt (mit Begruendung im Datei-Header `js/data/schueler.js`): Religion/Ethik (konfessionell/kontrovers, nicht plattformneutral), Musik (Audio-Wiedergabe), Kunst (visuell-praktisch), Sport (motorisch) — nicht sinnvoll als Text-Quiz vermittelbar.
+
 **Sprach-Pools (Englisch, Franzoesisch, Latein Klasse 5–10, seit v73; section-Trennung seit v75):** Pro (Klasse, Sprache) ein 400er Pool mit `{q, a, f, s, kind, section}`; genau 200 Items tragen `kind: 'vocab'` (davon 100 `section: 'numbers'` und 100 `section: 'vocab'`), genau 200 Items tragen `kind: 'grammar'` und `section: 'grammar'`. Die Fachkarten rendern diese drei Abschnitte einklappbar mit eigenen Training-/Quiz-Starts; Gesamttraining/Gesamtquiz bleibt erhalten. Die Pools sind curriculum-orientiert (NRW-KLP SI / CEFR A1-B1 bzw. Latein-KLP Sprache/Text/Kultur), aber **nicht** lehrwerksspezifisch: Die Kernlehrplaene schreiben keine einheitliche, schulbuchuebergreifende Vokabelliste mit exakt 200 Woertern pro Jahrgang vor. Wenn ein konkretes Lehrwerk (z.B. Green Line, Decouvertes, Pontes/Cursus/Prima) bedient werden soll, muss die autorisierte Vokabelliste nachgereicht und append-only eingepflegt werden.
 
 ### 17.4 Erweiterungsregeln
 
-- **Neue Aufgabe für Klasse 3 oder 4 hinzufügen**: an das passende `pool_*`-Array anhängen (Reihenfolge irrelevant — die UI sampelt zufällig).
+- **Neue Aufgabe für Klasse 1–4 hinzufügen** (Grundschul-Faecher Deutsch/Sachunterricht/Englisch/Mathe-Pool): an das passende `pool_kN_fach`-Array in `js/data/schueler.js` anhängen (Reihenfolge irrelevant — die UI sampelt zufällig). Schema `{q, a}` Plain-Text; Antwort-Vergleich via `SCH.normalize()` (Umlaut-Folding ae/oe/ue/ss + Akzent-Tolerance kommt aus `schueler_200_topups.js`).
 - **Neue Naturwissenschaften-Aufgabe für Klasse 5–10 hinzufügen**: append-only in die passende `NATWI_TOPUPS`-/Extra-Liste oder ans passende `pool_k*_fach()`-Basisarray; keine bestehenden Items verschieben, da Schueler-Progress/Stable-QID aus Stem+Antwort entsteht und Review-Diffs sonst unnoetig schwer werden. Neue Items muessen nach Runtime-Anreicherung `{q,a,f,s}` besitzen; `tools/validate.js --strict-sources` prueft das.
 - **Neue Mathe-/Deutsch-/NW-/Geschichte-Aufgabe für Klasse 5–10 hinzufügen**: append-only in die passende Basisfunktion oder in `js/data/schueler_200_topups.js`; Schema `{q,a,f,s}` direkt liefern, keine bestehenden Items verschieben. Validator fordert mindestens 200 Items pro (Klasse, Fach) und die Trainingsfelder.
 - **Opt-out fuer Formel/Merksatz oder Musterloesung** (seit v82, P-DATA-SCHUELER-DIDACTIC-AUDIT): `f` und `s` muessen `string` sein, duerfen aber **explizit leer** sein (`''`). Leerer String = "kein sinnvoller Tipp / keine Musterloesung" — der Renderer blendet die jeweilige Box im Training und im Quiz-Result aus. Die runtime-Helper `schuelerFormulaFor` / `schuelerSolutionFor` nutzen dieses Opt-out aktiv: Geschichte und Sprach-Vokabeln/Zahlen liefern keinen generischen Merksatz mehr; Musterloesungen sind knapp (numerisch `\\boxed{...}`, sonst `Antwort: <code>...</code>`). Lehrplan-Quellen werden nicht mehr pro Item ausgewiesen; sie stehen weiterhin im Datei-Header der Pool-Datei.
@@ -758,7 +760,8 @@ Da der Fortschritt rein in `localStorage` lebt und damit gerätegebunden ist, bi
 
 - Pflichtfelder: `format`, `version`, `data`. `format === 'smartineer-progress'` ist die Validierungs-Magic.
 - Erlaubte Storage-Keys im `data`-Objekt sind ausschließlich die in `EXPORT_KEYS` definierten: `STORAGE_KEY` (Ingenieurs-Track), `SCHULUNGEN_KEY` (Schulungen-Track), `SRS_KEY` (Spaced Repetition v2), `READER_NOTES_KEY` (Reader-Notizen, P-LP-NOTES-BOOKMARKS) und `READER_BOOKMARKS_KEY` (Reader-Bookmarks, P-LP-NOTES-BOOKMARKS).
-- **Nicht im Export**: `THEME_KEY`, `INSTALL_DISMISS_KEY`, Schüler-Drill-Zustand. Diese sind gerätespezifisch und sollen beim Wechsel zwischen Geräten **nicht** überschrieben werden.
+- **Geraete-Einstellungen** (seit v88, P-ARCH-EXPORT-DEVICE-SETTINGS): optionales Top-Level-Feld `device` enthaelt rohe String-Werte fuer `smartineer_theme_v1` und `smartineer_reader_typography_v1` (Liste in `DEVICE_EXPORT_KEYS`). Beim Import werden diese in die jeweiligen Live-Keys geschrieben. Format-Version bleibt `2` (additiv, ältere Reader ignorieren das Feld).
+- **Nicht im Export**: `INSTALL_DISMISS_KEY`, `AUTH_KEY`, Schüler-Drill-Zustand. `AUTH_KEY` ist sicherheitsrelevant (cookie-aequivalent), `INSTALL_DISMISS_KEY` rein installations-spezifisch.
 
 ### 19.2 Verhalten
 
@@ -775,7 +778,8 @@ Da der Fortschritt rein in `localStorage` lebt und damit gerätegebunden ist, bi
 
 - Neuer Storage-Key (z.B. zukünftiger Schüler-Persistenz-Key) wird ergänzt, indem er in `EXPORT_KEYS` aufgenommen wird **und** ein passender Merge-Pfad in `mergeProgressKey()` definiert wird. Schema-Version bei jeder breaking-change inkrementieren (`EXPORT_VERSION`) und im Import-Pfad alte Versionen migrieren oder ablehnen.
 - Niemals personenbezogene Daten in den Export aufnehmen.
-- Niemals `THEME_KEY` oder `INSTALL_DISMISS_KEY` in den Export aufnehmen — würde User-Einstellungen auf dem Zielgerät stillschweigend verändern.
+- `THEME_KEY` und `READER_TYPO_KEY` duerfen seit v88 ueber das optionale `device`-Feld exportiert/importiert werden (User-Wunsch, P-ARCH-EXPORT-DEVICE-SETTINGS). Beim Import wird der Wert ohne Rueckfrage uebernommen — das ist der explizite Wunsch des Users (Geraete-Wechsel mit komplettem State-Transfer).
+- Niemals `INSTALL_DISMISS_KEY` oder `AUTH_KEY` in den Export aufnehmen — sicherheits- bzw. installations-spezifisch.
 - Keine binären Formate (z.B. msgpack, protobuf): das Format muss in jedem Texteditor lesbar bleiben — auch zur manuellen Inspektion und Debugging.
 
 ### 19.4 Anti-Pattern
@@ -1162,6 +1166,7 @@ Nach `chooseAudience(choice)` prueft `App` den Storage-Key `INTERESTS_PICKED_KEY
 - **Schueler-Pfad**: Multi-Select-Liste der 10 Klassen aus `window.SCHUELER.classes`. Auswahl schreibt via `visClasses.setSelection(arr)` in `VISIBLE_CLASSES_KEY`.
 - Buttons: `Alle auswaehlen` / `Keine` / `Weiter` / `Ueberspringen`. Beide Buttons (Weiter und Ueberspringen) rufen `markInterestsPicked()` und schliessen den Modal.
 - **Defensive Empty-Fallback:** Eine **leere** Whitelist im Storage bedeutet **alle sichtbar** (sonst entstuende ein leerer Dashboard-Zustand). Der Picker ersetzt ein leeres `picked`-Array beim Submit deshalb durch die volle Liste.
+- **Stage-Filter (seit v88, P-UI-CLASS-FILTER-SCHUELER):** `Schueler` in `js/app/schueler.jsx` nimmt eine `visibleClassIds`-Prop entgegen und filtert die Klassen-Stage uebers `useMemo`/`Set`. Bei genau einer sichtbaren Klasse springt die Stage initial auf `subjects` (Auto-Skip — der Picker hat den User bereits zur einzigen Klasse gefuehrt). Default `null` / leere Whitelist = alle Klassen sichtbar (konsistent mit Empty-Fallback). Analog filtert der Ingenieurbereich ueber `vis.visibleOrder`.
 
 Audience-Reset (`resetAudienceChoice` in `App`) ruft `clearInterestsPicked()` — beim naechsten Audience-Pick erscheint der Picker wieder. Spaetere Aenderungen laufen ueber die Einstellungen (§ 25.5).
 
