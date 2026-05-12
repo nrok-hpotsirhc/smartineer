@@ -737,7 +737,9 @@ Der Adapter `applyGlossary(html, glossaryMap)` in `js/app.jsx` ersetzt jeden Mar
 
 Da der Fortschritt rein in `localStorage` lebt und damit gerätegebunden ist, bietet das Dashboard Buttons zum Export und Import einer **plattform-portablen JSON-Datei**.
 
-### 19.1 Datei-Schema
+> **Hinweis (seit v84, P-ARCH-PROFILES):** `EXPORT_VERSION` ist mittlerweile `2` und exportiert **alle 5 Profile** gebuendelt. Siehe §24.7 fuer das Multi-Profil-Format. Das unten beschriebene v1-Schema bleibt fuer **Import** weiterhin gueltig und wird ins aktive Profil gemerged.
+
+### 19.1 Datei-Schema (v1, Import-kompatibel)
 
 ```json
 {
@@ -996,5 +998,133 @@ Eine vollstaendige Lehrseite hat acht Bloecke in dieser Reihenfolge:
 ### 23.6 Referenz-Implementierung
 
 `PAGE_AI_GOVERNANCE` in `js/data/schulung_master_et_cybersec.js` (Cybersec Kap. 6.4 „MLOps-Sicherheit, NIST AI RMF, EU AI Act, ISO/IEC 42001") ist die exemplarische Lehrseite, die alle acht Bloecke in der vorgeschriebenen Reihenfolge fuehrt. Folgepakete (P-CYBERSEC-01-TOPUP, P-AUTO-01-TOPUP, P-MED-AUDIT, P-CYBERSEC-07/-08/-09, P-AUTO-05/-06/-07/-08/-09) verwenden diese Seite als Vorlage.
+
+---
+
+## 24. Multi-Profil-Architektur (P-ARCH-PROFILES, seit v84)
+
+Smartineer haelt seit v84 bis zu **fuenf** lokale Lernprofile auf demselben Geraet/Browser parallel. Jedes Profil hat einen eigenen, vollstaendig getrennten Fortschritt (Ingenieurs-Track, Schueler-Track, Schulungen-Lesestand, Quiz-Bestleistungen, SRS-Karten, Reader-Notizen/Bookmarks, Startbereich). **Kein Backend, keine Authentifizierung, keine personenbezogenen Daten** — Profile sind reine clientseitige Storage-Namespaces (vgl. §1, §11).
+
+### 24.1 Profil-Slots (fix, nicht erweiterbar)
+
+Genau **fuenf** Slots mit fester Farbe + spektakulaerem Formelzeichen + Klartextname (Quelle: `PROFILES` in `js/app/_core.jsx`):
+
+| ID  | Symbol | Klartextname | Beschreibung      | Akzent / Farbe (HEX) |
+|-----|--------|---------------|-------------------|----------------------|
+| p1  | Σ      | Summe         | Summenzeichen     | emerald — `#10b981`   |
+| p2  | ∫      | Integral      | Integralzeichen   | sky — `#0ea5e9`       |
+| p3  | ∇      | Nabla         | Nabla-Operator    | amber — `#f59e0b`     |
+| p4  | π      | Pi            | Kreiszahl         | rose — `#f43f5e`      |
+| p5  | ∞      | Unendlich     | Unendlich-Symbol  | violet — `#8b5cf6`    |
+
+Die fuenf Tiles sind die einzige Profil-Identitaet — kein Freitext-Name, kein Avatar, keine E-Mail. Wer mehr Personen braucht, teilt sich einen Slot oder nutzt ein zweites Geraet. Die Slot-Definition ist absichtlich klein und stabil; **Slot-IDs `p1..p5` werden nie umbenannt** (Persistenz).
+
+### 24.2 Storage-Modell ("live mirror")
+
+Bestehender Code (Hooks, Komponenten, Datenrenderer) liest und schreibt unveraendert in die kanonischen Lern-Keys:
+
+```
+wissen_reloaded_progress_v1
+smartineer_schueler_progress_v1
+smartineer_schulungen_v2
+smartineer_srs_v2
+smartineer_reader_notes_v1
+smartineer_reader_bookmarks_v1
+smartineer_audience_v1
+```
+
+Diese **live-Keys spiegeln immer das aktive Profil** (`PROFILE_SCOPED_KEYS` in `js/app/_core.jsx`). Pro Profil existiert zusaetzlich ein Snapshot-Slot
+
+```
+smartineer_p_<pid>_<originalKey>
+```
+
+Beim Profilwechsel passiert genau dies (`switchToProfile()` in `js/app/_core.jsx`):
+
+1. live-Keys werden in den Snapshot-Slot des **alten** Profils geschrieben.
+2. Snapshot-Slot des **neuen** Profils wird in die live-Keys gespiegelt.
+3. `smartineer_active_profile_v1` wird auf die neue PID gesetzt.
+4. `markProfileUsed(pid)` aktualisiert `smartineer_profiles_meta_v1` (`{used, since, lastUsed}`).
+5. `window.location.reload()` — alle React-Hooks lesen den neuen Stand frisch.
+
+Vorteil dieser Architektur: **Kein Refactoring** der ~20 direkten `localStorage.getItem(STORAGE_KEY)`-Stellen noetig. Renderer/Hooks bleiben profilblind.
+
+### 24.3 Geraetespezifische (NICHT-profil-spezifische) Keys
+
+Diese Keys werden **nicht** per Profil getrennt — sie bleiben pro Geraet/Browser identisch fuer alle Profile:
+
+- `smartineer_theme_v1` — Theme-Auswahl
+- `smartineer_install_dismissed_v1` — PWA-Install-Prompt-Dismiss
+- `smartineer_auth_v1` — Login-Token (Schulungen-Auth, frontend-only)
+- `smartineer_visible_categories_v1` — Sidebar-Kategoriefilter (admin)
+- `smartineer_reader_typography_v1` — Reader-Schriftgroesse/-breite
+
+Begruendung: Theme- und Typografie-Wahl ist eine Geraete-Eigenschaft (Bildschirm, Sehkomfort), keine Lern-Identitaet. Auth gehoert zum Geraet (Cookie-aequivalent). Install-Dismiss ist per Definition geraetespezifisch.
+
+### 24.4 ProfileGate
+
+Solange `smartineer_active_profile_v1` nicht auf eine gueltige PID gesetzt ist, rendert die App **ausschliesslich** den `ProfileGate`-Vollbildschirm (`js/app.jsx`). Kein Nav, kein Footer, kein Track ist zugaenglich. Der User muss **genau eine** der fuenf Kacheln auswaehlen, bevor er weiterkommt. Slots mit existierendem Snapshot tragen den Badge **„Fortschritt vorhanden"**.
+
+**Adoption-Pfad (Erst-Pick mit bestehendem Lernstand):** Wenn beim allerersten Profil-Pick bereits live-Lerndaten vorliegen (z.B. nach Update von einer Pre-v84-Version), fragt die App per `window.confirm`: *"Diesen Fortschritt diesem Profil zuordnen?"* — bei OK wird der bestehende Live-Stand als Snapshot fuer das gewaehlte Profil uebernommen (`adoptLiveAsProfile()`), bei Abbruch startet das Profil leer und der vorhandene Stand bleibt unzugeordnet im Storage liegen (kann durch erneuten Wechsel mit Adoption wiedergewonnen werden, solange er nicht ueberschrieben wurde).
+
+### 24.5 Profil-Switcher (Navbar)
+
+In der Top-Navigation (`Nav` in `js/app/training.jsx`) erscheint, sobald ein Profil aktiv ist, ein Button **rechts vor dem Theme-Toggle**:
+
+- Inhalt: kleines farbiges Tile mit `symbol` des aktiven Profils + **Wechselpfeil-Icon** (zwei gegenlaeufige Pfeile, Inline-SVG `<path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/>`) + (ab `lg`) Klartextname.
+- `title`/`aria-label`: „Profil wechseln (aktuell: <Name>)".
+- Klick oeffnet `ProfileSwitcher`-Modal mit allen 5 Tiles, dem aktiven Tile als **AKTIV**-Badge markiert. Beim Klick auf ein anderes Tile wird gewechselt (siehe §24.2). Backdrop-Klick oder „×" schliesst das Modal ohne Wechsel.
+
+### 24.6 Profil-Loeschen
+
+Im `ProfileGate` und im `ProfileSwitcher` zeigen Tiles mit Daten einen kleinen **„Löschen"**-Knopf (unten rechts). Klick fragt per `window.confirm` und ruft dann `wipeProfileData(pid)` — leert Snapshot **und** (falls aktiv) die live-Keys. Theme/Auth bleiben erhalten. Die App laedt anschliessend neu. Wenn das aktive Profil geloescht wird, springt die App zurueck in den `ProfileGate`.
+
+### 24.7 Globaler Export/Import (gilt fuer ALLE Profile)
+
+Die in §19 definierte Export/Import-Funktion ist seit v84 **profil-uebergreifend**:
+
+- **Export-Format-Version:** `EXPORT_VERSION = 2`. Form:
+  ```json
+  {
+    "format": "smartineer-progress",
+    "version": 2,
+    "exportedAt": "...",
+    "activeProfile": "p2",
+    "profilesMeta": { "p1": { "used": true, "since": "...", "lastUsed": "..." }, ... },
+    "profiles": {
+      "p1": { "wissen_reloaded_progress_v1": {...}, "smartineer_schulungen_v2": {...}, ... },
+      "p2": { ... },
+      ...
+    }
+  }
+  ```
+- `buildExportPayload()` walks alle 5 Profile: fuer das aktive Profil aus den live-Keys, fuer inaktive Profile aus den Snapshot-Slots. Profile ohne Daten werden ausgelassen.
+- **Import v2** verteilt die Daten zurueck in die Profile (aktives Profil → live-Keys; andere → Snapshot-Slots), wobei dasselbe Merge-Schema wie v1 pro `(profile, key)` greift (`mergeProgressKey`).
+- **Backward-Kompatibilitaet (v1-Datei):** wird in das **aktuell aktive Profil** importiert. Falls kein Profil aktiv ist, in die live-Keys — das naechste `adoptLiveAsProfile()` uebernimmt sie. Damit bleiben bestehende v1-Exports (vor v84 erstellt) gueltig.
+- Personenbezogene Daten und geraetespezifische Keys (Theme/Auth/Install/Typo/Visible-Cats) sind **nicht** im Export. Aenderungsregeln von §19.4 (kein Cloud-Upload, kein Hard-Replace-Default, lesbares JSON) gelten unveraendert.
+
+### 24.8 Erweiterungsregeln
+
+- **Neue PROFILE_SCOPED_KEYS hinzufuegen:** Key in `PROFILE_SCOPED_KEYS` (`js/app/_core.jsx`) ergaenzen. Snapshot/Restore deckt ihn automatisch ab. Wenn der Key auch im Export erscheinen soll und nicht bereits in `EXPORT_KEYS` enthalten ist, dort ebenfalls eintragen.
+- **Profilanzahl:** bewusst hart auf 5 begrenzt — entspricht der User-Spec („1 von 5 Kacheln"). Eine Erweiterung erfordert Spec-Aenderung und neuen ProfileGate-Grid-Bruch.
+- **Slot-IDs `p1..p5` aendern**: NIEMALS — alle Snapshot-Keys und Profil-Meta haengen daran. Wer ein Profil „umtitulieren" will, aendert nur Anzeige (`name`, `symbol`, `bg`) im `PROFILES`-Array.
+- **CACHE_VERSION** bei jeder Aenderung der Profil-Logik oder am UI bumpen.
+
+### 24.9 Anti-Pattern
+
+- Per-Profil-Daten in `THEME_KEY` / `AUTH_KEY` schreiben — verletzt die Trennung „Lernidentitaet vs. Geraet".
+- Reload nach Profilwechsel weglassen — Hooks wuerden den alten React-State weiterfuehren, waehrend die live-Keys schon zum neuen Profil gehoeren (Datendrift).
+- Mehr als 5 Profile zulassen — verstoesst gegen Spec und sprengt die Tile-Optik (5-Spalten-Grid auf `lg`).
+- Personenbezogene Daten (E-Mail, Klarname) als Tile-Label akzeptieren — Spec gibt fixe Symbol+Name-Paare vor; bewusst keine User-Eingabe (Datenschutz, Schueler-Track auch fuer Minderjaehrige).
+- Profil-Snapshot-Slots aus dem Export-Format streichen, um „Datei klein zu halten" — verletzt §24.7 (Multi-User-Migrationspflicht zwischen Geraeten).
+- Beim Reset (`onReset`) saemtliche Profil-Snapshots loeschen — Reset ist per Spec **profil-lokal** (loescht nur das aktive Profil). Wer alle Profile loeschen will, nutzt im ProfileGate/Switcher den „Löschen"-Button pro Profil.
+
+### 24.10 Referenz-Implementierung
+
+- Profil-Konstanten + Helper: `js/app/_core.jsx` (`PROFILES`, `PROFILE_IDS`, `PROFILE_SCOPED_KEYS`, `profileSlotKey`, `getActiveProfileId`, `switchToProfile`, `adoptLiveAsProfile`, `wipeProfileData`, `profileSlotHasData`, `hasAnyLiveScopedData`, `getProfileMeta`/`setProfileMeta`/`markProfileUsed`).
+- Multi-Profil-Export/Import: `buildExportPayload()` / `applyImportedPayload()` in `js/app/_core.jsx` (Format-Version `EXPORT_VERSION = 2`).
+- UI: `ProfileGate`, `ProfileSwitcher`, `ProfileTile` in `js/app.jsx`. Nav-Button in `Nav` (`js/app/training.jsx`, Props `activeProfile`, `onOpenProfileSwitcher`).
+- Integration: State `activeProfileId` und Callbacks `handlePickProfile`/`handleWipeProfile` im `App`-Root (`js/app.jsx`); ProfileGate blockiert das Rendering, solange `activeProfileId` falsy ist.
+
 
 

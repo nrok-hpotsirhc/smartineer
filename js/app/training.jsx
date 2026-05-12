@@ -51,7 +51,7 @@ const NAV_ICONS = {
     )
 };
 
-function Nav({ view, setView, theme, onToggleTheme }) {
+function Nav({ view, setView, theme, onToggleTheme, activeProfile, onOpenProfileSwitcher }) {
     // P-UI-NAV-GROUPING: Lern-Tabs (Dashboard/Training/Cheatsheets/Schulungen/Schueler)
     // visuell von Konto/Theme (Optionen + Theme-Toggle) trennen.
     const learnItems = [
@@ -93,6 +93,23 @@ function Nav({ view, setView, theme, onToggleTheme }) {
                         {learnItems.map(renderItem)}
                         <span className="hidden sm:block w-px h-7 bg-slate-700 mx-1" aria-hidden="true" />
                         {accountItems.map(renderItem)}
+                        {activeProfile && onOpenProfileSwitcher && (
+                            <button onClick={onOpenProfileSwitcher}
+                                title={'Profil: ' + activeProfile.name + ' — zum Wechseln klicken'}
+                                aria-label={'Profil wechseln (aktuell: ' + activeProfile.name + ')'}
+                                className="ml-1 sm:ml-2 inline-flex items-center justify-center gap-2 whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium border border-slate-600 text-slate-200 hover:bg-slate-700/60 transition">
+                                <span aria-hidden="true" className="inline-flex items-center justify-center w-6 h-6 rounded-md text-base font-serif font-bold"
+                                    style={{ backgroundColor: activeProfile.bg, color: activeProfile.fg }}>
+                                    {activeProfile.symbol}
+                                </span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                     strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
+                                    <path d="M7 7h11l-3-3" />
+                                    <path d="M17 17H6l3 3" />
+                                </svg>
+                                <span className="hidden lg:inline">{activeProfile.name}</span>
+                            </button>
+                        )}
                         <button onClick={onToggleTheme}
                             title={theme === 'dark' ? 'Auf hell umschalten' : 'Auf dunkel umschalten'}
                             aria-label="Farbschema umschalten"

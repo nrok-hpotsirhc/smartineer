@@ -43,28 +43,190 @@ const AUTH_TEMPORARILY_DISABLED = false; // P-UI-LOGIN-REACTIVATE (v43): Auth-Ga
 const VISIBLE_CATS_KEY = 'smartineer_visible_categories_v1'; // { [catId]: false } — Default: alle sichtbar
 const ADMIN_GLOBAL_KEY = 'smartineer_admin_global_v1'; // reserviert fuer kuenftige globale Settings
 
+// ---------------------------------------------------------------- Multi-Profil (P-ARCH-PROFILES, v84)
+// Smartineer unterstuetzt bis zu 5 lokale Lern-Profile auf demselben Geraet.
+// Jedes Profil hat einen festen Slot (p1..p5) mit Farbe, spektakulaerem
+// Formelzeichen und Klartextnamen — die Tile-Identitaet ist Teil der Spec
+// (siehe AGENTS.md §24). Profile sind streng client-seitig; KEINE Authentifizierung,
+// KEINE personenbezogenen Daten, KEIN Backend.
+//
+// Datenmodell ("live mirror"):
+//   - Die Lern-Keys (STORAGE_KEY, SCHUELER_PROGRESS_KEY, SCHULUNGEN_KEY, SRS_KEY,
+//     READER_NOTES_KEY, READER_BOOKMARKS_KEY, AUDIENCE_KEY) spiegeln IMMER das
+//     aktive Profil. Bestehender Code liest/schreibt direkt diese Keys und
+//     braucht keine Anpassung.
+//   - Pro Profil gibt es einen Snapshot-Key `smartineer_p_<pid>_<originalKey>`.
+//   - Beim Profilwechsel: live -> alte Snapshot-Slot, neuer Snapshot -> live, reload.
+//
+// Geraetespezifische Keys bleiben global (NICHT per Profil): THEME_KEY,
+// INSTALL_DISMISS_KEY, AUTH_KEY, VISIBLE_CATS_KEY, READER_TYPO_KEY.
+const PROFILES_ACTIVE_KEY = 'smartineer_active_profile_v1'; // 'p1'..'p5' | null
+const PROFILES_META_KEY = 'smartineer_profiles_meta_v1';    // { p1: { used:true, since:ISO, lastUsed:ISO }, ... }
+const PROFILES = [
+    { id: 'p1', name: 'Summe',     symbol: 'Σ',  desc: 'Summenzeichen',     accent: 'emerald', bg: '#10b981', fg: '#ffffff' },
+    { id: 'p2', name: 'Integral',  symbol: '∫',  desc: 'Integralzeichen',   accent: 'sky',     bg: '#0ea5e9', fg: '#ffffff' },
+    { id: 'p3', name: 'Nabla',     symbol: '∇',  desc: 'Nabla-Operator',    accent: 'amber',   bg: '#f59e0b', fg: '#1f2937' },
+    { id: 'p4', name: 'Pi',        symbol: 'π',  desc: 'Kreiszahl',         accent: 'rose',    bg: '#f43f5e', fg: '#ffffff' },
+    { id: 'p5', name: 'Unendlich', symbol: '∞',  desc: 'Unendlich-Symbol',  accent: 'violet',  bg: '#8b5cf6', fg: '#ffffff' }
+];
+const PROFILE_IDS = PROFILES.map(p => p.id);
+// Diese Keys werden pro Profil snapshotted und beim Wechsel umgeschaltet.
+// AUDIENCE_KEY ist mit dabei, weil jedes Profil seinen Startbereich (Schueler vs Ingenieur)
+// fuer sich behalten soll. THEME/AUTH/INSTALL bleiben geraetespezifisch.
+const PROFILE_SCOPED_KEYS = [
+    'wissen_reloaded_progress_v1',
+    'smartineer_schueler_progress_v1',
+    'smartineer_schulungen_v2',
+    'smartineer_srs_v2',
+    'smartineer_reader_notes_v1',
+    'smartineer_reader_bookmarks_v1',
+    'smartineer_audience_v1'
+];
+function profileSlotKey(pid, originalKey) { return 'smartineer_p_' + pid + '_' + originalKey; }
+function getActiveProfileId() {
+    try { const v = localStorage.getItem(PROFILES_ACTIVE_KEY); return PROFILE_IDS.includes(v) ? v : null; }
+    catch (e) { return null; }
+}
+function getProfileMeta() {
+    try { return JSON.parse(localStorage.getItem(PROFILES_META_KEY)) || {}; }
+    catch (e) { return {}; }
+}
+function setProfileMeta(meta) {
+    try { localStorage.setItem(PROFILES_META_KEY, JSON.stringify(meta || {})); } catch (e) { /* quota */ }
+}
+function markProfileUsed(pid) {
+    if (!PROFILE_IDS.includes(pid)) return;
+    const meta = getProfileMeta();
+    const cur = meta[pid] || {};
+    meta[pid] = { used: true, since: cur.since || new Date().toISOString(), lastUsed: new Date().toISOString() };
+    setProfileMeta(meta);
+}
+function snapshotLiveTo(pid) {
+    if (!PROFILE_IDS.includes(pid)) return;
+    PROFILE_SCOPED_KEYS.forEach(k => {
+        try {
+            const v = localStorage.getItem(k);
+            const slot = profileSlotKey(pid, k);
+            if (v == null) localStorage.removeItem(slot);
+            else localStorage.setItem(slot, v);
+        } catch (e) { /* ignore */ }
+    });
+}
+function restoreLiveFrom(pid) {
+    if (!PROFILE_IDS.includes(pid)) return;
+    PROFILE_SCOPED_KEYS.forEach(k => {
+        try {
+            const slot = profileSlotKey(pid, k);
+            const v = localStorage.getItem(slot);
+            if (v == null) localStorage.removeItem(k);
+            else localStorage.setItem(k, v);
+        } catch (e) { /* ignore */ }
+    });
+}
+function clearLiveScoped() {
+    PROFILE_SCOPED_KEYS.forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+}
+// Wechsel auf ein Profil. Wenn `prevPid` gesetzt ist, werden die live-Keys vorher
+// in dessen Slot gesichert. Anschliessend wird der neue Slot in die live-Keys
+// gespiegelt. Der Aufrufer ist fuer das `window.location.reload()` zustaendig.
+function switchToProfile(nextPid, prevPid) {
+    if (!PROFILE_IDS.includes(nextPid)) return false;
+    if (prevPid && PROFILE_IDS.includes(prevPid) && prevPid !== nextPid) {
+        snapshotLiveTo(prevPid);
+    }
+    restoreLiveFrom(nextPid);
+    try { localStorage.setItem(PROFILES_ACTIVE_KEY, nextPid); } catch (e) {}
+    markProfileUsed(nextPid);
+    return true;
+}
+// Bei allererstem Profil-Pick: die bereits in den live-Keys liegenden Lerndaten
+// werden uebernommen — wir snapshotten sie als Inhalt des gewaehlten Profils.
+function adoptLiveAsProfile(pid) {
+    if (!PROFILE_IDS.includes(pid)) return false;
+    snapshotLiveTo(pid);
+    try { localStorage.setItem(PROFILES_ACTIVE_KEY, pid); } catch (e) {}
+    markProfileUsed(pid);
+    return true;
+}
+// Vollstaendig zuruecksetzen: live-Slot und Snapshot loeschen. Theme/Auth bleiben.
+function wipeProfileData(pid) {
+    if (!PROFILE_IDS.includes(pid)) return;
+    PROFILE_SCOPED_KEYS.forEach(k => {
+        try { localStorage.removeItem(profileSlotKey(pid, k)); } catch (e) {}
+    });
+    if (getActiveProfileId() === pid) clearLiveScoped();
+    const meta = getProfileMeta();
+    delete meta[pid];
+    setProfileMeta(meta);
+}
+function getProfileById(pid) { return PROFILES.find(p => p.id === pid) || null; }
+// Hat ein Profil-Slot bereits Daten? Heuristik: irgendein scoped Key hat Inhalt
+// im Slot ODER (fuer das aktive Profil) im live-Bereich. Wird in der ProfileGate
+// genutzt, um Slots mit Fortschritt zu markieren.
+function profileSlotHasData(pid) {
+    if (!PROFILE_IDS.includes(pid)) return false;
+    const active = getActiveProfileId();
+    return PROFILE_SCOPED_KEYS.some(k => {
+        try {
+            const slotVal = localStorage.getItem(profileSlotKey(pid, k));
+            if (slotVal && slotVal !== '{}' && slotVal !== 'null') return true;
+            if (active === pid) {
+                const live = localStorage.getItem(k);
+                if (live && live !== '{}' && live !== 'null') return true;
+            }
+        } catch (e) {}
+        return false;
+    });
+}
+function hasAnyLiveScopedData() {
+    return PROFILE_SCOPED_KEYS.some(k => {
+        try {
+            const v = localStorage.getItem(k);
+            return v && v !== '{}' && v !== 'null';
+        } catch (e) { return false; }
+    });
+}
+
 // ---------------------------------------------------------------- Export / Import
 // Plattform-portables JSON-Format zur Synchronisation des Lernfortschritts
 // zwischen Geräten. Enthält bewusst KEINE personenbezogenen Daten — nur
 // die in localStorage gehaltenen Lern-Keys. Theme/Install-Dismiss bleiben
 // gerätespezifisch und werden NICHT exportiert.
+//
+// Format v2 (P-ARCH-PROFILES): exportiert ALLE 5 Profile gemeinsam. Pro Profil
+// die snapshotted Lern-Keys; zusaetzlich das aktive Profil und die Profil-Metadaten.
+// v1-Importe werden weiterhin akzeptiert und ins aktive Profil gemerged.
 const EXPORT_FORMAT = 'smartineer-progress';
-const EXPORT_VERSION = 1;
+const EXPORT_VERSION = 2;
 const EXPORT_KEYS = [STORAGE_KEY, SCHUELER_PROGRESS_KEY, SCHULUNGEN_KEY, SRS_KEY, READER_NOTES_KEY, READER_BOOKMARKS_KEY];
 
 function buildExportPayload() {
-    const data = {};
-    EXPORT_KEYS.forEach((k) => {
-        try {
-            const raw = localStorage.getItem(k);
-            data[k] = raw ? JSON.parse(raw) : null;
-        } catch (e) { data[k] = null; }
+    // P-ARCH-PROFILES: v2 — alle 5 Profil-Snapshots werden gebuendelt exportiert.
+    // Damit kann der User auf einem neuen Geraet/Browser den vollstaendigen Stand
+    // aller Personen wiederherstellen.
+    const profiles = {};
+    const activePid = getActiveProfileId();
+    PROFILE_IDS.forEach(pid => {
+        const slot = {};
+        let any = false;
+        PROFILE_SCOPED_KEYS.forEach(k => {
+            try {
+                // Beim aktiven Profil liest live-Key; sonst Snapshot-Slot.
+                const raw = (pid === activePid)
+                    ? localStorage.getItem(k)
+                    : localStorage.getItem(profileSlotKey(pid, k));
+                if (raw != null) { slot[k] = JSON.parse(raw); any = true; }
+            } catch (e) { /* corrupt entry — skip */ }
+        });
+        if (any) profiles[pid] = slot;
     });
     return {
         format: EXPORT_FORMAT,
         version: EXPORT_VERSION,
         exportedAt: new Date().toISOString(),
-        data
+        activeProfile: activePid || null,
+        profilesMeta: getProfileMeta(),
+        profiles
     };
 }
 
@@ -128,6 +290,78 @@ function applyImportedPayload(payload, mode) {
     if (typeof payload.version !== 'number' || payload.version > EXPORT_VERSION) {
         throw new Error('Dateiversion wird nicht unterstützt (' + payload.version + ').');
     }
+    // ---- v2 (Multi-Profil) ----
+    if (payload.version >= 2 && payload.profiles) {
+        const activePid = getActiveProfileId();
+        const incomingProfiles = payload.profiles || {};
+        // Profile-Meta merge: importierte Eintraege uebernehmen, vorhandene erhalten.
+        try {
+            const curMeta = getProfileMeta();
+            const incMeta = payload.profilesMeta || {};
+            const mergedMeta = { ...curMeta };
+            PROFILE_IDS.forEach(pid => {
+                if (incMeta[pid]) {
+                    const a = curMeta[pid] || {};
+                    const b = incMeta[pid];
+                    mergedMeta[pid] = {
+                        used: !!(a.used || b.used),
+                        since: a.since && (a.since <= (b.since || a.since)) ? a.since : (b.since || a.since),
+                        lastUsed: (a.lastUsed || '') >= (b.lastUsed || '') ? (a.lastUsed || b.lastUsed) : b.lastUsed
+                    };
+                } else if (incomingProfiles[pid]) {
+                    mergedMeta[pid] = mergedMeta[pid] || { used: true, since: new Date().toISOString(), lastUsed: new Date().toISOString() };
+                }
+            });
+            setProfileMeta(mergedMeta);
+        } catch (e) { /* ignore meta-merge issues */ }
+        // Pro Profil-Slot mergen oder ersetzen.
+        PROFILE_IDS.forEach(pid => {
+            const inc = incomingProfiles[pid];
+            if (!inc) return;
+            const writeForPid = (k, val) => {
+                if (pid === activePid) {
+                    // live-Keys schreiben
+                    if (val === null || val === undefined) {
+                        if (mode === 'replace') localStorage.removeItem(k);
+                        return;
+                    }
+                    if (mode === 'merge') {
+                        let current = {};
+                        try { current = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { current = {}; }
+                        const merged = mergeProgressKey(k, current, val);
+                        localStorage.setItem(k, JSON.stringify(merged));
+                    } else {
+                        localStorage.setItem(k, JSON.stringify(val));
+                    }
+                } else {
+                    // Snapshot-Slot schreiben
+                    const slot = profileSlotKey(pid, k);
+                    if (val === null || val === undefined) {
+                        if (mode === 'replace') localStorage.removeItem(slot);
+                        return;
+                    }
+                    if (mode === 'merge') {
+                        let current = {};
+                        try { current = JSON.parse(localStorage.getItem(slot)) || {}; } catch (e) { current = {}; }
+                        const merged = mergeProgressKey(k, current, val);
+                        localStorage.setItem(slot, JSON.stringify(merged));
+                    } else {
+                        localStorage.setItem(slot, JSON.stringify(val));
+                    }
+                }
+            };
+            // EXPORT_KEYS reflektieren die alten v1-Lernkeys; AUDIENCE_KEY ist v2-spezifisch
+            // und steht in PROFILE_SCOPED_KEYS — wir nutzen die Vereinigung beim Schreiben.
+            const allKeys = Array.from(new Set([...EXPORT_KEYS, ...PROFILE_SCOPED_KEYS]));
+            allKeys.forEach(k => {
+                if (inc[k] !== undefined) writeForPid(k, inc[k]);
+            });
+        });
+        return;
+    }
+    // ---- v1 (Single-Profil-Datei) ----
+    // Wir mergen v1 in das aktuell aktive Profil. Falls keines aktiv ist, in die live-Keys
+    // (der naechste Profil-Pick adoptiert die Daten).
     const incoming = upgradeImportedData(payload.data || {});
     EXPORT_KEYS.forEach((k) => {
         const next = incoming[k];

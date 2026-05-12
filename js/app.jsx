@@ -1,6 +1,50 @@
 function App() {
     const data = window.APP_DATA || {};
     const allOrder = (window.APP_ORDER && window.APP_ORDER.length) ? window.APP_ORDER : Object.keys(data);
+    // P-ARCH-PROFILES (v84): aktives Profil muss vor jedem Lernschritt gesetzt sein.
+    // Die ProfileGate blockiert die App vollstaendig, solange keines aktiv ist.
+    const [activeProfileId, setActiveProfileId] = useState(() => getActiveProfileId());
+    const [profileSwitcherOpen, setProfileSwitcherOpen] = useState(false);
+    const handlePickProfile = useCallback((pid) => {
+        if (!PROFILE_IDS.includes(pid)) return;
+        const prev = getActiveProfileId();
+        if (prev === pid) {
+            setProfileSwitcherOpen(false);
+            return;
+        }
+        // Erstmaliger Pick und live-Daten vorhanden -> adoptieren (Legacy-Migration).
+        if (!prev && hasAnyLiveScopedData()) {
+            const useExisting = window.confirm(
+                'Es liegt bereits Lernfortschritt auf diesem Geraet vor. '
+                + 'Diesen Fortschritt dem Profil "' + (getProfileById(pid)?.name || pid) + '" zuordnen?\n\n'
+                + 'OK = uebernehmen (empfohlen, kein Datenverlust).\n'
+                + 'Abbrechen = leeres Profil starten (vorhandener Fortschritt bleibt nicht zugeordnet im Speicher liegen).'
+            );
+            if (useExisting) {
+                adoptLiveAsProfile(pid);
+                setActiveProfileId(pid);
+                setProfileSwitcherOpen(false);
+                setTimeout(() => { try { window.location.reload(); } catch (e) {} }, 30);
+                return;
+            }
+        }
+        switchToProfile(pid, prev);
+        setActiveProfileId(pid);
+        setProfileSwitcherOpen(false);
+        setTimeout(() => { try { window.location.reload(); } catch (e) {} }, 30);
+    }, []);
+    const handleWipeProfile = useCallback((pid) => {
+        if (!PROFILE_IDS.includes(pid)) return;
+        const p = getProfileById(pid);
+        if (!window.confirm('Profil "' + (p?.name || pid) + '" inklusive Lernfortschritt wirklich loeschen?\n\n'
+            + 'Theme, Login und der App-Install-Hinweis bleiben erhalten.\n'
+            + 'Die App laedt anschliessend neu.')) return;
+        const wasActive = getActiveProfileId() === pid;
+        wipeProfileData(pid);
+        if (wasActive) { try { localStorage.removeItem(PROFILES_ACTIVE_KEY); } catch (e) {} setActiveProfileId(null); }
+        setTimeout(() => { try { window.location.reload(); } catch (e) {} }, 30);
+    }, []);
+
     const auth = useAuth();
     const vis = useVisibleCategories(allOrder);
     const order = vis.visibleOrder;
@@ -195,9 +239,18 @@ function App() {
         );
     }
 
+    // P-ARCH-PROFILES: ProfileGate blockiert die App, bis ein Profil aktiv ist.
+    if (!activeProfileId) {
+        return <ProfileGate onPick={handlePickProfile} onWipe={handleWipeProfile} />;
+    }
+
+    const activeProfile = getProfileById(activeProfileId);
+
     return (
         <>
-            <Nav view={view} setView={setView} theme={theme} onToggleTheme={toggleTheme} />
+            <Nav view={view} setView={setView} theme={theme} onToggleTheme={toggleTheme}
+                activeProfile={activeProfile}
+                onOpenProfileSwitcher={() => setProfileSwitcherOpen(true)} />
             <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {view === 'dashboard' && (
                     <Dashboard data={data} order={order} isSolved={isSolved}
@@ -257,6 +310,9 @@ function App() {
                 deferredEvent={deferredEvent} platform={platform} />
             <AudienceChooser open={audienceDialogOpen} onChoose={chooseAudience} />
             <ImpressumModal open={impressumOpen} onClose={() => setImpressumOpen(false)} />
+            <ProfileSwitcher open={profileSwitcherOpen} activeId={activeProfileId}
+                onClose={() => setProfileSwitcherOpen(false)}
+                onPick={handlePickProfile} onWipe={handleWipeProfile} />
             <input ref={fileInputRef} type="file" accept="application/json,.json"
                 onChange={onImportFile}
                 style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
@@ -302,6 +358,110 @@ function AudienceChooser({ open, onChoose }) {
                         <span className="block text-base leading-relaxed text-slate-200 max-w-sm">Direkt zum Ingenieurs-Dashboard mit Reaktivierungstraining, Fortschritt und Kategorien.</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+// ---------------------------------------------------------------- Profile (P-ARCH-PROFILES, v84)
+function ProfileTile({ profile, used, lastUsed, isActive, onPick, onWipe, large }) {
+    const sizeCls = large ? 'min-h-[210px] sm:min-h-[260px] p-6 sm:p-8' : 'min-h-[180px] p-5';
+    const symbolCls = large ? 'text-7xl sm:text-8xl' : 'text-6xl';
+    return (
+        <div className={'profile-tile relative rounded-2xl shadow-lg overflow-hidden border-4 ' + sizeCls
+            + (isActive ? ' ring-4 ring-offset-2 ring-white/80 border-white' : ' border-white/30 hover:border-white/60')}
+            style={{ backgroundColor: profile.bg, color: profile.fg }}>
+            <button type="button"
+                onClick={() => onPick(profile.id)}
+                className="w-full h-full flex flex-col items-center justify-center gap-3 focus:outline-none focus:ring-4 focus:ring-white/60 rounded-xl"
+                aria-label={'Profil ' + profile.name + ' (' + profile.desc + ') waehlen'}>
+                <span className={symbolCls + ' font-serif leading-none drop-shadow-md'} aria-hidden="true">{profile.symbol}</span>
+                <span className="text-lg sm:text-xl font-extrabold tracking-wide uppercase">{profile.name}</span>
+                <span className="text-xs sm:text-sm opacity-90">{profile.desc}</span>
+                {used && (
+                    <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-white/25 text-[10px] sm:text-xs font-bold backdrop-blur-sm border border-white/40">
+                        Fortschritt vorhanden
+                    </span>
+                )}
+                {isActive && (
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white text-slate-900 text-[10px] sm:text-xs font-extrabold">
+                        AKTIV
+                    </span>
+                )}
+            </button>
+            {used && onWipe && (
+                <button type="button" onClick={(e) => { e.stopPropagation(); onWipe(profile.id); }}
+                    className="absolute bottom-2 right-2 px-2 py-1 rounded-md bg-black/30 hover:bg-black/50 text-white text-[10px] sm:text-xs font-medium border border-white/30"
+                    aria-label={'Profil ' + profile.name + ' loeschen'}>
+                    Löschen
+                </button>
+            )}
+        </div>
+    );
+}
+
+function ProfileGate({ onPick, onWipe }) {
+    const meta = getProfileMeta();
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white px-4 py-8">
+            <div className="w-full max-w-6xl">
+                <header className="text-center mb-8">
+                    <img src="icons/smartineer-logo.png" alt="Smartineer" width="64" height="64" className="mx-auto w-16 h-16 mb-3" />
+                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                        Wer lernt heute?
+                    </h1>
+                    <p className="mt-3 text-sm sm:text-base text-slate-300 max-w-2xl mx-auto">
+                        Smartineer haelt bis zu fuenf eigenstaendige Lernfortschritte auf diesem Geraet.
+                        Waehle ein Profil, um zu starten. Der Wechsel ist jederzeit ueber das Wechselsymbol oben rechts moeglich.
+                    </p>
+                </header>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+                    {PROFILES.map(p => (
+                        <ProfileTile key={p.id} profile={p}
+                            used={!!(meta[p.id] && meta[p.id].used)}
+                            lastUsed={meta[p.id] && meta[p.id].lastUsed}
+                            isActive={false}
+                            large={true}
+                            onPick={onPick} onWipe={onWipe} />
+                    ))}
+                </div>
+                <p className="mt-6 text-center text-xs text-slate-400">
+                    Hinweis: Profile sind nur lokal auf diesem Geraet (kein Server, keine Anmeldung).
+                    Theme und PWA-Einstellungen bleiben geraetewerter Bestandteil; sie werden nicht je Profil getrennt.
+                </p>
+            </div>
+        </div>
+    );
+}
+
+function ProfileSwitcher({ open, activeId, onClose, onPick, onWipe }) {
+    if (!open) return null;
+    const meta = getProfileMeta();
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-6"
+            role="dialog" aria-modal="true" aria-labelledby="profile-switch-title"
+            onClick={onClose}>
+            <div className="w-full max-w-5xl rounded-2xl bg-slate-900 text-white shadow-2xl border border-slate-700 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between px-5 sm:px-7 py-4 border-b border-slate-700">
+                    <h2 id="profile-switch-title" className="text-xl sm:text-2xl font-bold">Profil wechseln</h2>
+                    <button onClick={onClose}
+                        className="text-slate-300 hover:text-white text-2xl leading-none px-2"
+                        aria-label="Dialog schliessen">×</button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 p-5 sm:p-7">
+                    {PROFILES.map(p => (
+                        <ProfileTile key={p.id} profile={p}
+                            used={!!(meta[p.id] && meta[p.id].used)}
+                            lastUsed={meta[p.id] && meta[p.id].lastUsed}
+                            isActive={activeId === p.id}
+                            large={false}
+                            onPick={onPick} onWipe={onWipe} />
+                    ))}
+                </div>
+                <p className="px-5 sm:px-7 pb-5 text-xs text-slate-400">
+                    Beim Wechsel wird der aktuelle Stand des aktiven Profils gespeichert. Die App laedt anschliessend neu.
+                </p>
             </div>
         </div>
     );
