@@ -3704,7 +3704,7 @@
             'k4.deutsch':        { mode: 'pool', pool: pool_k4_deutsch(),
                                    note: 'Deutsch Klasse 4 (NRW): vier Faelle (Nominativ/Genitiv/Dativ/Akkusativ), Subjekt/Praedikat, Adjektivsteigerung, Wortarten, Rechtschreibung vertieft.' },
             'k4.sachunterricht': { mode: 'pool', pool: pool_k4_sachunterricht(),
-                                   note: 'Sachunterricht Klasse 4 (NRW): Europa und Hauptstaedte, Demokratie-Grundbegriffe (Bundestag, Grundgesetz), Stromkreis, Bundeslaender vertieft, Wasserkreislauf.' },
+                                   note: 'Sachunterricht Klasse 4 (NRW): Kartenarbeit und Orientierung in NRW/Europa, Kinderrechte und Klassenrat, Quellen und Zeitstrahl, Wasserkreislauf, Stromkreis, Tiere, Pflanzen und Verkehr.' },
             'k4.englisch':       { mode: 'pool', pool: pool_k4_englisch(),
                                    note: 'Englisch Klasse 4 (NRW): Begruessungen, Zahlen bis 100, Wochentage und Monate, einfache Saetze, Uhrzeit (Grundform).' },
             'k5.mathe':  { mode: 'pool', pool: pool_k5_mathe(),
