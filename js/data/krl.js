@@ -337,6 +337,24 @@
                         + '<strong>SWITCH-Anweisung:</strong><br>'
                         + code('KRL', 'SWITCH PRODUKT\n  CASE 1\n    schweissen_typ1()\n  CASE 2, 3\n    schweissen_typ2()\n  DEFAULT\n    MSG "Unbekanntes Produkt"\nENDSWITCH')
                         + 'Quelle: KSS 8.x Programmierhandbuch §8 Kontrollstrukturen.'
+                },
+                {
+                    q: 'Welche <strong>elementaren Datentypen</strong> kennt KRL, und wie werden Variablen typisch deklariert (lokal in <code>.SRC</code> vs. global in <code>.DAT</code>)?',
+                    h: 'INT, REAL, BOOL, CHAR; DECL ... bzw. DECL GLOBAL ...; .DAT-Datei haelt persistente Daten.',
+                    s: 'KRL ist statisch und stark typisiert. Die <strong>vier elementaren Datentypen</strong> sind:<br>'
+                        + '<table class="text-xs my-2"><thead><tr><th class="pr-3 text-left">Typ</th><th class="pr-3 text-left">Wertebereich</th><th class="text-left">Beispiel</th></tr></thead><tbody>'
+                        + '<tr><td class="pr-3"><code>INT</code></td><td class="pr-3">-2147483648 &hellip; +2147483647 (32 Bit)</td><td><code>DECL INT ZAEHLER = 0</code></td></tr>'
+                        + '<tr><td class="pr-3"><code>REAL</code></td><td class="pr-3">$\pm 1{,}4 \cdot 10^{-45} \ldots \pm 3{,}4 \cdot 10^{38}$ (32 Bit IEEE-754)</td><td><code>DECL REAL ABSTAND = 12.5</code></td></tr>'
+                        + '<tr><td class="pr-3"><code>BOOL</code></td><td class="pr-3"><code>TRUE</code> / <code>FALSE</code></td><td><code>DECL BOOL FERTIG = FALSE</code></td></tr>'
+                        + '<tr><td class="pr-3"><code>CHAR</code></td><td class="pr-3">Einzelzeichen, ASCII (0&hellip;255)</td><td><code>DECL CHAR TEXT[20]</code> (String als Array)</td></tr>'
+                        + '</tbody></table>'
+                        + 'Zusaetzlich existieren <em>strukturierte</em> Typen (<code>POS</code>, <code>E6POS</code>, <code>FRAME</code>, <code>AXIS</code>, <code>E6AXIS</code>) und <em>aufzaehlende</em> Typen via <code>ENUM</code>.<br>'
+                        + '<strong>Lokal vs. global / persistent:</strong><br>'
+                        + code('KRL', 'DEF main()\n  DECL INT zaehler   ; lokal in .SRC, fluechtig, sichtbar nur in main\n  zaehler = 0\nEND')
+                        + 'Daten, die <em>persistent</em> sein und beim Reboot erhalten bleiben sollen, gehoeren in die <code>.DAT</code>-Datei und werden dort als globale Variablen gehalten:<br>'
+                        + code('KRL', '[main.dat]\nDEFDAT MAIN\n  DECL GLOBAL INT MAX_ZYKLEN = 1000\n  DECL E6POS XHOME = {X 0, Y 0, Z 1500, A 0, B 90, C 0, S 6, T 27, E1 0, E2 0, E3 0, E4 0, E5 0, E6 0}\nENDDAT')
+                        + 'Wichtige Regeln: jede Deklaration beginnt mit <code>DECL</code> (Pflicht in KSS 8.x); Variablen vor Verwendung initialisieren (sonst undefiniertes Verhalten bei <code>INT</code>/<code>REAL</code>); <code>GLOBAL</code> nur in <code>.DAT</code>-Dateien zulaessig.<br>'
+                        + 'Quelle: KSS 8.x Programmierhandbuch §3 (Variablen und Vereinbarungen); KUKA Systemintegratoren-Handbuch §3.2 Datentypen.'
                 }
             ],
 
@@ -645,6 +663,20 @@
                         + '<strong>Programmwahl-Logik:</strong> in der <code>CELL.SRC</code> wartet der Roboter im EXT-Mode auf <code>$EXT_START</code>. Nach Empfang liest er <code>$PGNO</code> und ruft das passende Unterprogramm:<br>'
                         + code('KRL', 'DEF CELL()\n  ; CELL initialisieren\n  REPEAT\n    WAIT FOR ($EXT_START == TRUE) AND ($PGNO_VALID == TRUE)\n    SWITCH $PGNO\n      CASE 1\n        zyklus_karosserie()\n      CASE 2\n        zyklus_tuer()\n      DEFAULT\n        MSG "Unbekannte PGNO"\n    ENDSWITCH\n    PTP XHOME\n  UNTIL FALSE\nEND')
                         + 'Quelle: KSS 8.x Bedienhandbuch §6 (Externer Automatikbetrieb); KUKA PROFINET-Handbuch §4 Schnittstellensignale.'
+                },
+                {
+                    q: 'Welcher Unterschied besteht zwischen <code>WAIT SEC</code>, <code>WAIT FOR</code> und einer <strong>TRIGGER</strong>-Anweisung in KRL, und welche Auswirkungen hat das jeweils auf den <strong>Advance-Run</strong>?',
+                    h: 'WAIT SEC: Pause; WAIT FOR: bedingtes Warten; TRIGGER: zeit-/wegsynchrone Aktion auf der Bahn ohne Stop.',
+                    s: 'Alle drei sind Synchronisationsmittel in KRL, unterscheiden sich aber fundamental im Verhalten gegenueber dem <strong>Advance-Run</strong> ($\$ADVANCE$, Default 3 Saetze Vorausschau).<br>'
+                        + '<strong>1. <code>WAIT SEC t</code> (Zeit-Pause):</strong> erzeugt einen <em>Advance-Run-Stopp</em>. Der Interpreter haelt den Vorlauf an, der Roboter erreicht einen <em>Genauhalt</em>, dann laeuft die Zeit $t$ &mdash; danach geht es weiter. Verhindert Bahn-Annaeherung (<code>C_DIS</code>, <code>C_PTP</code>) am davorliegenden Bewegungssatz.<br>'
+                        + code('KRL', 'LIN P10 C_DIS\nWAIT SEC 0.5   ; HIER Genauhalt + 500 ms Pause\nLIN P20 C_DIS')
+                        + '<strong>2. <code>WAIT FOR bedingung</code> (Pegel-/Eingangswarten):</strong> ebenfalls Advance-Run-Stopp. Der Roboter haelt an und wartet, bis die Bedingung <code>TRUE</code> wird.<br>'
+                        + code('KRL', 'LIN P10 C_DIS\nWAIT FOR $IN[5] == TRUE   ; Stop, warte auf Sensor\nLIN P20 C_DIS')
+                        + '<strong>3. <code>TRIGGER WHEN PATH = x DELAY = y DO anweisung</code>:</strong> <em>kein</em> Advance-Run-Stopp. Die Aktion (z.B. <code>$OUT[3] = TRUE</code>, Unterprogramm-Aufruf) wird <strong>auf der Bahn</strong> ausgeloest, zeit- bzw. wegsynchron zum Bezugspunkt &mdash; die Bewegung laeuft ohne Verzoegerung durch.<br>'
+                        + code('KRL', '; 50 ms vor Erreichen von P20 die Schweisszange schliessen\nTRIGGER WHEN DISTANCE = 1 DELAY = -50 DO $OUT[3] = TRUE\nLIN P20 C_DIS\n\n; Alternative mit PATH: 20 mm vor Bahnende\nTRIGGER WHEN PATH = -20 DELAY = 0 DO zange_zu()')
+                        + '<strong>Konsequenzen fuer die Programmqualitaet:</strong> wer in einer Schweiss-/Klebe-Roboterzelle die Zange mit <code>WAIT FOR $IN[..]</code> statt mit <code>TRIGGER</code> ansteuert, erzwingt einen Genauhalt vor jedem Schweisspunkt &mdash; Zykluszeit steigt typ. um 200&hellip;400 ms pro Punkt. Korrekt ist die <code>TRIGGER</code>-Variante, die Bahnannaeherung erhalten bleibt.<br>'
+                        + '<strong>Sonderfall:</strong> <code>CONTINUE</code> vor einem <code>WAIT FOR</code> verhindert den Advance-Run-Stopp <em>nicht</em>; es bewirkt nur, dass die <em>folgende</em> Anweisung beim Vorlauf nicht stoppt &mdash; oft missverstanden.<br>'
+                        + 'Quelle: KSS 8.x Programmierhandbuch §11 (Synchronisationsanweisungen) sowie KUKA Schulungsmaterial "Bahnplanung und Advance-Run".'
                 }
             ],
 
@@ -1021,6 +1053,28 @@
                         + '<strong>Ergebnis:</strong> aus typ. $\\pm 2\\,\\text{mm}$ absoluter Genauigkeit wird $\\pm 0{,}3\\,\\text{mm}$ &mdash; eine 10-fache Verbesserung. Die identifizierten Parameter werden in $\\$config.dat$ geschrieben und beim naechsten Boot vom KSS-Inverse-Kinematik-Loeser verwendet.<br>'
                         + '<strong>Aufwand:</strong> Setup + Messungen + Auswertung typ. 2-3 Tage. Anschliessend lasertracker-zertifizierter Kalibrier-Status fuer 6-12 Monate (bis thermische Drift oder Crashs eine Neukalibrierung erfordern).<br>'
                         + 'Quelle: Zhuang/Roth "Comprehensive Robot Calibration with Special Reference to Industrial Robots" Wiley 1996; KUKA AbsoluteAccuracy-Optionspaket Handbuch.'
+                },
+                {
+                    q: 'Wie ist die <strong>Konfigurationsangabe</strong> in einem KRL-<code>E6POS</code> (Felder <code>S</code> = Status und <code>T</code> = Turn) definiert, und warum kann ein und derselbe kartesische TCP-Punkt dennoch durch <em>mehrere</em> Achsstellungen erreicht werden?',
+                    h: 'S kodiert Schulter/Ellenbogen/Handgelenk-Lage (3 Bit), T kodiert die volle Umdrehungs-Zaehlung der Achsen 4/6 (12 Bit).',
+                    s: 'Ein 6-DoF-Knickarmroboter (KUKA KR-Serie) hat fuer eine vorgegebene TCP-Pose $\mathbf{T}_\text{TCP} \in SE(3)$ typischerweise <strong>bis zu acht</strong> diskrete Inverse-Kinematik-Loesungen (Schulter links/rechts, Ellenbogen oben/unten, Handgelenk geflippt/nicht-geflippt) plus theoretisch unendlich viele Loesungen, die sich nur in vollen Umdrehungen einzelner Achsen unterscheiden. KRL macht diese Information ueber zwei Felder im <code>E6POS</code> eindeutig:<br>'
+                        + '<strong>Status-Bits <code>S</code> (3 Bit, 0&hellip;7):</strong><br>'
+                        + '<table class="text-xs my-2"><thead><tr><th class="pr-3 text-left">Bit</th><th class="pr-3 text-left">Bedeutung</th><th class="text-left">Wert = 1</th></tr></thead><tbody>'
+                        + '<tr><td class="pr-3">Bit 0</td><td class="pr-3">Position von Achse 1 (Grundstellung)</td><td><em>overhead</em> &mdash; Roboter zeigt nach hinten</td></tr>'
+                        + '<tr><td class="pr-3">Bit 1</td><td class="pr-3">Position von Achse 3 (Ellenbogen)</td><td>Ellenbogen <em>unter</em> dem Werkzeug</td></tr>'
+                        + '<tr><td class="pr-3">Bit 2</td><td class="pr-3">Position von Achse 5 (Handgelenk)</td><td>$\theta_5 &lt; 0$ (flip)</td></tr>'
+                        + '</tbody></table>'
+                        + '<strong>Turn-Bits <code>T</code> (12 Bit, 0&hellip;4095):</strong> 2 Bit pro Achse fuer Achsen 1&hellip;6, kodieren das Vorzeichen-Quadranten / die Periodenzaehlung. Bit $i$ gesetzt = Achse $i+1$ steht in einem $\geq 0$-Quadranten bzw. zaehlt eine zusaetzliche Umdrehung.<br>'
+                        + '<strong>Konsequenzen fuer die Bahnplanung:</strong><br>'
+                        + '<ul class="list-disc list-inside text-sm">'
+                        + '<li><strong>PTP:</strong> S und T werden ausgewertet. Stehen S/T im Zielpunkt anders als in der aktuellen Stellung, wechselt der Inverse-Kinematik-Loeser die Konfiguration &mdash; der Roboter fuehrt einen Konfigurationswechsel durch (Schulter-/Ellenbogen-Umkehr).</li>'
+                        + '<li><strong>LIN/CIRC:</strong> S und T werden <em>ignoriert</em>. Der Bahnplaner haelt die aktuelle Konfiguration bei und faehrt linear. Liegt das Ziel ausserhalb der mit dieser Konfiguration erreichbaren Region, bricht KSS mit <em>"Stop wegen kinematischer Singularitaet"</em> oder <em>"Status-Turn-Aenderung waehrend Bahnbewegung"</em> ab.</li>'
+                        + '<li><strong>Singularitaeten</strong> (Achse 5 nahe 0°, Handgelenk-Singularitaet) erfordern <code>LIN</code> oder eine PTP-Bewegung mit Status-Wechsel; eine Bahnbewegung durch die Singularitaet ist nicht moeglich, da die inverse Jacobi-Matrix dort unbestimmt wird.</li>'
+                        + '</ul>'
+                        + '<strong>Praxis-Beispiel:</strong><br>'
+                        + code('KRL', '; Punkt mit explizitem S/T:\nDECL E6POS XHOME = {X 1200, Y 0, Z 1500, A 0, B 90, C 0, S \'B010\', T \'B000010\', E1 0, E2 0, E3 0, E4 0, E5 0, E6 0}\n\nPTP XHOME      ; loest ggf. Konfigurationswechsel aus\nLIN PNEU       ; behaelt aktuelle Konfiguration')
+                        + 'In <code>B</code>-Schreibweise (binaer) sind die Bits direkt sichtbar. Wer Programme zwischen unterschiedlichen Robotervarianten (KR-Quantec vs. KR-Iontec) portiert, muss S/T pruefen &mdash; identische TCP-Koordinaten, aber andere Konfiguration fuehren in der neuen Zelle zu Kollisionen.<br>'
+                        + 'Quelle: KSS 8.x Programmierhandbuch §5 (Datentyp <code>POS</code>/<code>E6POS</code>, Status- und Turn-Felder); Siciliano et al. "Robotics: Modelling, Planning and Control", Springer 2009, §2.12 (Multiple IK-Loesungen) sowie §3.7 (kinematische Singularitaeten).'
                 }
             ]
         ]
