@@ -384,6 +384,7 @@ function validateSchueler(win) {
     Object.keys(s.content).forEach((key) => {
         const c = s.content[key];
         const where = `SCHUELER.content["${key}"]`;
+        const needsGrundschuleFiftyItems = /^k[1-4]\.(mathe|deutsch|sachunterricht|englisch)$/.test(key);
         const needsTrainingFields = /^k(?:[5-9]|10)\.(mathe|deutsch|physik|chemie|biologie|geschichte|englisch|franzoesisch|latein)$/.test(key);
         const needsTwoHundredItems = /^k(?:[5-9]|10)\.(mathe|deutsch|physik|chemie|biologie|geschichte)$/.test(key);
         const needsLanguageItems = /^k(?:[5-9]|10)\.(englisch|franzoesisch|latein)$/.test(key);
@@ -404,6 +405,9 @@ function validateSchueler(win) {
             } else {
                 if (needsTwoHundredItems && c.pool.length < 200) {
                     err(file, where, 'Klasse-5-10-Faecher benoetigen mindestens 200 Pool-Items.');
+                }
+                if (needsGrundschuleFiftyItems && c.pool.length < 50) {
+                    err(file, where, 'Klasse-1-4-Pool-Faecher benoetigen mindestens 50 Pool-Items.');
                 }
                 if (needsLanguageItems) {
                     const vocabCount = c.pool.filter((it) => it && it.kind === 'vocab').length;

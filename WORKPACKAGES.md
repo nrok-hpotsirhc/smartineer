@@ -303,6 +303,12 @@ Pro Paket-Akzeptanz: vor Start IST-Stand (per Kategorie zaehlen) im Status-Repor
 
 ## C2) Schueler-Bereich — Mittelstufe ausbauen
 
+### P-DATA-K1-4-LEHRPLAN-REVIEW — Grundschule Klasse 1-4: 50+ je Fach und fachlicher Zweit-Review
+- **Status:** in-progress
+- **Dateien:** `js/data/schueler.js`, `WORKPACKAGES.md`, `sw.js`
+- **Aktion:** User-Request 2026-05-12: Fuer alle aktiven Grundschul-Faecher der Klassen 1-4 mindestens 50 Fragen bzw. bei Generator-Faechern mindestens 50 moegliche Aufgaben nachweisen und die neu ergaenzten Items fachlich gegen den NRW-Lehrplan Grundschule (Stand 2021) zweitpruefen.
+- **Akzeptanz:** Jede aktive Kombination `k1-k4.<fach>` hat ≥50 konkrete Pool-Items oder einen Generator mit ≥50 unterscheidbaren Aufgaben; fachlich grenzwertige oder unklare Items werden korrigiert/ersetzt; Antwortformen sind `SCH.normalize`-kompatibel; `get_errors` und `node tools/validate.js --strict-sources` gruen; CACHE_VERSION bumpen; Review-Befund im Status-Report dokumentieren.
+
 ### P-SCHUELER-NATWI-TOPUP — Naturwissenschaften Klasse 5-10 auf 50 Fragen je Fach bringen
 - **Status:** done (v68, Sitzung 2026-05-11)
 - **Datei:** `js/data/schueler.js`
