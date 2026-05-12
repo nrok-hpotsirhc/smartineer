@@ -299,6 +299,40 @@ html.theme-dark, body.theme-dark {
 }
 .theme-dark .schueler-crumb-sep { color: #64748b; }
 
+/* P-UI-SCHUELER-BOX-CONTRAST (v82): Formel/Merksatz- und Musterloesung-Boxen
+   im Schueler-Training und Quiz-Result. Im Dark-Mode greift Tailwind
+   `bg-cyan-50` / `bg-emerald-50` als near-white und erzeugt einen blendend
+   hellen Block (Formel-Box wirkt zu weiss) bzw. einen kontrastarmen
+   Pastell-Block (Musterloesung-Box wirkt schwach). Eigene Klassen
+   gewinnen ueber Tailwind-Utilities (gleiche Spezifitaet, gleicher
+   Cascade-Punkt — Reihenfolge stellt sicher dass diese Regeln zuletzt
+   gelten) und bringen WCAG-AA-Kontrast (Text/Hintergrund >= 7:1). */
+.theme-dark .schueler-formula-box {
+    background-color: #0c2a33;
+    border-color: #0e7490;
+    border-left-color: #06b6d4;
+}
+.theme-dark .schueler-formula-title { color: #67e8f9; }
+.theme-dark .schueler-formula-body,
+.theme-dark .schueler-formula-body * { color: #a5f3fc; }
+.theme-dark .schueler-formula-body strong,
+.theme-dark .schueler-formula-body code { color: #e0f7fa; }
+.theme-dark .schueler-formula-hint { color: #67e8f9; }
+.theme-dark .schueler-solution-box {
+    background-color: #064e3b;
+    border-color: #10b981;
+}
+.theme-dark .schueler-solution-title {
+    color: #6ee7b7;
+    border-color: #10b981;
+}
+.theme-dark .schueler-solution-body,
+.theme-dark .schueler-solution-body * { color: #d1fae5; }
+.theme-dark .schueler-solution-body strong,
+.theme-dark .schueler-solution-body code { color: #ecfdf5; }
+.theme-dark .schueler-result-details > summary { color: #cbd5e1; }
+.theme-dark .schueler-result-details > summary:hover { color: #f1f5f9; }
+
 /* Schulungen — Book-Reader & Quiz */
 .book-page {
     font-family: Georgia, 'Times New Roman', 'Iowan Old Style', serif;

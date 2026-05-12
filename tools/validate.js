@@ -424,9 +424,11 @@ function validateSchueler(win) {
                             || typeof it.a !== 'string' || it.a.trim() === '') {
                         err(file, `${where}.pool[${i}]`, 'Pool-Item benoetigt {q:string, a:string}.');
                     }
-                    if (needsTrainingFields && (!it || typeof it.f !== 'string' || it.f.trim() === ''
-                            || typeof it.s !== 'string' || it.s.trim() === '')) {
-                        err(file, `${where}.pool[${i}]`, 'Mittelstufen-NW-Item benoetigt zusaetzlich {f:string, s:string}.');
+                    // P-DATA-SCHUELER-DIDACTIC-AUDIT (v82): {f,s} muessen vorhanden, aber duerfen
+                    // explizit leer sein. Leerer String = "kein sinnvoller Tipp" — Renderer blendet
+                    // den Block aus. Generische Floskeln zaehlen nicht als Tipp; siehe AGENTS §17.4.
+                    if (needsTrainingFields && (!it || typeof it.f !== 'string' || typeof it.s !== 'string')) {
+                        err(file, `${where}.pool[${i}]`, 'Mittelstufen-Item benoetigt {f:string, s:string} (leer = kein Tipp).');
                     }
                 });
             }

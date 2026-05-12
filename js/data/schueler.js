@@ -119,52 +119,91 @@
             .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
+    // P-DATA-SCHUELER-DIDACTIC-AUDIT (v82): Formel/Merksatz werden nur dann automatisch
+    // generiert, wenn ein echter Mehrwert entsteht (Formel, Regel, Schema). Fuer reine
+    // Begriffs-/Vokabel-/Geschichts-Fragen wird '' zurueckgegeben; der Renderer blendet
+    // den Tipp-Block dann aus. Generische "Pruefe das Ergebnis"-Floskeln vermeiden.
     function schuelerFormulaFor(item, classId, subject) {
         const q = String(item.q || '').toLowerCase();
+        const kind = item.kind || '';
+        const section = item.section || '';
+        // Sprachen: Vokabeln und Zahlen brauchen keinen Tipp; Grammatik nur bei klarem Stichwort.
+        if (subject === 'englisch' || subject === 'franzoesisch' || subject === 'latein') {
+            if (kind === 'vocab' || section === 'numbers' || section === 'vocab') return '';
+            if (kind === 'grammar' || section === 'grammar') {
+                if (q.includes('konjug')) return '<p><strong>Hinweis.</strong> Achte auf Person, Numerus, Tempus.</p>';
+                if (q.includes('plural')) return '<p><strong>Hinweis.</strong> Regelmaessige vs. unregelmaessige Pluralbildung pruefen.</p>';
+                if (q.includes('praeteritum') || q.includes('praesens') || q.includes('futur') || q.includes('perfekt') || q.includes('imperfekt') || q.includes('imperfect') || q.includes('past')) return '<p><strong>Hinweis.</strong> Tempus genau lesen und Endung pruefen.</p>';
+                if (subject === 'latein' && (q.includes('aci') || q.includes('abl. abs') || q.includes('ablativus'))) return '<p><strong>Hinweis.</strong> Satzkonstruktion identifizieren (AcI, Ablativus absolutus, Participium coniunctum).</p>';
+                return '';
+            }
+            return '';
+        }
+        // Geschichte: keine generische "Ordne Ereignis/Jahr/Ort"-Floskel pro Frage.
+        if (subject === 'geschichte') return '';
+        if (subject === 'deutsch') {
+            if (q.includes('wortart')) return '<p><strong>Merksatz.</strong> Wortarten: Nomen, Verb, Adjektiv, Artikel, Pronomen, Praeposition, Konjunktion, Adverb.</p>';
+            if (q.includes('zeitform') || q.includes('praeteritum') || q.includes('plusquamperfekt') || q.includes('futur') || q.includes('perfekt')) return '<p><strong>Merksatz.</strong> Sechs Zeitformen: Praesens, Praeteritum, Perfekt, Plusquamperfekt, Futur I, Futur II.</p>';
+            if (q.includes('satzglied') || q.includes('subjekt') || q.includes('objekt') || q.includes('praedikat')) return '<p><strong>Merksatz.</strong> Satzglieder: Subjekt (wer?), Praedikat (was tun?), Objekt (wen/was/wem?), adverbiale Bestimmung (wo/wann/wie?).</p>';
+            if (q.includes('konjunktiv')) return '<p><strong>Merksatz.</strong> Konjunktiv I = indirekte Rede; Konjunktiv II = Wunsch / Hypothese / Irrealis.</p>';
+            if (q.includes('aktiv') || q.includes('passiv')) return '<p><strong>Merksatz.</strong> Aktiv: Taeter im Mittelpunkt. Passiv (mit "werden"): Vorgang/Geschehen im Mittelpunkt.</p>';
+            if (q.includes('komma') || q.includes('zeichen')) return '<p><strong>Merksatz.</strong> Komma trennt u.a. Hauptsatz/Nebensatz, Aufzaehlungen und Einschuebe.</p>';
+            return '';
+        }
         if (subject === 'physik') {
-            if (q.includes('geschwindigkeit') || q.includes('$v')) return '<p><strong>Formel.</strong> Geschwindigkeit: $v = \\frac{s}{t}$, Weg: $s = v \\cdot t$, Zeit: $t = \\frac{s}{v}$.</p>';
-            if (q.includes('kraft') || q.includes('$f')) return '<p><strong>Formel.</strong> Newton: $F = m \\cdot a$; Gewichtskraft nahe der Erde: $F_G = m \\cdot g$ mit $g \\approx 10\\,\\text{N/kg}$.</p>';
-            if (q.includes('dichte') || q.includes('rho') || q.includes('\\rho')) return '<p><strong>Formel.</strong> Dichte: $\\rho = \\frac{m}{V}$, also Masse pro Volumen.</p>';
-            if (q.includes('widerstand') || q.includes('ohm') || q.includes('$r')) return '<p><strong>Formel.</strong> Ohmsches Gesetz: $U = R \\cdot I$, daraus $R = \\frac{U}{I}$ und $I = \\frac{U}{R}$.</p>';
-            if (q.includes('leistung') || q.includes('$p')) return '<p><strong>Formel.</strong> Leistung: $P = \\frac{W}{t}$; elektrische Leistung: $P = U \\cdot I$.</p>';
-            if (q.includes('arbeit') || q.includes('$w=')) return '<p><strong>Formel.</strong> Mechanische Arbeit bei konstanter Kraft: $W = F \\cdot s$.</p>';
-            if (q.includes('druck')) return '<p><strong>Formel.</strong> Druck: $p = \\frac{F}{A}$, Kraft pro Flaeche.</p>';
-            if (q.includes('ladung') || q.includes('$q')) return '<p><strong>Formel.</strong> Elektrische Ladung: $Q = I \\cdot t$; Spannung als Energie pro Ladung: $U = \\frac{W}{Q}$.</p>';
-            if (q.includes('wellenlaenge') || q.includes('lambda') || q.includes('\\lambda')) return '<p><strong>Formel.</strong> Wellengleichung: $c = \\lambda \\cdot f$, also $\\lambda = \\frac{c}{f}$.</p>';
-            if (q.includes('halbwertszeit') || q.includes('halbwert')) return '<p><strong>Formel.</strong> Nach $n$ Halbwertszeiten bleibt $N = N_0 \\cdot (\\tfrac{1}{2})^n$.</p>';
-            return '<p><strong>Merksatz.</strong> Ordne zuerst Groesse, Einheit und Grundgesetz zu; bei Begriffsfragen ist der praezise Fachbegriff die Loesung.</p>';
+            if (q.includes('geschwindigkeit') || q.includes('$v')) return '<p><strong>Formel.</strong> $v = \\frac{s}{t}$, $s = v \\cdot t$, $t = \\frac{s}{v}$.</p>';
+            if (q.includes('kraft') || q.includes('$f')) return '<p><strong>Formel.</strong> Newton: $F = m \\cdot a$; Gewichtskraft: $F_G = m \\cdot g$, $g \\approx 9{,}81\\,\\text{N/kg}$.</p>';
+            if (q.includes('dichte') || q.includes('rho') || q.includes('\\rho')) return '<p><strong>Formel.</strong> Dichte: $\\rho = \\frac{m}{V}$.</p>';
+            if (q.includes('widerstand') || q.includes('ohm') || q.includes('$r')) return '<p><strong>Formel.</strong> Ohmsches Gesetz: $U = R \\cdot I$.</p>';
+            if (q.includes('leistung') || q.includes('$p')) return '<p><strong>Formel.</strong> Leistung: $P = \\frac{W}{t}$; elektrisch: $P = U \\cdot I$.</p>';
+            if (q.includes('arbeit') || q.includes('$w=')) return '<p><strong>Formel.</strong> Mechanische Arbeit: $W = F \\cdot s$.</p>';
+            if (q.includes('druck')) return '<p><strong>Formel.</strong> Druck: $p = \\frac{F}{A}$.</p>';
+            if (q.includes('ladung') || q.includes('$q')) return '<p><strong>Formel.</strong> Ladung: $Q = I \\cdot t$; Spannung: $U = \\frac{W}{Q}$.</p>';
+            if (q.includes('wellenlaenge') || q.includes('lambda') || q.includes('\\lambda')) return '<p><strong>Formel.</strong> Wellengleichung: $c = \\lambda \\cdot f$.</p>';
+            if (q.includes('halbwertszeit') || q.includes('halbwert')) return '<p><strong>Formel.</strong> $N = N_0 \\cdot (\\tfrac{1}{2})^n$ nach $n$ Halbwertszeiten.</p>';
+            if (q.includes('beschleunigung')) return '<p><strong>Formel.</strong> $a = \\frac{\\Delta v}{\\Delta t}$.</p>';
+            if (q.includes('energie') && q.includes('lage')) return '<p><strong>Formel.</strong> Lageenergie: $E_\\text{pot} = m \\cdot g \\cdot h$.</p>';
+            if (q.includes('energie') && q.includes('bewegung')) return '<p><strong>Formel.</strong> Bewegungsenergie: $E_\\text{kin} = \\tfrac{1}{2} m v^2$.</p>';
+            return '';
         }
         if (subject === 'chemie') {
-            if (q.includes('ph')) return '<p><strong>Merksatz.</strong> pH &lt; 7 = sauer, pH = 7 = neutral, pH &gt; 7 = basisch.</p>';
-            if (q.includes('neutralisation')) return '<p><strong>Reaktionsschema.</strong> Saeure + Base $\\rightarrow$ Salz + Wasser.</p>';
-            if (q.includes('summenformel') || q.includes('formel') || q.includes('symbol')) return '<p><strong>Merksatz.</strong> Eine Summenformel nennt Elementsymbole und Anzahl der Atome, z.B. $H_2O$, $CO_2$, $NaCl$.</p>';
-            if (q.includes('oxidation') || q.includes('reduktion') || q.includes('redox')) return '<p><strong>Merksatz.</strong> Oxidation = Elektronenabgabe, Reduktion = Elektronenaufnahme; beides zusammen ist eine Redoxreaktion.</p>';
-            if (q.includes('alkan') || q.includes('alken') || q.includes('alkohol') || q.includes('carbonsaeure')) return '<p><strong>Merksatz.</strong> Organische Stoffklassen werden ueber Kohlenstoffgeruest und funktionelle Gruppen erkannt, z.B. Alkane (Einfachbindungen), Alkohole (-OH), Carbonsaeuren (-COOH).</p>';
-            return '<p><strong>Merksatz.</strong> Nutze Stoffeigenschaft, Teilchenmodell oder Reaktionsschema; die Antwort ist der eindeutige chemische Fachbegriff bzw. die Formel.</p>';
+            if (q.includes('ph')) return '<p><strong>Merksatz.</strong> pH &lt; 7 sauer, pH = 7 neutral, pH &gt; 7 basisch.</p>';
+            if (q.includes('neutralisation')) return '<p><strong>Schema.</strong> Saeure + Base $\\rightarrow$ Salz + Wasser.</p>';
+            if (q.includes('summenformel')) return '<p><strong>Merksatz.</strong> Summenformel = Elementsymbole + Anzahl, z.B. $H_2O$, $CO_2$, $NaCl$.</p>';
+            if (q.includes('oxidation') || q.includes('reduktion') || q.includes('redox')) return '<p><strong>Merksatz.</strong> Oxidation = Elektronen ab, Reduktion = Elektronen auf.</p>';
+            if (q.includes('alkan') || q.includes('alken') || q.includes('alkohol') || q.includes('carbonsaeure')) return '<p><strong>Merksatz.</strong> Alkane (Einfachbindungen), Alkene (Doppelbindung), Alkohole (-OH), Carbonsaeuren (-COOH).</p>';
+            return '';
         }
         if (subject === 'biologie') {
-            if (q.includes('dna') || q.includes('rna') || q.includes('gen') || q.includes('transkription') || q.includes('translation')) return '<p><strong>Merksatz.</strong> DNA speichert Information; Transkription erzeugt mRNA; Translation setzt die Information am Ribosom in ein Protein um.</p>';
-            if (q.includes('fotosynthese')) return '<p><strong>Schema.</strong> Fotosynthese: Kohlenstoffdioxid + Wasser + Licht $\\rightarrow$ Traubenzucker + Sauerstoff.</p>';
-            if (q.includes('oekosystem') || q.includes('nahrung') || q.includes('population') || q.includes('biodiversitaet')) return '<p><strong>Merksatz.</strong> Oekosysteme bestehen aus Lebensraum, Lebewesen, Stoffkreislauf und Energiefluss; Produzenten, Konsumenten und Zersetzer sind zentrale Rollen.</p>';
-            if (q.includes('atmung') || q.includes('kreislauf') || q.includes('verdauung') || q.includes('blut')) return '<p><strong>Merksatz.</strong> Organe werden ueber ihre Funktion erkannt: Aufnahme, Transport, Umwandlung oder Ausscheidung von Stoffen.</p>';
-            return '<p><strong>Merksatz.</strong> In der Biologie fuehrt die Frage meist von Struktur zu Funktion: Welcher Teil uebernimmt welche Aufgabe?</p>';
+            if (q.includes('dna') || q.includes('rna') || q.includes('gen') || q.includes('transkription') || q.includes('translation')) return '<p><strong>Merksatz.</strong> DNA speichert; Transkription erzeugt mRNA; Translation am Ribosom liefert Protein.</p>';
+            if (q.includes('fotosynthese')) return '<p><strong>Schema.</strong> $6\\,CO_2 + 6\\,H_2O \\xrightarrow{\\text{Licht}} C_6H_{12}O_6 + 6\\,O_2$.</p>';
+            if (q.includes('zellatmung')) return '<p><strong>Schema.</strong> $C_6H_{12}O_6 + 6\\,O_2 \\rightarrow 6\\,CO_2 + 6\\,H_2O + \\text{Energie}$.</p>';
+            if (q.includes('oekosystem') || q.includes('nahrung') || q.includes('population') || q.includes('biodiversitaet')) return '<p><strong>Merksatz.</strong> Produzenten &rarr; Konsumenten &rarr; Zersetzer; Stoffkreislauf + Energiefluss.</p>';
+            return '';
         }
-        if (subject === 'geschichte') {
-            return '<p><strong>Merksatz.</strong> Ordne Ereignis, Jahr, Ort und Akteur zu. Pruefe Ursache &rarr; Verlauf &rarr; Folge und nutze Schluesselbegriffe (z.B. Lehnswesen, Aufklaerung, Reformation, Industrialisierung, Kalter Krieg) als Anker.</p>';
+        // Mathe k1-k4: prozedurale Aufgaben brauchen keinen Tipp.
+        if (subject === 'mathe') {
+            if (q.includes('prozent')) return '<p><strong>Formel.</strong> Prozentwert $W = G \\cdot \\tfrac{p}{100}$.</p>';
+            if (q.includes('flaeche') && q.includes('rechteck')) return '<p><strong>Formel.</strong> Rechteck: $A = a \\cdot b$.</p>';
+            if (q.includes('umfang') && q.includes('rechteck')) return '<p><strong>Formel.</strong> Rechteck: $U = 2(a+b)$.</p>';
+            if (q.includes('flaeche') && q.includes('dreieck')) return '<p><strong>Formel.</strong> Dreieck: $A = \\tfrac{1}{2} g \\cdot h$.</p>';
+            if (q.includes('kreis') && (q.includes('flaeche') || q.includes('umfang'))) return '<p><strong>Formel.</strong> Kreis: $A = \\pi r^2$, $U = 2\\pi r$.</p>';
+            if (q.includes('pythagoras')) return '<p><strong>Formel.</strong> Pythagoras: $a^2 + b^2 = c^2$.</p>';
+            if (q.includes('binomisch')) return '<p><strong>Formeln.</strong> $(a+b)^2 = a^2+2ab+b^2$, $(a-b)^2 = a^2-2ab+b^2$, $(a+b)(a-b)=a^2-b^2$.</p>';
+            return '';
         }
-        return '<p><strong>Merksatz.</strong> Nutze die im Unterricht eingefuehrte Regel oder Definition und pruefe das Endergebnis.</p>';
+        return '';
     }
 
     function schuelerSolutionFor(item, classId, subject) {
         const answer = escapeHtml(item.a);
         const numeric = /^-?[0-9]+(?:[.,][0-9]+)?$/.test(String(item.a));
-        const boxed = numeric
-            ? '<p>Damit lautet das Endergebnis $$\\boxed{' + answer.replace(/,/g, '{,}') + '}$$</p>'
-            : '<p><strong>Endergebnis:</strong> <code>' + answer + '</code></p>';
-        return '<p><strong>Musterloesung.</strong> Lies die gesuchte Groesse bzw. den gesuchten Fachbegriff aus der Aufgabenstellung ab und vergleiche ihn mit dem Merksatz.</p>'
-            + '<p>Die passende Antwort fuer diese Aufgabe ist <strong>' + answer + '</strong>.</p>'
-            + boxed
-            + '<p class="text-xs text-slate-500"><em>Quelle: NRW-Kernlehrplan Sekundarstufe I, Naturwissenschaften bzw. Physik/Chemie/Biologie/Geschichte; schuluebliche SI-Lehrbuchkonventionen.</em></p>';
+        if (numeric) {
+            // Mathe / Physik / Chemie / Biologie mit Zahlenergebnis: knapper \boxed-Block, keine Floskel.
+            return '<p>Ergebnis: $$\\boxed{' + answer.replace(/,/g, '{,}') + '}$$</p>';
+        }
+        // Text-/Begriffsantwort: knappe "Antwort:"-Zeile, keine Lehrplan-Quelle pro Frage.
+        return '<p><strong>Antwort:</strong> <code>' + answer + '</code></p>';
     }
 
     function enrichSchuelerTrainingItems(items, classId, subject) {

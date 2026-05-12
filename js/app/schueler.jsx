@@ -583,9 +583,10 @@ function Schueler() {
                         <div className="text-xl md:text-2xl text-slate-900 font-semibold leading-snug math-block" dangerouslySetInnerHTML={{ __html: meta.body }} />
                     </div>
                     ); })()}
-                    <div className="bg-cyan-50 border-l-4 border-cyan-400 p-4 mb-5 rounded-r-lg">
+                    {(item.f && item.f.trim()) ? (
+                    <div className="schueler-formula-box bg-cyan-50 border-l-4 border-cyan-400 p-4 mb-5 rounded-r-lg">
                         <div className="flex items-center justify-between gap-3 mb-2">
-                            <h3 className="text-sm font-bold text-cyan-800 uppercase tracking-wide">Formel / Merksatz</h3>
+                            <h3 className="schueler-formula-title text-sm font-bold text-cyan-800 uppercase tracking-wide">Formel / Merksatz</h3>
                             <button onClick={() => setShowTrainingFormula(v => !v)}
                                 aria-expanded={showTrainingFormula}
                                 className="text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white py-1 px-3 rounded transition">
@@ -593,11 +594,12 @@ function Schueler() {
                             </button>
                         </div>
                         {showTrainingFormula ? (
-                            <div className="text-cyan-950 math-block slide-in" dangerouslySetInnerHTML={{ __html: item.f || '<p>Nutze den passenden Fachbegriff und pruefe die Einheit.</p>' }} />
+                            <div className="schueler-formula-body text-cyan-950 math-block slide-in" dangerouslySetInnerHTML={{ __html: item.f }} />
                         ) : (
-                            <p className="text-xs italic text-cyan-700">Versuche es zuerst selbst. Bei Bedarf den Tipp einblenden.</p>
+                            <p className="schueler-formula-hint text-xs italic text-cyan-700">Versuche es zuerst selbst. Bei Bedarf den Tipp einblenden.</p>
                         )}
                     </div>
+                    ) : null}
                     <div className="flex flex-wrap gap-3 mb-5">
                         <button onClick={() => setShowTrainingSolution(v => !v)}
                             className="bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 px-4 rounded-lg transition">
@@ -610,10 +612,10 @@ function Schueler() {
                             {solved ? 'Gelöst zurücknehmen' : 'Als gelöst markieren'}
                         </button>
                     </div>
-                    {showTrainingSolution && (
-                        <div className="bg-emerald-50 border border-emerald-200 p-5 rounded-xl slide-in">
-                            <h3 className="text-sm font-bold text-emerald-800 uppercase tracking-wide mb-3 border-b border-emerald-200 pb-2">Musterlösung</h3>
-                            <div className="text-emerald-950 math-block" dangerouslySetInnerHTML={{ __html: item.s }} />
+                    {showTrainingSolution && item.s && item.s.trim() && (
+                        <div className="schueler-solution-box bg-emerald-50 border border-emerald-200 p-5 rounded-xl slide-in">
+                            <h3 className="schueler-solution-title text-sm font-bold text-emerald-800 uppercase tracking-wide mb-3 border-b border-emerald-200 pb-2">Musterlösung</h3>
+                            <div className="schueler-solution-body text-emerald-950 math-block" dangerouslySetInnerHTML={{ __html: item.s }} />
                         </div>
                     )}
                 </div>
@@ -725,11 +727,11 @@ function Schueler() {
                                     Deine Antwort: <strong className={a.correct ? 'text-emerald-700' : 'text-rose-700'}>{a.given || '—'}</strong>
                                     {!a.correct && <span className="text-slate-700"> · richtig: <strong>{a.expected}</strong></span>}
                                 </div>
-                                {(a.formula || a.solution) && (
-                                    <details className="mt-2">
+                                {((a.formula && a.formula.trim()) || (a.solution && a.solution.trim())) && (
+                                    <details className="schueler-result-details mt-2">
                                         <summary className="cursor-pointer text-xs font-bold text-slate-600 hover:text-slate-900">Formel und Musterlösung</summary>
-                                        {a.formula && <div className="mt-2 text-sm text-cyan-950 math-block" dangerouslySetInnerHTML={{ __html: a.formula }} />}
-                                        {a.solution && <div className="mt-2 text-sm text-emerald-950 math-block" dangerouslySetInnerHTML={{ __html: a.solution }} />}
+                                        {a.formula && a.formula.trim() && <div className="schueler-formula-body mt-2 text-sm text-cyan-950 math-block" dangerouslySetInnerHTML={{ __html: a.formula }} />}
+                                        {a.solution && a.solution.trim() && <div className="schueler-solution-body mt-2 text-sm text-emerald-950 math-block" dangerouslySetInnerHTML={{ __html: a.solution }} />}
                                     </details>
                                 )}
                             </li>
