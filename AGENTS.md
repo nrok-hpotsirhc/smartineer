@@ -1126,5 +1126,112 @@ Die in §19 definierte Export/Import-Funktion ist seit v84 **profil-uebergreifen
 - UI: `ProfileGate`, `ProfileSwitcher`, `ProfileTile` in `js/app.jsx`. Nav-Button in `Nav` (`js/app/training.jsx`, Props `activeProfile`, `onOpenProfileSwitcher`).
 - Integration: State `activeProfileId` und Callbacks `handlePickProfile`/`handleWipeProfile` im `App`-Root (`js/app.jsx`); ProfileGate blockiert das Rendering, solange `activeProfileId` falsy ist.
 
+---
+
+## 25. Track-Restrukturierung (P-UI-RESTRUCTURE + P-UI-INTERESTS, seit v86)
+
+Seit v86 ist die Top-Navigation auf vier Bereiche reduziert; Cheatsheets und Schulungen leben nicht mehr als eigene Top-Level-Tabs, sondern als Sub-Tabs im neuen **Ingenieurbereich**-Wrapper. Zusaetzlich fragt die App nach dem Audience-Pick (§ AudienceChooser) per **InterestPicker** ab, welche Kategorien bzw. Klassenstufen den Nutzer interessieren, und persistiert diese Auswahl **pro Profil**.
+
+### 25.1 Nav-Topologie
+
+`learnItems` (in `js/app/training.jsx`) listet genau drei Lern-Tabs: `dashboard`, `ingenieur`, `schueler`. `accountItems` enthaelt `optionen` (Anzeige: **Einstellungen**). Daneben rendert die Nav den Profil-Switcher und den Theme-Toggle.
+
+- `NAV_ICONS` enthaelt seit v86 nur noch `dashboard | ingenieur | schueler | optionen`. Die Symbole `training`, `cheatsheet`, `schulungen` sind entfernt — neue Top-Level-Views duerfen nicht eingefuehrt werden, ohne dass `learnItems`/`accountItems` und `NAV_ICONS` synchron erweitert werden (siehe AGENTS §20).
+- Jeder Tab traegt `label` (visibler Kurzname, mobil per Icon-Only ersetzt) **und** `aria` (Vollname fuer `title`/`aria-label`/SR-Output). Beispiel: `Ingenieur` (Label) vs. `Ingenieurbereich` (aria).
+- **Direct-Views `view === 'training' | 'cheatsheet' | 'schulungen'`** sind seit v86 keine primaeren Routen mehr. Code, das frueher `setView('training')` aufgerufen hat, ruft jetzt `setIngenieurSub('training'); setView('ingenieur')` (analog fuer `cheatsheet`/`schulungen`). Ein Fallback in `App` rendert weiterhin den Ingenieur-Wrapper, falls `view === 'schulungen'` aus alten Resume-Pfaden gesetzt wird.
+
+### 25.2 Ingenieurbereich-Wrapper
+
+`js/app/ingenieur.jsx` exportiert die Komponente `Ingenieur`. Sie rendert:
+
+1. einen **Sub-Tab-Strip** mit den drei IDs `training | cheatsheet | schulungen`,
+2. darunter das aktive Sub-Rendering (`<Training/>`, `<Cheatsheet/>` oder `<Schulungen/>`).
+
+Der Sub-Tab-State (`ingenieurSub`) lebt im `App`-Root, damit Open-Category-/Resume-Schulung-Routen gezielt einen Sub-Bereich oeffnen:
+
+- `openCategory(catId, 'training')` setzt `setIngenieurSub('training')` + `setView('ingenieur')`.
+- `openCategory(catId, 'cheatsheet')` analog mit `'cheatsheet'`.
+- `openTrainingAt(catId, level, idx)` → `setIngenieurSub('training')` + `setView('ingenieur')`.
+- `onResumeSchulung(tid, cid)` → `setIngenieurSub('schulungen')` + `setView('ingenieur')`; die zur Reader-Position fuehrende `getInitialOpen`-Prop wird weitergereicht.
+
+### 25.3 InterestPicker
+
+Nach `chooseAudience(choice)` prueft `App` den Storage-Key `INTERESTS_PICKED_KEY` (`smartineer_interests_picked_v1`). Wenn er leer ist, wird der `InterestPicker`-Modal geoeffnet:
+
+- **Ingenieur-Pfad**: Multi-Select-Liste aller registrierten Kategorien aus `window.APP_DATA`/`APP_ORDER`. Auswahl schreibt via `vis.setSelection(arr)` in `VISIBLE_CATS_KEY`.
+- **Schueler-Pfad**: Multi-Select-Liste der 10 Klassen aus `window.SCHUELER.classes`. Auswahl schreibt via `visClasses.setSelection(arr)` in `VISIBLE_CLASSES_KEY`.
+- Buttons: `Alle auswaehlen` / `Keine` / `Weiter` / `Ueberspringen`. Beide Buttons (Weiter und Ueberspringen) rufen `markInterestsPicked()` und schliessen den Modal.
+- **Defensive Empty-Fallback:** Eine **leere** Whitelist im Storage bedeutet **alle sichtbar** (sonst entstuende ein leerer Dashboard-Zustand). Der Picker ersetzt ein leeres `picked`-Array beim Submit deshalb durch die volle Liste.
+
+Audience-Reset (`resetAudienceChoice` in `App`) ruft `clearInterestsPicked()` — beim naechsten Audience-Pick erscheint der Picker wieder. Spaetere Aenderungen laufen ueber die Einstellungen (§ 25.5).
+
+### 25.4 Schueler-Dashboard
+
+`view === 'dashboard'` verzweigt seit v86 nach `audienceChoice`:
+
+- **Ingenieur (Default):** das bestehende `Dashboard` (Radar + Kategorien-Grid + Resume-Karte).
+- **Schueler:** das neue `SchuelerDashboard` (in `js/app/schueler.jsx`):
+    - Hero-Header mit Brand-Logo + Profil-Badge.
+    - Gesamtfortschritts-Karte mit Chart.js-Horizontalbalken (`SchuelerChart`) und 10-Farben-Palette `SCHUELER_CLASS_COLORS` = `[emerald, sky, amber, rose, violet, teal, indigo, pink, lime, orange]`.
+    - Pro Klasse eine Karte mit Klassen-Farbe, animiertem Progress-Balken und Klick-Route auf den Schueler-Bereich der Klasse.
+    - Fortschritt-Berechnung via `schuelerClassStats(SCH, classId, progress)`: summiert die `pool`-Items aller Faecher der Klasse; Schluessel `${classId}.${subjId}|${stableQid({q,a}) || idx}` (Stable-QID wenn vorhanden, sonst Index als Fallback). Generierte Klassen (K1/K2, `mode: 'generated'`) liefern `{ mode: 'generated', done, total: 0, pct: 0 }` und werden in der UI als „X Aufgaben gemeistert" angezeigt — ohne Prozentangabe.
+
+### 25.5 Storage-Erweiterung
+
+Neu in `js/app/_core.jsx`:
+
+- `VISIBLE_CLASSES_KEY = 'smartineer_visible_classes_v1'` — Whitelist der angezeigten Klassen-IDs (analog `VISIBLE_CATS_KEY`).
+- `INTERESTS_PICKED_KEY = 'smartineer_interests_picked_v1'` — boolesches Flag, ob der User den InterestPicker einmal abgeschlossen hat.
+- Beide Keys plus der bereits vorhandene `VISIBLE_CATS_KEY` sind seit v86 Teil von `PROFILE_SCOPED_KEYS` und werden damit **profil-spezifisch** gespiegelt (§24.2). Vor v86 war `VISIBLE_CATS_KEY` geraete-global — die Live-Daten existierender User werden beim Profilwechsel automatisch in den Snapshot des aktiven Profils geschrieben.
+- Neuer Hook `useVisibleClasses(allClassIds)` analog `useVisibleCategories(allCatIds)`. Return-Form: `{ hidden, isVisible(id), visibleClasses, toggle(id), reset(), setSelection(arr) }`. **Semantik „leere Whitelist = alles sichtbar"** in beiden Hooks identisch.
+- `useVisibleCategories` erhaelt ein zusaetzliches `setSelection(arr)`, das atomar die ganze Whitelist setzt (frueher nur pro-ID-`toggle`).
+- Helfer: `isInterestsPicked()`, `markInterestsPicked()`, `clearInterestsPicked()`.
+
+Einstellungen-Tabs (`js/app/optionen.jsx`):
+
+- Header umbenannt auf **Einstellungen** (vorher „Optionen").
+- Bestehender Kategorien-Filter-Tab bleibt unveraendert (nutzt `vis`).
+- Neuer Tab **Klassen** wird **nur fuer Schueler-Audience** eingeblendet (`audienceChoice === 'schueler'`). Komponente: `OptionenKlassen({allClassIds, classLabels, visClasses})` — Checkbox-Grid mit „Alle anzeigen" und „Standard wiederherstellen".
+
+### 25.6 CSS-Hardening (Viewport-Anker)
+
+In `css/styles.css` (P-UI-VIEWPORT-ANCHOR):
+
+```css
+#react-root, #react-root > *, main, footer {
+    max-width: 100vw;
+    overflow-x: clip;
+}
+.nav-glass > div { min-width: 0; }
+```
+
+- **`overflow-x: clip` statt `hidden`** ist verbindlich: `hidden` auf Vorfahren erzeugt einen Scroll-Container und **deaktiviert `position: sticky`** der Topnav. `clip` schneidet Overflow ab, ohne einen Scroll-Container zu erzwingen — die Sticky-Nav bleibt funktional.
+- `min-width: 0` auf den Flex-Children der Nav-Glass-Bar erlaubt korrektes Shrinking, sodass z.B. der Theme-Toggle auf Mobile nicht aus dem Viewport ragt.
+
+### 25.7 Migrationspfad
+
+- **Bestehende Pre-v86-Profile:** `INTERESTS_PICKED_KEY` ist leer → der Picker erscheint einmalig nach dem naechsten Audience-Pick. Wer den AudienceChooser nicht erneut sieht (weil `audienceChoice` bereits gesetzt ist), bekommt den Picker beim naechsten Audience-Reset.
+- **VISIBLE_CATS_KEY**: alte (geraete-globale) Whitelist wird beim ersten Profilwechsel als Snapshot des aktiven Profils festgeschrieben (vgl. §24.2 „live mirror").
+- **Pre-v86-Resume-Pfade** (z.B. `view: 'schulungen'` aus altem Storage-State): Fallback in `App` rendert den Ingenieur-Wrapper mit `subview='schulungen'`. Kein Lernstand-Drift.
+
+### 25.8 Anti-Pattern
+
+- `overflow: hidden` (statt `clip`) auf `#react-root`/`main`/`footer` oder `.nav-glass` setzen — bricht `position: sticky` der Topnav (Browser muss in einen Scroll-Container „flushen"). Wer Horizontal-Overflow eindaemmen will, nutzt `overflow-x: clip`.
+- Cheatsheets oder Schulungen als eigenen Top-Level-Tab in `learnItems` wieder einfuehren — verletzt die neue Track-Topologie. Erweiterungen leben im Ingenieurbereich-Wrapper (Sub-Tab) oder als eigener Track im `App`-Root.
+- `setView('training' | 'cheatsheet' | 'schulungen')` ohne vorheriges `setIngenieurSub(...)` aufrufen — der Wrapper sollte den richtigen Sub-Tab kennen, bevor er montiert wird. Hilfsfunktionen `openCategory`/`openTrainingAt`/`onResumeSchulung` kapseln diese Reihenfolge.
+- Leere Interest-Whitelist als „nichts sichtbar" interpretieren — die App-Konvention seit v86 ist **leer = alles sichtbar**. Wer eine echte Null-Auswahl modellieren will, braucht einen zweiten Storage-Key („explizit leer").
+- VISIBLE_CLASSES_KEY oder INTERESTS_PICKED_KEY aus `PROFILE_SCOPED_KEYS` herausnehmen — verletzt die Multi-Profil-Trennung (§24.1).
+- Brand-Logo oder Chart-Farben pro Klasse aus `SCHUELER_CLASS_COLORS` aendern, ohne die zugehoerigen Klassen-Karten zu pruefen — die Palette ist 1:1 auf `k1..k10` gemappt und stabilisiert die Wiedererkennbarkeit der Klasse zwischen Dashboard und Schueler-Stage.
+
+### 25.9 Referenz-Implementierung
+
+- Nav + Icons: `js/app/training.jsx` (`NAV_ICONS`, `Nav`-Komponente mit `learnItems`/`accountItems`).
+- Wrapper: `js/app/ingenieur.jsx` (`Ingenieur`-Komponente; Sub-Tabs + Sub-Render).
+- InterestPicker + App-State-Verkabelung: `js/app.jsx` (`InterestPicker`-Komponente; State `ingenieurSub`, `interestPicker`).
+- Schueler-Dashboard + Chart + Stats: `js/app/schueler.jsx` (`SchuelerDashboard`, `SchuelerChart`, `SCHUELER_CLASS_COLORS`, `schuelerClassStats`).
+- Storage + Hooks: `js/app/_core.jsx` (`VISIBLE_CLASSES_KEY`, `INTERESTS_PICKED_KEY`, `useVisibleClasses`, erweiterte `useVisibleCategories`, `isInterestsPicked`/`markInterestsPicked`/`clearInterestsPicked`, erweiterte `PROFILE_SCOPED_KEYS`).
+- Einstellungen-Tab: `js/app/optionen.jsx` (`Optionen` mit Header „Einstellungen", `OptionenKlassen`-Subkomponente).
+- CSS: `css/styles.css` (`#react-root, main, footer { overflow-x: clip }`, `.nav-glass > div { min-width: 0 }`).
+- App-Shell: `index.html` (Script `js/app/ingenieur.jsx` zwischen `optionen.jsx` und `app.jsx`); `sw.js` (`APP_SHELL` enthaelt `./js/app/ingenieur.jsx`; `CACHE_VERSION = 'smartineer-v86-restructure'`).
 
 
