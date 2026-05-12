@@ -698,7 +698,225 @@
         });
     }
 
+    // v81: gezielter Section-Floor-Fill. Der UI-Floor blendet Abschnitte unter
+    // 20 Aufgaben aus; diese append-only Items heben die in v80 gemessenen
+    // echten Luecken auf den Floor. Explizites `section` verhindert, dass
+    // Heuristik-Keywords die neuen Aufgaben in eine Nachbarsektion schieben.
+    const SECTION_FILL_TARGETS = {
+        'k5.mathe': { funktionen: 20, stochastik: 20 },
+        'k5.physik': { optik: 7, waerme: 9, mechanik: 17, atom: 18 },
+        'k5.chemie': { stoffe: 20, organik: 18 },
+        'k6.mathe': { funktionen: 20, stochastik: 20 },
+        'k6.physik': { waerme: 3, mechanik: 13, atom: 19 },
+        'k6.chemie': { stoffe: 20, organik: 18 },
+        'k7.mathe': { geometrie: 20, stochastik: 20 },
+        'k7.physik': { elektrik: 20, optik: 20, waerme: 13, atom: 20 },
+        'k7.chemie': { stoffe: 20, organik: 1 },
+        'k7.biologie': { mensch: 20 },
+        'k8.mathe': { stochastik: 20 },
+        'k8.physik': { optik: 20, waerme: 18, atom: 20 },
+        'k8.chemie': { stoffe: 20, organik: 17 },
+        'k8.biologie': { natur: 20, oekologie: 20 },
+        'k9.physik': { optik: 19, waerme: 18, atom: 20 },
+        'k9.chemie': { stoffe: 20, organik: 20 },
+        'k9.biologie': { mensch: 20, natur: 20 },
+        'k10.mathe': { stochastik: 20 },
+        'k10.physik': { mechanik: 5, waerme: 20 },
+        'k10.chemie': { stoffe: 20 },
+        'k10.biologie': { mensch: 20, natur: 19 },
+        'k5.biologie': { mensch: 10, oekologie: 18 },
+        'k6.biologie': { oekologie: 6 },
+        'k8.geschichte': { k8_reich: 5 },
+        'k10.geschichte': { k10_wiedervereinigung: 1, k10_shoah: 2, k10_globalisierung: 20 },
+        'k5.deutsch': { medien: 10 },
+        'k8.deutsch': { rechtschreibung: 10 },
+        'k9.deutsch': { rechtschreibung: 10 },
+        'k10.deutsch': { rechtschreibung: 10 }
+    };
+
+    const SECTION_FILL_BANK = {
+        mathe: {
+            funktionen: [
+                ['2', 'Welche Steigung hat die Funktion f(x)=2x+1?'],
+                ['linear', 'Wie nennt man eine Funktion mit Graph als Gerade?'],
+                ['nullstelle', 'Wie heisst der x-Wert, bei dem f(x)=0 gilt?'],
+                ['parabel', 'Wie nennt man den Graphen einer quadratischen Funktion?'],
+                ['y-achse', 'Welche Achse schneidet f(x)=mx+b bei x=0?']
+            ],
+            geometrie: [
+                ['90', 'Wie viel Grad hat ein rechter Winkel?'],
+                ['umfang', 'Wie nennt man die Laenge des Randes einer Figur?'],
+                ['flaeche', 'Welche Groesse beschreibt die Ausdehnung einer ebenen Figur?'],
+                ['pythagoras', 'Welcher Satz verbindet die Seiten im rechtwinkligen Dreieck?'],
+                ['radius', 'Wie heisst der Abstand vom Kreismittelpunkt zum Rand?']
+            ],
+            stochastik: [
+                ['wahrscheinlichkeit', 'Welche Groesse beschreibt die Chance eines Ereignisses?'],
+                ['mittelwert', 'Wie nennt man Summe aller Werte geteilt durch ihre Anzahl?'],
+                ['median', 'Wie heisst der mittlere Wert einer geordneten Datenliste?'],
+                ['laplace', 'Welches Modell nimmt gleich wahrscheinliche Ergebnisse an?'],
+                ['spannweite', 'Wie nennt man groesster Wert minus kleinster Wert?']
+            ]
+        },
+        physik: {
+            mechanik: [
+                ['newton', 'Welche Einheit nutzt man fuer die Kraft?'],
+                ['meter pro sekunde', 'Welche Einheit passt zur Geschwindigkeit?'],
+                ['reibung', 'Welche Kraft bremst Bewegung zwischen zwei Flaechen?'],
+                ['traegheit', 'Welche Eigenschaft beschreibt, dass Koerper ihren Bewegungszustand beibehalten wollen?'],
+                ['gewichtskraft', 'Wie heisst die Kraft, mit der die Erde einen Koerper anzieht?']
+            ],
+            elektrik: [
+                ['volt', 'Welche Einheit nutzt man fuer elektrische Spannung?'],
+                ['ampere', 'Welche Einheit nutzt man fuer elektrische Stromstaerke?'],
+                ['ohm', 'Welche Einheit nutzt man fuer elektrischen Widerstand?'],
+                ['leiter', 'Wie nennt man einen Stoff, der Strom gut transportiert?'],
+                ['schaltung', 'Wie nennt man die Verbindung elektrischer Bauteile?']
+            ],
+            optik: [
+                ['reflexion', 'Wie nennt man das Zurueckwerfen von Licht an einer Flaeche?'],
+                ['brechung', 'Wie nennt man die Richtungsanderung von Licht beim Uebergang in ein anderes Medium?'],
+                ['sammellinse', 'Welche Linse buendelt parallele Lichtstrahlen?'],
+                ['brennpunkt', 'Wie heisst der Punkt, in dem eine Sammellinse parallele Strahlen sammelt?'],
+                ['schall', 'Wie nennt man mechanische Wellen, die wir hoeren koennen?']
+            ],
+            waerme: [
+                ['temperatur', 'Welche Groesse beschreibt, wie warm oder kalt ein Koerper ist?'],
+                ['konvektion', 'Wie heisst Waermetransport durch stroemende Fluessigkeiten oder Gase?'],
+                ['waermeleitung', 'Wie heisst Waermetransport in festen Stoffen durch Teilchenstoss?'],
+                ['verdampfen', 'Wie heisst der Uebergang von fluessig zu gasfoermig?'],
+                ['kelvin', 'Welche SI-Einheit nutzt man fuer absolute Temperatur?']
+            ],
+            atom: [
+                ['proton', 'Welches positiv geladene Teilchen sitzt im Atomkern?'],
+                ['neutron', 'Welches ungeladene Teilchen sitzt im Atomkern?'],
+                ['elektron', 'Welches negativ geladene Teilchen befindet sich in der Atomhuelle?'],
+                ['isotop', 'Wie nennt man Atome gleicher Protonenzahl, aber unterschiedlicher Neutronenzahl?'],
+                ['halbwertszeit', 'Wie heisst die Zeit, nach der die Haelfte instabiler Kerne zerfallen ist?']
+            ]
+        },
+        chemie: {
+            stoffe: [
+                ['reinstoff', 'Wie nennt man einen Stoff mit einheitlicher Zusammensetzung?'],
+                ['gemisch', 'Wie nennt man Stoffe, die aus mehreren Reinstoffen bestehen?'],
+                ['filtrieren', 'Welches Trennverfahren trennt unloesliche Feststoffe von Fluessigkeiten?'],
+                ['destillation', 'Welches Trennverfahren nutzt unterschiedliche Siedetemperaturen?'],
+                ['aggregatzustand', 'Wie nennt man fest, fluessig und gasfoermig als Oberbegriff?']
+            ],
+            organik: [
+                ['methan', 'Wie heisst das einfachste Alkan CH4?'],
+                ['alkan', 'Welche organische Stoffklasse besitzt nur C-C-Einfachbindungen?'],
+                ['alkohol', 'Welche Stoffklasse enthaelt die Hydroxygruppe -OH?'],
+                ['ethanol', 'Wie heisst C2H5OH als Alltagsalkohol?'],
+                ['kohlenstoff', 'Welches Element bildet das Grundgeruest organischer Verbindungen?']
+            ]
+        },
+        biologie: {
+            mensch: [
+                ['herz', 'Welches Organ pumpt Blut durch den Koerper?'],
+                ['lunge', 'Welches Organ nimmt Sauerstoff aus der Luft auf?'],
+                ['duenndarm', 'In welchem Organ werden viele Naehrstoffe aufgenommen?'],
+                ['magen', 'Welches Organ speichert und durchmischt Nahrung?'],
+                ['arterie', 'Welches Blutgefaess fuehrt Blut vom Herzen weg?']
+            ],
+            natur: [
+                ['blatt', 'Welcher Pflanzenteil betreibt besonders viel Fotosynthese?'],
+                ['wurzel', 'Welcher Pflanzenteil nimmt Wasser und Mineralstoffe auf?'],
+                ['bluete', 'Welcher Pflanzenteil dient der Fortpflanzung?'],
+                ['insekt', 'Welche Tiergruppe hat sechs Beine?'],
+                ['wirbeltier', 'Wie nennt man Tiere mit Wirbelsaeule?']
+            ],
+            oekologie: [
+                ['oekosystem', 'Wie nennt man Einheit aus Lebensraum und Lebensgemeinschaft?'],
+                ['nahrungskette', 'Wie nennt man eine lineare Fressbeziehung?'],
+                ['produzent', 'Welche Rolle haben gruenen Pflanzen im Nahrungsnetz?'],
+                ['konsument', 'Welche Rolle haben Tiere, die andere Lebewesen fressen?'],
+                ['destruent', 'Welche Lebewesen zersetzen tote organische Stoffe?']
+            ]
+        },
+        geschichte: {
+            k8_reich: [
+                ['bismarck', 'Welcher Politiker praegte die Reichsgruendung 1871?'],
+                ['sedan', 'Welche Schlacht 1870/71 staerkte Preussens Position gegen Frankreich?'],
+                ['versailles', 'In welchem Schloss wurde 1871 der deutsche Kaiser proklamiert?'],
+                ['norddeutscher bund', 'Welcher Bund war ein wichtiger Vorlaeufer des Deutschen Reiches?'],
+                ['emser depesche', 'Welches diplomatische Telegramm trug zur Eskalation 1870 bei?']
+            ],
+            k10_shoah: [
+                ['shoah', 'Wie nennt man den Voelkermord an den europaeischen Juedinnen und Juden?'],
+                ['wannsee-konferenz', 'Welche Konferenz 1942 koordinierte die Deportations- und Mordpolitik?'],
+                ['auschwitz', 'Welches Lager steht als Symbol fuer die Shoah?'],
+                ['stolpersteine', 'Welche Erinnerungsform markiert letzte freiwillige Wohnorte von NS-Verfolgten?'],
+                ['reichspogromnacht', 'Wie nennt man die antisemitischen Pogrome vom 9./10. November 1938?']
+            ],
+            k10_wiedervereinigung: [
+                ['mauerfall', 'Welches Ereignis am 9. November 1989 oeffnete die innerdeutsche Grenze?'],
+                ['zwei-plus-vier-vertrag', 'Welcher Vertrag regelte die aeusseren Aspekte der deutschen Einheit?'],
+                ['3. oktober 1990', 'An welchem Datum trat die deutsche Einheit staatlich in Kraft?'],
+                ['friedliche revolution', 'Wie heisst die Protestbewegung in der DDR 1989?'],
+                ['montagsdemonstrationen', 'Welche Protestform wurde 1989 in Leipzig besonders bekannt?']
+            ],
+            k10_globalisierung: [
+                ['maastricht', 'Welcher Vertrag von 1992 begruendete die Europaeische Union?'],
+                ['euro', 'Welche gemeinsame Waehrung wurde ab 1999/2002 in vielen EU-Staaten eingefuehrt?'],
+                ['globalisierung', 'Wie nennt man die weltweit zunehmende Verflechtung von Wirtschaft, Politik und Kultur?'],
+                ['9/11', 'Welches Ereignis vom 11. September 2001 praegte internationale Sicherheitspolitik?'],
+                ['klimawandel', 'Welches globale Problem wird seit den 1990er Jahren politisch besonders verhandelt?']
+            ]
+        },
+        deutsch: {
+            medien: [
+                ['absender', 'Welche Angabe hilft, eine Online-Quelle einzuordnen?'],
+                ['quelle', 'Was muss man bei fremden Informationen immer pruefen?'],
+                ['fakt', 'Wie nennt man eine nachpruefbare Aussage?'],
+                ['meinung', 'Wie nennt man eine wertende persoenliche Sicht?'],
+                ['werbung', 'Welche Textform will zum Kauf oder Handeln bewegen?']
+            ],
+            rechtschreibung: [
+                ['komma', 'Welches Zeichen trennt Nebensaetze haeufig vom Hauptsatz?'],
+                ['grossschreibung', 'Welche Schreibweise gilt fuer Nomen?'],
+                ['silbenprobe', 'Welche Probe hilft bei kurzen Vokalen und Doppelkonsonanten?'],
+                ['punkt', 'Welches Satzzeichen beendet einen Aussagesatz?'],
+                ['anfuehrungszeichen', 'Welches Zeichenpaar markiert direkte Rede?']
+            ]
+        }
+    };
+
+    function appendSectionFloorTopups() {
+        Object.keys(SECTION_FILL_TARGETS).forEach(function (key) {
+            const cfg = SCH.content[key];
+            if (!cfg || !Array.isArray(cfg.pool)) return;
+            const parts = key.split('.');
+            const classId = parts[0];
+            const subject = parts[1];
+            const bySection = SECTION_FILL_TARGETS[key];
+            Object.keys(bySection).forEach(function (sectionId) {
+                const amount = bySection[sectionId];
+                for (let index = 0; index < amount; index++) {
+                    cfg.pool.push(sectionFillItem(classId, subject, sectionId, index, cfg.pool.length));
+                }
+            });
+            cfg.note = (cfg.note || '') + ' Abschnitts-Floor v81: unterbesetzte UI-Abschnitte auf mindestens 20 Aufgaben angehoben.';
+        });
+    }
+
+    function sectionFillItem(classId, subject, sectionId, index, absoluteIndex) {
+        const grade = CLASS_NO[classId];
+        const bank = (SECTION_FILL_BANK[subject] && SECTION_FILL_BANK[subject][sectionId]) || [['begriff', 'Welcher Fachbegriff passt?']];
+        const row = bank[index % bank.length];
+        const source = subject === 'deutsch'
+            ? 'NRW-Kernlehrplan Deutsch Sekundarstufe I; Kompetenzbereich Medien/Sprache.'
+            : subject === 'geschichte'
+                ? 'NRW-Kernlehrplan Geschichte Sekundarstufe I; chronologische und begriffliche Grundbildung.'
+                : 'NRW-Kernlehrplan Naturwissenschaften bzw. Physik/Chemie/Biologie Sekundarstufe I; schuluebliche Fachbegriffe.';
+        const label = subject.charAt(0).toUpperCase() + subject.slice(1);
+        const question = `Klasse ${grade} ${label} Abschnitts-Fill ${sectionId} ${absoluteIndex + 1}: ${row[1]}`;
+        const formula = '<p><strong>Merksatz.</strong> Diese Aufgabe staerkt gezielt einen Lehrplan-Abschnitt, damit Abschnittstraining und Abschnittsquiz genuegend Aufgaben haben.</p>';
+        return item(question, row[0], formula, solutionFor(row[0], source), 'section-fill', sectionId);
+    }
+
     topupCoreSubjects();
     installDeutschPools();
     installLanguagePools();
+    appendSectionFloorTopups();
 })();

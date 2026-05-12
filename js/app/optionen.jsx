@@ -1,9 +1,10 @@
 // ---------------------------------------------------------------- Optionen
 // Tabs: Konto, Kategorien, Daten (Export/Import + Reset), Store (Skeleton),
 // PWA (Install), Admin (nur fuer admin-Rolle).
-function Optionen({ data, allOrder, vis, auth, onExport, onImport, onReset, onInstall, installAvailable }) {
+function Optionen({ data, allOrder, vis, auth, onExport, onImport, onReset, onInstall, installAvailable, audienceChoice, onSetAudience, onResetAudience }) {
     const [tab, setTab] = useState('konto');
     const tabs = [
+        { id: 'start',      label: 'Startbereich' },
         { id: 'konto',      label: 'Konto' },
         { id: 'kategorien', label: 'Kategorien' },
         { id: 'daten',      label: 'Daten' },
@@ -27,6 +28,7 @@ function Optionen({ data, allOrder, vis, auth, onExport, onImport, onReset, onIn
                 ))}
             </div>
 
+            {tab === 'start' && <OptionenStartbereich audienceChoice={audienceChoice} onSetAudience={onSetAudience} onResetAudience={onResetAudience} />}
             {tab === 'konto' && <OptionenKonto auth={auth} />}
             {tab === 'kategorien' && <OptionenKategorien data={data} allOrder={allOrder} vis={vis} />}
             {tab === 'daten' && <OptionenDaten onExport={onExport} onImport={onImport} onReset={onReset} />}
@@ -34,6 +36,49 @@ function Optionen({ data, allOrder, vis, auth, onExport, onImport, onReset, onIn
             {tab === 'pwa' && <OptionenPwa onInstall={onInstall} installAvailable={installAvailable} />}
             {tab === 'admin' && auth.isAdmin && <OptionenAdmin auth={auth} vis={vis} />}
         </section>
+    );
+}
+
+function OptionenStartbereich({ audienceChoice, onSetAudience, onResetAudience }) {
+    const current = audienceChoice === 'schueler' ? 'Schüler' : audienceChoice === 'ingenieur' ? 'Ingenieur' : 'Noch nicht gewählt';
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-2">Startbereich</h3>
+            <p className="text-sm text-slate-600 mb-4">Aktuelle Auswahl: <strong>{current}</strong>. Die Auswahl bestimmt, wohin Smartineer beim ersten Betreten direkt springt.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button type="button" onClick={() => onSetAudience('schueler')}
+                    className={`text-left rounded-xl border p-5 transition ${audienceChoice === 'schueler' ? 'border-emerald-500 bg-emerald-50 text-emerald-950' : 'border-slate-200 bg-slate-50 hover:bg-emerald-50'}`}>
+                    <span className="flex items-center gap-3 mb-2">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M4 19.5V6.8A2.8 2.8 0 0 1 6.8 4H20v15H7a3 3 0 0 0-3 3" />
+                                <path d="M8 8h8" />
+                                <path d="M8 12h7" />
+                            </svg>
+                        </span>
+                        <span className="text-base font-black text-slate-900">Schüler</span>
+                    </span>
+                    <span className="text-sm text-slate-600">Beim Start direkt in Klassen- und Fachauswahl wechseln.</span>
+                </button>
+                <button type="button" onClick={() => onSetAudience('ingenieur')}
+                    className={`text-left rounded-xl border p-5 transition ${audienceChoice === 'ingenieur' ? 'border-blue-600 bg-blue-50 text-blue-950' : 'border-slate-200 bg-slate-50 hover:bg-blue-50'}`}>
+                    <span className="flex items-center gap-3 mb-2">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-amber-200">
+                            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+                                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.05A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.05A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.05A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.05A1.7 1.7 0 0 0 19.4 15Z" />
+                            </svg>
+                        </span>
+                        <span className="text-base font-black text-slate-900">Ingenieur</span>
+                    </span>
+                    <span className="text-sm text-slate-600">Beim Start direkt das Ingenieurs-Dashboard öffnen.</span>
+                </button>
+            </div>
+            <button type="button" onClick={onResetAudience}
+                className="mt-4 px-4 py-2 text-sm font-bold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition">
+                Auswahl zurücksetzen
+            </button>
+        </div>
     );
 }
 

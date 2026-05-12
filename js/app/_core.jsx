@@ -8,6 +8,7 @@ const STORAGE_KEY = 'wissen_reloaded_progress_v1';
 const SCHUELER_PROGRESS_KEY = 'smartineer_schueler_progress_v1';
 const INSTALL_DISMISS_KEY = 'smartineer_install_dismissed_v1';
 const THEME_KEY = 'smartineer_theme_v1'; // 'dark' | 'light' (Default: 'light')
+const AUDIENCE_KEY = 'smartineer_audience_v1'; // 'schueler' | 'ingenieur' — Startbereich, geraetespezifisch
 // Schulungen-State (Stand v2): wie v1, mit Versions-Bump fuer Stable-QID-Symmetrie.
 // Shape unveraendert: { [trainingId]: { [chapterId]: { lastPage, quizBest, quizLast } } }.
 const SCHULUNGEN_KEY = 'smartineer_schulungen_v2';

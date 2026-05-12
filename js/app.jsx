@@ -5,7 +5,17 @@ function App() {
     const vis = useVisibleCategories(allOrder);
     const order = vis.visibleOrder;
 
-    const [view, setView] = useState('dashboard');
+    const readAudienceChoice = () => {
+        try {
+            const stored = localStorage.getItem(AUDIENCE_KEY);
+            return stored === 'schueler' || stored === 'ingenieur' ? stored : null;
+        } catch (e) { return null; }
+    };
+    const initialAudienceChoice = readAudienceChoice();
+
+    const [audienceChoice, setAudienceChoice] = useState(initialAudienceChoice);
+    const [audienceDialogOpen, setAudienceDialogOpen] = useState(!initialAudienceChoice);
+    const [view, setView] = useState(initialAudienceChoice === 'schueler' ? 'schueler' : 'dashboard');
     const [currentCat, setCurrentCat] = useState(allOrder[0] || null);
     const { isSolved, setSolved, reset } = useProgress();
     // P-LP-SRS-OPEN: SRS-State wird im App-Root gehalten und an Training, Dashboard
@@ -58,6 +68,20 @@ function App() {
     const closeInstall = (dismissPersistent) => {
         if (dismissPersistent) localStorage.setItem(INSTALL_DISMISS_KEY, '1');
         setInstallOpen(false);
+    };
+
+    const chooseAudience = (choice) => {
+        if (choice !== 'schueler' && choice !== 'ingenieur') return;
+        try { localStorage.setItem(AUDIENCE_KEY, choice); } catch (e) { /* quota */ }
+        setAudienceChoice(choice);
+        setAudienceDialogOpen(false);
+        setView(choice === 'schueler' ? 'schueler' : 'dashboard');
+    };
+
+    const resetAudienceChoice = () => {
+        try { localStorage.removeItem(AUDIENCE_KEY); } catch (e) { /* quota */ }
+        setAudienceChoice(null);
+        setAudienceDialogOpen(true);
     };
 
     const openCategory = (k, targetView) => {
@@ -214,7 +238,10 @@ function App() {
                     <Optionen data={data} allOrder={allOrder} vis={vis} auth={auth}
                         onExport={onExport} onImport={onImportClick} onReset={onReset}
                         onInstall={showInstallButton ? () => setInstallOpen(true) : null}
-                        installAvailable={!!showInstallButton} />
+                        installAvailable={!!showInstallButton}
+                        audienceChoice={audienceChoice}
+                        onSetAudience={chooseAudience}
+                        onResetAudience={resetAudienceChoice} />
                 )}
             </main>
             <footer className="bg-slate-900 text-slate-400 py-6 text-center text-sm mt-auto">
@@ -228,12 +255,55 @@ function App() {
             </footer>
             <InstallPrompt open={installOpen} onClose={closeInstall}
                 deferredEvent={deferredEvent} platform={platform} />
+            <AudienceChooser open={audienceDialogOpen} onChoose={chooseAudience} />
             <ImpressumModal open={impressumOpen} onClose={() => setImpressumOpen(false)} />
             <input ref={fileInputRef} type="file" accept="application/json,.json"
                 onChange={onImportFile}
                 style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
                 aria-hidden="true" tabIndex={-1} />
         </>
+    );
+}
+
+function AudienceChooser({ open, onChoose }) {
+    if (!open) return null;
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="audience-title">
+            <div className="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl border border-white/70">
+                <div className="px-5 sm:px-8 pt-7 pb-5 text-center border-b border-slate-200">
+                    <h2 id="audience-title" className="text-3xl sm:text-4xl font-black text-slate-900">Schüler || Ingenieur</h2>
+                    <p className="mt-2 text-sm sm:text-base text-slate-600">Wähle deinen Startbereich. Smartineer öffnet danach direkt den passenden Arbeitsmodus.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                    <button type="button" onClick={() => onChoose('schueler')}
+                        className="group min-h-[250px] bg-emerald-600 hover:bg-emerald-700 text-white text-left p-7 sm:p-9 transition focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-inset"
+                        aria-label="Schülerbereich starten">
+                        <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-white/15 border border-white/30 mb-7 text-white">
+                            <svg viewBox="0 0 24 24" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M4 19.5V6.8A2.8 2.8 0 0 1 6.8 4H20v15H7a3 3 0 0 0-3 3" />
+                                <path d="M8 8h8" />
+                                <path d="M8 12h7" />
+                                <path d="M7 19h13" />
+                            </svg>
+                        </span>
+                        <span className="block text-3xl font-black mb-3">Schüler</span>
+                        <span className="block text-base leading-relaxed text-emerald-50 max-w-sm">Direkt zum Schülerbereich mit Klassen, Fächern, Abschnittstraining und 10-Fragen-Quiz.</span>
+                    </button>
+                    <button type="button" onClick={() => onChoose('ingenieur')}
+                        className="group min-h-[250px] bg-slate-900 hover:bg-blue-950 text-white text-left p-7 sm:p-9 transition focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-inset"
+                        aria-label="Ingenieursbereich starten">
+                        <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-amber-400/20 border border-amber-200/40 mb-7 text-amber-200">
+                            <svg viewBox="0 0 24 24" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+                                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.05A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.05A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.05A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.05A1.7 1.7 0 0 0 19.4 15Z" />
+                            </svg>
+                        </span>
+                        <span className="block text-3xl font-black mb-3">Ingenieur</span>
+                        <span className="block text-base leading-relaxed text-slate-200 max-w-sm">Direkt zum Ingenieurs-Dashboard mit Reaktivierungstraining, Fortschritt und Kategorien.</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }
 
