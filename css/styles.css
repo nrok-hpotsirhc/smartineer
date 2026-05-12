@@ -207,31 +207,47 @@ html.theme-dark, body.theme-dark {
 .theme-dark .text-slate-500 { color: #94a3b8; }
 .theme-dark .hover\:bg-slate-50:hover,
 .theme-dark .hover\:bg-slate-100:hover { background-color: #273449; }
+.theme-dark .text-blue-600,
 .theme-dark .text-blue-700 { color: #93c5fd; }
 .theme-dark .bg-blue-50 { background-color: rgba(59,130,246,0.15); }
+.theme-dark .bg-blue-50\/40 { background-color: rgba(59,130,246,0.1); }
 .theme-dark .bg-blue-100 { background-color: rgba(59,130,246,0.25); }
 .theme-dark .bg-amber-50 { background-color: rgba(251,191,36,0.12); }
 .theme-dark .bg-amber-100 { background-color: rgba(251,191,36,0.22); }
+.theme-dark .bg-amber-200,
+.theme-dark .hover\:bg-amber-200:hover { background-color: rgba(251,191,36,0.3); }
 .theme-dark .border-amber-200 { border-color: rgba(251,191,36,0.45); }
+.theme-dark .border-amber-300 { border-color: rgba(251,191,36,0.55); }
 .theme-dark .border-amber-400 { border-color: #f59e0b; }
+.theme-dark .text-amber-700,
 .theme-dark .text-amber-800,
 .theme-dark .text-amber-900 { color: #fde68a; }
 .theme-dark .bg-emerald-50 { background-color: rgba(16,185,129,0.12); }
 .theme-dark .bg-emerald-100 { background-color: rgba(16,185,129,0.22); }
+.theme-dark .bg-emerald-200,
+.theme-dark .hover\:bg-emerald-200:hover { background-color: rgba(16,185,129,0.3); }
 .theme-dark .border-emerald-200,
 .theme-dark .border-emerald-300 { border-color: rgba(16,185,129,0.4); }
+.theme-dark .text-emerald-600,
 .theme-dark .text-emerald-700,
 .theme-dark .text-emerald-800,
 .theme-dark .text-emerald-900 { color: #6ee7b7; }
 .theme-dark .bg-teal-50 { background-color: rgba(20,184,166,0.12); }
-.theme-dark .border-teal-200 { border-color: rgba(20,184,166,0.4); }
-.theme-dark .text-teal-700 { color: #5eead4; }
+.theme-dark .bg-teal-50\/50 { background-color: rgba(20,184,166,0.12); }
+.theme-dark .bg-teal-100,
+.theme-dark .hover\:bg-teal-100:hover { background-color: rgba(20,184,166,0.22); }
+.theme-dark .border-teal-200,
+.theme-dark .border-teal-300 { border-color: rgba(20,184,166,0.4); }
+.theme-dark .text-teal-700,
+.theme-dark .text-teal-800 { color: #5eead4; }
 /* Rose-/Rot-Akzente (falsche Antworten, Reset-Button, Fehler-Hinweise):
    Hellrosa Tailwind-Defaults sind im Dark-Mode unlesbar in Kombination mit gemappter
    slate-800-Schrift. Daher analog zu Emerald/Amber halbtransparent dunkel-rosa
    einfaerben + helle Schrift. */
 .theme-dark .bg-rose-50 { background-color: rgba(244,63,94,0.12); }
 .theme-dark .bg-rose-100 { background-color: rgba(244,63,94,0.22); }
+.theme-dark .bg-rose-200,
+.theme-dark .hover\:bg-rose-200:hover { background-color: rgba(244,63,94,0.3); }
 .theme-dark .hover\:bg-rose-100:hover { background-color: rgba(244,63,94,0.3); }
 .theme-dark .border-rose-200 { border-color: rgba(244,63,94,0.45); }
 .theme-dark .border-rose-300 { border-color: rgba(244,63,94,0.55); }
@@ -243,6 +259,72 @@ html.theme-dark, body.theme-dark {
 .theme-dark .border-blue-200 { border-color: rgba(59,130,246,0.45); }
 .theme-dark .text-blue-800,
 .theme-dark .text-blue-900 { color: #bfdbfe; }
+.theme-dark .text-blue-950 { color: #dbeafe; }
+.theme-dark .hover\:bg-blue-50:hover { background-color: rgba(59,130,246,0.2); }
+.theme-dark .text-emerald-950 { color: #d1fae5; }
+.theme-dark .hover\:bg-emerald-50:hover { background-color: rgba(16,185,129,0.2); }
+.theme-dark .text-rose-800,
+.theme-dark .text-rose-900 { color: #fecdd3; }
+/* Indigo-/Violet-Akzente (Pruefungsmodus, SRS, PBQ-Tags): helle Tailwind-
+   Panels werden im Dark-Mode sonst blendend hell, waehrend globale Slate-
+   Textmappings bereits helle Schrift setzen. */
+.theme-dark .bg-indigo-50 { background-color: rgba(99,102,241,0.14); }
+.theme-dark .bg-indigo-100 { background-color: rgba(99,102,241,0.24); }
+.theme-dark .border-indigo-200,
+.theme-dark .border-indigo-300 { border-color: rgba(129,140,248,0.45); }
+.theme-dark .text-indigo-700,
+.theme-dark .text-indigo-800,
+.theme-dark .text-indigo-900 { color: #c7d2fe; }
+.theme-dark .bg-violet-50 { background-color: rgba(139,92,246,0.14); }
+.theme-dark .bg-violet-100 { background-color: rgba(139,92,246,0.24); }
+.theme-dark .border-violet-200,
+.theme-dark .border-violet-300 { border-color: rgba(167,139,250,0.45); }
+.theme-dark .text-violet-600,
+.theme-dark .text-violet-700,
+.theme-dark .text-violet-800,
+.theme-dark .text-violet-900 { color: #ddd6fe; }
+.theme-dark .srs-review-panel {
+    background-image: linear-gradient(135deg, rgba(76,29,149,0.34), rgba(30,64,175,0.2));
+    border-color: rgba(167,139,250,0.42);
+}
+.theme-dark .assessment-panel {
+    background-image: linear-gradient(135deg, rgba(49,46,129,0.52), rgba(30,41,59,0.97));
+    border-color: rgba(129,140,248,0.5);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.theme-dark .assessment-card {
+    background-color: rgba(15,23,42,0.74);
+    border-color: rgba(129,140,248,0.42);
+}
+.theme-dark .assessment-card:hover { border-color: rgba(167,139,250,0.7); }
+.theme-dark .assessment-meta,
+.theme-dark .assessment-best { color: #a5b4fc; }
+.theme-dark .assessment-start-button:not(:disabled) {
+    background-image: linear-gradient(to right, #4f46e5, #7c3aed);
+    color: #ffffff;
+    box-shadow: 0 12px 24px -16px rgba(168,85,247,0.75);
+}
+.theme-dark .assessment-start-button:not(:disabled):hover {
+    background-image: linear-gradient(to right, #818cf8, #c084fc);
+    color: #0f172a;
+}
+.theme-dark .assessment-start-button:disabled {
+    background: #334155;
+    color: #94a3b8;
+    box-shadow: none;
+}
+.theme-dark .assessment-status-banner-normal {
+    background-color: rgba(76,29,149,0.28);
+    border-color: rgba(167,139,250,0.52);
+}
+.theme-dark .assessment-status-banner-danger {
+    background-color: rgba(127,29,29,0.36);
+    border-color: #fb7185;
+}
+.theme-dark .dashboard-resume-panel {
+    background-image: linear-gradient(135deg, rgba(30,64,175,0.28), rgba(15,23,42,0.94), rgba(8,145,178,0.18));
+    border-color: rgba(96,165,250,0.42);
+}
 .theme-dark .bg-clip-text.text-transparent { -webkit-text-fill-color: initial; color: #e2e8f0; background: none; }
 .theme-dark .task-pill { background: #334155; color: #cbd5e1; border-color: transparent; }
 .theme-dark .task-pill:hover { background: #475569; }

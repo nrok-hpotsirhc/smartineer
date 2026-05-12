@@ -278,7 +278,7 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
             {/* P-UI-DASHBOARD-RESUME: Wiedereinstiegs-Hero. Wird nur gerendert, wenn
                 eine Schulung kuerzlich bearbeitet wurde (lastPage > 0 oder ein Quiz-Lauf vorliegt). */}
             {resumeCandidate && onResumeSchulung && (
-                <div className="bg-gradient-to-br from-blue-50 via-white to-cyan-50/40 rounded-2xl border border-blue-200 shadow-sm p-6 md:p-7 mb-10 flex flex-col md:flex-row items-start md:items-center gap-5">
+                <div className="dashboard-resume-panel bg-gradient-to-br from-blue-50 via-white to-cyan-50/40 rounded-2xl border border-blue-200 shadow-sm p-6 md:p-7 mb-10 flex flex-col md:flex-row items-start md:items-center gap-5">
                     <div className="flex-1 min-w-0">
                         <div className="text-[11px] uppercase tracking-wider text-blue-700 font-bold mb-1">Weiterlernen</div>
                         <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 truncate">{resumeCandidate.trainingName}</h2>

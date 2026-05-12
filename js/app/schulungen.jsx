@@ -1083,7 +1083,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                     </div>
                 </div>
                 {srsStats.total > 0 && (
-                    <div className="mb-5 bg-gradient-to-r from-violet-50 to-blue-50 border border-violet-200 rounded-2xl p-4 md:p-5">
+                    <div className="srs-review-panel mb-5 bg-gradient-to-r from-violet-50 to-blue-50 border border-violet-200 rounded-2xl p-4 md:p-5">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <div className="flex-1 min-w-[200px]">
                                 <div className="text-xs font-bold uppercase tracking-wider text-violet-700 mb-1">Spaced Repetition</div>
@@ -1110,7 +1110,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                     wenn die Schulung `assessments: [...]` definiert. Liest Bestleistungen
                     aus `state[training.id].__assessments[asmt.id]`. */}
                 {Array.isArray(training.assessments) && training.assessments.length > 0 && (
-                    <div className="mb-5 bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-200 rounded-2xl p-4 md:p-5">
+                    <div className="assessment-panel mb-5 bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-200 rounded-2xl p-4 md:p-5">
                         <div className="mb-3">
                             <div className="text-xs font-bold uppercase tracking-wider text-indigo-700 mb-1">Pruefungsmodus</div>
                             <h3 className="text-base md:text-lg font-bold text-slate-900">Cross-Chapter-Pruefungen</h3>
@@ -1123,17 +1123,17 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                                 const pool = buildAssessmentPool(training, asmt.poolFilter || {});
                                 const enough = pool.length >= 1;
                                 return (
-                                    <div key={asmt.id} className="bg-white border border-indigo-200 rounded-lg px-4 py-3 flex items-center gap-4 flex-wrap">
+                                    <div key={asmt.id} className="assessment-card bg-white border border-indigo-200 rounded-lg px-4 py-3 flex items-center gap-4 flex-wrap">
                                         <div className="flex-1 min-w-[220px]">
                                             <div className="text-sm font-bold text-slate-800">{asmt.title}</div>
-                                            <div className="text-[11px] text-slate-500 mt-0.5">
+                                            <div className="assessment-meta text-[11px] text-slate-500 mt-0.5">
                                                 {asmt.count} Items aus {pool.length} verfuegbar
                                                 {asmt.timeLimit > 0 && ` · ${asmt.timeLimit} min`}
                                                 {typeof asmt.passScore === 'number' && ` · Bestehen ab ${Math.round(asmt.passScore * 100)}%`}
                                                 {st.attempts > 0 && ` · ${st.attempts} Versuch${st.attempts === 1 ? '' : 'e'}`}
                                             </div>
                                             {st.best && (
-                                                <div className="text-[11px] mt-1">
+                                                <div className="assessment-best text-[11px] mt-1">
                                                     <span className="text-slate-500">Best: </span>
                                                     <span className="font-bold text-slate-700">{st.best.score}/{st.best.total} ({Math.round(st.bestRatio * 100)}%)</span>
                                                     {st.passed === true && <span className="ml-2 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">bestanden</span>}
@@ -1142,7 +1142,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                                             )}
                                         </div>
                                         <button onClick={() => startAssessment(asmt)} disabled={!enough}
-                                            className="text-sm font-bold px-4 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow transition">
+                                            className="assessment-start-button text-sm font-bold px-4 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow transition">
                                             {st.attempts > 0 ? 'Wiederholen' : 'Pruefung starten'}
                                         </button>
                                     </div>
@@ -1386,7 +1386,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                     const mm = remainingMs != null ? Math.floor(remainingMs / 60000) : null;
                     const ss = remainingMs != null ? Math.floor((remainingMs % 60000) / 1000) : null;
                     return (
-                        <div className={`mb-3 rounded-xl border px-4 py-2 flex items-center justify-between gap-3 flex-wrap ${lowTime ? 'border-rose-400 bg-rose-50' : 'border-violet-300 bg-violet-50'}`}>
+                        <div className={`assessment-status-banner mb-3 rounded-xl border px-4 py-2 flex items-center justify-between gap-3 flex-wrap ${lowTime ? 'assessment-status-banner-danger border-rose-400 bg-rose-50' : 'assessment-status-banner-normal border-violet-300 bg-violet-50'}`}>
                             <div className="text-sm">
                                 <span className="font-bold text-violet-900">Pruefungsmodus</span>
                                 <span className="text-slate-700"> · {currentAssessment.title}</span>
