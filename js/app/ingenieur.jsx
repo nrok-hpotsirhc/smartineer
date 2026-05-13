@@ -12,7 +12,7 @@ function Ingenieur({
     subview, setSubview,
     schulungenGetInitialOpen,
     onGoToOptionen,
-    progressMap, resetCategory
+    progressMap, resetCategory, resetTrainingSrsCategory
 }) {
     const tabs = [
         { id: 'training',   label: 'Training' },
@@ -50,6 +50,7 @@ function Ingenieur({
                     consumeInitialPos={consumeInitialPos}
                     progressMap={progressMap}
                     resetCategory={resetCategory}
+                    resetTrainingSrsCategory={resetTrainingSrsCategory}
                 />
             )}
             {subview === 'cheatsheet' && (

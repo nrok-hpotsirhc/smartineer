@@ -56,10 +56,16 @@
             Typ K (NiCr-Ni): $\\approx 41\\,\\mu\\text{V/K}$ bei Raumtemperatur,
             -270 bis +1372 °C. <strong>Vergleichsstelle</strong> erforderlich!<br><br>
 
+            <strong>NTC / PTC / Steinhart-Hart</strong><br>
+            NTC-$\\beta$-Modell: $R(T)=R_{25}\\,\\exp\\!\\left[\\beta\\left(\\dfrac{1}{T}-\\dfrac{1}{T_{25}}\\right)\\right]$ mit $T$ in Kelvin.<br>
+            Steinhart-Hart: $\\dfrac{1}{T}=A+B\\ln R+C(\\ln R)^3$ — genauer ueber weiten Temperaturbereich; $A,B,C$ aus drei Kalibrierpunkten.<br>
+            PTC: positiver Temperaturkoeffizient; Widerstand steigt mit Temperatur, oft fuer Schutz-/Schaltfunktionen.<br><br>
+
             <strong>Dehnungsmessstreifen (DMS, Wheatstone-Brücke)</strong><br>
             $\\dfrac{\\Delta R}{R} = k \\cdot \\varepsilon$ (k-Faktor ≈ 2 für Konstantan).<br>
             Halbbrücke: $\\dfrac{U_a}{U_B} = \\dfrac{k\\,\\varepsilon}{2}$ (Temperatur-kompensiert).<br>
-            Vollbrücke: $\\dfrac{U_a}{U_B} = k\\,\\varepsilon$ (höchste Empfindlichkeit).<br><br>
+            Vollbrücke: $\\dfrac{U_a}{U_B} = k\\,\\varepsilon$ (höchste Empfindlichkeit).<br>
+            Biegebalken mit Poisson-Effekt: effektiver Faktor haeufig $k_\\text{eff}=k(1+\\nu)$, z.B. $k=2$, $\\nu=0{,}3$ -> $k_\\text{eff}=2{,}6$.<br><br>
 
             <strong>Kapazitive Sensoren</strong><br>
             $C = \\varepsilon_0\\varepsilon_r\\dfrac{A}{d}$ — Änderung von $A$, $d$ oder
@@ -83,34 +89,51 @@
             $4\\cdot N$ Schritte/Umdrehung mit N Strichen (4-fach-Auswertung).<br>
             Absolut: Single-Turn liefert Position innerhalb einer Umdrehung
             (z.B. 13 Bit = 8192 Schritte), Multi-Turn zählt Umdrehungen (z.B. 12 Bit).<br>
-            Gray-Code vermeidet Doppelsprünge an Bitgrenzen.<br><br>
+            Gray-Code vermeidet Doppelsprünge an Bitgrenzen.<br>
+            Sin/Cos-Interpolation: $\\varphi=\\operatorname{atan2}(S,C)$; Teilung $T$ mit $M$ Interpolationsschritten ergibt $\\Delta x=T/M$.<br>
+            SSI: synchron-seriell, Clock vom Master, Daten MSB-first; typisch Gray-Code bis 25 Bit und Takt im MHz-Bereich.<br><br>
 
             <strong>IMU (MEMS)</strong><br>
             Beschleunigungssensor: kapazitiver Comb-Drive misst Auslenkung einer Federmasse.<br>
             Gyroskop: Coriolis-Effekt $\\vec F_C = -2m\\,\\vec\\Omega\\times\\vec v$ an
             oszillierender Masse.<br>
-            Sensor-Fusion (Madgwick/Kalman) kombiniert Acc + Gyro + Mag zu Lage.<br><br>
+            Allan-Varianz: log-log-Steigungen helfen Bias-Instabilitaet, White Noise, Rate Random Walk und Drift zu unterscheiden.<br>
+            Kalman-Filter (linear): Prediction $\\hat x_k^- = A\\hat x_{k-1}+Bu_k$, $P_k^- = AP_{k-1}A^T+Q$; Update $K_k=P_k^-H^T(HP_k^-H^T+R)^{-1}$, $\\hat x_k=\\hat x_k^-+K_k(z_k-H\\hat x_k^-)$.<br>
+            Bayes-Fusion zweier unabhaengiger Normalmessungen: $\\sigma^{-2}=\\sigma_1^{-2}+\\sigma_2^{-2}$, $\\mu=\\sigma^2(\\mu_1/\\sigma_1^2+\\mu_2/\\sigma_2^2)$.<br>
+            Magnetometer-Kalibrierung: $\\vec B_\\text{korr}=\\mathbf A^{-1}(\\vec B-\\vec b)$ (Hard-Iron-Offset $\\vec b$, Soft-Iron-Matrix $\\mathbf A$).<br><br>
 
             <strong>4...20 mA (NAMUR NE 43)</strong><br>
             Live-Zero-Stromschleife: $4\\,\\text{mA} = 0\\,\\%$, $20\\,\\text{mA} = 100\\,\\%$
             Messbereich. NAMUR NE 43 (1994): $\\le 3{,}6\\,\\text{mA}$ oder $\\ge 21\\,\\text{mA}$ = Fehler;
             Mess-Untergrenze $3{,}8\\,\\text{mA}$, Obergrenze $20{,}5\\,\\text{mA}$.
-            Vorteile: Drahtbruchsicher, eingeprägter Strom unempfindlich gegen Spannungsabfall.<br><br>
+            Vorteile: Drahtbruchsicher, eingeprägter Strom unempfindlich gegen Spannungsabfall.<br>
+            Linearabbildung: $I=4\\,\\text{mA}+16\\,\\text{mA}\\cdot \\dfrac{x-x_\\text{min}}{x_\\text{max}-x_\\text{min}}$.<br>
+            Buerde: $R_{B,\\max}=\\dfrac{U_S-U_{S,\\min}}{20\\,\\text{mA}}$; z.B. $(24-12)\\,\\text{V}/0{,}02\\,\\text{A}=600\\,\\Omega$.<br><br>
 
             <strong>IO-Link (DIN EN 61131-9:2014)</strong><br>
             Punkt-zu-Punkt-Kommunikation Master ↔ Device (max. 20 m).<br>
             COM1 = 4,8 kBaud · COM2 = 38,4 kBaud · COM3 = 230,4 kBaud.<br>
             3-Leiter (L+, L−, C/Q) — kompatibel zu Standard-Schalt-Sensoren (SIO-Mode).<br><br>
 
+            <strong>HART / Profibus / PROFINET</strong><br>
+            HART: Bell-202-FSK mit 1200/2200 Hz und kleiner Strommodulation ueber 4-20 mA; analoger Prozesswert bleibt erhalten.<br>
+            Profibus DP: RS-485, Master-Slave + Token, typ. 9,6 kbit/s bis 12 Mbit/s; DP-V0/V1/V2.<br>
+            PROFINET: Switched Ethernet, RT und IRT; IRT nutzt synchronisierte Zeitfenster, Zykluszeiten bis $31{,}25\\,\\mu\\text{s}$ moeglich.<br><br>
+
             <strong>Auflösung A/D-Wandler</strong><br>
             $\\Delta U = U_\\text{ref}/2^N$ pro LSB. SNR (ideal): $6{,}02\\cdot N + 1{,}76\\,\\text{dB}$.<br>
-            Quantisierungsrauschen: $\\sigma_q = \\Delta U/\\sqrt{12}$.<br><br>
+            Quantisierungsrauschen: $\\sigma_q = \\Delta U/\\sqrt{12}$.<br>
+            Architekturwahl: SAR = mittlere Geschwindigkeit/niedrige Latenz; Sigma-Delta = hohe Aufloesung durch Oversampling/Noise-Shaping; Pipeline = hohe Geschwindigkeit mit Latenz.<br>
+            Sigma-Delta-ENOB-Gewinn: grob $\\Delta\\text{ENOB}\\approx (L+0{,}5)\\log_2(\\text{OSR})$ fuer Modulatorordnung $L$.<br><br>
 
             <strong>Funktionssicherheit (IEC 61508:2010)</strong><br>
             SIL = Safety Integrity Level (1...4). Low Demand: $\\text{PFD}_\\text{avg}$,
             High Demand: PFH (Probability of Failure per Hour).<br>
             SIL 1: $10^{-2} \\le \\text{PFD} < 10^{-1}$, SIL 2: $10^{-3} \\le \\text{PFD} < 10^{-2}$,
-            SIL 3: $10^{-4} \\le \\text{PFD} < 10^{-3}$, SIL 4: $10^{-5} \\le \\text{PFD} < 10^{-4}$.
+            SIL 3: $10^{-4} \\le \\text{PFD} < 10^{-3}$, SIL 4: $10^{-5} \\le \\text{PFD} < 10^{-4}$.<br>
+            Safe Failure Fraction: $\\text{SFF}=\\dfrac{\\lambda_S+\\lambda_{DD}}{\\lambda_S+\\lambda_{DD}+\\lambda_{DU}}$.<br>
+            Typ-A/B-Architektur: fuer SIL 2 duerfen einfache Typ-A-Komponenten bei $60\\,\\%\\le\\text{SFF}<90\\,\\%$ mit $\\text{HFT}=0$ auskommen; komplexe Typ-B-Komponenten brauchen dort meist $\\text{HFT}\\ge 1$ (IEC 61508-2 Tabellen 2/3).<br>
+            Low-Demand-Naeherung fuer ein 1oo1-Element: $\\text{PFD}_\\text{avg}\\approx \\lambda_{DU}\\,T_I/2$.
         `,
 
         levels: [

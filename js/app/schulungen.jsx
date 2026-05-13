@@ -310,7 +310,24 @@ function useSRSState() {
         setState({});
         try { localStorage.removeItem(SRS_KEY); } catch (e) {}
     }, []);
-    return { state, gradeMany, reset };
+    const resetTrainingCategory = useCallback((catId) => {
+        if (!catId) return;
+        setState((prev) => {
+            const trainingTree = prev && prev[TRAINING_SRS_TID];
+            if (!trainingTree || !trainingTree[catId]) return prev;
+            const nextTraining = { ...trainingTree };
+            delete nextTraining[catId];
+            const next = { ...prev };
+            if (Object.keys(nextTraining).length) next[TRAINING_SRS_TID] = nextTraining;
+            else delete next[TRAINING_SRS_TID];
+            try {
+                if (Object.keys(next).length) localStorage.setItem(SRS_KEY, JSON.stringify(next));
+                else localStorage.removeItem(SRS_KEY);
+            } catch (e) { /* quota */ }
+            return next;
+        });
+    }, []);
+    return { state, gradeMany, reset, resetTrainingCategory };
 }
 
 // ---------- P-LP-SRS-OPEN: SRS fuer Ingenieurs-Training ----------

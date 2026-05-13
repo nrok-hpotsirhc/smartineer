@@ -72,7 +72,7 @@ function App() {
     const { progress: progressMap, isSolved, setSolved, reset, resetCategory } = useProgress();
     // P-LP-SRS-OPEN: SRS-State wird im App-Root gehalten und an Training, Dashboard
     // sowie Schulungen durchgereicht, damit alle Tracks denselben SRS-Storage sehen.
-    const { state: srsState, gradeMany: srsGradeMany, reset: resetSRS } = useSRSState();
+    const { state: srsState, gradeMany: srsGradeMany, reset: resetSRS, resetTrainingCategory: resetTrainingSrsCategory } = useSRSState();
 
     // Theme: Default hell. Pre-paint-Skript in index.html setzt die Klasse bereits am <html>,
     // hier wird der State synchron daraus initialisiert und bei Änderung sowohl <html> als auch <body> markiert.
@@ -307,6 +307,7 @@ function App() {
                         }}
                         progressMap={progressMap}
                         resetCategory={resetCategory}
+                        resetTrainingSrsCategory={resetTrainingSrsCategory}
                         onGoToOptionen={() => setView('optionen')} />
                 )}
                 {view === 'schueler' && (
@@ -331,6 +332,7 @@ function App() {
                         }}
                         progressMap={progressMap}
                         resetCategory={resetCategory}
+                        resetTrainingSrsCategory={resetTrainingSrsCategory}
                         onGoToOptionen={() => setView('optionen')} />
                 )}
                 {view === 'optionen' && (

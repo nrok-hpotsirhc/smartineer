@@ -587,7 +587,7 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
 
 function Training({ data, order, isSolved, setSolved, currentCat, setCurrentCat,
                     srsState, srsGradeMany, initialLevel, initialIdx, consumeInitialPos,
-                    progressMap, resetCategory }) {
+                    progressMap, resetCategory, resetTrainingSrsCategory }) {
     const [level, setLevel] = useState(0);
     const [idx, setIdx] = useState(0);
     useEffect(() => {
@@ -638,6 +638,7 @@ function Training({ data, order, isSolved, setSolved, currentCat, setCurrentCat,
                                     <button onClick={() => {
                                         if (window.confirm(`Fortschritt der Kategorie "${cat.name}" wirklich zurücksetzen? (${catSolved} gelöste Aufgaben)`)) {
                                             resetCategory(cat.id);
+                                            if (resetTrainingSrsCategory) resetTrainingSrsCategory(cat.id);
                                         }
                                     }}
                                         className="px-3 py-2 text-sm bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg font-bold transition shrink-0"

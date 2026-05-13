@@ -19,7 +19,7 @@ const SCHUELER_CLASS_COLORS = [
 function schuelerClassStats(SCH, classId, progress) {
     const cls = SCH && SCH.classes && SCH.classes.find(c => c.id === classId);
     if (!cls) return { total: 0, done: 0, pct: 0, mode: 'unknown' };
-    let total = 0, done = 0, hasPool = false, hasGenerated = false;
+    let total = 0, done = 0, generatedDone = 0, hasPool = false, hasGenerated = false;
     (cls.subjects || []).forEach(sub => {
         const cfg = SCH.content && SCH.content[`${classId}.${sub}`];
         if (!cfg) return;
@@ -33,13 +33,20 @@ function schuelerClassStats(SCH, classId, progress) {
             });
         } else if (cfg.mode === 'generated') {
             hasGenerated = true;
+            const prefix = `${classId}.${sub}|`;
+            Object.keys(progress || {}).forEach(k => { if (k.indexOf(prefix) === 0) generatedDone++; });
         }
     });
     if (!hasPool && hasGenerated) {
         // K1/K2 (rein generiert): kein fester Pool — wir zaehlen direkt persistierte Items.
-        let gDone = 0;
-        Object.keys(progress).forEach(k => { if (k.indexOf(classId + '.') === 0) gDone++; });
-        return { total: 0, done: gDone, pct: 0, mode: 'generated' };
+        return { total: 0, done: generatedDone, pct: 0, mode: 'generated' };
+    }
+    // K1/K2 haben seit v88 neben generierter Mathematik auch Pool-Faecher. Damit
+    // Mathe-Quiz/Training im Dashboard sichtbar wird, zaehlen geloeste generated
+    // Items dynamisch zu done und total hinzu; Pool-Prozentwerte bleiben stabil.
+    if (generatedDone) {
+        total += generatedDone;
+        done += generatedDone;
     }
     return { total, done, pct: total ? Math.round((done / total) * 100) : 0, mode: 'pool' };
 }
@@ -135,7 +142,7 @@ function SchuelerDashboard({ activeProfile, visibleClassIds, onOpenSchueler, onG
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
                     <div className="flex-1 min-w-0">
                         <h2 className="text-xl font-bold text-slate-800 mb-1">Gesamtfortschritt</h2>
-                        <p className="text-sm text-slate-600 mb-3">{rows.length} sichtbare Klassen · {totals.done} / {totals.total} Pool-Aufgaben gelöst ({totals.pct}%).</p>
+                        <p className="text-sm text-slate-600 mb-3">{rows.length} sichtbare Klassen · {totals.done} / {totals.total} Aufgaben gelöst ({totals.pct}%).</p>
                         <div className="flex flex-wrap gap-2">
                             <button onClick={onOpenSchueler}
                                 className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-2 px-5 rounded-xl shadow-md hover:shadow-lg transition-all">
