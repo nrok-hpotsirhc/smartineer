@@ -584,6 +584,16 @@ function Schueler({ visibleClassIds }) {
         const meta = splitQuestionMeta(item.q, klass, subject, selectedSection);
         const next = answers.concat([{ q: item.q, body: meta.body, crumbs: meta.crumbs, expected: item.a, given: val, correct, formula: item.f, solution: item.s }]);
         setAnswers(next); setVal('');
+        // P-UI-SCHUELER-QUIZ-PROGRESS (v95): Richtig beantwortete Quiz-Items in den
+        // Schueler-Fortschritt schreiben. studentTaskKey nutzt stableQid({q,a}) —
+        // damit deckt sich der Key 1:1 mit dem, was schuelerClassStats erwartet,
+        // und das Klassen-Dashboard zaehlt das Item ab sofort als geloest. Wirkt
+        // sowohl fuer Pool-Faecher (Mittelstufe / Klasse 3-4) als auch fuer
+        // generierte Faecher (K1/K2): generierte Items haben pro {q,a} eine
+        // eigene qid und tragen damit zur K1/K2-"gemeistert"-Zaehlung bei.
+        if (correct) {
+            schuelerProgress.setSolved(studentTaskKey(klass, subject, item, idx), true);
+        }
         if (idx + 1 >= items.length) setStage('result');
         else setIdx(idx + 1);
     };

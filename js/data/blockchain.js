@@ -84,6 +84,71 @@
                     q: 'Erkläre, wie ein SPV/Light-Client einen Zahlungseingang verifiziert, ohne die gesamte Chain zu speichern.',
                     h: 'Header-Kette + Merkle-Proof.',
                     s: '1) Light-Client speichert nur Block-Header (~80 B/Block, ~4 MB für Bitcoin gesamt).<br>2) Empfängt vom Full Node: Tx + Merkle-Proof (Pfad bis Root).<br>3) Verifiziert: a) PoW jedes Headers, b) Merkle-Proof gegen Root des Blocks, c) Block ist tief genug eingebettet.<br>Vertrauensannahme: ehrliche Mehrheit unter den verbundenen Full Nodes (kann durch Bloom-Filter aufgeweicht werden $\\Rightarrow$ Privatsphäre-Tradeoff).'
+                },
+                {
+                    q: 'Nenne und erläutere kurz die drei Sicherheitsanforderungen an eine kryptographische Hashfunktion im Blockchain-Kontext.',
+                    h: 'Preimage-, 2nd-Preimage- und Kollisionsresistenz.',
+                    s: '<strong>Preimage-Resistenz</strong>: zu gegebenem $y$ ist es schwer, ein $x$ mit $H(x)=y$ zu finden (Einwegfunktion).<br><strong>2nd-Preimage-Resistenz</strong>: zu gegebenem $x_1$ ist es schwer, ein $x_2 \\ne x_1$ mit $H(x_1)=H(x_2)$ zu finden.<br><strong>Kollisionsresistenz</strong>: schwierig, überhaupt irgendein Paar $x_1 \\ne x_2$ mit $H(x_1)=H(x_2)$ zu finden (Geburtstagsschranke $\\sim 2^{n/2}$).<br>Bitcoin nutzt SHA-256d (~128 Bit Kollisionsicherheit), Ethereum keccak-256.<br><em>Quelle:</em> Menezes/van Oorschot/Vanstone, "Handbook of Applied Cryptography", CRC Press 1996/2018, §9.2.'
+                },
+                {
+                    q: 'Welches Problem löst der Konsens einer Blockchain überhaupt? Erkläre das Doppel-Spend-Problem.',
+                    h: 'Digitale Bits sind kopierbar — wer entscheidet, welche Tx zuerst gültig war?',
+                    s: 'Digitale Münzen sind reine Daten und beliebig kopierbar. Ohne globalen Konsens könnte ein Sender dieselbe Münze parallel an zwei Empfänger versprechen (<strong>Double Spend</strong>). Klassische Lösungen erfordern eine vertrauenswürdige Zentralinstanz (Bank).<br>Nakamoto zeigte 2008, dass eine Kette aus PoW-Blöcken eine zeitliche Totalordnung der Transaktionen erzwingt: die Tx, die zuerst in einen genügend tiefen Block kommt, gilt — alle anderen werden verworfen.<br><em>Quelle:</em> S. Nakamoto, "Bitcoin: A Peer-to-Peer Electronic Cash System", 2008, §2 "Transactions" und §11 "Calculations".'
+                },
+                {
+                    q: 'Welche 6 Felder enthält ein Bitcoin-Blockheader (80 Byte)?',
+                    h: 'Version, prev hash, merkle root, time, bits, nonce.',
+                    s: 'Bitcoin-Blockheader, 80 Byte fix:<br>1) <code>version</code> (4 B) — Protokoll-Version.<br>2) <code>prev_block_hash</code> (32 B) — SHA-256d des Vorgänger-Headers.<br>3) <code>merkle_root</code> (32 B) — Root des Tx-Merkle-Trees.<br>4) <code>time</code> (4 B) — Unix-Timestamp.<br>5) <code>bits</code> (4 B) — komprimiertes Target $T$ (Difficulty).<br>6) <code>nonce</code> (4 B) — Mining-Suchvariable.<br>Der PoW-Hash wird über genau diese 80 Byte berechnet.<br><em>Quelle:</em> A. Antonopoulos, "Mastering Bitcoin", 2nd ed., O\u2019Reilly 2017, Kap. 9 "The Bitcoin Network" / Kap. 10 "Mining and Consensus".'
+                },
+                {
+                    q: 'Was sind die Bitcoin-Halvings, und wie oft treten sie auf?',
+                    h: 'Alle 210000 Blöcke halbiert sich der Block-Reward.',
+                    s: 'Im Bitcoin-Protokoll halbiert sich die <strong>Block-Subsidy</strong> alle 210000 Blöcke (≈ alle 4 Jahre). Start: 50 BTC/Block (2009). Halvings: 25 (2012), 12,5 (2016), 6,25 (2020), 3,125 (2024), ...<br>Limit der Reihe: $210000\\cdot 50/(1-1/2) = 21$ Mio. BTC ($\\approx 2140$ vollständig ausgegeben). Danach lebt das Mining nur noch von Transaktionsgebühren.<br><em>Quelle:</em> Bitcoin Core Source, <code>chainparams.cpp</code> / <code>validation.cpp</code> (Konstante <code>SUBSIDY_HALVING_INTERVAL = 210000</code>); Antonopoulos "MTB" Kap. 10.'
+                },
+                {
+                    q: 'Wie wird aus einem öffentlichen ECDSA-Schlüssel eine Bitcoin-Adresse (P2PKH, beginnend mit "1...")?',
+                    h: 'HASH160 = RIPEMD-160(SHA-256(PubKey)), dann Base58Check.',
+                    s: '1) Public Key $P$ (33 B komprimiert oder 65 B unkomprimiert).<br>2) $h = \\text{RIPEMD-160}(\\text{SHA-256}(P))$ — 20 Byte ("HASH160").<br>3) Prefix-Byte 0x00 (Mainnet) voranstellen: $0x00 \\| h$.<br>4) Checksum: erste 4 Byte von $\\text{SHA-256}(\\text{SHA-256}(\\text{prefix}+h))$ anhängen.<br>5) Base58 codieren $\\Rightarrow$ Adresse beginnt mit "1...".<br><em>Quelle:</em> Bitcoin BIP-13 (Address Format for pay-to-script-hash), Antonopoulos "MTB" Kap. 4 "Keys, Addresses".'
+                },
+                {
+                    q: 'Was unterscheidet asymmetrische Kryptographie (Public-Key) von symmetrischer? Welche Rolle spielt sie in Blockchains?',
+                    h: 'Schlüsselpaar (priv, pub); Signieren mit priv, Verifizieren mit pub.',
+                    s: 'Symmetrisch (AES, ChaCha20): Sender und Empfänger teilen denselben geheimen Schlüssel.<br>Asymmetrisch (RSA, ECDSA, Ed25519): jeder hat ein Paar $(sk, pk)$; aus $sk$ wird $pk$ effizient berechnet, aber nicht umgekehrt. <strong>Signieren</strong> nutzt $sk$; <strong>Verifizieren</strong> nutzt $pk$.<br>In Blockchains: die <em>Adresse</em> leitet sich aus $pk$ ab; jede Tx wird mit $sk$ signiert; jeder Node kann mit $pk$ prüfen, dass die Tx autorisiert war.<br><em>Quelle:</em> Diffie/Hellman, "New Directions in Cryptography", IEEE T-IT 22(6), 1976; Menezes/Vanstone HAC §1.8 / §11.5.'
+                },
+                {
+                    q: 'Was ist ein Smart Contract auf einer Blockchain wie Ethereum?',
+                    h: 'Code, der deterministisch von jedem Node ausgeführt wird.',
+                    s: 'Ein Smart Contract ist Programmcode (z.B. EVM-Bytecode aus Solidity/Vyper), der bei Tx-Aufruf von jedem Validator-Node deterministisch ausgeführt wird. Speicherzustand $S$ und Code liegen on-chain. Effekt: Vertragslogik (Transfers, Bedingungen, Schiedsregeln) wird ohne vertrauenswürdige Drittpartei durchgesetzt.<br>Wesentliche Eigenschaften: <em>Deterministisch</em>, <em>Sandboxed</em> (kein Netzzugriff), <em>Gas-bemessen</em> (jeder Opcode kostet Gas, verhindert Endlosschleifen).<br><em>Quelle:</em> N. Szabo, "Smart Contracts" 1996; G. Wood, "Ethereum Yellow Paper" (Berlin/London-Forks).'
+                },
+                {
+                    q: 'Was ist Gas in Ethereum, und wofür ist es da?',
+                    h: 'Maßeinheit für Rechenarbeit; bezahlt mit ETH.',
+                    s: '<strong>Gas</strong> = Maßeinheit für den Rechenaufwand einer EVM-Operation (z.B. ADD = 3 Gas, SSTORE neu = 20000 Gas). Jede Tx setzt ein Gas-Limit und einen Gas-Preis ($\\text{baseFee}+\\text{tip}$) in Wei.<br>Effekt: 1) <em>DoS-Schutz</em> — Endlosschleifen sind unmöglich, weil sie irgendwann das Gas-Limit reißen und mit OOG (out of gas) revertieren. 2) <em>Preisliche Steuerung</em> — Nachfrage nach Blockraum führt zu höherer baseFee (EIP-1559).<br><em>Quelle:</em> G. Wood, "Ethereum Yellow Paper" Appendix G "Fee Schedule"; EIP-1559 (London-Fork, 5. Aug. 2021).'
+                },
+                {
+                    q: 'Was ist der Unterschied zwischen einem Coin und einem Token in Blockchain-Sprache?',
+                    h: 'Coin = native Chain-Währung. Token = Smart-Contract-Asset.',
+                    s: '<strong>Coin</strong>: native Krypto-Währung der Chain, durch das Konsensprotokoll selbst gebucht (Bitcoin = BTC, Ethereum = ETH, Solana = SOL). Wird für Gas/Fees gebraucht.<br><strong>Token</strong>: in einem Smart Contract definiertes Asset (ERC-20 für fungible, ERC-721 für NFTs, ERC-1155 hybrid). Lebt als Mapping <code>balance[addr]</code> im Contract-Storage; kein eigenes Konsensverfahren.<br>Beispiel: USDC ist ein ERC-20-Token auf Ethereum; nicht das Konsensprotokoll bucht ihn, sondern der Contract <code>0xA0b8...</code>.<br><em>Quelle:</em> Ethereum ERC-20 (F. Vogelsteller / V. Buterin 2015), ERC-721 (W. Entriken et al. 2018).'
+                },
+                {
+                    q: 'Welche Hashfunktionen verwenden Bitcoin und Ethereum, und warum nicht MD5/SHA-1?',
+                    h: 'SHA-256d bzw. keccak-256; ältere Funktionen sind gebrochen.',
+                    s: 'Bitcoin: <strong>SHA-256d</strong> = $\\text{SHA-256}(\\text{SHA-256}(x))$ für PoW und Block-/Tx-IDs; HASH160 (SHA-256 + RIPEMD-160) für Adressen.<br>Ethereum: <strong>keccak-256</strong> (Pre-NIST-Variante von SHA-3) für Block-/Tx-Hashes und Adressen ($\\text{addr} = \\text{keccak}(P)[12{:}32]$).<br>MD5 (1992) und SHA-1 (1995) sind <em>kollisionsbruch</em>: Stevens et al. lieferten 2017 die erste SHA-1-Kollision ("SHAttered"); MD5 schon 2004 (Wang et al.). Für Blockchain-Wurzel-Hashes ist Kollisionsresistenz Pflicht.<br><em>Quelle:</em> NIST FIPS 180-4 (SHA-2) und FIPS 202 (SHA-3/Keccak); Stevens/Bursztein/Karpman/Albertini/Markov, "The first collision for full SHA-1", CRYPTO 2017.'
+                },
+                {
+                    q: 'Was ist der Unterschied zwischen einem Full Node und einem Light Node?',
+                    h: 'Full Node validiert die gesamte Chain selbst; Light Node verlässt sich auf Header.',
+                    s: '<strong>Full Node</strong>: lädt und validiert <em>alle</em> Blöcke und Transaktionen seit dem Genesis (Bitcoin: ~580 GB, Ethereum Archive: > 14 TB). Prüft Konsensregeln selbst — vollständige Vertrauensminimierung.<br><strong>Light Node (SPV)</strong>: speichert nur Block-Header (~4 MB bei Bitcoin) und prüft Inklusion über Merkle-Proofs (siehe L1 oben). Vertrauensannahme: ehrliche Mehrheit unter den verbundenen Full Nodes.<br>Mobile Wallets sind fast immer Light Nodes; Börsen und Miner betreiben Full Nodes.<br><em>Quelle:</em> Nakamoto-Whitepaper §8 "Simplified Payment Verification"; Antonopoulos "MTB" Kap. 8.'
+                },
+                {
+                    q: 'Was ist "Stake" in einem Proof-of-Stake-Protokoll, und wozu dient er?',
+                    h: 'Hinterlegtes Kapital, das bei Fehlverhalten gekürzt wird.',
+                    s: 'Ein Validator in einem PoS-Protokoll hinterlegt Coins als <strong>Stake</strong> (Ethereum 2.0: 32 ETH Mindesteinsatz). Auswahl als Block-Proposer und Stimmgewicht in Attestationen sind proportional zum Stake.<br>Bei Fehlverhalten (Doppel-Vote, Surround-Vote, Liveness-Versäumnis) verbrennt das Protokoll Teile des Stakes — <strong>Slashing</strong>. Damit liegt die Sicherheit nicht auf Energie (PoW), sondern auf wirtschaftlichem Risiko.<br><em>Quelle:</em> V. Buterin/V. Griffith, "Casper the Friendly Finality Gadget", arXiv:1710.09437, 2017; Ethereum Consensus Specs (Phase 0, 2020).'
+                },
+                {
+                    q: 'Was ist der Unterschied zwischen einer Hot Wallet und einer Cold Wallet?',
+                    h: 'Online vs. offline gespeicherter privater Schlüssel.',
+                    s: '<strong>Hot Wallet</strong>: privater Schlüssel auf einem Online-Gerät (Browser-Wallet, Mobile-App, Börsen-Account). Komfortabel, aber angreifbar durch Malware/Phishing.<br><strong>Cold Wallet</strong>: privater Schlüssel offline (Hardware-Wallet wie Ledger/Trezor, Paper-Wallet, Air-Gapped-Rechner). Tx werden offline signiert und nur die fertige Signatur übertragen. Empfohlen für größere Beträge.<br>Hybrid: Multi-Sig (z.B. 2-of-3) verteilt Schlüssel auf Hot + Cold + Backup.<br><em>Quelle:</em> Antonopoulos "MTB" Kap. 5 "Wallets"; BIP-32 (HD-Wallets), BIP-39 (Mnemonic Seeds), BIP-44 (Multi-Account Hierarchy).'
                 }
             ],
             // L2
@@ -142,6 +207,71 @@
                     q: 'Was ist eine Soft Fork, was eine Hard Fork? Welche Kompatibilität ergibt sich für alte Nodes?',
                     h: 'Regel-Verschärfung vs. -Erweiterung.',
                     s: '<strong>Soft Fork</strong>: neue Regeln <em>verschärfen</em> die alten. Alte Nodes akzeptieren neue Blöcke weiterhin (rückwärtskompatibel). Beispiel: SegWit (BIP-141).<br><strong>Hard Fork</strong>: neue Regeln <em>weiten</em> Gültigkeit aus oder ändern grundlegend (z.B. Blockgröße, EVM-Opcodes). Alte Nodes lehnen neue Blöcke ab $\\Rightarrow$ Chain-Split, falls nicht alle upgraden. Beispiel: Bitcoin Cash, Ethereum-Merge.'
+                },
+                {
+                    q: 'Berechne das Block-Weight eines SegWit-Bitcoin-Blocks mit 800 kB Base-Data und 1600 kB Witness-Data. Wie wird die 4-MWU-Grenze überschritten?',
+                    h: 'Weight = 4·Base + Witness (BIP-141).',
+                    s: '$W = 4\\cdot 800 + 1600 = 4800\\,\\text{kWU}=4{,}8\\,\\text{MWU}$.<br>Die SegWit-Block-Weight-Grenze ist <strong>4 MWU</strong> (4 Mio. Weight-Units). Der hypothetische Block ist also <em>ungültig</em>; in der Praxis enthalten reale SegWit-Blöcke max. ca. 1,5–2 MB tatsächlich übertragene Bytes, da Witness-Daten 4-mal günstiger sind als Base-Daten.<br>Effekt: Anreiz, signaturlastige Inputs (Multi-Sig, Schnorr) ins Witness zu verschieben.<br>$$\\boxed{W=4{,}8\\,\\text{MWU} > 4\\,\\text{MWU\\ Limit}}$$<br><em>Quelle:</em> Bitcoin BIP-141 "Segregated Witness (Consensus layer)", P. Wuille / E. Lombrozo / J. Lau 2015; Bitcoin Core <code>consensus.h</code> (<code>MAX_BLOCK_WEIGHT = 4000000</code>).'
+                },
+                {
+                    q: 'Erkläre das EIP-1559-Fee-Modell von Ethereum: baseFee, Priority-Fee, Burn.',
+                    h: 'Algorithmische baseFee + Tip. baseFee wird verbrannt.',
+                    s: 'Bis Juli 2021: First-Price-Auktion (User bietet Gasprice; alles geht an Miner). Resultat: hohe Volatilität, Overbidding.<br>Mit EIP-1559 (London-Fork, 5. Aug. 2021): Jeder Block hat eine <strong>baseFee</strong>, die deterministisch aus der Auslastung des Vorblocks berechnet wird (Ziel 50 % von 30 M Gas). Sender zahlt $\\text{baseFee}+\\text{tip}$. Die baseFee wird <em>verbrannt</em> (aus dem Umlauf entfernt), nur der Tip geht an den Validator.<br>Effekte: vorhersagbare Fees, deflationärer Druck auf ETH (negative Issuance bei hoher Last).<br><em>Quelle:</em> Ethereum EIP-1559 "Fee market change for ETH 1.0 chain" (Buterin/Conner/Dudley/Slipper/Norden/Bakhta, 2019); Ethereum Yellow Paper Appendix H (post-London).'
+                },
+                {
+                    q: 'Was ist ECDSA-Signatur-Malleability, und wie hat Bitcoin sie behoben?',
+                    h: 'Negation der S-Komponente liefert eine zweite gültige Signatur; geändert via BIP-66 / Low-S / SegWit.',
+                    s: 'ECDSA-Signatur ist $(r, s)$. Da $-s \\bmod n$ ebenfalls eine gültige Signatur derselben Nachricht ist, kann ein Angreifer die TXID einer broadcastet Tx <em>ändern</em>, ohne die Signatur ungültig zu machen ("Tx-Malleability") — gefährlich für Off-chain-Konstruktionen.<br>Mitigations: 1) <strong>BIP-66</strong> (2015) erzwingt strikte DER-Codierung. 2) <strong>Low-S-Regel</strong> (BIP-146, 2017) akzeptiert nur $s \\le n/2$. 3) <strong>SegWit</strong> (BIP-141, 2017) verlegt die Signatur aus der TXID-Berechnung heraus $\\Rightarrow$ TXID ist signaturunabhängig.<br><em>Quelle:</em> Bitcoin BIP-66 "Strict DER signatures" (P. Wuille 2015), BIP-141 / BIP-143 (SegWit witness commitment).'
+                },
+                {
+                    q: 'Nenne die wichtigsten Slashing-Bedingungen in Ethereum-PoS (Casper FFG / Gasper).',
+                    h: 'Double-Vote und Surround-Vote.',
+                    s: 'Ein Validator wird geschlitzt, wenn er signiert:<br>1) <strong>Double-Vote</strong> — zwei verschiedene Attestationen für denselben Target-Epoch.<br>2) <strong>Surround-Vote</strong> — Attestation $A_1=(s_1, t_1)$ und $A_2=(s_2, t_2)$ mit $s_1 < s_2 < t_2 < t_1$ (umschließt die andere; verletzt FFG-Sicherheit).<br>3) Proposer-Slashing: zwei verschiedene Block-Proposals in derselben Slot-Position.<br>Konsequenz: sofortiger Verlust von 1 ETH (Min.) bis zum gesamten Stake, plus Ejection.<br><em>Quelle:</em> Buterin/Griffith, "Casper the Friendly Finality Gadget", arXiv:1710.09437, 2017, §4 "Slashing Conditions"; Ethereum Consensus Specs Phase 0 (2020).'
+                },
+                {
+                    q: 'Was bewirken Compact Blocks (BIP-152) für die Block-Propagation in Bitcoin?',
+                    h: 'Statt voller Blöcke nur kurze TX-IDs übertragen.',
+                    s: 'Ohne BIP-152: ein neu gefundener Bitcoin-Block (~1 MB) wird vollständig zu allen Peers gesendet. Bei langsamen Nodes erhöht das die Wahrscheinlichkeit eines Reorgs (Stale-Rate).<br>Mit <strong>Compact Blocks</strong>: der Sender liefert nur Header + 6-Byte-Short-IDs der Tx; der Empfänger rekonstruiert den Block aus seinem eigenen Mempool. Datenvolumen sinkt auf ~10–20 kB pro Block.<br>Variante "high-bandwidth-mode": Sender pusht den kompakten Block sofort an Top-3-Peers, ohne auf Inv-Roundtrips zu warten.<br><em>Quelle:</em> Bitcoin BIP-152 "Compact Block Relay" (M. Corallo 2016); Bitcoin Core seit 0.13 (2016).'
+                },
+                {
+                    q: 'Was ist das "Nothing-at-Stake"-Problem in naivem Proof-of-Stake, und wie löst Ethereum es?',
+                    h: 'Bei Forks kann ein Validator kostenfrei auf beiden Seiten signieren.',
+                    s: 'In naivem PoS hat Signieren keine externen Kosten — bei einer Fork-Situation würde ein rationaler Validator auf <em>beiden</em> Forks gleichzeitig signieren, um in jedem Fall belohnt zu werden. Konsequenz: keine eindeutige Chain-Wahl, kein Konsens.<br>Lösung über <strong>Slashing</strong>: doppeltes Signieren konkurrierender Blöcke/Attestationen ist auf der Chain nachweisbar und führt zum Stake-Verlust. Damit ist das "Stimme auf allen Forks"-Verhalten wirtschaftlich verboten.<br><em>Quelle:</em> Buterin "Slasher" Blog 2014; Buterin/Griffith arXiv:1710.09437; Saleh "Blockchain Without Waste: Proof-of-Stake", Rev. Fin. Studies 34(3), 2021.'
+                },
+                {
+                    q: 'Was ist eine Long-Range-Attack in Proof-of-Stake, und wie helfen Weak-Subjectivity-Checkpoints?',
+                    h: 'Alte Validatoren mit verkauftem Stake können eine alternative Geschichte rückwirkend signieren.',
+                    s: 'Validatoren, die ihren Stake bereits verkauft und sich ausgezahlt haben, können <em>nachträglich</em> mit ihren alten Schlüsseln eine alternative Chain ab einem weit zurückliegenden Punkt signieren. Da kein externer Energieaufwand wie bei PoW nötig ist, ist dieses Re-Signieren kostenlos.<br>Mitigation: <strong>Weak Subjectivity</strong> — jeder neu beitretende Node erhält einen <em>Checkpoint</em> (z.B. Hash eines kürzlichen finalisierten Blocks) aus vertrauenswürdiger Quelle und akzeptiert nur Ketten, die diesen Punkt enthalten. Periodendauer < Bonded-Stake-Withdrawal-Zeitfenster.<br><em>Quelle:</em> V. Buterin, "Proof of Stake: How I Learned to Love Weak Subjectivity", Ethereum Blog 25. Nov. 2014; Ethereum Consensus Specs Phase 0.'
+                },
+                {
+                    q: 'Wie viel ETH werden pro Tag verbrannt, wenn jeder Block 15 Mio. Gas verbraucht und die baseFee konstant 30 Gwei beträgt?',
+                    h: '12 s/Block · 86400 s/Tag · 15e6 Gas · 30 Gwei.',
+                    s: 'Blöcke pro Tag: $86400/12 = 7200$.<br>Gas pro Tag: $7200 \\cdot 15 \\cdot 10^6 = 1{,}08 \\cdot 10^{11}\\,\\text{Gas}$.<br>baseFee = $30\\,\\text{Gwei} = 30 \\cdot 10^{-9}\\,\\text{ETH/Gas}$.<br>Burn = $1{,}08 \\cdot 10^{11} \\cdot 30 \\cdot 10^{-9} = 3240\\,\\text{ETH/Tag}$.<br>$$\\boxed{\\approx 3240\\,\\text{ETH/Tag}}$$<br>Bei einer Issuance von ca. 2000 ETH/Tag (Beacon-Chain-Validator-Rewards) wäre die Chain netto deflationär ("ultrasound money", post-Merge).<br><em>Quelle:</em> EIP-1559, ultrasound.money Live-Dashboards; Bitfly Beaconcha.in Statistics.'
+                },
+                {
+                    q: 'Bitcoin: warum wird die HASH160-Adresse aus RIPEMD-160(SHA-256(PK)) statt nur SHA-256 oder nur RIPEMD-160 gebildet?',
+                    h: 'Zwei unabhängige Hashes — Defense in Depth + 20-Byte-Adresse.',
+                    s: '1) <strong>Kürzere Adresse</strong>: RIPEMD-160 liefert 160 Bit = 20 Byte (Base58 ca. 34 Zeichen), während SHA-256 32 Byte = 44 Zeichen ergäbe.<br>2) <strong>Diversität der Hashfamilien</strong>: ein potenzieller Bruch von SHA-256 (Merkle-Damgård, NSA-Design) würde nicht automatisch auch RIPEMD-160 (Davies-Meyer, europäische Lineage RACE) brechen — "belt and suspenders".<br>3) <strong>2nd-Preimage-Sicherheit</strong>: 160-Bit-Hash bietet ca. $2^{80}$ Aufwand gegen Geburtstag — historisch angemessen, heute Grenzfall (daher Bech32/SegWit nutzt 256-Bit-Hash für Skript-Pfade).<br><em>Quelle:</em> Bitcoin BIP-13 / BIP-16; Dobbertin/Bosselaers/Preneel, "RIPEMD-160: A Strengthened Version of RIPEMD", FSE 1996.'
+                },
+                {
+                    q: 'Was ist P2SH (Pay-to-Script-Hash, BIP-16), und welchen Vorteil bietet es gegenüber P2PKH?',
+                    h: 'Sender zahlt an den Hash eines Skripts; Empfänger liefert das Skript + Witness beim Ausgeben.',
+                    s: 'Bei <strong>P2PKH</strong> commitet die UTXO direkt auf einen Pubkey-Hash; das Spending-Skript ist immer die Form OP_DUP OP_HASH160 ... OP_EQUALVERIFY OP_CHECKSIG.<br>Bei <strong>P2SH</strong> commitet die UTXO auf den Hash eines beliebigen Redeem-Skripts $R$: <code>OP_HASH160 H(R) OP_EQUAL</code>. Erst beim Ausgeben enthüllt der Sender $R$ und liefert dazu passende Inputs.<br>Vorteile: 1) <em>Komplexe Skripte (Multi-Sig, Timelocks) ohne Senderseite</em> — der Sender sieht nur eine "3..."-Adresse. 2) <em>Geringere Größe in UTXO</em>. 3) Vorstufe zu SegWit (P2WSH/P2WPKH "in" P2SH für alte Wallets).<br><em>Quelle:</em> Bitcoin BIP-16 "Pay to Script Hash" (G. Andresen 2012); Antonopoulos "MTB" Kap. 7.'
+                },
+                {
+                    q: 'Bitcoin-Difficulty: erkläre die 4-fach-Begrenzung pro Adjustment und den Grund dafür.',
+                    h: 'Schutz gegen extreme Hashrate-Schwankungen.',
+                    s: 'Die Difficulty-Adjustment-Formel ist $D_{neu} = D_{alt} \\cdot T_{soll}/T_{ist}$, aber der Bitcoin-Code clampt $T_{ist}$ in $[T_{soll}/4,\\ 4\\cdot T_{soll}]$. Effektiv heißt das: pro Adjustment-Periode (2016 Blöcke) ändert sich die Difficulty maximal um Faktor 4 nach oben oder unten.<br>Zweck: 1) Schutz gegen einen plötzlichen Massive-Hashpower-Anstieg, der sonst die Block-Inter-Arrival-Zeit auf wenige Sekunden drücken würde. 2) Schutz gegen plötzlichen Massive-Hashpower-Drop ("Death Spiral" bei niedriger Difficulty wäre fatal). Beispiel: das chinesische Mining-Ban im Mai 2021 löste die größte Difficulty-Senkung (-27,9 %, Block 689472) aus, blieb aber unter der 4-fach-Grenze.<br><em>Quelle:</em> Bitcoin Core <code>pow.cpp</code> Funktion <code>CalculateNextWorkRequired</code>; Antonopoulos "MTB" Kap. 10.'
+                },
+                {
+                    q: 'Was ist das Stratum-Protokoll bei Bitcoin-Mining-Pools, und welche Aufgabe übernimmt der Pool-Server gegenüber dem Miner?',
+                    h: 'TCP/JSON-RPC-basiertes Job-Verteilungs-Protokoll.',
+                    s: '<strong>Stratum</strong> (M. Palatinus 2012) ersetzt das ältere <code>getwork</code>. Ablauf:<br>1) Pool-Server konstruiert den vollen Block-Header-Template inklusive Coinbase-Tx (die <em>Pool-Adresse</em> als Output trägt).<br>2) Pool sendet an Miner: <code>mining.notify</code>(jobId, prev-hash, coinbase1, coinbase2, merkle-branches, version, nbits, ntime, cleanjobs).<br>3) Miner variiert <em>extraNonce</em> + Standard-Nonce über $2^{32}$, prüft Hash gegen <em>Share-Difficulty</em> (deutlich niedriger als Netz-Target) und reportet "Shares".<br>4) Findet er einen Hash unter Netz-Target, hat der Pool den Block gewonnen und verteilt den Reward proportional zu eingereichten Shares (PPLNS, PPS+).<br><em>Quelle:</em> M. Palatinus / P. Rusnak, Stratum Mining Protocol v1, slushpool.com Spezifikation (2012); BIP-310 Version-Rolling-Erweiterung.'
+                },
+                {
+                    q: 'Wie groß war historisch die längste Reorg-Tiefe in Bitcoin nach dem Genesis-Block, und warum sind tiefe Reorgs in einer Hashpower-stabilen Chain äußerst selten?',
+                    h: 'Bitcoin-Mainnet: max. 4 Blöcke (März 2013, Versions-Inkonsistenz). Wahrscheinlichkeit fällt exponentiell mit Tiefe.',
+                    s: 'Im Bitcoin-Mainnet betrug die längste bekannte Reorg-Tiefe seit Genesis <strong>4 Blöcke</strong>, ausgelöst durch eine Konsens-Inkonsistenz zwischen Bitcoin Core 0.7 und 0.8 im März 2013 (BDB-Lock-Limit vs. LevelDB) — kein Angriff, sondern ein Bug.<br>Für ein ehrliches Netz mit Hashpower-Anteil $p$ und Angreifer $q=1-p < 0{,}5$ fällt die Wahrscheinlichkeit eines Reorgs der Tiefe $z$ exponentiell: $P \\approx (q/p)^z$ (Nakamoto §11). Bei realistischen $q < 0{,}3$ ist $P(z=6) < 1\\%$.<br>Andere PoW-Chains mit geringerer Hashpower hatten dagegen historisch tiefe Reorgs: Ethereum Classic (51 %-Angriffe Jan. 2019, mehr als 100 Blöcke; Aug. 2020 mehrfach > 3500 Blöcke), Verge (XVG, 2018) und Bitcoin Gold (2018, 2020).<br><em>Quelle:</em> bitcoin.org Alert Mar 11 2013 (BIP-50 "March 2013 chain fork"); Nakamoto 2008 §11; "Ethereum Classic 51% Attack Post-Mortem", Bitquery / SlowMist Aug. 2020.'
                 }
             ],
             // L3
@@ -195,6 +325,71 @@
                     q: 'Account Abstraction (ERC-4337): was ändert sich gegenüber EOAs, und welche Use-Cases werden möglich?',
                     h: 'Smart-Contract-Wallets als First-Class, Bundler/Paymaster.',
                     s: 'EOA (klassisch): privater Schlüssel = Account, fest definierte Signaturlogik (ECDSA/secp256k1), nur ETH zahlt Gas.<br><strong>ERC-4337</strong>: Wallets sind Smart Contracts. UserOperation-Objekte werden über einen <em>Bundler</em> in einen Block eingespeist; <em>Paymaster</em> kann Gas in ERC-20 oder gesponsert bezahlen.<br>Use-Cases: 1) <em>Social Recovery</em> (Multi-Faktor statt Seed-Phrase). 2) <em>Session Keys</em> für Spiele/dApps. 3) <em>Spending Limits</em>, Whitelists. 4) <em>Multisig out of the box</em>. 5) Passwordless via WebAuthn/Passkeys. Erfolgt ohne Hard Fork (Layer auf normaler EVM).'
+                },
+                {
+                    q: 'Schnorr-Signaturen vs ECDSA: welche fundamentalen Vorteile bringt Schnorr für Bitcoin (Taproot, BIP-340)?',
+                    h: 'Linearität: $s = s_1 + s_2$. Aggregation, Batch-Verifikation, Provable Security.',
+                    s: 'Schnorr-Signaturen (Schnorr 1989/91, Patent 2008 ausgelaufen) haben drei Eigenschaften, die ECDSA fehlen:<br>1) <strong>Linearität</strong>: $(R_1+R_2, s_1+s_2)$ ist eine gültige Signatur von $\\text{pk}_1+\\text{pk}_2$. Das erlaubt MuSig2 / FROST Multi-Signaturen, die on-chain ununterscheidbar von Einzel-Signaturen sind.<br>2) <strong>Batch-Verifikation</strong>: $n$ Signaturen prüfen in $O(n)$ EC-Skalarmultiplikationen mit $O(\\log n)$ Speedup vs. $n$ Einzel-Verifikationen.<br>3) <strong>Beweisbar sicher</strong> im Random-Oracle-Modell unter DLOG-Annahme (ECDSA hat nur heuristische Sicherheit).<br>BIP-340 (Wuille/Nick/Towns 2020) standardisiert Schnorr über secp256k1 mit X-only Pubkeys. Bestandteil des Taproot-Upgrades (aktiviert Block 709632, Nov. 2021).<br><em>Quelle:</em> C.P. Schnorr, "Efficient Signature Generation by Smart Cards", J. Cryptology 4(3), 1991; Bitcoin BIP-340 / BIP-341 / BIP-342.'
+                },
+                {
+                    q: 'Erkläre Taproot (BIP-341) und MAST (Merkelized Abstract Syntax Trees) — welches Privatsphäre- und Effizienz-Argument verbindet sie?',
+                    h: 'Mehrere Spending-Pfade unter einem Pubkey; nur der genutzte Pfad wird offengelegt.',
+                    s: '<strong>Taproot</strong> kombiniert: 1) einen <em>Key-Path</em> — eine Schnorr-Signatur unter einem aggregierten Pubkey $Q = P + H(P\\|m)\\cdot G$, wobei $P$ der "ehrliche" gemeinsame Schlüssel ist und $m$ ein Skript-Merkle-Root. 2) einen <em>Script-Path</em> — Spending durch Reveal eines Skripts aus dem MAST.<br><strong>MAST</strong>: Alternative Spending-Pfade werden zu einem Merkle-Baum aggregiert; beim Spending wird nur der gewählte Pfad + sein Merkle-Proof offengelegt.<br>Effekte: <em>Privatsphäre</em> (kooperative Schließung sieht aus wie eine einzige Signatur), <em>Effizienz</em> (große, ungenutzte Skript-Zweige bleiben verborgen), <em>Skalierbarkeit</em> (kleinere Witness-Größe).<br><em>Quelle:</em> BIP-341 "Taproot: SegWit version 1 spending rules" (Wuille/Nick/Towns 2020); BIP-114-Vorläufer (Lau 2016) für MAST.'
+                },
+                {
+                    q: 'Vergleiche zk-SNARK (z.B. Groth16) und zk-STARK in Bezug auf Trusted Setup, Beweisgröße und Quanten-Resistenz.',
+                    h: 'Groth16: kleinste Beweise, aber Setup; STARK: kein Setup, größer, post-quantum.',
+                    s: '<strong>Groth16</strong> (J. Groth, EUROCRYPT 2016): nicht-interaktive zk-SNARKs auf pairing-fähigen Kurven (BN254/BLS12-381). Beweise ~190 Byte, Verifikation in $O(1)$. <em>Erfordert</em> ein circuit-spezifisches Trusted Setup (toxic waste).<br><strong>PLONK</strong> (Gabizon/Williamson/Ciobotaru, IACR ePrint 2019/953): universelles, updatable Trusted Setup pro Schaltkreis-Größe; Beweise ~500 Byte.<br><strong>zk-STARK</strong> (Ben-Sasson/Bentov/Horesh/Riabzev, ePrint 2018/046): hash-basiert (FRI-Protokoll), <em>kein</em> Trusted Setup, plausibel <em>post-quantum-sicher</em>; Beweise jedoch 50–500 kB groß, Verifikation $O(\\log^2 n)$.<br>Einsatz: zkSync Era nutzt PLONK; StarkNet nutzt STARKs; Filecoin/Zcash Sapling nutzen Groth16.<br><em>Quelle:</em> Groth EUROCRYPT 2016; PLONK ePrint 2019/953; "Scalable, transparent, and post-quantum secure computational integrity" (Ben-Sasson et al.).'
+                },
+                {
+                    q: 'Erkläre den Selfish-Mining-Angriff (Eyal/Sirer 2014). Warum ist die "Majority-is-Honest"-Annahme von Nakamoto nicht ausreichend?',
+                    h: 'Angreifer hält private Blöcke zurück und veröffentlicht sie strategisch.',
+                    s: 'Setup: Angreifer mit Hashpower-Anteil $\\alpha < 0{,}5$, ehrliches Netz $1-\\alpha$. Strategie: jeder gefundene Block wird <em>privat</em> gehalten. Findet das ehrliche Netz auch einen Block, veröffentlicht der Angreifer schnell, um die ehrliche Arbeit zu vergeuden ("räcen, dann veröffentlichen").<br>Ergebnis (Eyal/Sirer 2014): bei Netzwerk-Sympathie-Parameter $\\gamma=0{,}5$ ist Selfish Mining profitabler als ehrliches Mining bereits ab $\\alpha > 25\\%$ — nicht erst bei $\\alpha > 50\\%$. Bei perfektem Network-Edge ($\\gamma=1$) sogar ab $\\alpha > 0$.<br>Konsequenz: Nakamotos "Sicherheit bei $\\alpha < 50\\%$" gilt nicht in Bezug auf Anreize, sondern nur in Bezug auf Doppel-Spend.<br><em>Quelle:</em> I. Eyal, E. Sirer, "Majority is not Enough: Bitcoin Mining is Vulnerable", FC 2014 / Commun. ACM 61(7), 2018.'
+                },
+                {
+                    q: 'Erkläre Ethereums Casper-FFG-Finalität: warum ist sie "deterministisch" und nicht nur "probabilistisch wie PoW"?',
+                    h: 'Zwei-Phasen-Voting: Justify dann Finalize. Slashing blockiert konkurrierende Forks.',
+                    s: 'Validatoren stimmen pro Epoche (32 Slots, ~6,4 min) in zwei Schritten:<br>1) <strong>Justify</strong> — Supermajority-Votum (≥ 2/3 Stake) für ein Checkpoint-Paar (Source, Target). Justification "kettet" Checkpoints.<br>2) <strong>Finalize</strong> — wenn ein bereits justifizierter Checkpoint Quelle der nächsten Justification ist, wird er <em>finalisiert</em>.<br>Sicherheits-Theorem (Buterin/Griffith 2017): es gibt keine zwei konfliktären finalisierten Checkpoints, ohne dass mindestens 1/3 des gesamten Stake gleichzeitig slashable wäre. Wirtschaftliche Garantie: Angriff auf Finalität kostet > $\\$10$ Mrd. (bei 30 Mio. gestaketer ETH).<br>Gasper = Casper FFG + LMD-GHOST-Fork-Choice. Liveness unter "partial synchrony", Sicherheit auch bei vollständiger Asynchronie.<br><em>Quelle:</em> Buterin/Griffith arXiv:1710.09437 (2017), §3-5; Gasper-Paper arXiv:2003.03052 (2020).'
+                },
+                {
+                    q: 'BLS-Aggregat-Signaturen auf BLS12-381: skizziere die Mathematik der Verifikation $e(\\sigma, g_2) = e(H(m), pk)$.',
+                    h: 'Bilineare Paarung auf elliptischer Kurve mit Embedding-Grad 12.',
+                    s: 'BLS12-381 ist eine pairing-freundliche Kurve mit Embedding-Grad 12, Sicherheits-Niveau ca. 117 Bit.<br>Schlüssel: $sk \\in \\mathbb{Z}_q$, $pk = sk \\cdot g_2 \\in G_2$.<br>Signieren: $\\sigma = sk \\cdot H(m) \\in G_1$ mit Hash-zu-Kurve $H: \\{0,1\\}^* \\to G_1$.<br>Verifizieren: $e(\\sigma, g_2) \\stackrel{?}{=} e(H(m), pk)$, weil $e(sk H(m), g_2) = e(H(m), g_2)^{sk} = e(H(m), sk\\,g_2)$.<br>Aggregation: $\\sigma_{agg} = \\sum_i \\sigma_i \\in G_1$ (96 B konstant), $pk_{agg} = \\sum_i pk_i$. Verifikation prüft $e(\\sigma_{agg}, g_2) = \\prod_i e(H(m_i), pk_i)$ — bei gleicher Nachricht: $= e(\\sum H(m_i), pk_{agg})$.<br><em>Quelle:</em> Boneh/Lynn/Shacham, "Short Signatures from the Weil Pairing", J. Cryptology 17(4), 2004; Boneh/Drijvers/Neven, "Compact Multi-Signatures for Smaller Blockchains", ASIACRYPT 2018; IETF Draft <code>draft-irtf-cfrg-bls-signature</code> v05 (2022).'
+                },
+                {
+                    q: 'Was ist eine Verifiable Delay Function (VDF), und wozu wäre sie in einer Blockchain nützlich?',
+                    h: 'Sequenzielle Berechnung, die nicht parallelisierbar ist, aber schnell verifizierbar bleibt.',
+                    s: 'Eine <strong>VDF</strong> ist eine Funktion $y = f(x, t)$, deren Auswertung mindestens $t$ sequenzielle Schritte benötigt (auch mit beliebig viel Parallelität), während die Verifikation $y$ aus einem kurzen Beweis in $\\operatorname{polylog}(t)$ möglich ist.<br>Konstruktionen: 1) <em>Wesolowski-VDF</em> (EUROCRYPT 2019) auf RSA-/Klassengruppen mit $y = x^{2^t} \\bmod N$. 2) <em>Pietrzak-VDF</em> (ITCS 2019) ähnlich, anderes Beweisverfahren.<br>Blockchain-Anwendungen: 1) <em>Randomness Beacon</em> — verhindert Last-Revealer-Manipulation in PoS-Lotterien (Drand, Solana Proof of History). 2) <em>Faire Leader-Election</em> in Ethereum-2-Sharding-Roadmap. 3) Front-Running-Schutz in Encrypted Mempools (Shutter Network).<br><em>Quelle:</em> Boneh/Bonneau/Bünz/Fisch, "Verifiable Delay Functions", CRYPTO 2018; Wesolowski "Efficient VDFs", EUROCRYPT 2019.'
+                },
+                {
+                    q: 'Erkläre EigenLayer-Restaking: welcher Mehrwert entsteht, und welches systemische Risiko?',
+                    h: 'Bereits gestaktes ETH wird "wiederverwendet", um zusätzliche Dienste abzusichern — gemeinsame Slashing-Bedingungen.',
+                    s: 'Ethereum-Validatoren weisen ihre Withdrawal-Credentials einem EigenLayer-Smart-Contract zu. Damit unterwerfen sie sich zusätzlichen Slashing-Bedingungen für sogenannte AVS (Actively Validated Services) — z.B. Data-Availability-Committees, Bridges, Oracles, Rollup-Sequencer-Sicherheit.<br>Mehrwert: neue Protokolle erben Ethereum-Sicherheit, ohne eigenes Validator-Set aufbauen zu müssen. Validatoren erzielen zusätzliche Yield.<br>Systemisches Risiko: korrelierte Slashing-Ereignisse können große Stake-Anteile gleichzeitig vernichten (Kontagion). Buterin warnte 2023 vor "über-extending consensus": wenn AVS auf Konsens-Forks angewiesen sind und Validatoren sich uneinig sind, könnte Ethereum-L1 selbst geforkt werden müssen.<br><em>Quelle:</em> Sreeram Kannan et al. "EigenLayer: The Restaking Collective" Whitepaper Feb. 2023; V. Buterin "Don\u2019t overload Ethereum\u2019s consensus", vitalik.eth.limo Mai 2023.'
+                },
+                {
+                    q: 'Beschreibe Cosmos IBC (Inter-Blockchain Communication) und die Rolle von Tendermint-BFT für instant finality.',
+                    h: 'Light-Client-basierte Brücke; Tendermint = klassisches PBFT mit ≤ 1/3-Byzantine-Toleranz.',
+                    s: '<strong>Tendermint BFT</strong> (Buchman/Kwon/Milosevic 2018): partial-synchronous PBFT-Variante; nach Pre-Vote → Pre-Commit → Commit eines Blocks ist dieser <em>instant final</em>, solange < 1/3 der Validatoren byzantine sind. Keine Reorgs.<br><strong>IBC</strong>: Chain $A$ läuft auf Chain $B$ einen Light-Client (Header + Konsens-Beweis von $A$). Pakete (Tokens, Daten) werden über <em>Channels</em> mit Authentication ("ICS-20" für fungible Tokens) ausgetauscht. Receive-, Acknowledge-, Timeout-Pakete erlauben atomare Cross-Chain-Operations.<br>Effekt: heterogenes Mehrkettensystem ohne zentralisierte Bridge — anders als ein Multi-Sig-Lock-and-Mint-Modell, das in den letzten Jahren > $\\$2$ Mrd. an Bridge-Hacks verloren hat.<br><em>Quelle:</em> Buchman/Kwon/Milosevic, "The Latest Gossip on BFT Consensus", arXiv:1807.04938 (2018); Cosmos ICS-23 / ICS-26 Spezifikationen.'
+                },
+                {
+                    q: 'Wie unterscheidet sich ein DAG-basiertes Ledger (z.B. IOTA Tangle, Hedera Hashgraph) von einer klassischen Blockchain?',
+                    h: 'Parallele Tx-Bestätigungen ohne strenge Block-Sequenz.',
+                    s: '<strong>Blockchain (linear)</strong>: Tx werden in Blöcken gebündelt, Blöcke sind strikt totalgeordnet; Throughput ist durch Blockgröße/Blockzeit beschränkt.<br><strong>DAG-Ledger</strong>: jede neue Tx referenziert (und damit bestätigt) eine kleine Anzahl früherer Tx; die Topologie ist ein gerichteter azyklischer Graph. Theoretisch beliebig hoher Tx-Parallelismus.<br>Beispiele: <em>IOTA Tangle</em> (Popov 2016) — jede Tx bestätigt zwei Vorgänger über Tip-Selection. <em>Hashgraph</em> (Baird 2016) — Gossip-about-Gossip + virtuelles Voting, asynchron-BFT.<br>Trade-offs: schwierige Konsistenz/Finalitäts-Definition; oft Hilfs-Konstruktionen (Coordinator/Coordicide bei IOTA, Patent-Schutz bei Hashgraph).<br><em>Quelle:</em> S. Popov, "The Tangle", iotatoken.com Whitepaper v1.4.3 (2018); L. Baird, "The Swirlds Hashgraph Consensus Algorithm", Swirlds Tech Report TR-2016-01.'
+                },
+                {
+                    q: 'Was sind Confidential Transactions (Maxwell 2015) und welche Rolle spielen Pedersen Commitments?',
+                    h: 'Beträge werden als Pedersen Commitments versteckt, Range-Proof beweist Nichtnegativität.',
+                    s: 'In Bitcoin sind UTXO-Beträge öffentlich. <strong>Confidential Transactions</strong> (G. Maxwell, Blockstream Whitepaper 2015) ersetzen den Klartext-Betrag durch ein <em>Pedersen Commitment</em> $C = vH + rG$, wobei $v$ der Betrag, $r$ der Blinding-Faktor und $G, H$ unabhängige Generatoren sind.<br>Eigenschaften: <em>Hiding</em> (kein Rückschluss auf $v$), <em>Binding</em> (Manipulation erfordert Lösen des DLOG), <em>Homomorph</em> ($C_1 + C_2 = (v_1+v_2)H + (r_1+r_2)G$ — Summenprüfung der Tx möglich, ohne Beträge zu kennen).<br>Zusätzlich braucht es einen <strong>Range-Proof</strong> ($0 \\le v < 2^{64}$, sonst Inflation möglich); Bulletproofs (Bünz et al. 2018) reduzierten ihn von ~10 kB auf ~700 B.<br>Einsatz: Monero, Mimblewimble/Grin, Liquid-Network.<br><em>Quelle:</em> G. Maxwell, "Confidential Transactions" elementsproject.org (2015); Bünz/Bootle/Boneh/Poelstra/Wuille/Maxwell, "Bulletproofs", IEEE S&P 2018.'
+                },
+                {
+                    q: 'Was ist das Data-Availability-Problem bei zk-Rollups, und wie lösen es Danksharding (EIP-4844) und externe DA-Layer (Celestia, EigenDA)?',
+                    h: 'Ein gültiger ZK-Proof allein reicht nicht — Nutzer brauchen Zustands-Daten zur Anfechtung/Recovery.',
+                    s: 'Ein zk-Rollup veröffentlicht on-chain nur einen Zustandsübergang und einen ZK-Beweis seiner Korrektheit. Wenn der Sequencer aber die zugrundeliegenden Tx-Daten <em>geheim hält</em>, können Nutzer ihre eigenen Balances nicht rekonstruieren und nicht selbst aus dem Rollup ausziehen — selbst wenn der Beweis korrekt ist.<br>Lösungen:<br>1) <strong>EIP-4844 / Proto-Danksharding</strong> (Ethereum Cancun-Fork, März 2024): "Blobs" — kurzlebige Datenfelder (~125 kB pro Blob, max 6 pro Block), explizit für Rollup-Daten, ~10x billiger als Calldata, 18-Tage-Retention, geprüft via KZG-Polynom-Commitments.<br>2) <strong>Externe DA-Layer</strong>: Celestia (Tendermint-BFT-Chain mit data-availability sampling) bzw. EigenDA (Restaking-gesicherte Verfügbarkeits-Quoren) — bieten DA als eigenständigen Dienst; Rollups committen nur Hashes on-chain.<br><em>Quelle:</em> EIP-4844 Spezifikation (Buterin/Feist/Beiko et al. 2022); Mustafa Al-Bassam et al. "Fraud and Data Availability Proofs", FC 2021; Celestia-Paper "Lazyledger" arXiv:1905.09274 (2019).'
+                },
+                {
+                    q: 'Was ist ein Atomic-Composability-Verlust in Cross-Rollup-Setups, und welche Architekturen versuchen ihn zu beheben (Shared Sequencer, Based Rollups)?',
+                    h: 'Tx über zwei L2s sind nicht in einer einzigen atomaren Operation einschließbar — Race-Conditions, MEV, Latenz.',
+                    s: 'Innerhalb eines einzigen Rollups (z.B. Arbitrum) gilt EVM-Atomarität: Tx revertet alle Subaufrufe gemeinsam. Über <em>zwei</em> Rollups hinweg (z.B. Arbitrum + zkSync) ist das nicht mehr gegeben — eine Cross-Rollup-Operation muss als Sequenz separater Tx mit Bridges/Messengern ausgeführt werden, mit unterschiedlichen Finalitätszeiten und MEV-Angriffsfläche dazwischen.<br>Lösungsansätze:<br>1) <strong>Shared Sequencer</strong> (Espresso, Astria): mehrere Rollups teilen sich einen Sequencer, der die Tx-Reihenfolge über Rollup-Grenzen hinweg festlegt — atomare Inklusion möglich, atomare Ausführung nur mit zusätzlicher Conditional-Inclusion-Logik.<br>2) <strong>Based Rollups</strong> (Buterin Mar 2023): L1-Block-Proposer selbst sequenziert die Rollup-Tx — natürliche Komposition mit L1, aber Latenz wie L1.<br>3) <strong>Native Account Abstraction Bridges</strong> mit Pre-Confirmations (Polygon AggLayer, Optimism Superchain).<br><em>Quelle:</em> V. Buterin, "Different types of layer 2s", vitalik.eth.limo Okt. 2023; Espresso Sequencer Whitepaper (2023); Polygon AggLayer Docs (2024).'
                 }
             ]
         ]
