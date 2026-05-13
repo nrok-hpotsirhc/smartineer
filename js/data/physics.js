@@ -93,6 +93,71 @@
                     q: 'Reynoldszahl: Wasser strömt mit $v=1\\,\\text{m/s}$ durch ein Rohr mit $L=D=0{,}05\\,\\text{m}$. ($\\rho=1000$, $\\eta=10^{-3}\\,\\text{Pa s}$). Laminar oder turbulent?',
                     h: '$\\mathrm{Re}=\\rho v L/\\eta$, kritisch $\\sim 2300$.',
                     s: '$\\mathrm{Re}=1000\\cdot 1\\cdot 0{,}05/10^{-3}=50\\,000$.<br>$\\gg 2300$, also <strong>turbulent</strong>.<br>$$\\boxed{\\mathrm{Re}=5\\cdot 10^4\\Rightarrow\\text{turbulent}}$$'
+                },
+                {
+                    q: 'Senkrechter Wurf nach oben mit $v_0=20\\,\\text{m/s}$ (Luftreibung vernachlaessigt, $g=9{,}81\\,\\text{m/s}^2$). Berechne maximale Steighoehe und Steigzeit.',
+                    h: 'Energieerhaltung $\\tfrac12 m v_0^2 = mgh$ bzw. $v=v_0-gt$ mit $v=0$.',
+                    s: '$h=v_0^2/(2g)=400/19{,}62\\approx 20{,}4\\,\\text{m}$.<br>$t=v_0/g=20/9{,}81\\approx 2{,}04\\,\\text{s}$.<br>$$\\boxed{h\\approx 20{,}4\\,\\text{m},\\ t\\approx 2{,}04\\,\\text{s}}$$<br><em>Quelle:</em> Tipler/Mosca, Physik fuer Wissenschaftler und Ingenieure, 7. Aufl. (Spektrum 2015), §2.3.'
+                },
+                {
+                    q: 'Schiefe Ebene mit Haftreibung: Auf einer Rampe ($\\alpha$) rutscht ein Klotz erst, wenn $\\tan\\alpha>\\mu_H$. Berechne den Grenzwinkel fuer $\\mu_H=0{,}4$.',
+                    h: '$F_H = \\mu_H F_N = \\mu_H mg\\cos\\alpha$; Hangabtrieb $= mg\\sin\\alpha$.',
+                    s: 'Gleichgewicht an der Rutschgrenze: $mg\\sin\\alpha = \\mu_H mg\\cos\\alpha \\Rightarrow \\tan\\alpha = \\mu_H$.<br>$\\alpha = \\arctan(0{,}4)\\approx 21{,}8°$.<br>$$\\boxed{\\alpha_{krit}\\approx 21{,}8°}$$<br><em>Quelle:</em> Halliday/Resnick/Walker, Fundamentals of Physics, 11. ed. (Wiley 2018), §6.1 Friction.'
+                },
+                {
+                    q: 'Hookesches Gesetz: Eine Schraubenfeder dehnt sich unter $F=10\\,\\text{N}$ um $\\Delta x=2{,}5\\,\\text{cm}$. Berechne $k$ und die gespeicherte Energie bei dieser Auslenkung.',
+                    h: '$k=F/\\Delta x$, $W = \\tfrac12 k\\Delta x^2$.',
+                    s: '$k = 10/0{,}025 = 400\\,\\text{N/m}$.<br>$W = 0{,}5\\cdot 400\\cdot (0{,}025)^2 = 0{,}125\\,\\text{J}$.<br>$$\\boxed{k=400\\,\\text{N/m},\\ W=0{,}125\\,\\text{J}}$$<br><em>Quelle:</em> Demtroeder, Experimentalphysik 1: Mechanik und Waerme, 9. Aufl. (Springer 2021), §6.2.'
+                },
+                {
+                    q: 'Mechanische Leistung: Ein Aufzug ($m=800\\,\\text{kg}$) faehrt mit $v=1{,}5\\,\\text{m/s}$ konstant nach oben. Welche Antriebsleistung wird (verlustfrei) benoetigt?',
+                    h: '$P = F\\cdot v$, hier $F = mg$.',
+                    s: '$P = 800\\cdot 9{,}81\\cdot 1{,}5 \\approx 11{,}77\\,\\text{kW}$.<br>$$\\boxed{P\\approx 11{,}8\\,\\text{kW}}$$<br><em>Quelle:</em> Halliday/Resnick/Walker, Fundamentals of Physics, 11. ed. (Wiley 2018), §7.7 Power.'
+                },
+                {
+                    q: 'Gleichfoermige Kreisbewegung: Ein Auto faehrt mit $v=72\\,\\text{km/h}$ durch eine Kurve mit Radius $r=50\\,\\text{m}$. Berechne die Zentripetalbeschleunigung.',
+                    h: '$a_z = v^2/r$. Erst km/h $\\to$ m/s.',
+                    s: '$v=72/3{,}6=20\\,\\text{m/s}$.<br>$a_z = 400/50 = 8\\,\\text{m/s}^2 \\approx 0{,}82\\,g$.<br>$$\\boxed{a_z = 8\\,\\text{m/s}^2}$$<br><em>Quelle:</em> Tipler/Mosca, Physik fuer Wissenschaftler und Ingenieure, 7. Aufl. (Spektrum 2015), §3.4.'
+                },
+                {
+                    q: 'Ohmsches Gesetz und spezifischer Widerstand: Ein Kupferdraht ($\\rho_{Cu}=1{,}7\\cdot 10^{-8}\\,\\Omega\\,\\text{m}$) hat Laenge $\\ell=100\\,\\text{m}$ und Querschnitt $A=1{,}5\\,\\text{mm}^2$. Berechne den Widerstand.',
+                    h: '$R=\\rho \\ell/A$. Einheiten: $A=1{,}5\\cdot 10^{-6}\\,\\text{m}^2$.',
+                    s: '$R = 1{,}7\\cdot 10^{-8}\\cdot 100 / (1{,}5\\cdot 10^{-6}) = 1{,}7\\cdot 10^{-6}/1{,}5\\cdot 10^{-6}\\approx 1{,}13\\,\\Omega$.<br>$$\\boxed{R\\approx 1{,}13\\,\\Omega}$$<br><em>Quelle:</em> Tipler/Mosca, Physik, 7. Aufl. (Spektrum 2015), §25.3 (Materialdaten DIN EN 60228:2005).'
+                },
+                {
+                    q: 'Kirchhoffsche Maschenregel: In einer Masche liegen $U_q=12\\,\\text{V}$, $R_1=4\\,\\Omega$, $R_2=6\\,\\Omega$, $R_3=2\\,\\Omega$ in Reihe. Berechne den Strom und die Teilspannungen.',
+                    h: '$\\sum U=0$: $U_q = I(R_1+R_2+R_3)$. Spannungsteiler.',
+                    s: '$I = 12/(4+6+2) = 12/12 = 1\\,\\text{A}$.<br>$U_1=4\\,\\text{V}$, $U_2=6\\,\\text{V}$, $U_3=2\\,\\text{V}$ ($\\Sigma = 12\\,\\text{V}$ konsistent).<br>$$\\boxed{I=1\\,\\text{A};\\ U_1=4,\\ U_2=6,\\ U_3=2\\,\\text{V}}$$<br><em>Quelle:</em> Tipler/Mosca, Physik, 7. Aufl. (Spektrum 2015), §26.1 (Kirchhoff 1845).'
+                },
+                {
+                    q: 'Elektrisches Feld einer Punktladung: $Q=+2\\,\\text{nC}$ im Vakuum. Berechne $|\\vec E|$ im Abstand $r=10\\,\\text{cm}$.',
+                    h: '$E = \\dfrac{1}{4\\pi\\varepsilon_0}\\dfrac{Q}{r^2}$.',
+                    s: '$E = 8{,}99\\cdot 10^9 \\cdot 2\\cdot 10^{-9}/(0{,}1)^2 = 17{,}98/0{,}01\\approx 1798\\,\\text{V/m}\\approx 1{,}8\\,\\text{kV/m}$.<br>$$\\boxed{E\\approx 1{,}8\\,\\text{kV/m}}$$<br><em>Quelle:</em> Griffiths, Introduction to Electrodynamics, 4. ed. (Pearson 2013), §2.2.'
+                },
+                {
+                    q: 'Magnetfeld eines langen geraden Stromleiters: $I=5\\,\\text{A}$, Abstand $r=4\\,\\text{cm}$ ($\\mu_0=4\\pi\\cdot 10^{-7}\\,\\text{Vs/(Am)}$). Berechne $|B|$.',
+                    h: 'Biot-Savart fuer langen Leiter: $B = \\mu_0 I/(2\\pi r)$.',
+                    s: '$B = 4\\pi\\cdot 10^{-7}\\cdot 5/(2\\pi\\cdot 0{,}04) = 2\\cdot 10^{-6}\\cdot 5/0{,}04 \\cdot \\tfrac{1}{...}$<br>Direkter: $B = (4\\pi\\cdot 10^{-7}\\cdot 5)/(2\\pi\\cdot 0{,}04) = (2\\cdot 10^{-7}\\cdot 5)/0{,}04 = 10^{-6}/0{,}04 = 2{,}5\\cdot 10^{-5}\\,\\text{T} = 25\\,\\mu\\text{T}$.<br>$$\\boxed{B\\approx 25\\,\\mu\\text{T}}$$<br><em>Quelle:</em> Griffiths, Electrodynamics, 4. ed. (Pearson 2013), §5.2.2.'
+                },
+                {
+                    q: 'Lange Zylinderspule (Solenoid): $n=500$ Windungen/m, $I=2\\,\\text{A}$. Berechne das Magnetfeld im Inneren.',
+                    h: 'Ampere-Gesetz: $B = \\mu_0 n I$ (Naeherung lange Spule).',
+                    s: '$B = 4\\pi\\cdot 10^{-7}\\cdot 500\\cdot 2 = 4\\pi\\cdot 10^{-4}\\approx 1{,}26\\cdot 10^{-3}\\,\\text{T} = 1{,}26\\,\\text{mT}$.<br>$$\\boxed{B\\approx 1{,}26\\,\\text{mT}}$$<br><em>Quelle:</em> Griffiths, Electrodynamics, 4. ed. (Pearson 2013), §5.3.3.'
+                },
+                {
+                    q: 'Hydrostatischer Druck: Welche Druckdifferenz herrscht in $h=10\\,\\text{m}$ Wassertiefe gegenueber der Oberflaeche ($\\rho=1000\\,\\text{kg/m}^3$)?',
+                    h: '$\\Delta p = \\rho g h$.',
+                    s: '$\\Delta p = 1000\\cdot 9{,}81\\cdot 10 = 98{,}1\\,\\text{kPa}\\approx 0{,}97\\,\\text{bar}$.<br>$$\\boxed{\\Delta p\\approx 98\\,\\text{kPa}}$$<br><em>Quelle:</em> Tipler/Mosca, Physik, 7. Aufl. (Spektrum 2015), §13.2 (Stevin-Gesetz).'
+                },
+                {
+                    q: 'Schallpegel: Ein Lautsprecher strahlt $I=1\\,\\text{mW/m}^2$ ab. Berechne den Schallintensitaetspegel $L$ in dB ($I_0=10^{-12}\\,\\text{W/m}^2$).',
+                    h: '$L = 10\\log_{10}(I/I_0)$.',
+                    s: '$L = 10\\log_{10}(10^{-3}/10^{-12}) = 10\\log_{10}(10^9) = 90\\,\\text{dB}$.<br>$$\\boxed{L = 90\\,\\text{dB}}$$ Vergleichswert: laute Strasse, dauerhaft gehoerschaedigend.<br><em>Quelle:</em> ISO 1683:2015 (Schallpegel-Referenzen); Halliday/Resnick/Walker, Fundamentals of Physics, 11. ed. (Wiley 2018), §17.6.'
+                },
+                {
+                    q: 'Radioaktiver Zerfall: Tritium ($^3$H) hat Halbwertszeit $T_{1/2}=12{,}32\\,\\text{a}$. Welcher Anteil der urspruenglichen Aktivitaet bleibt nach $25\\,\\text{a}$?',
+                    h: '$N(t)/N_0 = 2^{-t/T_{1/2}}$.',
+                    s: '$N/N_0 = 2^{-25/12{,}32} = 2^{-2{,}029}\\approx 0{,}245$, also $\\approx 24{,}5\\%$.<br>$$\\boxed{N/N_0\\approx 24{,}5\\,\\%}$$<br><em>Quelle:</em> Demtroeder, Experimentalphysik 4: Kern-, Teilchen- und Astrophysik, 5. Aufl. (Springer 2017), §3.2; Halbwertszeit nach NIST CODATA 2018.'
                 }
             ],
             // L2
@@ -151,6 +216,71 @@
                     q: 'Plattenkondensator: $A=0{,}01\\,\\text{m}^2$, $d=1\\,\\text{mm}$, Vakuum. Berechne $C$ und Energie bei $U=100\\,\\text{V}$. ($\\varepsilon_0=8{,}85\\cdot 10^{-12}$).',
                     h: '$C=\\varepsilon_0 A/d$, $W=\\tfrac12 CU^2$.',
                     s: '$C=8{,}85\\cdot 10^{-12}\\cdot 0{,}01/10^{-3}=8{,}85\\cdot 10^{-11}\\,\\text{F}\\approx 88{,}5\\,\\text{pF}$.<br>$W=0{,}5\\cdot 8{,}85\\cdot 10^{-11}\\cdot 10^4 = 4{,}43\\cdot 10^{-7}\\,\\text{J}\\approx 0{,}44\\,\\mu\\text{J}$.<br>$$\\boxed{C\\approx 88{,}5\\,\\text{pF},\\ W\\approx 0{,}44\\,\\mu\\text{J}}$$'
+                },
+                {
+                    q: 'Vollkommen unelastischer Stoss: $m_1=2\\,\\text{kg}$ mit $v_1=6\\,\\text{m/s}$ trifft ruhendes $m_2=4\\,\\text{kg}$, beide haften zusammen. Berechne $v\u2019$ und die in Waerme umgesetzte Energie.',
+                    h: 'Impulserhaltung gilt; Energie nicht. $v\u2019=(m_1 v_1)/(m_1+m_2)$. $\\Delta E = E_{kin,vor}-E_{kin,nach}$.',
+                    s: '$v\u2019 = 2\\cdot 6/6 = 2\\,\\text{m/s}$.<br>$E_{vor} = \\tfrac12\\cdot 2\\cdot 36 = 36\\,\\text{J}$; $E_{nach}=\\tfrac12\\cdot 6\\cdot 4 = 12\\,\\text{J}$.<br>$\\Delta E = 24\\,\\text{J}$ (Verformung/Waerme).<br>$$\\boxed{v\u2019 = 2\\,\\text{m/s},\\ \\Delta E = 24\\,\\text{J}}$$<br><em>Quelle:</em> Tipler/Mosca, Physik, 7. Aufl. (Spektrum 2015), §8.6.'
+                },
+                {
+                    q: 'Satz von Steiner: Berechne das Traegheitsmoment einer Vollscheibe ($m=2\\,\\text{kg}$, $r=0{,}1\\,\\text{m}$) bezueglich einer Achse durch den Rand, parallel zur Symmetrieachse.',
+                    h: '$I = I_S + m d^2$, mit $I_S = \\tfrac12 m r^2$ und $d=r$.',
+                    s: '$I_S = 0{,}5\\cdot 2\\cdot 0{,}01 = 0{,}01\\,\\text{kg m}^2$.<br>$I = 0{,}01 + 2\\cdot 0{,}01 = 0{,}03\\,\\text{kg m}^2$.<br>$$\\boxed{I = 0{,}03\\,\\text{kg m}^2}$$<br><em>Quelle:</em> Demtroeder, Experimentalphysik 1, 9. Aufl. (Springer 2021), §5.5 (Satz von Steiner / Huygens-Steiner).'
+                },
+                {
+                    q: 'Ziolkowski-Raketengleichung: Eine Rakete mit Anfangsmasse $m_0=10\\,\\text{t}$, Endmasse $m_e=2\\,\\text{t}$, Ausstroemgeschw. $v_e=3\\,\\text{km/s}$. Welche Endgeschwindigkeit im feldfreien Raum?',
+                    h: '$\\Delta v = v_e \\ln(m_0/m_e)$.',
+                    s: '$\\Delta v = 3000\\cdot \\ln(5) = 3000\\cdot 1{,}609 \\approx 4828\\,\\text{m/s}\\approx 4{,}83\\,\\text{km/s}$.<br>$$\\boxed{\\Delta v\\approx 4{,}83\\,\\text{km/s}}$$<br><em>Quelle:</em> Ziolkowski, Untersuchung der Welträume durch Reaktionsapparate (1903); Halliday/Resnick/Walker, Fundamentals of Physics, 11. ed. (Wiley 2018), §9.9.'
+                },
+                {
+                    q: 'Wheatstone-Bruecke: Vier Widerstaende $R_1=100\\,\\Omega$, $R_2=200\\,\\Omega$, $R_3=150\\,\\Omega$, $R_x=?$. Im Abgleich (Diagonalstrom $=0$) gilt welcher Zusammenhang? Berechne $R_x$.',
+                    h: 'Abgleichbedingung: $R_1/R_2 = R_3/R_x$.',
+                    s: '$R_x = R_3 R_2/R_1 = 150\\cdot 200/100 = 300\\,\\Omega$.<br>$$\\boxed{R_x = 300\\,\\Omega}$$<br><em>Quelle:</em> Tipler/Mosca, Physik, 7. Aufl. (Spektrum 2015), §26.4; Wheatstone, Phil. Trans. R. Soc. 133 (1843).'
+                },
+                {
+                    q: 'RLC-Serienschwingkreis: $L=10\\,\\text{mH}$, $C=1\\,\\mu\\text{F}$, $R=20\\,\\Omega$. Berechne Resonanzfrequenz $f_0$ und Guete $Q$.',
+                    h: '$\\omega_0=1/\\sqrt{LC}$, $Q=\\omega_0 L/R = (1/R)\\sqrt{L/C}$.',
+                    s: '$\\omega_0 = 1/\\sqrt{10^{-2}\\cdot 10^{-6}} = 1/\\sqrt{10^{-8}} = 10^4\\,\\text{rad/s}$.<br>$f_0 = 10^4/(2\\pi)\\approx 1592\\,\\text{Hz}$.<br>$Q = (1/20)\\sqrt{10^{-2}/10^{-6}} = 0{,}05\\cdot 100 = 5$.<br>$$\\boxed{f_0\\approx 1{,}59\\,\\text{kHz},\\ Q=5}$$<br><em>Quelle:</em> Tipler/Mosca, Physik, 7. Aufl. (Spektrum 2015), §29.5.'
+                },
+                {
+                    q: 'Stefan-Boltzmann: Welche Leistung pro Flaeche strahlt ein schwarzer Koerper bei $T=1000\\,\\text{K}$ ab? ($\\sigma=5{,}67\\cdot 10^{-8}\\,\\text{W/(m}^2\\text{K}^4)$.)',
+                    h: '$j = \\sigma T^4$.',
+                    s: '$j = 5{,}67\\cdot 10^{-8}\\cdot 10^{12} = 5{,}67\\cdot 10^4\\,\\text{W/m}^2 = 56{,}7\\,\\text{kW/m}^2$.<br>$$\\boxed{j\\approx 56{,}7\\,\\text{kW/m}^2}$$<br><em>Quelle:</em> Demtroeder, Experimentalphysik 3: Atome, Molekuele und Festkoerper, 5. Aufl. (Springer 2016), §3.1.4 (Stefan 1879 / Boltzmann 1884).'
+                },
+                {
+                    q: 'Adiabate Kompression eines idealen zweiatomigen Gases ($\\kappa=1{,}4$) von $V_1=10\\,\\text{L}$, $p_1=1\\,\\text{bar}$, $T_1=300\\,\\text{K}$ auf $V_2=2\\,\\text{L}$. Berechne $T_2$.',
+                    h: 'Adiabate: $TV^{\\kappa-1} = $ const.',
+                    s: '$T_2 = T_1 (V_1/V_2)^{\\kappa-1} = 300\\cdot 5^{0{,}4}$.<br>$5^{0{,}4} = e^{0{,}4\\ln 5} = e^{0{,}4\\cdot 1{,}609} = e^{0{,}644}\\approx 1{,}904$.<br>$T_2 \\approx 571\\,\\text{K}$.<br>$$\\boxed{T_2\\approx 571\\,\\text{K}}$$<br><em>Quelle:</em> Demtroeder, Experimentalphysik 1, 9. Aufl. (Springer 2021), §10.3.'
+                },
+                {
+                    q: 'Entropieaenderung bei Waermeleitung: $Q=1000\\,\\text{J}$ fliessen von $T_w=400\\,\\text{K}$ nach $T_k=300\\,\\text{K}$. Berechne die Gesamtentropieaenderung des Systems Heiss+Kalt (irreversibel).',
+                    h: '$\\Delta S = -Q/T_w + Q/T_k$.',
+                    s: '$\\Delta S = -1000/400 + 1000/300 = -2{,}5 + 3{,}333 = +0{,}833\\,\\text{J/K}$.<br>$$\\boxed{\\Delta S\\approx +0{,}83\\,\\text{J/K}}$$<br>2. HS bestaetigt: $\\Delta S>0$ fuer spontanen Waermefluss in das kaeltere Reservoir.<br><em>Quelle:</em> Atkins/de Paula, Physical Chemistry, 11. ed. (Oxford 2018), §3B.2.'
+                },
+                {
+                    q: 'Schallgeschwindigkeit in Luft: Bestimme $c$ bei $T=20°\\text{C}$ (ideales Gas, $\\kappa=1{,}4$, $R=287\\,\\text{J/(kg K)}$).',
+                    h: '$c = \\sqrt{\\kappa R T}$ (Newton-Laplace).',
+                    s: '$T = 293{,}15\\,\\text{K}$.<br>$c = \\sqrt{1{,}4\\cdot 287\\cdot 293{,}15} = \\sqrt{117\\,800}\\approx 343\\,\\text{m/s}$.<br>$$\\boxed{c\\approx 343\\,\\text{m/s}}$$<br><em>Quelle:</em> Demtroeder, Experimentalphysik 1, 9. Aufl. (Springer 2021), §11.9.4 (Newton-Laplace).'
+                },
+                {
+                    q: 'Doppelspalt-Interferenz: Spaltabstand $g=0{,}1\\,\\text{mm}$, Wellenlaenge $\\lambda=633\\,\\text{nm}$ (HeNe). Wie gross ist der Winkel des 1. Maximums?',
+                    h: 'Konstruktive Interferenz: $g\\sin\\theta = n\\lambda$, $n=1$.',
+                    s: '$\\sin\\theta = 633\\cdot 10^{-9}/10^{-4} = 6{,}33\\cdot 10^{-3}$.<br>$\\theta \\approx 6{,}33\\cdot 10^{-3}\\,\\text{rad}\\approx 0{,}363°$.<br>$$\\boxed{\\theta\\approx 0{,}36°}$$<br><em>Quelle:</em> Hecht, Optics, 5. ed. (Pearson 2017), §9.3 (Young 1801).'
+                },
+                {
+                    q: 'Abbesche Aufloesungsgrenze: Ein Mikroskop arbeitet mit $\\lambda=550\\,\\text{nm}$, numerischer Apertur $NA=0{,}9$. Berechne die theoretische Aufloesungsgrenze.',
+                    h: '$d_{min} = 0{,}61\\lambda/NA$ (Rayleigh-Kriterium) bzw. Abbe: $d = \\lambda/(2\\,NA)$.',
+                    s: 'Abbe: $d = 550/(2\\cdot 0{,}9) \\approx 306\\,\\text{nm}$.<br>Rayleigh: $d_{min} = 0{,}61\\cdot 550/0{,}9 \\approx 373\\,\\text{nm}$.<br>$$\\boxed{d\\approx 0{,}3\\,\\mu\\text{m}}$$<br><em>Quelle:</em> Abbe, Archiv f. mikrosk. Anat. 9 (1873); Hecht, Optics, 5. ed. (Pearson 2017), §10.2.6.'
+                },
+                {
+                    q: 'Hall-Effekt: Ein duenner Cu-Streifen ($d=0{,}1\\,\\text{mm}$, $n=8{,}5\\cdot 10^{28}\\,\\text{m}^{-3}$) fuehrt $I=10\\,\\text{A}$ in $B=1\\,\\text{T}$. Berechne die Hall-Spannung.',
+                    h: '$U_H = IB/(n e d)$.',
+                    s: '$U_H = 10\\cdot 1/(8{,}5\\cdot 10^{28}\\cdot 1{,}6\\cdot 10^{-19}\\cdot 10^{-4}) = 10/(1{,}36\\cdot 10^6) \\approx 7{,}35\\cdot 10^{-6}\\,\\text{V}\\approx 7{,}4\\,\\mu\\text{V}$.<br>$$\\boxed{U_H\\approx 7{,}4\\,\\mu\\text{V}}$$<br><em>Quelle:</em> Kittel, Introduction to Solid State Physics, 8. ed. (Wiley 2005), §6 (Hall 1879).'
+                },
+                {
+                    q: 'Curie-Temperatur: Eisen ($T_C = 1043\\,\\text{K}$). Erklaere qualitativ und mit einer Naeherungsbeziehung, wie sich die spontane Magnetisierung $M(T)$ in der Naehe von $T_C$ verhaelt.',
+                    h: 'Mean-Field/Landau-Theorie: $M\\propto (T_C-T)^{1/2}$ fuer $T \\lesssim T_C$.',
+                    s: 'Unterhalb $T_C$ ist die spontane Magnetisierung endlich; sie verschwindet bei $T_C$ kontinuierlich (Phasenuebergang 2. Ordnung). In Mean-Field-Naeherung: $M(T) \\propto (1-T/T_C)^{1/2}$. Beobachtet wird ein Exponent $\\beta\\approx 0{,}33$ (3D-Ising). Oberhalb $T_C$ paramagnetisch, $\\chi\\propto 1/(T-T_C)$ (Curie-Weiss).<br>$$\\boxed{M\\propto (T_C-T)^{\\beta},\\ \\beta_{MF}=1/2}$$<br><em>Quelle:</em> Kittel, Introduction to Solid State Physics, 8. ed. (Wiley 2005), §12; Goldenfeld, Lectures on Phase Transitions and the RG (Addison-Wesley 1992), §3.'
                 }
             ],
             // L3
@@ -209,6 +339,66 @@
                     q: 'Quanten-Tunneleffekt: Wahrscheinlichkeit, dass ein Elektron durch eine Rechteckbarriere ($V=10\\,\\text{eV}$, Breite $a=0{,}5\\,\\text{nm}$) tunnelt mit $E=5\\,\\text{eV}$. ($\\hbar=1{,}055\\cdot 10^{-34}$, $m_e=9{,}11\\cdot 10^{-31}$).',
                     h: 'Näherung: $T\\approx \\exp(-2\\kappa a)$ mit $\\kappa=\\sqrt{2m(V-E)}/\\hbar$.',
                     s: '$V-E=5\\,\\text{eV}=8\\cdot 10^{-19}\\,\\text{J}$.<br>$\\kappa=\\sqrt{2\\cdot 9{,}11\\cdot 10^{-31}\\cdot 8\\cdot 10^{-19}}/1{,}055\\cdot 10^{-34}=\\sqrt{1{,}458\\cdot 10^{-48}}/1{,}055\\cdot 10^{-34}\\approx 1{,}21\\cdot 10^{-24}/1{,}055\\cdot 10^{-34}\\approx 1{,}15\\cdot 10^{10}\\,\\text{m}^{-1}$.<br>$2\\kappa a = 2\\cdot 1{,}15\\cdot 10^{10}\\cdot 5\\cdot 10^{-10}=11{,}5$.<br>$T\\approx e^{-11{,}5}\\approx 1{,}0\\cdot 10^{-5}$.<br>$$\\boxed{T\\approx 10^{-5}}$$ Stark abstands-/höhenabhängig (exponentiell). Basis von Tunneldioden, REM-Mikroskop.'
+                },
+                {
+                    q: 'Lagrange-Funktion eines ebenen mathematischen Pendels (Masse $m$, Laenge $\\ell$, Winkel $\\varphi$). Stelle $L=T-V$ auf und leite die Bewegungsgleichung her.',
+                    h: '$T = \\tfrac12 m\\ell^2\\dot\\varphi^2$, $V = -mg\\ell\\cos\\varphi$. Euler-Lagrange: $\\frac{d}{dt}\\partial_{\\dot\\varphi}L - \\partial_\\varphi L = 0$.',
+                    s: '$L = \\tfrac12 m\\ell^2\\dot\\varphi^2 + mg\\ell\\cos\\varphi$.<br>$\\partial_{\\dot\\varphi}L = m\\ell^2\\dot\\varphi \\Rightarrow \\frac{d}{dt}(\\cdot) = m\\ell^2\\ddot\\varphi$.<br>$\\partial_\\varphi L = -mg\\ell\\sin\\varphi$.<br>Bewegungsgleichung: $m\\ell^2\\ddot\\varphi + mg\\ell\\sin\\varphi = 0 \\Rightarrow \\ddot\\varphi + (g/\\ell)\\sin\\varphi = 0$.<br>Fuer kleine $\\varphi$: $\\omega_0 = \\sqrt{g/\\ell}$.<br>$$\\boxed{\\ddot\\varphi + (g/\\ell)\\sin\\varphi = 0}$$<br><em>Quelle:</em> Goldstein/Poole/Safko, Classical Mechanics, 3. ed. (Pearson 2002), §1.4-1.6.'
+                },
+                {
+                    q: 'Hamiltonscher Formalismus: Stelle fuer einen harmonischen Oszillator ($H = p^2/(2m) + \\tfrac12 k x^2$) die Hamilton-Gleichungen auf und zeige, dass sie auf $\\ddot x + \\omega_0^2 x = 0$ fuehren.',
+                    h: '$\\dot x = \\partial H/\\partial p$, $\\dot p = -\\partial H/\\partial x$.',
+                    s: '$\\dot x = p/m$, $\\dot p = -kx$.<br>Differenzieren: $\\ddot x = \\dot p/m = -kx/m \\Rightarrow \\ddot x + (k/m)x = 0$.<br>Mit $\\omega_0^2 = k/m$: $\\ddot x + \\omega_0^2 x = 0$, identisch zur Newton-Form.<br>$$\\boxed{\\dot x = p/m,\\ \\dot p = -kx}$$<br><em>Quelle:</em> Goldstein/Poole/Safko, Classical Mechanics, 3. ed. (Pearson 2002), §8.1.'
+                },
+                {
+                    q: 'Skin-Effekt: Eindringtiefe $\\delta$ in Kupfer bei $f=50\\,\\text{Hz}$ und bei $f=1\\,\\text{MHz}$. ($\\sigma=5{,}96\\cdot 10^7\\,\\text{S/m}$, $\\mu_r\\approx 1$).',
+                    h: '$\\delta = \\sqrt{2/(\\omega\\mu\\sigma)} = 1/\\sqrt{\\pi f\\mu\\sigma}$, mit $\\mu=\\mu_0$.',
+                    s: '$\\delta = 1/\\sqrt{\\pi f \\cdot 4\\pi\\cdot 10^{-7}\\cdot 5{,}96\\cdot 10^7}$.<br>Bei $f=50\\,\\text{Hz}$: $\\delta = 1/\\sqrt{50\\cdot \\pi^2\\cdot 4\\cdot 10^{-7}\\cdot 5{,}96\\cdot 10^7}=1/\\sqrt{1{,}176\\cdot 10^3}\\approx 9{,}3\\,\\text{mm}$.<br>Bei $f=1\\,\\text{MHz}$: $\\delta\\approx 65\\,\\mu\\text{m}$.<br>$$\\boxed{\\delta_{50\\,\\text{Hz}}\\approx 9{,}3\\,\\text{mm};\\ \\delta_{1\\,\\text{MHz}}\\approx 65\\,\\mu\\text{m}}$$<br><em>Quelle:</em> Jackson, Classical Electrodynamics, 3. ed. (Wiley 1998), §5.18 / §8.1.'
+                },
+                {
+                    q: 'Poynting-Vektor: Eine ebene em-Welle mit $E_0=100\\,\\text{V/m}$ im Vakuum. Berechne die zeitlich gemittelte Energieflussdichte $\\langle S\\rangle$.',
+                    h: '$\\langle S\\rangle = \\tfrac12 \\varepsilon_0 c E_0^2$.',
+                    s: '$\\langle S\\rangle = 0{,}5\\cdot 8{,}85\\cdot 10^{-12}\\cdot 3\\cdot 10^8\\cdot 10^4 = 1{,}33\\cdot 10^1\\,\\text{W/m}^2\\approx 13{,}3\\,\\text{W/m}^2$.<br>$$\\boxed{\\langle S\\rangle\\approx 13{,}3\\,\\text{W/m}^2}$$<br><em>Quelle:</em> Jackson, Classical Electrodynamics, 3. ed. (Wiley 1998), §6.7; Poynting, Phil. Trans. R. Soc. 175 (1884).'
+                },
+                {
+                    q: 'Compton-Streuung: Ein Roentgenphoton ($\\lambda=0{,}1\\,\\text{nm}$) trifft ein ruhendes Elektron und wird unter $\\theta=90°$ gestreut. Berechne die Wellenlaengenverschiebung.',
+                    h: '$\\Delta\\lambda = \\lambda_C (1-\\cos\\theta)$, mit $\\lambda_C = h/(m_e c) \\approx 2{,}43\\,\\text{pm}$.',
+                    s: '$\\Delta\\lambda = 2{,}43\\,\\text{pm}\\cdot (1-0) = 2{,}43\\,\\text{pm}$.<br>$\\lambda\\u2019 = 100 + 2{,}43 \\approx 102{,}43\\,\\text{pm}$.<br>$$\\boxed{\\Delta\\lambda\\approx 2{,}43\\,\\text{pm}}$$<br><em>Quelle:</em> Compton, Phys. Rev. 21 (1923) 483; Demtroeder, Experimentalphysik 3, 5. Aufl. (Springer 2016), §3.1.6.'
+                },
+                {
+                    q: 'Spezielle Relativitaet: Eine Rakete bewegt sich mit $v=0{,}9c$ relativ zur Erde. Eine Stange auf der Rakete hat Eigenlaenge $L_0=10\\,\\text{m}$. Welche Laenge $L$ misst der Erdbeobachter?',
+                    h: 'Laengenkontraktion: $L = L_0/\\gamma = L_0\\sqrt{1-(v/c)^2}$.',
+                    s: '$\\gamma = 1/\\sqrt{1-0{,}81} = 1/\\sqrt{0{,}19}\\approx 2{,}294$.<br>$L = 10/2{,}294\\approx 4{,}36\\,\\text{m}$.<br>$$\\boxed{L\\approx 4{,}36\\,\\text{m}}$$<br><em>Quelle:</em> Einstein, Annalen der Physik 17 (1905) 891; Demtroeder, Experimentalphysik 1, 9. Aufl. (Springer 2021), §3.6.4.'
+                },
+                {
+                    q: 'Energie-Impuls-Beziehung: Ein Proton hat Impuls $p=1\\,\\text{GeV}/c$. Berechne Gesamtenergie und kinetische Energie ($m_p c^2 = 938{,}3\\,\\text{MeV}$).',
+                    h: '$E^2 = (pc)^2 + (mc^2)^2$, $E_{kin} = E - mc^2$.',
+                    s: '$E = \\sqrt{1000^2 + 938{,}3^2}\\,\\text{MeV} = \\sqrt{10^6 + 8{,}80\\cdot 10^5}\\,\\text{MeV}=\\sqrt{1{,}88\\cdot 10^6}\\approx 1371\\,\\text{MeV}$.<br>$E_{kin}\\approx 1371 - 938{,}3 \\approx 433\\,\\text{MeV}$.<br>$$\\boxed{E\\approx 1{,}37\\,\\text{GeV},\\ E_{kin}\\approx 433\\,\\text{MeV}}$$<br><em>Quelle:</em> Demtroeder, Experimentalphysik 1, 9. Aufl. (Springer 2021), §3.7; Particle Data Group, Review of Particle Physics 2024.'
+                },
+                {
+                    q: 'Teilchen im unendlich tiefen Potentialtopf der Breite $L=1\\,\\text{nm}$. Berechne die Energie des Grundzustands fuer ein Elektron in eV.',
+                    h: '$E_n = n^2 h^2/(8 m L^2)$. Grundzustand $n=1$.',
+                    s: '$E_1 = (6{,}626\\cdot 10^{-34})^2/(8\\cdot 9{,}11\\cdot 10^{-31}\\cdot 10^{-18}) = 4{,}39\\cdot 10^{-67}/7{,}29\\cdot 10^{-48}\\approx 6{,}02\\cdot 10^{-20}\\,\\text{J}\\approx 0{,}376\\,\\text{eV}$.<br>$$\\boxed{E_1\\approx 0{,}38\\,\\text{eV}}$$<br><em>Quelle:</em> Demtroeder, Experimentalphysik 3, 5. Aufl. (Springer 2016), §4.2.4.'
+                },
+                {
+                    q: 'Quantenmechanischer harmonischer Oszillator: Energieeigenwerte fuer Frequenz $\\omega = 10^{14}\\,\\text{rad/s}$. Berechne Nullpunktsenergie und Abstand zwischen Niveaus in eV.',
+                    h: '$E_n = \\hbar\\omega(n+\\tfrac12)$. $\\Delta E = \\hbar\\omega$. Nullpunkt: $n=0$.',
+                    s: '$\\hbar\\omega = 1{,}055\\cdot 10^{-34}\\cdot 10^{14} = 1{,}055\\cdot 10^{-20}\\,\\text{J}\\approx 0{,}066\\,\\text{eV}$.<br>Nullpunkt: $E_0 = 0{,}033\\,\\text{eV}$. Abstand: $\\Delta E\\approx 0{,}066\\,\\text{eV}$.<br>$$\\boxed{E_0\\approx 33\\,\\text{meV},\\ \\Delta E\\approx 66\\,\\text{meV}}$$<br><em>Quelle:</em> Demtroeder, Experimentalphysik 3, 5. Aufl. (Springer 2016), §4.3; Griffiths, Quantum Mechanics, 3. ed. (Cambridge 2018), §2.3.'
+                },
+                {
+                    q: 'Bohr-Modell: Berechne die Wellenlaenge der H$_\\alpha$-Linie (Balmer-Serie, $n_2=3\\to n_1=2$). Rydberg-Konstante $R_\\infty = 1{,}097\\cdot 10^7\\,\\text{m}^{-1}$.',
+                    h: '$1/\\lambda = R_\\infty(1/n_1^2 - 1/n_2^2)$.',
+                    s: '$1/\\lambda = 1{,}097\\cdot 10^7\\cdot (1/4 - 1/9) = 1{,}097\\cdot 10^7\\cdot 5/36 \\approx 1{,}524\\cdot 10^6\\,\\text{m}^{-1}$.<br>$\\lambda \\approx 656{,}3\\,\\text{nm}$ (rot).<br>$$\\boxed{\\lambda_{H\\alpha}\\approx 656\\,\\text{nm}}$$<br><em>Quelle:</em> Bohr, Phil. Mag. 26 (1913); Demtroeder, Experimentalphysik 3, 5. Aufl. (Springer 2016), §3.4.'
+                },
+                {
+                    q: 'Bose-Einstein-Kondensation: Bei welcher kritischen Temperatur $T_c$ kondensiert ein ideales Bose-Gas mit Teilchendichte $n = 10^{19}\\,\\text{m}^{-3}$ (atomare Masse $m=1{,}44\\cdot 10^{-25}\\,\\text{kg}$, Rb-87)?',
+                    h: '$T_c = \\frac{2\\pi\\hbar^2}{m k_B}\\left(\\frac{n}{\\zeta(3/2)}\\right)^{2/3}$, $\\zeta(3/2)\\approx 2{,}612$.',
+                    s: '$(n/2{,}612)^{2/3} = (3{,}83\\cdot 10^{18})^{2/3}\\approx 2{,}43\\cdot 10^{12}\\,\\text{m}^{-2}$.<br>$2\\pi\\hbar^2/(mk_B) = 2\\pi(1{,}055\\cdot 10^{-34})^2/(1{,}44\\cdot 10^{-25}\\cdot 1{,}38\\cdot 10^{-23})\\approx 3{,}51\\cdot 10^{-20}\\,\\text{m}^2\\text{K}$.<br>$T_c \\approx 3{,}51\\cdot 10^{-20}\\cdot 2{,}43\\cdot 10^{12}\\approx 8{,}5\\cdot 10^{-8}\\,\\text{K}\\approx 85\\,\\text{nK}$.<br>$$\\boxed{T_c\\approx 85\\,\\text{nK}}$$<br><em>Quelle:</em> Pethick & Smith, Bose-Einstein Condensation in Dilute Gases, 2. ed. (Cambridge 2008), §2.2; Anderson et al., Science 269 (1995) 198 (erstes BEC Rb-87 bei $\\sim 170\\,\\text{nK}$).'
+                },
+                {
+                    q: 'Halbleiter-Bandluecke: In intrinsischem Silizium ($E_g = 1{,}12\\,\\text{eV}$ bei $T=300\\,\\text{K}$) ist die Ladungstraegerdichte naeherungsweise $n_i\\propto T^{3/2}e^{-E_g/(2k_B T)}$. Um wieviel waechst $n_i$ bei Erhitzen von $300\\,\\text{K}$ auf $400\\,\\text{K}$ (Faktorabschaetzung, $T^{3/2}$ vernachlaessigen)?',
+                    h: 'Verhaeltnis: $n_i(400)/n_i(300)\\approx \\exp\\!\\left[\\tfrac{E_g}{2k_B}\\left(\\tfrac{1}{300}-\\tfrac{1}{400}\\right)\\right]$.',
+                    s: '$E_g/(2k_B) = 1{,}12\\,\\text{eV}/(2\\cdot 8{,}617\\cdot 10^{-5}\\,\\text{eV/K})\\approx 6499\\,\\text{K}$.<br>$1/300 - 1/400 = (400-300)/(300\\cdot 400) = 1/1200\\approx 8{,}33\\cdot 10^{-4}\\,\\text{K}^{-1}$.<br>Exponent: $6499\\cdot 8{,}33\\cdot 10^{-4}\\approx 5{,}42$.<br>Verhaeltnis: $e^{5{,}42}\\approx 226$.<br>$$\\boxed{n_i(400\\,\\text{K})/n_i(300\\,\\text{K})\\approx 2\\cdot 10^2}$$ Mit $T^{3/2}$-Faktor leicht groesser (Faktor 1{,}54).<br><em>Quelle:</em> Kittel, Introduction to Solid State Physics, 8. ed. (Wiley 2005), §8; Sze & Ng, Physics of Semiconductor Devices, 3. ed. (Wiley 2007), §1.5.4.'
                 }
             ]
         ]
