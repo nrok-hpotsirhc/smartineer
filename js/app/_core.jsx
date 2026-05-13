@@ -551,7 +551,16 @@ function useProgress() {
     const isSolved = useCallback((catId, lvl, idx) =>
         !!progress[`${catId}|${lvl}|${idx}`], [progress]);
     const reset = useCallback(() => persist({}), [persist]);
-    return { progress, isSolved, setSolved, reset };
+    // P-UI-RESET-SCOPED (v104): Loesche alle "gelöst"-Eintraege einer einzelnen
+    // Kategorie. Andere Kategorien bleiben unangetastet. Key-Schema "<catId>|<lvl>|<idx>".
+    const resetCategory = useCallback((catId) => {
+        if (!catId) return;
+        const prefix = `${catId}|`;
+        const next = {};
+        Object.keys(progress).forEach(k => { if (k.indexOf(prefix) !== 0) next[k] = progress[k]; });
+        persist(next);
+    }, [progress, persist]);
+    return { progress, isSolved, setSolved, reset, resetCategory };
 }
 
 function useSchuelerProgress() {
@@ -571,7 +580,23 @@ function useSchuelerProgress() {
     }, [progress, persist]);
     const isSolved = useCallback((taskKey) => !!progress[taskKey], [progress]);
     const reset = useCallback(() => persist({}), [persist]);
-    return { progress, isSolved, setSolved, reset };
+    // P-UI-RESET-SCOPED (v104): Reset auf Fach- bzw. Klassen-Ebene. Schluessel-
+    // Schema "<klassId>.<subjId>|<qid-or-idx>" (siehe studentTaskKey in schueler.jsx).
+    const resetSubject = useCallback((klassId, subjId) => {
+        if (!klassId || !subjId) return;
+        const prefix = `${klassId}.${subjId}|`;
+        const next = {};
+        Object.keys(progress).forEach(k => { if (k.indexOf(prefix) !== 0) next[k] = progress[k]; });
+        persist(next);
+    }, [progress, persist]);
+    const resetClass = useCallback((klassId) => {
+        if (!klassId) return;
+        const prefix = `${klassId}.`;
+        const next = {};
+        Object.keys(progress).forEach(k => { if (k.indexOf(prefix) !== 0) next[k] = progress[k]; });
+        persist(next);
+    }, [progress, persist]);
+    return { progress, isSolved, setSolved, reset, resetSubject, resetClass };
 }
 
 function useKaTeX(deps) {

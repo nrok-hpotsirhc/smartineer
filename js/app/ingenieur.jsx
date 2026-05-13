@@ -11,7 +11,8 @@ function Ingenieur({
     initialLevel, initialIdx, consumeInitialPos,
     subview, setSubview,
     schulungenGetInitialOpen,
-    onGoToOptionen
+    onGoToOptionen,
+    progressMap, resetCategory
 }) {
     const tabs = [
         { id: 'training',   label: 'Training' },
@@ -47,6 +48,8 @@ function Ingenieur({
                     initialLevel={initialLevel}
                     initialIdx={initialIdx}
                     consumeInitialPos={consumeInitialPos}
+                    progressMap={progressMap}
+                    resetCategory={resetCategory}
                 />
             )}
             {subview === 'cheatsheet' && (

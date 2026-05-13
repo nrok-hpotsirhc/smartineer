@@ -586,7 +586,8 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
 }
 
 function Training({ data, order, isSolved, setSolved, currentCat, setCurrentCat,
-                    srsState, srsGradeMany, initialLevel, initialIdx, consumeInitialPos }) {
+                    srsState, srsGradeMany, initialLevel, initialIdx, consumeInitialPos,
+                    progressMap, resetCategory }) {
     const [level, setLevel] = useState(0);
     const [idx, setIdx] = useState(0);
     useEffect(() => {
@@ -625,7 +626,27 @@ function Training({ data, order, isSolved, setSolved, currentCat, setCurrentCat,
             <div className="w-full md:w-3/4">
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 min-h-[600px]">
                     <div ref={titleRef} className="mb-6">
-                        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{cat ? cat.name : 'Kategorie wählen'}</h2>
+                        <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
+                            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">{cat ? cat.name : 'Kategorie wählen'}</h2>
+                            {cat && resetCategory && (() => {
+                                // P-UI-RESET-SCOPED (v104): Setze alle "gelöst"-Marker dieser Kategorie zurueck.
+                                const catSolved = progressMap
+                                    ? Object.keys(progressMap).filter(k => k.indexOf(`${cat.id}|`) === 0).length
+                                    : 0;
+                                if (!catSolved) return null;
+                                return (
+                                    <button onClick={() => {
+                                        if (window.confirm(`Fortschritt der Kategorie "${cat.name}" wirklich zurücksetzen? (${catSolved} gelöste Aufgaben)`)) {
+                                            resetCategory(cat.id);
+                                        }
+                                    }}
+                                        className="px-3 py-2 text-sm bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg font-bold transition shrink-0"
+                                        title={`Setzt ${catSolved} gelöste Aufgaben in ${cat.name} zurück`}>
+                                        Kategorie zurücksetzen ({catSolved})
+                                    </button>
+                                );
+                            })()}
+                        </div>
                         <p className="text-slate-600">{cat ? cat.desc : 'Wähle links ein Thema aus.'}</p>
                     </div>
                     {cat && (

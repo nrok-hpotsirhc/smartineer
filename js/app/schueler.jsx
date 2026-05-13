@@ -236,8 +236,17 @@ function Schueler({ visibleClassIds }) {
     }
 
     const isMittelstufeClass = (klassId) => /^k(?:[5-9]|10)$/.test(klassId || '');
-    const hasSchuelerTraining = (klassId, cfg) => !!(cfg && cfg.mode === 'pool' && isMittelstufeClass(klassId)
-        && Array.isArray(cfg.pool) && cfg.pool.some(it => it && (it.f || it.s)));
+    // P-UI-SCHUELER-TRAINING-K1-K4 (v104): Training ist seit v104 fuer alle Klassen
+    // verfuegbar. Pool-Faecher (K3-K10) brauchen mindestens ein Item; generierte
+    // Faecher (K1/K2 Mathe) bauen die Trainings-Batch zur Laufzeit. Formel/Loesung
+    // bleiben optional — Aufgabe + "Als geloest markieren" reichen aus.
+    const hasSchuelerTraining = (klassId, cfg) => {
+        if (!cfg) return false;
+        if (cfg.mode === 'pool') return Array.isArray(cfg.pool) && cfg.pool.length > 0;
+        if (cfg.mode === 'generated') return typeof cfg.gen === 'function';
+        return false;
+    };
+    const TRAINING_GENERATED_BATCH = 20; // K1/K2: Anzahl frischer Aufgaben pro Trainings-Start
     const studentTaskKey = (klassId, subjId, item, itemIdx) => {
         const qid = stableQid({ q: item && item.q, a: item && item.a });
         return `${klassId}.${subjId}|${qid || itemIdx}`;
@@ -544,7 +553,21 @@ function Schueler({ visibleClassIds }) {
         const key = `${klassId}.${subjId}`;
         const cfg = SCH.content[key];
         if (!hasSchuelerTraining(klassId, cfg)) return;
-        const pool = poolForSection(cfg, sectionId, subjId, klassId);
+        let pool = [];
+        if (cfg.mode === 'generated') {
+            // K1/K2: frische Batch generieren. Dedupliziere ueber den Frage-Stem,
+            // damit die kleinen Zahlraeume nicht zwei mal die exakt gleiche Aufgabe
+            // liefern.
+            const seen = new Set();
+            for (let i = 0; i < TRAINING_GENERATED_BATCH * 3 && pool.length < TRAINING_GENERATED_BATCH; i++) {
+                const it = cfg.gen();
+                if (!it || !it.q || seen.has(it.q)) continue;
+                seen.add(it.q);
+                pool.push(it);
+            }
+        } else {
+            pool = poolForSection(cfg, sectionId, subjId, klassId);
+        }
         if (!pool.length) return;
         setKlass(klassId); setSubject(subjId);
         setItems(pool.slice());
@@ -699,12 +722,31 @@ function Schueler({ visibleClassIds }) {
     if (stage === 'subjects') {
         const klassObj = SCH.classes.find(c => c.id === klass);
         if (!klassObj) { setStage('classes'); return null; }
+        // P-UI-RESET-SCOPED (v104): Zaehle geloeste Aufgaben je Fach fuer die
+        // Anzeige neben dem Reset-Button und fuer den Klassen-Gesamtwert.
+        const classSolvedCount = Object.keys(schuelerProgress.progress || {})
+            .filter(k => k.indexOf(`${klass}.`) === 0).length;
+        const handleResetClass = () => {
+            if (!classSolvedCount) return;
+            if (window.confirm(`Fortschritt für ${klassObj.label} wirklich zurücksetzen? (${classSolvedCount} gelöste Aufgaben)`)) {
+                schuelerProgress.resetClass(klass);
+            }
+        };
         return (
             <section className="view-fade">
                 <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
                     <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{klassObj.label} — Fach wählen</h1>
-                    <button onClick={() => setStage('classes')}
-                        className="px-4 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition">← Klassenübersicht</button>
+                    <div className="flex flex-wrap gap-2">
+                        {classSolvedCount > 0 && (
+                            <button onClick={handleResetClass}
+                                className="px-3 py-2 text-sm bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg font-bold transition"
+                                title={`Setzt alle gelösten Aufgaben in ${klassObj.label} zurück`}>
+                                Klasse zurücksetzen ({classSolvedCount})
+                            </button>
+                        )}
+                        <button onClick={() => setStage('classes')}
+                            className="px-4 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition">← Klassenübersicht</button>
+                    </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {klassObj.subjects.map(s => {
@@ -712,12 +754,29 @@ function Schueler({ visibleClassIds }) {
                         const ready = cfg && cfg.mode !== 'stub';
                         const trainingReady = hasSchuelerTraining(klass, cfg);
                         const poolCount = cfg && Array.isArray(cfg.pool) ? cfg.pool.length : null;
+                        const subjSolvedCount = Object.keys(schuelerProgress.progress || {})
+                            .filter(k => k.indexOf(`${klass}.${s}|`) === 0).length;
+                        const handleResetSubject = (e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Fortschritt für ${SCH.subjects[s].label} (${klassObj.label}) wirklich zurücksetzen? (${subjSolvedCount} gelöste Aufgaben)`)) {
+                                schuelerProgress.resetSubject(klass, s);
+                            }
+                        };
                         return (
                             <div key={s}
                                 className={`text-left bg-white rounded-2xl border border-slate-200 p-6 transition ${ready
                                     ? 'hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer'
                                     : 'opacity-60 cursor-not-allowed'}`}>
-                                <h3 className="text-xl font-bold text-slate-800 mb-2">{SCH.subjects[s].label}</h3>
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                    <h3 className="text-xl font-bold text-slate-800">{SCH.subjects[s].label}</h3>
+                                    {ready && subjSolvedCount > 0 && (
+                                        <button onClick={handleResetSubject}
+                                            className="text-xs px-2 py-1 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold transition shrink-0"
+                                            title={`Setzt ${subjSolvedCount} gelöste Aufgaben zurück`}>
+                                            Reset ({subjSolvedCount})
+                                        </button>
+                                    )}
+                                </div>
                                 <p className="text-sm text-slate-600 mb-3">{ready && cfg.note ? cfg.note : 'In Vorbereitung. Bald verfügbar.'}</p>
                                 {ready ? (
                                     <>

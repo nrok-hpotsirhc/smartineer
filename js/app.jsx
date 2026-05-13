@@ -69,7 +69,7 @@ function App() {
     // P-UI-INTERESTS (v85): Multi-Select-Picker fuer Kategorien/Klassen.
     const [interestPicker, setInterestPicker] = useState(null); // null | 'ingenieur' | 'schueler'
     const [currentCat, setCurrentCat] = useState(allOrder[0] || null);
-    const { isSolved, setSolved, reset } = useProgress();
+    const { progress: progressMap, isSolved, setSolved, reset, resetCategory } = useProgress();
     // P-LP-SRS-OPEN: SRS-State wird im App-Root gehalten und an Training, Dashboard
     // sowie Schulungen durchgereicht, damit alle Tracks denselben SRS-Storage sehen.
     const { state: srsState, gradeMany: srsGradeMany, reset: resetSRS } = useSRSState();
@@ -305,6 +305,8 @@ function App() {
                             pendingSchulungOpenRef.current = null;
                             return v;
                         }}
+                        progressMap={progressMap}
+                        resetCategory={resetCategory}
                         onGoToOptionen={() => setView('optionen')} />
                 )}
                 {view === 'schueler' && (
@@ -327,6 +329,8 @@ function App() {
                             pendingSchulungOpenRef.current = null;
                             return v;
                         }}
+                        progressMap={progressMap}
+                        resetCategory={resetCategory}
                         onGoToOptionen={() => setView('optionen')} />
                 )}
                 {view === 'optionen' && (
