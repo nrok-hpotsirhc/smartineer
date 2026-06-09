@@ -74,7 +74,31 @@
             &bull; Auf <code>BOOL</code>: <code>NOT</code> ist logisch; auf <code>WORD</code>: <code>NOT</code> ist bitweise (1er-Komplement).<br>
             &bull; <code>INT</code>-Überlauf wickelt modulo $2^{16}$ um (Implementation-defined kann sich unterscheiden).<br>
             &bull; <code>MOD</code> auf negative Operanden: Vorzeichen folgt herstellerabhängig dem Dividenden (CODESYS) bzw. ist genormt durch IEC ($a\\,\\text{MOD}\\,b$ = Rest mit Vorzeichen von $a$).<br>
-            &bull; Floating-Compare mit <code>=</code> ist gefährlich &mdash; immer mit Toleranz $\\varepsilon$.<br>
+            &bull; Floating-Compare mit <code>=</code> ist gefährlich &mdash; immer mit Toleranz $\\varepsilon$.<br><br>
+
+            <strong>Funktionale Sicherheit (IEC 61508 / ISO 13849)</strong>
+            <table class="text-xs my-2"><tbody>
+                <tr><td class="pr-3">SIL</td><td class="pr-3">PFD<sub>avg</sub> (low demand)</td><td>PFH [1/h] (high demand)</td></tr>
+                <tr><td>1</td><td>$[10^{-2},10^{-1})$</td><td>$[10^{-6},10^{-5})$</td></tr>
+                <tr><td>2</td><td>$[10^{-3},10^{-2})$</td><td>$[10^{-7},10^{-6})$</td></tr>
+                <tr><td>3</td><td>$[10^{-4},10^{-3})$</td><td>$[10^{-8},10^{-7})$</td></tr>
+            </tbody></table>
+            $\\mathrm{SFF}=\\dfrac{\\lambda_S+\\lambda_{DD}}{\\lambda_S+\\lambda_{DD}+\\lambda_{DU}}$, $\\mathrm{DC}=\\dfrac{\\sum\\lambda_{DD}}{\\sum\\lambda_D}$<br>
+            1oo1: $\\mathrm{PFD_{avg}}\\approx\\lambda_{DU}\\,T_1/2$; PL d $\\leftrightarrow$ SIL 2, PL e $\\leftrightarrow$ SIL 3<br>
+            MTTF<sub>d</sub>: low 3-10 a, medium 10-30 a, high 30-100 a; DC: none&lt;60% &le; low&lt;90% &le; medium&lt;99% &le; high<br><br>
+
+            <strong>Echtzeit / Diskretisierung</strong><br>
+            Reaktionszeit (Worst Case): $T_\\text{react}\\le T_\\text{filter}+2\\,T_\\text{cycle}+T_\\text{out}$<br>
+            Auslastung: $U=\\sum C_i/T_i\\le 1$ (notwendig)<br>
+            Tustin: $s\\leftarrow\\dfrac{2}{T_a}\\dfrac{z-1}{z+1}$; PT1/EMA: $y_k=y_{k-1}+\\alpha(x_k-y_{k-1})$, $\\alpha=\\dfrac{T_a}{\\tau+T_a}$<br>
+            Q15-Festkomma: $\\text{Wert}=\\text{int}/2^{15}$, Bereich $[-1,\\,1-2^{-15}]$<br><br>
+
+            <strong>Kommunikation</strong><br>
+            Modbus RTU: seriell + CRC-16 (Poly 0xA001); Modbus TCP: Port 502 + MBAP, kein CRC<br>
+            PROFINET RT (SW-priorisiert, ms) / IRT (HW-geplant, &le;250 µs, Jitter &lt;1 µs)<br>
+            CANopen: PDO (schnell, unbestätigt) / SDO (bestätigt, Objektverzeichnis)<br>
+            OPC UA Security: None &lt; Sign &lt; SignAndEncrypt; MQTT QoS 0/1/2 = höchstens/mindestens/genau einmal<br>
+            EtherCAT DC: $\\le 100$ ns Slave-Synchronität
         `,
 
         levels: [
@@ -207,6 +231,126 @@
                     q: 'Was unterscheidet einen ENUMERATED-Typ <code>TYPE eMode : (IDLE, RUN, STOP); END_TYPE</code> von einer Reihe <code>VAR CONSTANT IDLE := 0; RUN := 1; ... END_VAR</code>? Nenne zwei Vorteile.',
                     h: 'Stichworte: Typsicherheit, Lesbarkeit, Wertebereich-Prüfung.',
                     s: 'Vorteile des <code>ENUM</code>:<ul><li><strong>Typsicherheit</strong>: ein Parameter <code>mode : eMode</code> akzeptiert nur Werte aus <code>{IDLE, RUN, STOP}</code>; Zuweisung einer "fremden" Konstante ist Compile-Fehler. CONSTANT-Integers haben keinerlei Schutz vor falscher Belegung.</li><li><strong>Lesbarkeit / Refactoring</strong>: Compiler/IDE listen die zulässigen Werte automatisch; bei Erweiterung des Enums werden alle CASE-Verzweigungen vom Compiler auf Vollständigkeit geprüft (vendor-abhängig, z.B. CODESYS-Warning bei unvollständigem CASE).</li></ul>(Ed. 3 erlaubt zudem benannte Werte: <code>(IDLE := 10, RUN := 20)</code>.)<br>$\\boxed{\\text{ENUM = typisierter, geschlossener Wertebereich}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.4.4.3 Enumerated data types.'
+                },
+                {
+                    q: 'Wie viele Bits belegt der Datentyp <code>BOOL</code> nach IEC 61131-3, und welche Werte kann er annehmen? Wie viel Speicher belegt er in der Praxis?',
+                    h: '<code>BOOL</code> trägt logisch genau ein Bit.',
+                    s: 'Ein <code>BOOL</code> trägt logisch 1 Bit mit den Werten <code>FALSE</code> (0) und <code>TRUE</code> (1). In der Praxis allokieren viele Targets aus Adressierungs-/Alignmentgründen ein ganzes Byte pro einzelner <code>BOOL</code>-Variable; nur in gepackten Strukturen (<code>ARRAY OF BOOL</code> bzw. Bit-in-WORD) wird tatsächlich bitweise gespeichert.<br>$\\boxed{\\text{BOOL: 1 bit logisch, FALSE/TRUE}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) Tab. 10 elementare Datentypen.'
+                },
+                {
+                    q: 'Welche Genauigkeit und welchen ungefähren Wertebereich hat der Datentyp <code>REAL</code> (IEEE-754 single)? Warum ist ein exakter Gleichheitsvergleich problematisch?',
+                    h: '32 bit: 1 Vorzeichen, 8 Exponent, 23 Mantisse.',
+                    s: '<code>REAL</code> ist IEEE-754 single (32 bit): ca. <strong>7 signifikante Dezimalstellen</strong>, Bereich etwa $\\pm 1{,}18\\cdot 10^{-38}\\dots\\pm 3{,}4\\cdot 10^{38}$. Die Maschinengenauigkeit ist $\\varepsilon_\\text{m}\\approx 1{,}19\\cdot 10^{-7}$.<br>Viele Dezimalbrüche (z.B. 0,1) sind binär nicht endlich darstellbar; deshalb scheitert <code>IF x = 0.1</code> häufig — Toleranzvergleich <code>ABS(x-0.1) &lt; eps</code> verwenden.<br>$\\boxed{\\text{REAL: 32 bit, } \\approx 7 \\text{ Dezimalstellen}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) Tab. 10; IEEE 754-2019 §3.'
+                },
+                {
+                    q: 'Welchen Wertebereich hat ein <code>DINT</code> nach IEC 61131-3?',
+                    h: '<code>DINT</code> ist 32 bit signed (Zweierkomplement).',
+                    s: 'Bereich: $-2^{31}\\ldots 2^{31}-1 = -2\\,147\\,483\\,648\\ldots 2\\,147\\,483\\,647$.<br>$\\boxed{\\text{DINT}\\in[-2^{31},\\,2^{31}-1]}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) Tab. 10 elementare Datentypen.'
+                },
+                {
+                    q: 'Ein <code>UINT</code> hat den Wert <code>65535</code>. Was ergibt <code>x := x + 1;</code>?',
+                    h: '<code>UINT</code> ist 16 bit unsigned: $0 \\ldots 65535$.',
+                    s: 'Bei $65535+1$ läuft der vorzeichenlose 16-bit-Wert über und wickelt modulo $2^{16}$ auf <strong>0</strong> um.<br>$\\boxed{65535+1 \\to 0\\ (\\text{Wrap mod } 2^{16})}$<br>Defensive Programmierung muss den Überlauf selbst prüfen — IEC schreibt keine Exception vor. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) Tab. 10.'
+                },
+                {
+                    q: 'Wie viele Zeichen fasst ein <code>STRING</code> ohne Längenangabe standardmäßig, und wie deklariert man eine kürzere Variante?',
+                    h: 'Default-Kapazität ist herstellerüblich 80 Zeichen; <code>STRING(n)</code> begrenzt sie.',
+                    s: 'Ohne Angabe reserviert ein <code>STRING</code> üblicherweise <strong>80 Zeichen</strong> Nutzlast (plus interne Längen-/Terminierungsbytes). Mit <code>STRING(n)</code> wird die maximale Länge auf $n$ Zeichen festgelegt, z.B. <code>name : STRING(20);</code>.<br>$\\boxed{\\text{Default 80 Zeichen; STRING(n) begrenzt}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.3.3 Zeichenketten.'
+                },
+                {
+                    q: 'Wandle das IEC-TIME-Literal <code>T#1h15m</code> in Millisekunden um.',
+                    h: '$1\\,\\text{h}=3\\,600\\,000\\,\\text{ms}$, $1\\,\\text{min}=60\\,000\\,\\text{ms}$.',
+                    s: '$1\\,\\text{h}=3\\,600\\,000\\,\\text{ms}$; $15\\,\\text{min}=15\\cdot 60\\,000=900\\,000\\,\\text{ms}$. Summe $=4\\,500\\,000\\,\\text{ms}$.<br>$\\boxed{\\text{T\\#1h15m}=4\\,500\\,000\\,\\text{ms}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.2.1.2 Zeitliterale.'
+                },
+                {
+                    q: 'Berechne <code>16#FF XOR 16#0F</code> auf einem <code>BYTE</code> (bitweise).',
+                    h: 'XOR setzt das Ergebnisbit, wenn die Eingangsbits <em>verschieden</em> sind.',
+                    s: '$\\text{1111\\,1111} \\oplus \\text{0000\\,1111} = \\text{1111\\,0000} = \\text{16\\#F0}$.<br>$\\boxed{\\text{16\\#FF XOR 16\\#0F} = \\text{16\\#F0} = 240}$<br>XOR mit $\\text{16\\#FF}$ invertiert alle Bits (1er-Komplement). <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.5.4 bitweise Operatoren.'
+                },
+                {
+                    q: 'Was ergibt <code>17 MOD 5</code> für <code>INT</code>-Operanden?',
+                    h: '<code>MOD</code> liefert den Rest der Ganzzahldivision.',
+                    s: '$17 = 3\\cdot 5 + 2$, also $17 \\bmod 5 = 2$.<br>$\\boxed{\\text{17 MOD 5} = 2}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.5.3 arithmetische Operatoren.'
+                },
+                {
+                    q: 'Welchen Wahrheitswert hat der ST-Ausdruck <code>(5 &gt; 3) AND (2 = 2)</code>?',
+                    h: 'Vergleichsoperatoren liefern <code>BOOL</code>; <code>=</code> ist hier der Vergleich (nicht die Zuweisung).',
+                    s: '$(5>3)=\\text{TRUE}$, $(2=2)=\\text{TRUE}$, $\\text{TRUE} \\land \\text{TRUE} = \\text{TRUE}$.<br>$\\boxed{=\\text{TRUE}}$<br>Beachte: Zuweisung ist <code>:=</code>, Gleichheitsvergleich ist <code>=</code>. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.5.2 Vergleichsoperatoren.'
+                },
+                {
+                    q: 'Was ergibt der ST-Potenzoperator <code>3 ** 3</code>?',
+                    h: '<code>**</code> ist die Potenzierung mit der höchsten Operator-Priorität.',
+                    s: '$3^3 = 27$.<br>$\\boxed{\\text{3 ** 3} = 27}$<br>Das Ergebnis ist je nach Operandentyp <code>REAL</code> (viele Targets rechnen <code>**</code> in Gleitkomma). <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.5 Operatorenpriorität.'
+                },
+                {
+                    q: 'Was liefert <code>NOT 16#00FF</code> auf einem <code>WORD</code> (16 bit)?',
+                    h: 'Auf Bitstring-Typen ist <code>NOT</code> das bitweise 1er-Komplement.',
+                    s: '$\\text{16\\#00FF} = \\text{0000\\,0000\\,1111\\,1111}$. Bitweise invertiert: $\\text{1111\\,1111\\,0000\\,0000} = \\text{16\\#FF00}$.<br>$\\boxed{\\text{NOT 16\\#00FF} = \\text{16\\#FF00}}$<br>Auf <code>BOOL</code> wäre <code>NOT</code> dagegen die logische Negation. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.5.4.'
+                },
+                {
+                    q: 'Wandle das Hexadezimal-Literal <code>16#1A</code> in eine Dezimalzahl um.',
+                    h: '$16\\#1A = 1\\cdot 16 + 10$.',
+                    s: '$1\\cdot 16^1 + A\\cdot 16^0 = 16 + 10 = 26$.<br>$\\boxed{\\text{16\\#1A} = 26}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.2.1.1 Zahlenliterale (typisierte/basierte Literale).'
+                },
+                {
+                    q: 'Wandle das Binär-Literal <code>2#1010</code> in eine Dezimalzahl um.',
+                    h: 'Stellenwerte $8,4,2,1$.',
+                    s: '$1\\cdot 8 + 0\\cdot 4 + 1\\cdot 2 + 0\\cdot 1 = 10$.<br>$\\boxed{\\text{2\\#1010} = 10}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.2.1.1 basierte Literale.'
+                },
+                {
+                    q: 'Worin unterscheiden sich in ST die Operatoren <code>:=</code> und <code>=</code>? Was bedeutet daher <code>a := b = c;</code>?',
+                    h: '<code>:=</code> weist zu, <code>=</code> vergleicht (liefert BOOL).',
+                    s: '<code>:=</code> ist die <strong>Zuweisung</strong>, <code>=</code> der <strong>Gleichheitsvergleich</strong> (Ergebnistyp <code>BOOL</code>). Daher: <code>a := b = c;</code> wertet zuerst <code>b = c</code> aus (TRUE/FALSE) und weist dieses boolesche Ergebnis <code>a</code> zu — <code>a</code> muss also <code>BOOL</code> sein.<br>$\\boxed{\\text{a := (b = c); a ist BOOL}}$<br>Verwechslung mit C (<code>=</code> als Zuweisung) ist eine klassische Fehlerquelle. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §7.3.2 Zuweisung; §6.5.2 Vergleich.'
+                },
+                {
+                    q: 'Im Kontaktplan stehen zwei Schließer <code>A</code> und <code>B</code> in <em>Reihe</em> vor einer Spule <code>Y</code>. Welche Boolesche Verknüpfung ergibt das, und wie lautet das ST-Äquivalent?',
+                    h: 'Kontakte in Reihe = logisches UND.',
+                    s: 'Strom fließt nur, wenn <em>beide</em> Schließer leiten — das ist ein logisches UND.<br>$Y = A \\land B$, ST: <code>Y := A AND B;</code><br>$\\boxed{\\text{Reihe} \\Rightarrow \\text{AND}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §8.3 Ladder Diagram (LD).'
+                },
+                {
+                    q: 'Im Kontaktplan stehen zwei Schließer <code>A</code> und <code>B</code> <em>parallel</em> (Brücke) vor einer Spule <code>Y</code>. Welche Verknüpfung ist das?',
+                    h: 'Parallele Strompfade = logisches ODER.',
+                    s: 'Strom fließt, wenn <em>mindestens einer</em> der parallelen Pfade leitet — logisches ODER.<br>$Y = A \\lor B$, ST: <code>Y := A OR B;</code><br>$\\boxed{\\text{Parallel} \\Rightarrow \\text{OR}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §8.3 Ladder Diagram (LD).'
+                },
+                {
+                    q: 'Was bewirken die KOP-Spulentypen <strong>Set-Spule</strong> <code>-(S)-</code> und <strong>Reset-Spule</strong> <code>-(R)-</code> im Unterschied zur normalen Spule?',
+                    h: 'Set/Reset sind <em>speichernd</em> (latch), die normale Spule folgt dem Sprossenzustand direkt.',
+                    s: 'Die normale Spule <code>-( )-</code> setzt <code>Y</code> in jedem Zyklus auf den aktuellen Sprossenwert (nicht speichernd). <code>-(S)-</code> setzt <code>Y := TRUE</code> und <strong>hält</strong> diesen Zustand, auch wenn die Sprosse wieder FALSE wird; erst eine <code>-(R)-</code>-Spule mit gleichem Operanden setzt <code>Y := FALSE</code>. Set/Reset bilden zusammen ein Flip-Flop.<br>$\\boxed{\\text{-(S)- latcht TRUE, -(R)- latcht FALSE}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §8.3 (Set/Reset coils).'
+                },
+                {
+                    q: 'Beschreibe das Zeitverhalten des Standard-FB <code>TP</code> (Impulsglied). Wann geht <code>Q</code> TRUE und wann wieder FALSE, wenn <code>IN</code> bei $t=0$ steigt und <code>PT = T\\#2s</code> ist?',
+                    h: '<code>TP</code> erzeugt einen Impuls fester Länge <code>PT</code>, unabhängig vom weiteren Verlauf von <code>IN</code>.',
+                    s: 'Die steigende <code>IN</code>-Flanke startet einen Impuls: <code>Q := TRUE</code> für genau <code>PT = 2 s</code>, danach <code>Q := FALSE</code> — <em>unabhängig</em> davon, ob <code>IN</code> während des Impulses bereits abfällt oder HIGH bleibt. Während des laufenden Impulses werden weitere <code>IN</code>-Flanken ignoriert (nicht retriggerbar).<br>$\\boxed{Q\\ \\text{TRUE von } t=0 \\text{ bis } t=2\\,\\text{s}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §5.5.2.5 (TP pulse timer).'
+                },
+                {
+                    q: 'Wie arbeitet der Abwärtszähler <code>CTD</code>? Was bewirken <code>CD</code>, <code>LD</code> und wann ist <code>Q = TRUE</code>?',
+                    h: '<code>CTD</code> zählt von <code>PV</code> herunter; <code>LD</code> lädt <code>CV := PV</code>.',
+                    s: '<code>LD := TRUE</code> lädt <code>CV := PV</code>. Jede positive Flanke an <code>CD</code> dekrementiert <code>CV</code> (bis 0, kein Unterlauf). <code>Q := (CV ≤ 0)</code>, d.h. der Ausgang wird TRUE, sobald heruntergezählt ist.<br>$\\boxed{\\text{CTD: CV von PV abwärts, Q := (CV ≤ 0)}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §5.5.2.4 Counters (CTD).'
+                },
+                {
+                    q: 'Warum muss ein <code>TON</code> vor der Verwendung als <em>Instanz</em> deklariert werden, während eine <code>FUNCTION</code> wie <code>SQRT</code> direkt aufgerufen wird?',
+                    h: 'Stichwort: interner Zustand (ET) über Zyklen.',
+                    s: '<code>TON</code> ist ein <code>FUNCTION_BLOCK</code> mit Instanzdaten (u.a. die abgelaufene Zeit <code>ET</code>), die über Zyklen erhalten bleiben müssen. Jede unabhängige Verzögerung braucht daher einen eigenen Speicherbereich → eigene Instanz (<code>T1 : TON;</code>). <code>SQRT</code> ist eine zustandslose <code>FUNCTION</code>: gleicher Input → gleicher Output, kein Speicher, daher kein Instanzbedarf.<br>$\\boxed{\\text{FB = Instanz mit Zustand; FUN = stateless}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.6.2/§6.6.1.'
+                },
+                {
+                    q: 'Wozu dienen die Deklarationsbereiche <code>VAR_INPUT</code> und <code>VAR_OUTPUT</code> in einem Funktionsbaustein?',
+                    h: 'Schnittstelle des FB nach außen — Eingangs- bzw. Ausgangsparameter.',
+                    s: '<code>VAR_INPUT</code> deklariert die <em>Eingangsparameter</em> (werden beim Aufruf <code>von außen</code> belegt, im FB nur gelesen). <code>VAR_OUTPUT</code> deklariert die <em>Ausgangsparameter</em>, die der FB schreibt und die der Aufrufer nach dem Aufruf liest (<code>fbInst.OutVar</code>). Interne, nach außen unsichtbare Größen liegen in <code>VAR</code>.<br>$\\boxed{\\text{VAR\\_INPUT = rein, VAR\\_OUTPUT = raus}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.5.2 Variablendeklaration.'
+                },
+                {
+                    q: 'Was bewirkt das Schlüsselwort <code>CONSTANT</code> in einer Variablendeklaration, z.B. <code>VAR CONSTANT PI : REAL := 3.14159; END_VAR</code>?',
+                    h: 'Schreibschutz nach Initialisierung.',
+                    s: 'Eine mit <code>CONSTANT</code> deklarierte Variable erhält ihren Wert bei der Initialisierung und ist danach <strong>schreibgeschützt</strong> — jeder Schreibzugriff im Code ist ein Compile-Fehler. Das sichert Festwerte (Kennlinien, Grenzwerte, $\\pi$) gegen versehentliches Überschreiben und erlaubt dem Compiler Optimierungen.<br>$\\boxed{\\text{CONSTANT = read-only nach Init}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.5.2.'
+                },
+                {
+                    q: 'Was liefert <code>SHR(IN := 16#80, N := 1)</code> auf einem <code>BYTE</code> (8 bit)?',
+                    h: '<code>SHR</code> schiebt nach rechts und füllt links mit 0 (logischer Shift).',
+                    s: '$\\text{16\\#80} = \\text{1000\\,0000}$. Rechtsschieben um 1: $\\text{0100\\,0000} = \\text{16\\#40} = 64$.<br>$\\boxed{\\text{SHR(16\\#80, 1)} = \\text{16\\#40} = 64}$<br>Logischer Shift (0-Fill) — keine Vorzeichenerweiterung wie bei arithmetischem Shift. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §5.4.5 Shift-Operatoren.'
+                },
+                {
+                    q: 'Was berechnet die Standard-Funktion <code>SEL(G := g, IN0 := a, IN1 := b)</code> in Abhängigkeit von <code>g : BOOL</code>?',
+                    h: 'Binärer Selektor: ein Eingang wird durchgeschaltet.',
+                    s: '<code>SEL</code> gibt <code>IN0</code> zurück, wenn <code>G = FALSE</code>, und <code>IN1</code>, wenn <code>G = TRUE</code> — ein typisierter Zweifach-Multiplexer.<br>$\\boxed{\\text{SEL} = (G)\\,?\\,\\text{IN1}:\\text{IN0}}$<br>Für mehr als zwei Quellen nutzt man <code>MUX(K, IN0, IN1, ...)</code> mit ganzzahligem Selektor <code>K</code>. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.6.1 Standardfunktionen (selection functions).'
                 }
             ],
 
@@ -306,8 +450,8 @@
                 },
                 {
                     q: 'Berechne mit dem Standard-Funktionsbaustein <code>SCALE</code> (häufig auch <code>NORM_X</code> + <code>SCALE_X</code> bei Siemens) den physikalischen Druckwert in bar für einen 4-20-mA-Sensor (0–10 bar) mit aktuellem ADC-Rohwert $I = 12\\,\\text{mA}$.',
-                    h: 'Lineare Skalierung: $p = p_\\min + \\dfrac{I - I_\\min}{I_\\max - I_\\min}\\,(p_\\max - p_\\min)$.',
-                    s: 'Einsetzen mit $I_\\min = 4\\,\\text{mA}, I_\\max = 20\\,\\text{mA}, p_\\min = 0\\,\\text{bar}, p_\\max = 10\\,\\text{bar}, I = 12\\,\\text{mA}$:<br>$p = 0 + \\dfrac{12 - 4}{20 - 4}\\cdot (10 - 0) = \\dfrac{8}{16}\\cdot 10 = 5{,}00\\,\\text{bar}$.<br>$\\boxed{p = 5{,}00\\,\\text{bar}}$<br><em>Quelle:</em> Berger, Automation mit SIMATIC S7-1500, 5. Aufl. Publicis 2017, §6.3 Analogwertskalierung (NORM_X/SCALE_X).'
+                    h: 'Lineare Skalierung: $p = p_{\\min} + \\dfrac{I - I_{\\min}}{I_{\\max} - I_{\\min}}\\,(p_{\\max} - p_{\\min})$.',
+                    s: 'Einsetzen mit $I_{\\min} = 4\\,\\text{mA}, I_{\\max} = 20\\,\\text{mA}, p_{\\min} = 0\\,\\text{bar}, p_{\\max} = 10\\,\\text{bar}, I = 12\\,\\text{mA}$:<br>$p = 0 + \\dfrac{12 - 4}{20 - 4}\\cdot (10 - 0) = \\dfrac{8}{16}\\cdot 10 = 5{,}00\\,\\text{bar}$.<br>$\\boxed{p = 5{,}00\\,\\text{bar}}$<br><em>Quelle:</em> Berger, Automation mit SIMATIC S7-1500, 5. Aufl. Publicis 2017, §6.3 Analogwertskalierung (NORM_X/SCALE_X).'
                 },
                 {
                     q: 'Was ist eine <code>METHOD</code> in IEC 61131-3 Edition 3, und wie unterscheidet sie sich vom Aufruf des Funktionsbausteins selbst?',
@@ -342,6 +486,120 @@
                     q: 'Was unterscheidet die Tasks <em>cyclic</em>, <em>freewheeling</em>, <em>interrupt</em> und <em>event</em> in IEC 61131-3?',
                     h: 'Stichwort: feste Zykluszeit, "so schnell wie möglich", Hardware-Interrupt, Software-Ereignis.',
                     s: '<strong>cyclic:</strong> wird alle <code>T_cycle</code> ms aufgerufen (z.B. alle 10 ms). Bei Überschreitung der Zykluszeit löst die Laufzeit einen Task-Overrun aus.<br><strong>freewheeling:</strong> nach jedem Durchlauf sofort neu aufgerufen — keine deterministische Periode, dafür minimale Latenz für Vordergrund-Logik.<br><strong>interrupt:</strong> hardware-getriggert (digitaler Eingang, Counter-Überlauf, Encoder-Index). Höchste Priorität — direkt nach Interrupt-Erkennung wird der Task gestartet, typischerweise mit Latenzen $\\leq 100\\,\\mu\\text{s}$.<br><strong>event:</strong> software-getriggert (Boolesche Variable, OPC UA Event). Latenz höher als bei <em>interrupt</em>, da event-Prüfung auf Zyklusebene erfolgt.<br>Prioritäten und Präemption sind herstellerabhängig; harte Echtzeit benötigt typischerweise <em>cyclic</em>- oder <em>interrupt</em>-Tasks mit deterministischer Latenzgarantie.<br>$\\boxed{\\text{cyclic: T fix; freewheeling: ASAP; interrupt: HW; event: SW}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.8.2 Tasks; Berger, Automation mit SIMATIC S7-1500, 5. Aufl. 2017, §3.4 Task-Klassen.'
+                },
+                {
+                    q: 'Welchen Wert hat <code>sum</code> nach dieser WHILE-Schleife?' +
+                        code('ST', 'sum := 0;\ni   := 1;\nWHILE i <= 5 DO\n  sum := sum + i;\n  i   := i + 1;\nEND_WHILE;'),
+                    h: 'WHILE prüft die Bedingung <em>vor</em> jedem Durchlauf; $i$ läuft $1\\ldots 5$.',
+                    s: 'Die Schleife addiert $1+2+3+4+5 = 15$. Bei $i=6$ ist die Bedingung falsch, die Schleife endet.<br>$\\boxed{\\text{sum} = 15}$<br>Wichtig: ohne <code>i := i + 1</code> entstünde eine Endlosschleife bis zum Watchdog. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.7.5.4 WHILE statement.'
+                },
+                {
+                    q: 'Wie oft wird der Rumpf dieser REPEAT-Schleife mindestens ausgeführt, und welchen Wert hat <code>n</code> am Ende?' +
+                        code('ST', 'n := 0;\nREPEAT\n  n := n + 1;\nUNTIL n >= 3\nEND_REPEAT;'),
+                    h: 'REPEAT prüft die Abbruchbedingung am <em>Ende</em>.',
+                    s: 'Der Rumpf läuft, bis <code>n &gt;= 3</code> wahr ist: $n = 1, 2, 3$. Da die Prüfung am Ende erfolgt, wird der Rumpf <strong>mindestens einmal</strong> ausgeführt (auch wenn die Bedingung initial schon wahr wäre).<br>$\\boxed{n = 3,\\ \\geq 1 \\text{ Durchlauf garantiert}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.7.5.5 REPEAT statement.'
+                },
+                {
+                    q: 'Welchen Wert hat <code>last</code> nach dieser Schleife mit <code>EXIT</code>?' +
+                        code('ST', 'last := 0;\nFOR i := 1 TO 10 DO\n  IF i = 4 THEN EXIT; END_IF;\n  last := i;\nEND_FOR;'),
+                    h: '<code>EXIT</code> verlässt die Schleife sofort, bevor der Rest des Rumpfes läuft.',
+                    s: 'Für $i=1,2,3$ wird <code>last := i</code> gesetzt. Bei $i=4$ greift <code>EXIT</code> <em>vor</em> der Zuweisung, die Schleife bricht ab.<br>$\\boxed{\\text{last} = 3}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.7.5.6 EXIT statement.'
+                },
+                {
+                    q: 'Welchen Wert hat <code>k</code> für <code>x = 7</code>?' +
+                        code('ST', 'IF x < 0 THEN k := -1;\nELSIF x = 0 THEN k := 0;\nELSIF x < 10 THEN k := 1;\nELSE k := 2;\nEND_IF;'),
+                    h: '<code>ELSIF</code> wird in Reihenfolge geprüft; der erste wahre Zweig gewinnt.',
+                    s: '$x=7$: nicht $<0$, nicht $=0$, aber $<10$ ist wahr → <code>k := 1</code>. Die folgenden Zweige werden nicht mehr geprüft.<br>$\\boxed{k = 1}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.7.5.1 IF statement.'
+                },
+                {
+                    q: 'Was steht in <code>y</code> nach folgendem CASE über einen Aufzählungstyp, wenn <code>mode = RUN</code>?' +
+                        code('ST', 'TYPE eMode : (IDLE, RUN, STOP); END_TYPE\n\nCASE mode OF\n  IDLE : y := 0;\n  RUN  : y := 1;\n  STOP : y := 2;\nEND_CASE'),
+                    h: 'Der CASE-Selektor darf ein Aufzählungstyp sein; jeder Wert ist ein Label.',
+                    s: 'Bei <code>mode = RUN</code> trifft das Label <code>RUN</code> → <code>y := 1</code>.<br>$\\boxed{y = 1}$<br>Vorteil gegenüber Integer-CASE: der Compiler kann auf Vollständigkeit aller Enum-Werte prüfen. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.7.5.2 CASE; §6.4.4.3 Enums.'
+                },
+                {
+                    q: 'Wie viel Speicher belegt <code>m : ARRAY[1..3, 1..4] OF INT</code> nach IEC 61131-3 (ohne Padding)?',
+                    h: '$3\\cdot 4$ Elemente, <code>INT</code> = 2 Byte.',
+                    s: 'Elementanzahl $=3\\cdot 4 = 12$. Größe $=12\\cdot 2\\,\\text{Byte} = 24\\,\\text{Byte}$.<br>$\\boxed{24\\,\\text{Byte}}$<br>(Hersteller-Alignment kann zusätzlich Padding einfügen, IEC-unspezifiziert.) <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.4.4.1 Arrays.'
+                },
+                {
+                    q: 'Was berechnet die Schleife für <code>arr : ARRAY[1..4] OF INT := [10, 20, 30, 40]</code>?' +
+                        code('ST', 'sum := 0;\nFOR i := 1 TO 4 DO\n  sum := sum + arr[i];\nEND_FOR;'),
+                    h: 'Iteration über alle Array-Indizes.',
+                    s: '$\\text{sum} = 10+20+30+40 = 100$.<br>$\\boxed{\\text{sum} = 100}$<br>Faustregel: Array-Grenzen über <code>LOWER_BOUND</code>/<code>UPPER_BOUND</code> abfragen, um die Schleife robust gegen Größenänderungen zu halten. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.4.4.1; §6.7.5.3 FOR.'
+                },
+                {
+                    q: 'Wie greift man auf das Element einer Struktur zu? Gegeben:' +
+                        code('ST', 'TYPE tPoint : STRUCT\n  x : INT;\n  y : INT;\nEND_STRUCT END_TYPE\n\nVAR p : tPoint; END_VAR'),
+                    h: 'Strukturzugriff mit dem Punkt-Operator.',
+                    s: 'Auf Strukturmember wird mit dem Punkt zugegriffen: <code>p.x := 5; p.y := 8;</code>. Verschachtelte Strukturen entsprechend: <code>maschine.achse.position</code>. Strukturen bündeln zusammengehörige Daten (z.B. ein Rezept, eine Achse) und werden als Ganzes per Zuweisung kopiert.<br>$\\boxed{\\text{Zugriff: p.x, p.y}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.4.4.2 Structured data types.'
+                },
+                {
+                    q: 'Was liefern die String-Funktionen <code>CONCAT(\'AB\', \'CD\')</code> und <code>LEN</code> des Ergebnisses?',
+                    h: '<code>CONCAT</code> verkettet, <code>LEN</code> zählt Zeichen.',
+                    s: '<code>CONCAT(\'AB\', \'CD\') = \'ABCD\'</code>; <code>LEN(\'ABCD\') = 4</code>.<br>$\\boxed{\\text{\'ABCD\', LEN} = 4}$<br>Achtung auf die maximale <code>STRING</code>-Länge — bei Überlauf wird hersteller­abhängig abgeschnitten. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.6.1 Standardfunktionen für Zeichenketten.'
+                },
+                {
+                    q: 'Welche Position liefert <code>FIND(\'HELLO\', \'LL\')</code> nach IEC 61131-3?',
+                    h: '<code>FIND(IN1, IN2)</code> gibt die 1-basierte Startposition von <code>IN2</code> in <code>IN1</code> zurück (0, falls nicht gefunden).',
+                    s: 'In <code>\'HELLO\'</code> beginnt <code>\'LL\'</code> an Position 3 (H=1, E=2, L=3).<br>$\\boxed{\\text{FIND(\'HELLO\', \'LL\')} = 3}$<br>Wird die Teilkette nicht gefunden, ist das Ergebnis 0. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.6.1 (FIND).'
+                },
+                {
+                    q: 'Ein Siemens-Analogeingang liefert den Rohwert <code>0…27648</code> für <code>0…100 %</code>. Berechne mit der linearen Skalierung den Prozentwert für den Rohwert $13824$.',
+                    h: 'Linear: $w = w_{\\min} + \\dfrac{\\text{raw}-\\text{raw}_{\\min}}{\\text{raw}_{\\max}-\\text{raw}_{\\min}}(w_{\\max}-w_{\\min})$. Bei Siemens: <code>NORM_X</code> normiert auf 0..1, <code>SCALE_X</code> skaliert.',
+                    s: '$\\dfrac{13824-0}{27648-0} = 0{,}5$ (NORM_X). SCALE_X auf $0\\ldots 100\\,\\%$: $0{,}5\\cdot 100 = 50\\,\\%$.<br>$\\boxed{w = 50{,}0\\,\\%}$<br>$27648 = 2^{15}-2^{14}\\dots$ ist der Siemens-Nennbereich (entspricht 10 V bzw. 20 mA bei genau Nennwert). <em>Quelle:</em> Berger, Automation mit SIMATIC S7-1500, 5. Aufl. 2017, §6.3 (NORM_X/SCALE_X).'
+                },
+                {
+                    q: 'Implementiere in ST einen rekursiven Glättungsfilter (exponentiell gewichteter gleitender Mittelwert) <code>y := y + alpha*(x - y)</code>. Was bewirkt der Parameter <code>alpha</code> und in welchem Bereich liegt er?',
+                    h: '$\\alpha$ ist die Glättungskonstante; kleines $\\alpha$ glättet stärker.',
+                    s: 'Der EWMA-Filter $y_k = y_{k-1} + \\alpha(x_k - y_{k-1})$ entspricht einem zeitdiskreten PT1-Glied mit $\\alpha = \\dfrac{T_a}{\\tau + T_a}$ ($T_a$ Abtastzeit, $\\tau$ Zeitkonstante), $\\alpha \\in (0,1]$.' +
+                        code('ST', 'VAR y : REAL; CONSTANT alpha : REAL := 0.1; END_VAR\ny := y + alpha * (x - y);') +
+                        'Kleines $\\alpha$ (z.B. 0,1) → starke Glättung, träge Reaktion; $\\alpha = 1$ → keine Glättung (<code>y = x</code>).<br>$\\boxed{0 < \\alpha \\leq 1,\\ \\text{PT1-Verhalten}}$<br><em>Quelle:</em> Åström/Wittenmark, Computer-Controlled Systems, 3rd ed. (1997), §3.'
+                },
+                {
+                    q: 'Begründe, warum ein <code>TP</code> (Impulsglied) <em>nicht retriggerbar</em> ist, und was das für eine schnelle Folge von <code>IN</code>-Flanken bedeutet.',
+                    h: 'Während des laufenden Impulses werden neue Flanken ignoriert.',
+                    s: 'Nach der ersten steigenden <code>IN</code>-Flanke läuft der Impuls für <code>PT</code> unabhängig weiter. Treffen während dieser Zeit weitere steigende Flanken ein, werden sie <strong>ignoriert</strong> — der Impuls wird nicht verlängert oder neu gestartet. Folge: bei Flankenabständen $< PT$ erscheint am Ausgang ein <em>einzelner</em> durchgehender Impuls statt mehrerer. Für Verlängerung bei jeder Flanke braucht man eine retriggerbare Eigenimplementierung (Timer bei jeder Flanke neu starten).<br>$\\boxed{\\text{TP: fester Impuls PT, neue Flanken ignoriert}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §5.5.2.5 (TP).'
+                },
+                {
+                    q: 'Beim Auf-/Abwärtszähler <code>CTUD</code> — was bewirkt der Eingang <code>LD</code> im Unterschied zu <code>R</code>?',
+                    h: '<code>R</code> setzt auf 0, <code>LD</code> lädt den Vorgabewert.',
+                    s: '<code>R := TRUE</code> setzt <code>CV := 0</code> (Reset). <code>LD := TRUE</code> lädt <code>CV := PV</code> (Preset/Load) — nützlich, um beim Abwärtszählen von einem Sollwert zu starten. Bei gleichzeitig aktivem <code>R</code> und <code>LD</code> hat <code>R</code> Vorrang (Reset dominiert).<br>$\\boxed{\\text{R: CV:=0; LD: CV:=PV}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §5.5.2.4 Counters (CTUD).'
+                },
+                {
+                    q: 'Wozu dient der Deklarationsbereich <code>VAR_IN_OUT</code> und worin unterscheidet er sich von <code>VAR_INPUT</code>?',
+                    h: 'Stichwort: Übergabe per Referenz (by reference).',
+                    s: '<code>VAR_IN_OUT</code>-Parameter werden <strong>per Referenz</strong> übergeben: der FB liest <em>und</em> schreibt direkt die Variable des Aufrufers, Änderungen wirken nach außen. <code>VAR_INPUT</code> hingegen wird per Wert (Kopie) übergeben und im FB nur gelesen. <code>VAR_IN_OUT</code> eignet sich für große Strukturen/Arrays (keine Kopie nötig) und für FBs, die ihren Eingang modifizieren (z.B. ein Sortier-FB auf einem Array).<br>$\\boxed{\\text{VAR\\_IN\\_OUT = by reference (lesen+schreiben)}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.5.2 (VAR_IN_OUT).'
+                },
+                {
+                    q: 'Was bewirken <code>ADR</code> und der Dereferenzierungsoperator <code>^</code> (Pointer, CODESYS-Erweiterung zu IEC 61131-3)?',
+                    h: '<code>ADR</code> liefert die Adresse, <code>^</code> greift auf den Inhalt zu.',
+                    s: '<code>pt := ADR(var);</code> weist <code>pt</code> (Typ <code>POINTER TO ...</code>) die Speicheradresse von <code>var</code> zu. <code>pt^</code> dereferenziert — liest/schreibt den Inhalt an dieser Adresse. Pointer ermöglichen generische FBs und effizienten Zugriff, sind aber unsicher (kein Bounds-Check) — fehlerhafte Pointer können beliebigen Speicher überschreiben. IEC 61131-3 Ed. 3 kennt <code>REF_TO</code>/<code>REF=</code> als typsicherere, genormte Variante.<br>$\\boxed{\\text{ADR: Adresse; \\^{}: Inhalt}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.5.2 (reference types); CODESYS-Dokumentation (POINTER/ADR).'
+                },
+                {
+                    q: 'Was ist im SFC/AS eine <strong>Simultanverzweigung</strong> (parallele Verzweigung), und woran erkennt man sie grafisch?',
+                    h: 'Doppelte horizontale Linie; mehrere Zweige werden gleichzeitig aktiv.',
+                    s: 'Eine Simultanverzweigung (parallel branch) wird durch eine <strong>doppelte horizontale Linie</strong> dargestellt. Bei Erfüllung der <em>einen</em> gemeinsamen Transition werden <strong>alle</strong> parallelen Zweige gleichzeitig aktiviert und laufen nebenläufig. Die Zusammenführung (Synchronisation) wartet, bis <em>alle</em> Zweige ihren Endschritt erreicht haben, bevor die nachfolgende Transition prüfen darf.<br>$\\boxed{\\text{Parallel: doppelte Linie, alle Zweige aktiv}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §8.2.3 (simultaneous sequences).'
+                },
+                {
+                    q: 'Worin unterscheidet sich im SFC eine <strong>Alternativverzweigung</strong> von der Simultanverzweigung?',
+                    h: 'Einfache horizontale Linie; genau ein Zweig wird gewählt.',
+                    s: 'Die Alternativverzweigung (selection/divergence) wird durch eine <strong>einfache horizontale Linie</strong> dargestellt. Nur der Zweig wird aktiv, dessen Transition <em>zuerst/als einzige</em> erfüllt ist — die Zweige sind <strong>einander ausschließend</strong>. Der Programmierer muss disjunkte Transitionsbedingungen sicherstellen (sonst entscheidet die hersteller­definierte Auswertereihenfolge, typischerweise links→rechts).<br>$\\boxed{\\text{Alternativ: einfache Linie, genau ein Zweig}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §8.2.3 (selection of sequences).'
+                },
+                {
+                    q: 'Was liefert die implizite Schrittvariable <code>Schritt.T</code> (bzw. <code>Step.T</code>) in einem SFC, und wofür nutzt man sie?',
+                    h: 'Aktivzeit des Schritts als <code>TIME</code>.',
+                    s: 'Zu jedem Schritt gehört implizit ein Aktivflag <code>Schritt.X</code> (BOOL) und die <strong>Aktivzeit</strong> <code>Schritt.T</code> (TIME) — die Dauer, seit der der Schritt aktiv ist. Damit lassen sich zeitabhängige Transitionen formulieren, z.B. <code>Schritt5.T &gt; T#3s</code> als Weiterschaltbedingung (Timeout/Mindestverweildauer), ohne separaten <code>TON</code>.<br>$\\boxed{\\text{Schritt.T = Aktivzeit (TIME)}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §8.2.1 (step flags/elapsed time).'
+                },
+                {
+                    q: 'Was liefert <code>LIMIT(MN := 0, IN := 150, MX := 100)</code> nach IEC 61131-3?',
+                    h: '<code>LIMIT</code> begrenzt <code>IN</code> auf das Intervall $[MN, MX]$.',
+                    s: '<code>LIMIT</code> klemmt: Ergebnis $= \\min(\\max(IN, MN), MX) = \\min(\\max(150,0),100) = \\min(150,100) = 100$.<br>$\\boxed{\\text{LIMIT(0, 150, 100)} = 100}$<br>Praxis: Stellgrößen-/Sollwertbegrenzung vor der Ausgabe an einen Aktor. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.6.1 (LIMIT).'
+                },
+                {
+                    q: 'Was liefert <code>MUX(K := 2, IN0 := 10, IN1 := 20, IN2 := 30, IN3 := 40)</code>?',
+                    h: '<code>MUX</code> wählt anhand des ganzzahligen Selektors <code>K</code> den Eingang <code>IN(K)</code> (0-basiert).',
+                    s: 'Mit $K=2$ wird <code>IN2 = 30</code> durchgeschaltet.<br>$\\boxed{\\text{MUX(2, ...)} = 30}$<br>Im Unterschied zu <code>SEL</code> (binär, BOOL-Selektor) erlaubt <code>MUX</code> $n$ Quellen mit ganzzahligem Selektor. Ungültiges <code>K</code> ist hersteller­abhängig zu behandeln. <em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.6.1 (MUX selection function).'
                 }
             ],
 
@@ -444,7 +702,7 @@
                 {
                     q: 'Implementiere in ST einen Software-Watchdog, der den Sicherheits-Zustand auslöst, wenn ein zyklischer Heartbeat-Zähler (geliefert von einer anderen Steuerung) länger als 100 ms nicht inkrementiert. Diskutiere, warum der Watchdog selbst <em>nicht</em> für SIL ≥ 2 ausreicht.',
                     h: 'Zähler-Wert puffern, Differenz prüfen, TON für Timeout.',
-                    s: '<pre class="bg-slate-900 text-slate-100 p-3 text-xs rounded my-2"><code>FUNCTION_BLOCK FB_Heartbeat_WD\nVAR_INPUT\n  HeartbeatRemote : UINT;    // vom Partner alle 20-50 ms inkrementiert\n  Enable          : BOOL;\nEND_VAR\nVAR_OUTPUT\n  Alive           : BOOL;\n  TimeoutFault    : BOOL;\nEND_VAR\nVAR\n  WD_TO        : TON;\n  Edge         : R_TRIG;\n  PrevHB       : UINT;\nEND_VAR\n\n// Flanke bei Zählerwechsel\nEdge(CLK := (HeartbeatRemote &lt;&gt; PrevHB));\nPrevHB := HeartbeatRemote;\n\n// Timer wird durch jede Flanke zurückgesetzt\nWD_TO(IN := NOT Edge.Q AND Enable, PT := T#100ms);\nTimeoutFault := WD_TO.Q;\nAlive        := NOT TimeoutFault;\nEND_FUNCTION_BLOCK</code></pre>Warum nicht SIL ≥ 2 alleine?<ul><li><strong>Common-Cause-Failure:</strong> wenn Sender und Watchdog auf derselben CPU laufen, fällt bei CPU-Stop <em>beides</em> aus — der Watchdog kann den eigenen Fehler nicht melden. Lösung: dedizierte Sicherheits-SPS oder externer HW-Watchdog.</li><li><strong>Diagnose-Abdeckung (DC):</strong> ein reiner Software-Watchdog erkennt nur "Sender steht" — nicht "Sender liefert konstanten falschen Wert" (Maskerade), nicht "Sender liefert verzögert, aber innerhalb 100 ms" (Drift).</li><li><strong>Quervergleich nötig:</strong> für SIL 2 typischerweise 1oo2 mit unabhängiger Validierungslogik und CRC der Heartbeat-Payload.</li></ul>$\\boxed{\\text{Watchdog 100 ms: T_react} \\leq T_\\text{PT} + T_\\text{cycle}}$<br><em>Quelle:</em> IEC 61508-2:2010 Anhang A (techniques for SIL); IEC 61784-3:2021 §6.4 (E2E-watchdog).'
+                    s: '<pre class="bg-slate-900 text-slate-100 p-3 text-xs rounded my-2"><code>FUNCTION_BLOCK FB_Heartbeat_WD\nVAR_INPUT\n  HeartbeatRemote : UINT;    // vom Partner alle 20-50 ms inkrementiert\n  Enable          : BOOL;\nEND_VAR\nVAR_OUTPUT\n  Alive           : BOOL;\n  TimeoutFault    : BOOL;\nEND_VAR\nVAR\n  WD_TO        : TON;\n  Edge         : R_TRIG;\n  PrevHB       : UINT;\nEND_VAR\n\n// Flanke bei Zählerwechsel\nEdge(CLK := (HeartbeatRemote &lt;&gt; PrevHB));\nPrevHB := HeartbeatRemote;\n\n// Timer wird durch jede Flanke zurückgesetzt\nWD_TO(IN := NOT Edge.Q AND Enable, PT := T#100ms);\nTimeoutFault := WD_TO.Q;\nAlive        := NOT TimeoutFault;\nEND_FUNCTION_BLOCK</code></pre>Warum nicht SIL ≥ 2 alleine?<ul><li><strong>Common-Cause-Failure:</strong> wenn Sender und Watchdog auf derselben CPU laufen, fällt bei CPU-Stop <em>beides</em> aus — der Watchdog kann den eigenen Fehler nicht melden. Lösung: dedizierte Sicherheits-SPS oder externer HW-Watchdog.</li><li><strong>Diagnose-Abdeckung (DC):</strong> ein reiner Software-Watchdog erkennt nur "Sender steht" — nicht "Sender liefert konstanten falschen Wert" (Maskerade), nicht "Sender liefert verzögert, aber innerhalb 100 ms" (Drift).</li><li><strong>Quervergleich nötig:</strong> für SIL 2 typischerweise 1oo2 mit unabhängiger Validierungslogik und CRC der Heartbeat-Payload.</li></ul>$\\boxed{T_\\text{react} \\leq T_\\text{PT} + T_\\text{cycle}}$<br><em>Quelle:</em> IEC 61508-2:2010 Anhang A (techniques for SIL); IEC 61784-3:2021 §6.4 (E2E-watchdog).'
                 },
                 {
                     q: 'Eine zyklische Task läuft nominell mit $T_\\text{cycle} = 10\\,\\text{ms}$, beobachtet wurde ein Jitter (Streuung der tatsächlichen Aufrufzeitpunkte) von $\\sigma_J = 0.5\\,\\text{ms}$. Wie wirkt sich der Jitter auf eine darin implementierte zeitdiskrete PI-Reglung mit Integrationsschritt $T_s$ aus, und wie groß ist die relative Verfälschung des I-Anteils?',
@@ -478,6 +736,133 @@
                     q: 'Warum darf in einem zyklischen Schrittkettenwerk eine Schrittaktion <em>keine</em> Eingangs-Variable überschreiben (Aktor-Vorgabe, Befehl an Subsystem)? Welche zwei IEC-konformen Alternativen gibt es?',
                     h: 'Eingänge sind read-only Spiegel des PII; Determinismus bricht, wenn Schritt-Output und Eingang denselben Speicherplatz teilen.',
                     s: 'Im IEC-Zyklusmodell sind <em>Eingangs-Variablen</em> die read-only-Sicht auf das PII (siehe Aufgabe Prozess-Abbild). Würde eine Schrittaktion einen Eingang überschreiben, wäre der nächste Vergleich auf dieser Variable nicht mehr deterministisch — und das nächste PII-Update am Zyklusanfang überschreibt den Wert ohnehin wieder. Beide Effekte verletzen die Schrittketten-Semantik.<br><strong>Alternative 1 — Output-Variable schreiben:</strong> die Aktion setzt eine <em>Ausgangsvariable</em> (Bestandteil des PIO), die beim Zyklusende auf den physikalischen Aktor gelegt wird. Die Sensorrückmeldung bleibt im PII unbeeinflusst.<br><strong>Alternative 2 — Sollwert-Variable + separater Subsystem-FB:</strong> die Aktion setzt eine <em>interne Variable</em> <code>Sollwert</code> (kein Eingang, kein Ausgang), und ein parallel laufender Subsystem-FB (Regler, Achssteuerung) liest sie und stellt die physikalische Reaktion her. Vorteil: die Schrittkette ist hardware-unabhängig und kann mit Mock-FBs simuliert werden.<br><strong>Konsequenz für Architektur:</strong> Schrittketten-Schritte sind <em>Sollwertgeber</em>, nicht direkte Aktor-Treiber.<br>$\\boxed{\\text{Schritt → Sollwert/Output; nie zurück auf Eingang}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §8.2 SFC, Anhang B Best Practices.'
+                },
+                {
+                    q: 'Welche $\\mathrm{PFD_{avg}}$- und PFH-Bereiche fordert IEC 61508 für <strong>SIL 3</strong> bei <em>low demand</em> bzw. <em>high demand</em>?',
+                    h: 'Jede SIL-Stufe ist um Faktor 10 strenger als die vorige.',
+                    s: 'Low Demand (Tab. 2): $\\mathrm{PFD_{avg}}\\in[10^{-4},10^{-3})$. High Demand/Continuous (Tab. 3): $\\mathrm{PFH}\\in[10^{-8},10^{-7})\\,h^{-1}$.<br>$\\boxed{\\text{SIL 3: PFD}_\\text{avg}\\in[10^{-4},10^{-3}),\\ \\text{PFH}\\in[10^{-8},10^{-7})\\,h^{-1}}$<br>SIL 3 verlangt typischerweise HFT $\\geq 1$ (redundante Architektur, z.B. 1oo2/2oo3) und SFF $\\geq 90\\,\\%$. <em>Quelle:</em> IEC 61508-1:2010 Tab. 2 und 3.'
+                },
+                {
+                    q: 'Berechne die Safe Failure Fraction (SFF) für ein Bauteil mit $\\lambda_S=200$ FIT (sicher), $\\lambda_{DD}=150$ FIT (gefährlich erkannt), $\\lambda_{DU}=50$ FIT (gefährlich unerkannt).',
+                    h: '$\\mathrm{SFF}=\\dfrac{\\lambda_S+\\lambda_{DD}}{\\lambda_S+\\lambda_{DD}+\\lambda_{DU}}$.',
+                    s: '$\\mathrm{SFF}=\\dfrac{200+150}{200+150+50}=\\dfrac{350}{400}=0{,}875=87{,}5\\,\\%$.<br>$\\boxed{\\mathrm{SFF}=87{,}5\\,\\%}$<br>Mit HFT=0 erlaubt $\\mathrm{SFF}\\in[60\\%,90\\%)$ nach IEC 61508-2 Route $1_H$ maximal SIL 2 (Typ B). <em>Quelle:</em> IEC 61508-2:2010 §7.4.4, Tab. 3 (architectural constraints).'
+                },
+                {
+                    q: 'Worin unterscheiden sich die Kategorien <strong>3</strong> und <strong>4</strong> nach ISO 13849-1 bezüglich Fehlertoleranz?',
+                    h: 'Beide sind zweikanalig; Unterschied liegt in Fehlererkennung und Fehlerhäufung.',
+                    s: 'Beide Kategorien sind zweikanalig mit Diagnose. <strong>Kategorie 3:</strong> ein <em>einzelner</em> Fehler führt nicht zum Verlust der Sicherheitsfunktion, wird aber nicht in jedem Fall erkannt — bei Fehler<em>häufung</em> kann die Funktion verloren gehen. <strong>Kategorie 4:</strong> ein einzelner Fehler wird bei oder vor der nächsten Anforderung <em>erkannt</em>; bleibt er unerkannt, darf die Häufung weiterer Fehler die Sicherheitsfunktion trotzdem nicht aushebeln (höhere DC, $\\mathrm{DC_{avg}}\\geq 99\\,\\%$).<br>$\\boxed{\\text{Kat. 3: 1 Fehler toleriert; Kat. 4: + Fehlererkennung + Häufungsschutz}}$<br><em>Quelle:</em> ISO 13849-1:2023 §6.2.6/§6.2.7 (designated architectures).'
+                },
+                {
+                    q: 'Welche drei Bänder für die mittlere Zeit bis zum gefährlichen Ausfall <code>MTTFd</code> definiert ISO 13849-1 pro Kanal?',
+                    h: 'low / medium / high in Jahren.',
+                    s: '<strong>low:</strong> $3\\,\\text{a}\\leq \\mathrm{MTTF_d} < 10\\,\\text{a}$. <strong>medium:</strong> $10\\,\\text{a}\\leq \\mathrm{MTTF_d} < 30\\,\\text{a}$. <strong>high:</strong> $30\\,\\text{a}\\leq \\mathrm{MTTF_d} \\leq 100\\,\\text{a}$ (Kappung bei 100 a pro Kanal).<br>$\\boxed{\\text{low }3\\text{-}10,\\ \\text{medium }10\\text{-}30,\\ \\text{high }30\\text{-}100\\ \\text{Jahre}}$<br>Zusammen mit Kategorie und $\\mathrm{DC_{avg}}$ ergibt sich der PL aus dem vereinfachten Verfahren (Bild 5 der Norm). <em>Quelle:</em> ISO 13849-1:2023 §4.5.2, Tab. 5.'
+                },
+                {
+                    q: 'Welche Bänder definiert ISO 13849-1 für den Diagnosedeckungsgrad <code>DCavg</code>?',
+                    h: 'none / low / medium / high.',
+                    s: '<strong>none:</strong> $\\mathrm{DC}<60\\,\\%$. <strong>low:</strong> $60\\,\\%\\leq \\mathrm{DC}<90\\,\\%$. <strong>medium:</strong> $90\\,\\%\\leq \\mathrm{DC}<99\\,\\%$. <strong>high:</strong> $\\mathrm{DC}\\geq 99\\,\\%$.<br>$\\boxed{\\text{none}<60\\le\\text{low}<90\\le\\text{medium}<99\\le\\text{high}}$<br>$\\mathrm{DC}=\\dfrac{\\sum\\lambda_{DD}}{\\sum\\lambda_D}$ misst, welcher Anteil gefährlicher Ausfälle durch Diagnose erkannt wird. <em>Quelle:</em> ISO 13849-1:2023 §4.5.3, Tab. 6.'
+                },
+                {
+                    q: 'Worin unterscheiden sich <strong>PROFINET RT</strong> und <strong>PROFINET IRT</strong> bezüglich Echtzeitverhalten und Hardware?',
+                    h: 'RT priorisiert Standard-Ethernet-Frames; IRT plant Übertragungen hardwareseitig (isochron).',
+                    s: '<strong>RT (Real-Time):</strong> nutzt priorisierte Ethernet-Frames (VLAN-Priorität, EtherType 0x8892) über Standard-Switches, umgeht den TCP/IP-Stack. Typische Zykluszeiten 1-10 ms, Jitter im Bereich mehrerer hundert µs — ausreichend für Standard-I/O.<br><strong>IRT (Isochronous Real-Time):</strong> reserviert per Hardware-Scheduling feste Zeitschlitze auf der Leitung (bandwidth reservation); benötigt IRT-fähige Switch-ASICs in jedem Knoten. Zykluszeiten bis $\\leq 250\\,\\mu\\text{s}$ mit Jitter $<1\\,\\mu\\text{s}$ — für Motion Control / Taktsynchronität.<br>$\\boxed{\\text{RT: SW-priorisiert, ms; IRT: HW-geplant, <1\\,\\mu s Jitter}}$<br><em>Quelle:</em> IEC 61784-2 (CP 3/4, 3/5, 3/6 PROFINET); PI System Description 2018.'
+                },
+                {
+                    q: 'Worin unterscheiden sich <strong>Modbus RTU</strong> und <strong>Modbus TCP</strong> bezüglich Übertragung und Fehlersicherung?',
+                    h: 'RTU: serielle Leitung mit CRC; TCP: Ethernet mit MBAP-Header.',
+                    s: '<strong>Modbus RTU:</strong> serielle Übertragung (RS-485/232), kompaktes Binärformat, Frame-Sicherung über <strong>CRC-16</strong>, Frame-Trennung über Stille von $\\geq 3{,}5$ Zeichen. Adressierung über Slave-Adresse (1 Byte).<br><strong>Modbus TCP:</strong> Kapselung der PDU in TCP/IP (Port 502) mit <strong>MBAP-Header</strong> (Transaction-/Protocol-/Length-/Unit-ID). <em>Kein</em> Modbus-CRC — die Integrität sichert die TCP/IP-Prüfsumme. Mehrere offene Transaktionen über die Transaction-ID möglich.<br>$\\boxed{\\text{RTU: seriell + CRC-16; TCP: Ethernet + MBAP, kein CRC}}$<br><em>Quelle:</em> Modbus Application Protocol Specification V1.1b3 (2012); Modbus Messaging on TCP/IP Implementation Guide V1.0b.'
+                },
+                {
+                    q: 'Worin unterscheiden sich in CANopen <strong>PDO</strong> und <strong>SDO</strong>?',
+                    h: 'PDO = Prozessdaten (schnell, unbestätigt); SDO = Servicedaten (bestätigt, Objektverzeichnis).',
+                    s: '<strong>PDO (Process Data Object):</strong> überträgt Echtzeit-Prozessdaten in einem einzigen CAN-Frame (max. 8 Byte Nutzlast), unbestätigt (Producer/Consumer), ereignis-/zeit-/sync-getriggert — niedrige Latenz, hoher Durchsatz.<br><strong>SDO (Service Data Object):</strong> Client/Server-Zugriff auf das <em>Objektverzeichnis</em> eines Knotens (Lesen/Schreiben von Parametern), bestätigt (jede Anforderung wird quittiert), für beliebig große Daten (Segment-/Block-Transfer). Höherer Overhead, für Konfiguration statt zyklischen Betrieb.<br>$\\boxed{\\text{PDO: schnell/unbestätigt; SDO: bestätigt/Parameterzugriff}}$<br><em>Quelle:</em> CiA 301 (CANopen Application Layer and Communication Profile) V4.2.'
+                },
+                {
+                    q: 'Welche drei <code>MessageSecurityMode</code>-Stufen kennt OPC UA, und was sichern sie jeweils?',
+                    h: 'None, Sign, SignAndEncrypt.',
+                    s: '<strong>None:</strong> keine Sicherung — nur in vertrauenswürdigen, abgeschotteten Netzen vertretbar.<br><strong>Sign:</strong> jede Nachricht wird signiert (Integrität + Authentizität), aber im Klartext übertragen — Manipulation wird erkannt, Mitlesen nicht verhindert.<br><strong>SignAndEncrypt:</strong> Nachrichten werden signiert <em>und</em> verschlüsselt (Integrität + Authentizität + Vertraulichkeit). Empfohlen für produktive/öffentliche Netze.<br>Grundlage sind X.509-Zertifikate und Security Policies (z.B. <code>Aes256_Sha256_RsaPss</code>).<br>$\\boxed{\\text{None < Sign < SignAndEncrypt}}$<br><em>Quelle:</em> OPC UA Specification Part 2 (Security Model) und Part 4, OPC Foundation 2022.'
+                },
+                {
+                    q: 'Welche Zustellgarantien geben die MQTT-QoS-Stufen 0, 1 und 2?',
+                    h: 'at most once / at least once / exactly once.',
+                    s: '<strong>QoS 0 (at most once):</strong> "fire and forget" — keine Bestätigung, Nachricht kann verloren gehen, kein Duplikat.<br><strong>QoS 1 (at least once):</strong> Bestätigung per <code>PUBACK</code>; bei Timeout wird erneut gesendet — Nachricht kommt mindestens einmal, <em>Duplikate möglich</em>.<br><strong>QoS 2 (exactly once):</strong> Vier-Wege-Handshake (<code>PUBLISH/PUBREC/PUBREL/PUBCOMP</code>) — genau einmal, kein Verlust, kein Duplikat; höchster Overhead.<br>$\\boxed{\\text{QoS 0/1/2 = höchstens/mindestens/genau einmal}}$<br>In der Automatisierung (Sparkplug B) ist QoS 1 üblich. <em>Quelle:</em> MQTT Version 5.0, OASIS Standard 2019, §4.3.'
+                },
+                {
+                    q: 'Auf einer CPU laufen drei zyklische Tasks mit Worst-Case-Laufzeiten $C_1=2\\,\\text{ms}$ ($T_1=10\\,\\text{ms}$), $C_2=3\\,\\text{ms}$ ($T_2=20\\,\\text{ms}$), $C_3=5\\,\\text{ms}$ ($T_3=50\\,\\text{ms}$). Ist das System auslastbar?',
+                    h: 'Prozessorauslastung $U=\\sum C_i/T_i$; notwendig $U\\leq 1$.',
+                    s: '$U=\\dfrac{2}{10}+\\dfrac{3}{20}+\\dfrac{5}{50}=0{,}2+0{,}15+0{,}1=0{,}45=45\\,\\%$.<br>$U=0{,}45<1$ — die <em>notwendige</em> Bedingung ist erfüllt; bei Rate-Monotonic gilt zusätzlich die hinreichende Schranke $U\\leq n(2^{1/n}-1)=0{,}78$ für $n=3$, ebenfalls erfüllt.<br>$\\boxed{U=45\\,\\%\\ \\Rightarrow\\ \\text{planbar (mit Reserve)}}$<br>Reserve ist wichtig für Interrupts, Kommunikation und Jitter. <em>Quelle:</em> Liu &amp; Layland, J. ACM 20 (1973) 46-61 (Rate-Monotonic Scheduling).'
+                },
+                {
+                    q: 'Wie überwacht eine SPS die Einhaltung der Zykluszeit, und was passiert bei einem <em>Task-Overrun</em> (Watchdog-Auslösung)?',
+                    h: 'Zyklus-Watchdog vergleicht die tatsächliche Zykluszeit mit einem konfigurierten Maximum.',
+                    s: 'Jede zyklische Task hat eine konfigurierte <strong>maximale Zykluszeit</strong> (Watchdog-Zeit). Überschreitet die reale Ausführungszeit diese Schranke (z.B. durch eine zu lange Schleife, blockierende Kommunikation), löst die Laufzeit einen <strong>Task-Overrun</strong> aus. Typische Reaktionen (herstellerabhängig konfigurierbar): Aufruf eines OB für Zeitfehler (Siemens OB80), Übergang in STOP mit sicheren Ausgängen, oder Überspringen des nächsten Zyklus. Der Watchdog schützt vor "stehender" Steuerung und ist Teil des Fail-Safe-Konzepts.<br>$\\boxed{\\text{Overrun} \\Rightarrow \\text{Fehler-OB / STOP / sichere Ausgänge}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.8.2; Berger, S7-1500, 5. Aufl. 2017, §10.3.'
+                },
+                {
+                    q: 'Was bedeutet <strong>Präemption</strong> bei prioritätsbasiertem Multitasking in einer SPS, und welche Task gewinnt bei gleichzeitiger Bereitschaft?',
+                    h: 'Höhere Priorität verdrängt niedrigere.',
+                    s: 'Bei präemptivem Scheduling unterbricht (verdrängt) eine bereitwerdende Task <strong>höherer</strong> Priorität sofort eine gerade laufende Task <em>niedrigerer</em> Priorität; die unterbrochene Task setzt nach Abarbeitung der höher-prioren Task fort. Eine Interrupt-Task (höchste Prio) verdrängt also die zyklische Hintergrund-Task. Konsequenz: gemeinsame Variablen zwischen Tasks unterschiedlicher Priorität brauchen Schutz (Single-Writer/Critical Section), weil ein Read-Modify-Write mitten unterbrochen werden kann.<br>$\\boxed{\\text{Höhere Priorität verdrängt niedrigere (präemptiv)}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.8.2 (task priority/preemption).'
+                },
+                {
+                    q: 'Diskretisiere einen kontinuierlichen Regler $G(s)$ mit der <strong>Tustin-/Bilinear-Transformation</strong>. Wie lautet die Substitution, und welche Eigenschaft bleibt erhalten?',
+                    h: 'Tustin: $s \\leftarrow \\dfrac{2}{T_a}\\dfrac{z-1}{z+1}$.',
+                    s: 'Die Tustin-Approximation ersetzt $s$ durch $\\dfrac{2}{T_a}\\dfrac{z-1}{z+1}$ ($T_a$ = Abtastzeit). Sie bildet die gesamte linke $s$-Halbebene auf das Innere des Einheitskreises ab — damit bleibt <strong>Stabilität erhalten</strong> (ein stabiler kontinuierlicher Regler ergibt einen stabilen diskreten). Nachteil: <em>Frequenz-Warping</em> — die Frequenzachse wird nichtlinear gestaucht; per Pre-Warping kann eine Eckfrequenz exakt getroffen werden.<br>$\\boxed{s \\leftarrow \\dfrac{2}{T_a}\\dfrac{z-1}{z+1}\\ (\\text{stabilitätserhaltend})}$<br><em>Quelle:</em> Åström/Wittenmark, Computer-Controlled Systems, 3rd ed. (1997), §8.4.'
+                },
+                {
+                    q: 'Ein zeitdiskreter PT1-Tiefpass wird als <code>y := y + alpha*(x - y)</code> implementiert. Drücke die Zeitkonstante $\\tau$ über $\\alpha$ und die Abtastzeit $T_a$ aus.',
+                    h: 'Vergleich mit $y_k=(1-\\alpha)y_{k-1}+\\alpha x_k$ und $\\alpha=\\dfrac{T_a}{\\tau+T_a}$.',
+                    s: 'Die Rekursion entspricht einem PT1 mit $\\alpha=\\dfrac{T_a}{\\tau+T_a}$. Nach $\\tau$ aufgelöst:<br>$\\tau=T_a\\cdot\\dfrac{1-\\alpha}{\\alpha}$.<br>Beispiel $T_a=10\\,\\text{ms}$, $\\alpha=0{,}1$: $\\tau=10\\,\\text{ms}\\cdot 9=90\\,\\text{ms}$.<br>$\\boxed{\\tau=T_a\\dfrac{1-\\alpha}{\\alpha}}$<br>Kleines $\\alpha$ → großes $\\tau$ → starke Glättung. <em>Quelle:</em> Åström/Wittenmark, Computer-Controlled Systems, 3rd ed. (1997), §3.'
+                },
+                {
+                    q: 'Was bedeutet das Festkomma-Format <strong>Q15</strong>, und welchen Zahlenbereich deckt es ab? Wie wird $0{,}5$ in Q15 dargestellt?',
+                    h: 'Q15: 16-bit-Integer, 15 Nachkommabits; Wert $=\\text{int}/2^{15}$.',
+                    s: 'Q15 interpretiert einen 16-bit-Integer als Bruch mit 15 Nachkommastellen: $\\text{Wert}=\\dfrac{\\text{int}}{2^{15}}$. Bereich: $[-1,\\ 1-2^{-15}]=[-1,\\ 0{,}99997]$. $0{,}5$ entspricht $0{,}5\\cdot 32768=16384=\\text{16\\#4000}$.<br>Multiplikation zweier Q15-Werte ergibt Q30 — das Ergebnis muss um 15 Bit zurückgeschoben werden. Festkomma vermeidet FPU-Last und ist deterministisch, erfordert aber Skalierungs-/Überlaufdisziplin.<br>$\\boxed{0{,}5_\\text{Q15}=16384=\\text{16\\#4000}}$<br><em>Quelle:</em> Oppenheim/Schafer, Discrete-Time Signal Processing, 3rd ed. (2010), §6.7.'
+                },
+                {
+                    q: 'Wie erkennt man in ST einen <strong>Überlauf</strong> bei der Addition zweier <code>DINT</code>-Werte $a+b$ ohne Bibliotheksfunktion?',
+                    h: 'Vorzeichen-Regel: Überlauf, wenn $a$ und $b$ gleiches Vorzeichen haben, das Ergebnis aber das andere.',
+                    s: 'Für Zweierkomplement gilt: ein vorzeichenbehafteter Überlauf tritt genau dann auf, wenn die Summanden <em>gleiches</em> Vorzeichen haben, das Ergebnis aber das <em>entgegengesetzte</em>:' +
+                        code('ST', 's := a + b;\noverflow := (a > 0 AND b > 0 AND s < 0)\n        OR (a < 0 AND b < 0 AND s > 0);') +
+                        'Addiert man zwei positive Zahlen und erhält ein negatives Ergebnis (oder umgekehrt), ist der Wertebereich gesprengt. Bei vorzeichenlosen Typen prüft man stattdessen <code>s &lt; a</code> (Carry).<br>$\\boxed{\\text{Overflow} = \\text{gleiche Operanden-Vorzeichen} \\neq \\text{Ergebnis-Vorzeichen}}$<br><em>Quelle:</em> Warren, Hacker\'s Delight, 2nd ed. (2013), §2-13 (overflow detection).'
+                },
+                {
+                    q: 'Was bewirkt das Schlüsselwort <code>ABSTRACT</code> bei einem <code>FUNCTION_BLOCK</code> bzw. einer <code>METHOD</code> in IEC 61131-3 Ed. 3, und wie entsteht daraus Polymorphismus?',
+                    h: 'Abstrakte FBs/Methoden können nicht instanziiert/aufgerufen werden, ohne überschrieben zu sein.',
+                    s: 'Ein <code>ABSTRACT FUNCTION_BLOCK</code> kann <strong>nicht direkt instanziiert</strong> werden; eine <code>ABSTRACT METHOD</code> hat keinen Rumpf und <strong>muss</strong> in einem abgeleiteten FB (<code>EXTENDS</code>) überschrieben werden. Über eine Basis-/Interface-Referenz aufgerufen, wird zur Laufzeit die konkrete Implementierung des tatsächlichen Instanztyps ausgeführt (<em>dynamic dispatch</em>). So lässt sich z.B. ein <code>ARRAY OF I_Drive</code> generisch über <code>drive.Move()</code> ansteuern, unabhängig vom konkreten Antriebstyp.<br>$\\boxed{\\text{ABSTRACT erzwingt Override; Dispatch macht Polymorphismus}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.6.3/§6.6.5 (OO features).'
+                },
+                {
+                    q: 'Wozu dient der Selbstreferenz-Pointer <code>THIS^</code> in einem objektorientierten IEC-61131-3-Funktionsbaustein?',
+                    h: 'Verweis auf die eigene Instanz.',
+                    s: '<code>THIS^</code> ist ein Zeiger auf die <em>eigene</em> FB-Instanz. Man nutzt ihn, um (a) eine lokale Variable von einem gleichnamigen Parameter zu unterscheiden (<code>THIS^.x := x;</code>), (b) die eigene Instanz an eine Methode/Funktion weiterzugeben (Registrierung in einer Liste, Callback) oder (c) bei Vererbung in Kombination mit <code>SUPER^</code> eindeutig auf die aktuelle Ebene zu verweisen.<br>$\\boxed{\\text{THIS\\^{} = Referenz auf die eigene Instanz}}$<br><em>Quelle:</em> IEC 61131-3:2013 (Ed. 3) §6.6.3 (methods, THIS); CODESYS Online-Help.'
+                },
+                {
+                    q: 'Welche Ausgänge hat der PLCopen-Motion-FB <code>MC_MoveAbsolute</code>, und welche Bedeutung haben <code>Done</code>, <code>Busy</code> und <code>CommandAborted</code>?',
+                    h: 'PLCopen Motion Control Part 1 — Zustandsausgänge eines bewegenden FB.',
+                    s: '<code>MC_MoveAbsolute</code> fährt eine Achse auf eine absolute Zielposition. Wichtige Ausgänge: <code>Busy</code> (FB ist aktiv), <code>Active</code> (FB hat die Kontrolle über die Achse), <code>Done</code> (Zielposition erreicht), <code>CommandAborted</code> (Befehl durch einen anderen Motion-FB verdrängt), <code>Error</code>/<code>ErrorID</code>. Genau <em>einer</em> der terminalen Ausgänge <code>Done</code>/<code>CommandAborted</code>/<code>Error</code> wird gesetzt und bleibt gesetzt, solange <code>Execute</code> TRUE ist. Die Achse durchläuft dabei die PLCopen-Zustandsmaschine (<code>Standstill</code> → <code>Discrete Motion</code> → <code>Standstill</code>).<br>$\\boxed{\\text{Done: Ziel erreicht; Busy: aktiv; CommandAborted: verdrängt}}$<br><em>Quelle:</em> PLCopen, Function Blocks for Motion Control Part 1, V2.0 (2011).'
+                },
+                {
+                    q: 'Was beschreibt das <strong>PackML</strong>-Zustandsmodell (ISA-TR88.00.02 / OMAC), und wozu dient es?',
+                    h: 'Standardisierte Maschinenzustände und Betriebsarten für die Linienintegration.',
+                    s: 'PackML definiert ein herstellerübergreifendes <strong>Zustandsmodell</strong> für Produktionsmaschinen mit (in der Vollausprägung) 17 Zuständen — u.a. <code>Idle</code>, <code>Starting</code>, <code>Execute</code>, <code>Holding</code>/<code>Held</code>, <code>Suspending</code>/<code>Suspended</code>, <code>Stopping</code>/<code>Stopped</code>, <code>Aborting</code>/<code>Aborted</code>, <code>Resetting</code>, <code>Completing</code>/<code>Complete</code> — plus Betriebsarten (<code>Producing</code>, <code>Maintenance</code>, <code>Manual</code>). Ziel: einheitliche Schnittstelle für MES/SCADA, vergleichbare Zustands- und OEE-Daten über verschiedene Maschinen, schnellere Integration.<br>$\\boxed{\\text{PackML: standardisierte Maschinenzustände + Modi}}$<br><em>Quelle:</em> ISA-TR88.00.02 (PackML Implementation Guide); OMAC Packaging Workgroup.'
+                },
+                {
+                    q: 'Welche Konsistenzbedingung muss ein <strong>Online-Change</strong> (Laden bei laufender Steuerung) bezüglich <code>RETAIN</code>-/<code>PERSISTENT</code>-Daten erfüllen, und warum ist das kritisch?',
+                    h: 'Das Speicher-Layout der remanenten Variablen darf sich nicht inkonsistent verschieben.',
+                    s: 'Beim Online-Change bleibt die Steuerung im RUN, während geänderter Code geladen wird. Kritisch ist das <strong>Speicher-Layout</strong> der remanenten Variablen (<code>RETAIN</code>/<code>PERSISTENT</code>): fügt man eine Variable mittendrin ein oder ändert Typen/Reihenfolge, verschieben sich die Offsets — alte remanente Werte würden dann <em>falschen</em> Variablen zugeordnet (Daten-Drift, analog zu einem verschobenen Index). Laufzeitsysteme prüfen daher per <strong>Prüfsumme/Layout-Vergleich</strong>; passt das Layout nicht, ist nur ein Download (mit Reinitialisierung) möglich. Best Practice: remanente Variablen <em>anhängen</em>, nicht umsortieren.<br>$\\boxed{\\text{Retain-Layout muss stabil bleiben (sonst Daten-Drift)}}$<br><em>Quelle:</em> CODESYS Online-Help (Online Change, Retain Handling); IEC 61131-3:2013 (Ed. 3) §6.5.2.'
+                },
+                {
+                    q: 'Worin unterscheiden sich in EtherNet/IP die <strong>impliziten</strong> (I/O-)Verbindungen von den <strong>expliziten</strong> Nachrichten (CIP)?',
+                    h: 'Implicit: zyklische I/O über UDP; Explicit: azyklische Dienste über TCP.',
+                    s: '<strong>Implicit Messaging (I/O):</strong> zyklischer Austausch von Prozessdaten über <em>UDP</em> (Class 1, Producer/Consumer), niedrige Latenz, keine Bestätigung pro Telegramm — für Echtzeit-I/O. Mit CIP Sync/CIP Motion auch taktsynchron.<br><strong>Explicit Messaging:</strong> azyklische Anfrage/Antwort über <em>TCP</em> (Class 3 / UCMM) auf das CIP-Objektmodell (Lesen/Schreiben von Attributen, Diagnose, Parametrierung) — bestätigt, höherer Overhead, für Konfiguration und seltene Zugriffe.<br>$\\boxed{\\text{Implicit: UDP zyklisch I/O; Explicit: TCP azyklisch CIP-Dienste}}$<br><em>Quelle:</em> ODVA, The CIP Networks Library Vol. 1 (CIP) und Vol. 2 (EtherNet/IP Adaptation), 2021.'
+                },
+                {
+                    q: 'Was ist eine <strong>2oo3</strong>-Architektur (MooN-Voting), und welchen Vorteil bietet sie gegenüber 1oo2 in Bezug auf <em>Verfügbarkeit</em>?',
+                    h: '2oo3: zwei von drei Kanälen müssen übereinstimmen (Mehrheitsentscheid).',
+                    s: 'Bei <strong>2oo3</strong> (two-out-of-three) liefern drei unabhängige Kanäle ein Ergebnis; ein Mehrheits-Voter löst aus, wenn <em>mindestens zwei</em> Kanäle es fordern. Das toleriert <strong>einen</strong> beliebigen Kanalfehler (egal ob er fälschlich auslöst oder fälschlich nicht auslöst) ohne Verlust der Funktion und <em>ohne</em> einen Fehlauslöser (Spurious Trip) zu erzwingen.<br>Vorteil gegenüber 1oo2: 1oo2 erhöht zwar die Sicherheit (jeder Kanal kann auslösen), neigt aber zu <em>Fehlauslösungen</em>. 2oo3 verbindet hohe Sicherheit mit <strong>hoher Verfügbarkeit</strong> (kein Spurious Trip bei Einzelfehler) — Standard in der Prozessindustrie für teure Anlagen.<br>$\\boxed{\\text{2oo3: 1 Fehler toleriert, kein Fehl-Trip, hohe Verfügbarkeit}}$<br><em>Quelle:</em> IEC 61508-6:2010 §B.3 (MooN-Architekturen); Smith/Simpson, Safety Critical Systems Handbook, 4th ed. (2016), §8.'
+                },
+                {
+                    q: 'Was unterscheidet <strong>Typ-A</strong>- von <strong>Typ-B</strong>-Bauteilen nach IEC 61508-2, und welche Folge hat das für die SIL-Fähigkeit?',
+                    h: 'Typ A: einfach, alle Fehlermodi bekannt; Typ B: komplex (z.B. µC), nicht alle Fehlermodi bestimmbar.',
+                    s: '<strong>Typ A</strong> (einfache Bauteile): das Fehlerverhalten <em>aller</em> Komponenten ist vollständig bekannt, und das Verhalten unter Fehlerbedingungen ist eindeutig bestimmbar (z.B. Relais, Schalter, einfache Sensoren). <strong>Typ B</strong> (komplexe Bauteile): mindestens eine Komponente hat nicht vollständig bestimmbares Fehlerverhalten (z.B. Mikrocontroller, ASIC, FPGA).<br>Folge: für dieselbe SIL fordert IEC 61508-2 bei Typ B eine <strong>höhere</strong> Safe Failure Fraction bzw. HFT (strengere architektonische Randbedingungen, Tab. 2 vs. Tab. 3). Eine SPS-CPU ist immer Typ B.<br>$\\boxed{\\text{Typ B (komplex) braucht höhere SFF/HFT als Typ A}}$<br><em>Quelle:</em> IEC 61508-2:2010 §7.4.4.1.2/§7.4.4.1.3, Tab. 2 und 3.'
                 },
                 {
                     q: 'Eine Sicherheits-Funktion hat eine berechnete $\\mathrm{PFD_{avg}} = 4{,}5 \\cdot 10^{-3}$ bei einem Proof-Test-Intervall $T_1 = 1\\,$Jahr und einem Common-Cause-Faktor $\\beta = 5\\,\\%$. Reicht das für <strong>SIL 2</strong>? Was passiert, wenn $T_1$ auf 5 Jahre verlängert wird (lineare Näherung)?',

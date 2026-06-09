@@ -475,8 +475,12 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
     }
     const totalHints = hintLadder.length;
     const hasMoreHints = revealedHints < totalHints;
+    // Einstufige Aufgaben tragen einen neutralen "Hinweis"-Titel — der frühere
+    // "Formel / Ansatz" war nur für mathematische Kategorien sinnvoll, nicht für
+    // konzeptionelle Aufgaben (PLC, Krypto, Blockchain, ...). Mehrstufige Aufgaben
+    // nutzen weiterhin die nummerierte Hinweis-Leiter ("Hinweis k / N").
     const hintButtonLabel = totalHints <= 1
-        ? 'Formel / Ansatz'
+        ? 'Hinweis'
         : (revealedHints === 0
             ? `Hinweis 1${totalHints > 1 ? ` / ${totalHints}` : ''}`
             : `Nächster Hinweis (${revealedHints + 1} / ${totalHints})`);
@@ -534,7 +538,7 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
             {hintLadder.slice(0, revealedHints).map((hintHtml, i) => (
                 <div key={i} className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-lg slide-in">
                     <h4 className="text-sm font-bold text-amber-800 mb-1">
-                        {totalHints > 1 ? `Hinweis ${i + 1} / ${totalHints}` : 'Formel / Ansatz'}
+                        {totalHints > 1 ? `Hinweis ${i + 1} / ${totalHints}` : 'Hinweis'}
                     </h4>
                     <div className="text-amber-900 math-block" dangerouslySetInnerHTML={{ __html: hintHtml }} />
                 </div>

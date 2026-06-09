@@ -446,6 +446,45 @@
         return makeVocabItems(language, classId, 200).concat(makeGrammarItems(language, classId, 200));
     }
 
+    // --- Deterministische Hilfen gegen "Zahlenstrahl-Hochzaehlen" und Vokabel-Dubletten ---
+    // mulberry32: kleiner, deterministischer PRNG. Gleicher Seed -> gleiche Folge,
+    // daher reproduzierbare (aber nicht sequentielle) Aufgaben ueber alle Geraete.
+    function mulberry32(seed) {
+        let a = seed >>> 0;
+        return function () {
+            a |= 0; a = (a + 0x6D2B79F5) | 0;
+            let t = Math.imul(a ^ (a >>> 15), 1 | a);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+    function hashSeed(str) {
+        let h = 2166136261;
+        for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return h >>> 0;
+    }
+    // Deterministisches Fisher-Yates auf einer Kopie.
+    function deterministicShuffle(arr, seed) {
+        const out = arr.slice();
+        const rnd = mulberry32(seed);
+        for (let i = out.length - 1; i > 0; i--) {
+            const j = Math.floor(rnd() * (i + 1));
+            const t = out[i]; out[i] = out[j]; out[j] = t;
+        }
+        return out;
+    }
+    // Curriculum-progressive Obergrenze fuer Zahlwoerter (bleibt im sicheren
+    // Bereich 0..999 der numberWord-Funktionen; hoehere Klassen = groessere Zahlen).
+    function gradeNumberCeil(grade) {
+        return { 5: 100, 6: 200, 7: 320, 8: 500, 9: 720, 10: 999 }[grade] || 100;
+    }
+    // Liefert `count` DISTINKTE, durchmischte Zahlen aus [0, ceil] — kein +1-Lauf.
+    function pickDistinctNumbers(seed, ceil, count) {
+        const all = [];
+        for (let n = 0; n <= ceil; n++) all.push(n);
+        return deterministicShuffle(all, seed).slice(0, count);
+    }
+
     const SEMANTIC_VOCAB = [
         ['Junge', 'boy', 'garcon', 'puer'], ['Maedchen', 'girl', 'fille', 'puella'], ['Mutter', 'mother', 'mere', 'mater'], ['Vater', 'father', 'pere', 'pater'],
         ['Bruder', 'brother', 'frere', 'frater'], ['Schwester', 'sister', 'soeur', 'soror'], ['Freund', 'friend', 'ami', 'amicus'], ['Familie', 'family', 'famille', 'familia'],
@@ -472,7 +511,39 @@
         ['oder', 'or', 'ou', 'aut'], ['wenn', 'if', 'si', 'si'], ['wo', 'where', 'ou', 'ubi'], ['wer', 'who', 'qui', 'quis'],
         ['was', 'what', 'quoi', 'quid'], ['viele', 'many', 'beaucoup de', 'multi'], ['wenige', 'few', 'peu de', 'pauci'], ['alles', 'everything', 'tout', 'omnia'],
         ['nichts', 'nothing', 'rien', 'nihil'], ['Koerper', 'body', 'corps', 'corpus'], ['Kopf', 'head', 'tete', 'caput'], ['Hand', 'hand', 'main', 'manus'],
-        ['Fuss', 'foot', 'pied', 'pes'], ['Auge', 'eye', 'oeil', 'oculus'], ['Ohr', 'ear', 'oreille', 'auris'], ['Herz', 'heart', 'coeur', 'cor']
+        ['Fuss', 'foot', 'pied', 'pes'], ['Auge', 'eye', 'oeil', 'oculus'], ['Ohr', 'ear', 'oreille', 'auris'], ['Herz', 'heart', 'coeur', 'cor'],
+        // --- Erweiterung (v110): curriculum-progressiver Aufbaus-Wortschatz, je hoeher
+        // die Klasse, desto abstrakter (Sliding-Window in makeVocabItems). Spalten:
+        // [Deutsch, Englisch, Franzoesisch (ASCII), Latein (Nominativ)]. Alle Spalten
+        // sind innerhalb der Liste eindeutig (Validierung via tools/_tmp_vocabcheck.js).
+        ['Aufgabe', 'task', 'devoir', 'pensum'], ['Frage', 'question', 'question', 'quaestio'], ['Wort', 'word', 'mot', 'verbum'], ['Satz', 'sentence', 'phrase', 'sententia'],
+        ['Zahl', 'number', 'nombre', 'numerus'], ['Brief', 'letter', 'lettre', 'epistula'], ['Bild', 'picture', 'image', 'imago'], ['Stunde', 'hour', 'heure', 'hora'],
+        ['Monat', 'month', 'mois', 'mensis'], ['Mittag', 'noon', 'midi', 'meridies'], ['Abend', 'evening', 'soir', 'vesper'], ['Woche', 'week', 'semaine', 'septimana'],
+        ['Winter', 'winter', 'hiver', 'hiems'], ['Sommer', 'summer', 'ete', 'aestas'], ['Herbst', 'autumn', 'automne', 'autumnus'], ['Fruehling', 'spring', 'printemps', 'ver'],
+        ['Himmel', 'sky', 'ciel', 'caelum'], ['Stern', 'star', 'etoile', 'stella'], ['Wolke', 'cloud', 'nuage', 'nubes'], ['Regen', 'rain', 'pluie', 'pluvia'],
+        ['Schnee', 'snow', 'neige', 'nix'], ['Wind', 'wind', 'vent', 'ventus'], ['Feuer', 'fire', 'feu', 'ignis'], ['Erde', 'earth', 'terre', 'terra'],
+        ['Luft', 'air', 'air', 'aer'], ['Gold', 'gold', 'or', 'aurum'], ['Silber', 'silver', 'argent', 'argentum'], ['Loewe', 'lion', 'lion', 'leo'],
+        ['Wolf', 'wolf', 'loup', 'lupus'], ['Baer', 'bear', 'ours', 'ursus'], ['Schaf', 'sheep', 'mouton', 'ovis'], ['Kuh', 'cow', 'vache', 'vacca'],
+        ['Biene', 'bee', 'abeille', 'apis'], ['Schlange', 'snake', 'serpent', 'serpens'], ['Adler', 'eagle', 'aigle', 'aquila'], ['Wein', 'wine', 'vin', 'vinum'],
+        ['Honig', 'honey', 'miel', 'mel'], ['Ei', 'egg', 'oeuf', 'ovum'], ['Salz', 'salt', 'sel', 'sal'], ['Garten', 'garden', 'jardin', 'hortus'],
+        ['Feld', 'field', 'champ', 'ager'], ['Dorf', 'village', 'village', 'vicus'], ['Mauer', 'wall', 'mur', 'murus'], ['Turm', 'tower', 'tour', 'turris'],
+        ['Bett', 'bed', 'lit', 'lectus'], ['Tisch', 'table', 'table', 'mensa'], ['Stuhl', 'chair', 'chaise', 'sella'], ['Koenig', 'king', 'roi', 'rex'],
+        ['Koenigin', 'queen', 'reine', 'regina'], ['Soldat', 'soldier', 'soldat', 'miles'], ['Herr', 'lord', 'seigneur', 'dominus'], ['Volk', 'people', 'peuple', 'populus'],
+        ['Krieg', 'war', 'guerre', 'bellum'], ['Frieden', 'peace', 'paix', 'pax'], ['Gesetz', 'law', 'loi', 'lex'], ['Geld', 'money', 'monnaie', 'pecunia'],
+        ['Markt', 'market', 'marche', 'forum'], ['Land', 'country', 'pays', 'patria'], ['Welt', 'world', 'monde', 'mundus'], ['machen', 'to make', 'faire', 'facere'],
+        ['sagen', 'to say', 'dire', 'dicere'], ['fragen', 'to ask', 'demander', 'rogare'], ['antworten', 'to answer', 'repondre', 'respondere'], ['rufen', 'to call', 'appeler', 'vocare'],
+        ['fuehren', 'to lead', 'mener', 'ducere'], ['bauen', 'to build', 'construire', 'aedificare'], ['kaempfen', 'to fight', 'combattre', 'pugnare'], ['gewinnen', 'to win', 'gagner', 'vincere'],
+        ['finden', 'to find', 'trouver', 'invenire'], ['warten', 'to wait', 'attendre', 'exspectare'], ['glauben', 'to believe', 'croire', 'credere'], ['wissen', 'to know', 'savoir', 'scire'],
+        ['koennen', 'to be able', 'pouvoir', 'posse'], ['wollen', 'to want', 'vouloir', 'velle'], ['fuehlen', 'to feel', 'sentir', 'sentire'], ['denken', 'to think', 'penser', 'cogitare'],
+        ['leben', 'to live', 'vivre', 'vivere'], ['sterben', 'to die', 'mourir', 'mori'], ['lieben', 'to love', 'aimer', 'amare'], ['fuerchten', 'to fear', 'craindre', 'timere'],
+        ['lang', 'long', 'long', 'longus'], ['kurz', 'short', 'court', 'brevis'], ['hoch', 'high', 'haut', 'altus'], ['tief', 'deep', 'profond', 'profundus'],
+        ['breit', 'wide', 'large', 'latus'], ['schwer', 'heavy', 'lourd', 'gravis'], ['voll', 'full', 'plein', 'plenus'], ['leer', 'empty', 'vide', 'vacuus'],
+        ['reich', 'rich', 'riche', 'dives'], ['arm', 'poor', 'pauvre', 'pauper'], ['jung', 'young', 'jeune', 'iuvenis'], ['wahr', 'true', 'vrai', 'verus'],
+        ['falsch', 'false', 'faux', 'falsus'], ['schoen', 'beautiful', 'beau', 'pulcher'], ['klug', 'clever', 'intelligent', 'sapiens'], ['mutig', 'brave', 'courageux', 'audax'],
+        ['Wahrheit', 'truth', 'verite', 'veritas'], ['Freiheit', 'freedom', 'liberte', 'libertas'], ['Liebe', 'love', 'amour', 'amor'], ['Angst', 'fear', 'peur', 'timor'],
+        ['Hoffnung', 'hope', 'espoir', 'spes'], ['Mut', 'courage', 'courage', 'virtus'], ['Macht', 'power', 'puissance', 'potestas'], ['Ehre', 'honour', 'honneur', 'honor'],
+        ['Glueck', 'luck', 'chance', 'fortuna'], ['Tod', 'death', 'mort', 'mors'], ['Seele', 'soul', 'ame', 'anima'], ['Geist', 'spirit', 'esprit', 'spiritus'],
+        ['Wille', 'will', 'volonte', 'voluntas'], ['Vernunft', 'reason', 'raison', 'ratio'], ['Kunst', 'art', 'art', 'ars'], ['Natur', 'nature', 'nature', 'natura']
     ];
 
     function translationFor(language, semanticRow) {
@@ -484,24 +555,45 @@
     function makeVocabItems(language, classId, count) {
         const out = [];
         const grade = CLASS_NO[classId];
-        const startNumber = (grade - 5) * 100;
-        for (let index = 0; index < count; index++) {
-            if (index < 100) {
-                const number = startNumber + index;
-                const word = numberWord(language, number);
-                out.push(vocabItem(language, classId, `Welche Zahl bedeutet <code>${escapeHtml(word)}</code>?`, String(number), 'Zahlenwort', 'numbers'));
+        // --- Zahlwoerter: KEINE sequentielle 0,1,2,...-Reihe mehr (das war der vom
+        // Nutzer bemaengelte "Zahlenstrahl"-Effekt). Stattdessen durchmischte,
+        // klassen-progressive Zahlen aus [0, ceil] (hoehere Klasse = groesserer
+        // Bereich), reproduzierbar ueber einen seed-basierten Shuffle. ---
+        const ceil = gradeNumberCeil(grade);
+        const numbers = pickDistinctNumbers(hashSeed(language + classId + 'numbers'), ceil, 100);
+        numbers.forEach((number, i) => {
+            const word = numberWord(language, number);
+            // Kleiner Anteil "Ziffer -> Zahlwort" fuer runde/kleine Zahlen (gut tippbar);
+            // sonst "Zahlwort -> Ziffer" (Antwort als Ziffer ist immer eindeutig).
+            if (i % 5 === 4 && (number <= 20 || number % 10 === 0)) {
+                out.push(vocabItem(language, classId,
+                    `Schreibe die Zahl <code>${number}</code> als Zahlwort auf ${languageLabel(language)}.`,
+                    word, 'Zahlenwort', 'numbers'));
             } else {
-                const semanticIndex = (index - 100 + (grade - 5) * 17) % SEMANTIC_VOCAB.length;
-                const row = SEMANTIC_VOCAB[semanticIndex];
-                const target = translationFor(language, row);
-                const german = row[0];
-                if (index % 2 === 0) {
-                    out.push(vocabItem(language, classId, `Uebersetze ins Deutsche: <code>${escapeHtml(target)}</code>`, german, 'Grundwortschatz', 'vocab'));
-                } else {
-                    out.push(vocabItem(language, classId, `Uebersetze in ${languageLabel(language)}: <code>${escapeHtml(german)}</code>`, target, 'Grundwortschatz', 'vocab'));
-                }
+                out.push(vocabItem(language, classId,
+                    `Welche Zahl bedeutet <code>${escapeHtml(word)}</code>? (Antwort als Ziffer)`,
+                    String(number), 'Zahlenwort', 'numbers'));
             }
-        }
+        });
+        // --- Grundwortschatz: Sliding-Window pro Klasse statt fuer ALLE Klassen
+        // identischer Liste (vorher ~96 % Ueberlappung k5 vs k10). Hoehere Klassen
+        // rutschen in abstraktere Begriffe; k5 und k10 teilen damit kaum noch Wortschatz. ---
+        const L = SEMANTIC_VOCAB.length;
+        const windowSize = 100;
+        const slide = Math.max(1, Math.floor((L - windowSize) / 5)); // verteilt k5..k10
+        const startIdx = (grade - 5) * slide;
+        const windowRows = [];
+        for (let k = 0; k < windowSize; k++) windowRows.push(SEMANTIC_VOCAB[(startIdx + k) % L]);
+        const shuffledRows = deterministicShuffle(windowRows, hashSeed(language + classId + 'vocab'));
+        shuffledRows.forEach((row, i) => {
+            const target = translationFor(language, row);
+            const german = row[0];
+            if (i % 2 === 0) {
+                out.push(vocabItem(language, classId, `Uebersetze ins Deutsche: <code>${escapeHtml(target)}</code>`, german, 'Grundwortschatz', 'vocab'));
+            } else {
+                out.push(vocabItem(language, classId, `Uebersetze in ${languageLabel(language)}: <code>${escapeHtml(german)}</code>`, target, 'Grundwortschatz', 'vocab'));
+            }
+        });
         return out;
     }
 
@@ -523,112 +615,212 @@
 
     function englishGrammarItem(classId, index) {
         const grade = CLASS_NO[classId];
-        const variant = index % 10;
-        const verbs = [['go', 'goes', 'went', 'gone'], ['play', 'plays', 'played', 'played'], ['read', 'reads', 'read', 'read'], ['write', 'writes', 'wrote', 'written'], ['see', 'sees', 'saw', 'seen'], ['make', 'makes', 'made', 'made'], ['take', 'takes', 'took', 'taken'], ['come', 'comes', 'came', 'come']];
-        const nouns = [['box', 'boxes'], ['city', 'cities'], ['child', 'children'], ['friend', 'friends'], ['story', 'stories'], ['bus', 'buses'], ['knife', 'knives'], ['day', 'days']];
-        const row = verbs[index % verbs.length];
-        const noun = nouns[index % nouns.length];
-        let question;
-        let answer;
-        let formula;
+        // Voll konjugierte Tabellen (inkl. ing-Form) -> Inhalt variiert mit dem Index,
+        // statt nur 3 fixe Saetze pro Klasse zu wiederholen. Intransitive Verben werden
+        // nie im Passiv verwendet (eigene transitive Tabelle TV).
+        const V = [
+            ['go', 'goes', 'went', 'gone', 'going'], ['play', 'plays', 'played', 'played', 'playing'],
+            ['read', 'reads', 'read', 'read', 'reading'], ['work', 'works', 'worked', 'worked', 'working'],
+            ['come', 'comes', 'came', 'come', 'coming'], ['run', 'runs', 'ran', 'run', 'running'],
+            ['swim', 'swims', 'swam', 'swum', 'swimming'], ['sing', 'sings', 'sang', 'sung', 'singing'],
+            ['live', 'lives', 'lived', 'lived', 'living'], ['travel', 'travels', 'travelled', 'travelled', 'travelling'],
+            ['start', 'starts', 'started', 'started', 'starting'], ['arrive', 'arrives', 'arrived', 'arrived', 'arriving']
+        ];
+        const TV = [['write', 'written'], ['read', 'read'], ['make', 'made'], ['take', 'taken'], ['give', 'given'], ['find', 'found'], ['build', 'built'], ['paint', 'painted'], ['clean', 'cleaned'], ['send', 'sent'], ['buy', 'bought'], ['bring', 'brought']];
+        const N = [['box', 'boxes'], ['city', 'cities'], ['child', 'children'], ['man', 'men'], ['woman', 'women'], ['foot', 'feet'], ['leaf', 'leaves'], ['bus', 'buses'], ['story', 'stories'], ['knife', 'knives'], ['tooth', 'teeth'], ['mouse', 'mice']];
+        const A = [['big', 'bigger', 'biggest'], ['small', 'smaller', 'smallest'], ['fast', 'faster', 'fastest'], ['happy', 'happier', 'happiest'], ['easy', 'easier', 'easiest'], ['large', 'larger', 'largest'], ['nice', 'nicer', 'nicest'], ['old', 'older', 'oldest'], ['young', 'younger', 'youngest'], ['clever', 'cleverer', 'cleverest']];
+        const ART = [['apple', 'an'], ['book', 'a'], ['orange', 'an'], ['car', 'a'], ['egg', 'an'], ['house', 'a'], ['idea', 'an'], ['table', 'a']];
+        const NOM = [['decide', 'decision'], ['inform', 'information'], ['arrive', 'arrival'], ['develop', 'development'], ['describe', 'description'], ['discuss', 'discussion'], ['explain', 'explanation'], ['produce', 'production'], ['educate', 'education'], ['invent', 'invention']];
+        const R = '<p><strong>Regel.</strong> ';
+        let tpl;
         if (grade <= 5) {
-            if (variant < 3) { question = `Setze die richtige simple-present-Form ein: He ___ (${row[0]}).`; answer = row[1]; formula = '<p><strong>Regel.</strong> Simple Present, 3. Person Singular: Verb + s/es.</p>'; }
-            else if (variant < 6) { question = `Bilde den Plural von <code>${noun[0]}</code>.`; answer = noun[1]; formula = '<p><strong>Regel.</strong> Regelplural -s/-es; manche Woerter sind unregelmaessig.</p>'; }
-            else { question = `Setze den Artikel ein: ___ apple.`; answer = 'an'; formula = '<p><strong>Regel.</strong> Vor Vokallaut steht im Singular meist <code>an</code>.</p>'; }
+            tpl = [
+                j => { const v = V[j % V.length]; return { q: `Simple Present: She ___ (${v[0]}) every day.`, a: v[1], f: R + 'Simple Present, 3. Person Singular: Verb + -s/-es.</p>' }; },
+                j => { const n = N[j % N.length]; return { q: `Bilde den Plural von <code>${n[0]}</code>.`, a: n[1], f: R + 'Plural meist -s/-es; einige Woerter sind unregelmaessig.</p>' }; },
+                j => { const a = ART[j % ART.length]; return { q: `Setze a oder an ein: ___ ${a[0]}.`, a: a[1], f: R + 'Vor Vokallaut steht im Singular meist <code>an</code>.</p>' }; },
+                j => { const v = V[(j + 2) % V.length]; return { q: `Frage im Simple Present: ___ she ${v[0]}? (Do/Does)`, a: 'does', f: R + 'Fragen mit Do/Does + Subjekt + Infinitiv.</p>' }; },
+                j => { const n = N[(j + 1) % N.length]; return { q: `Setze is oder are ein: The ${n[1]} ___ here.`, a: 'are', f: R + 'Plural-Subjekt: are; Singular: is.</p>' }; }
+            ];
         } else if (grade === 6) {
-            if (variant < 4) { question = `Setze Simple Past ein: Yesterday I ___ (${row[0]}).`; answer = row[2]; formula = '<p><strong>Regel.</strong> Simple Past: regelmaessig -ed, unregelmaessig lernen.</p>'; }
-            else if (variant < 7) { question = `Setze Present Progressive ein: I am ___ (${row[0]}).`; answer = row[0].replace(/e$/, '') + 'ing'; formula = '<p><strong>Regel.</strong> am/is/are + Verb-ing.</p>'; }
-            else { question = 'Komparativ von <code>big</code>?'; answer = 'bigger'; formula = '<p><strong>Regel.</strong> Kurze Adjektive: -er, bei kurzer betonter Silbe Konsonant verdoppeln.</p>'; }
+            tpl = [
+                j => { const v = V[j % V.length]; return { q: `Simple Past: Yesterday she ___ (${v[0]}).`, a: v[2], f: R + 'Simple Past: regelmaessig -ed, unregelmaessige Formen lernen.</p>' }; },
+                j => { const v = V[(j + 3) % V.length]; return { q: `Present Progressive: Look! He is ___ (${v[0]}).`, a: v[4], f: R + 'am/is/are + Verb-ing.</p>' }; },
+                j => { const a = A[j % A.length]; return { q: `Komparativ von <code>${a[0]}</code>.`, a: a[1], f: R + 'Kurze Adjektive: -er (ggf. Konsonant verdoppeln).</p>' }; },
+                j => { const a = A[(j + 2) % A.length]; return { q: `Superlativ von <code>${a[0]}</code>.`, a: a[2], f: R + 'Kurze Adjektive: the + -est.</p>' }; },
+                j => { const v = V[(j + 1) % V.length]; return { q: `Frage im Simple Past: ___ you ${v[0]} yesterday? (Did/Do)`, a: 'did', f: R + 'Fragen im Simple Past: Did + Subjekt + Infinitiv.</p>' }; }
+            ];
         } else if (grade === 7) {
-            if (variant < 4) { question = `Setze Present Perfect ein: I have ___ (${row[0]}).`; answer = row[3]; formula = '<p><strong>Regel.</strong> Present Perfect: have/has + past participle.</p>'; }
-            else if (variant < 7) { question = 'Relativpronomen fuer Personen: the girl ___ lives next door.'; answer = 'who'; formula = '<p><strong>Regel.</strong> Relative clauses: people -> who, things -> which/that.</p>'; }
-            else { question = 'Zukunft mit Plan: I am ___ to visit London.'; answer = 'going'; formula = '<p><strong>Regel.</strong> going-to future fuer Plaene/Absichten.</p>'; }
+            tpl = [
+                j => { const v = V[j % V.length]; return { q: `Present Perfect: I have ___ (${v[0]}).`, a: v[3], f: R + 'Present Perfect: have/has + past participle.</p>' }; },
+                j => { const v = V[(j + 4) % V.length]; return { q: `going-to future: I am ___ to ${v[0]} tomorrow.`, a: 'going', f: R + 'going-to future fuer Plaene/Absichten.</p>' }; },
+                j => { const who = ['man', 'woman', 'child', 'teacher'][j % 4]; return { q: `Relativpronomen fuer Personen: The ${who} ___ helps me is kind.`, a: 'who', f: R + 'people -> who, things -> which/that.</p>' }; },
+                j => { const a = A[j % A.length]; return { q: `Vergleich mit Komparativ: She is ${a[1]} ___ me.`, a: 'than', f: R + 'Komparativ + than im Vergleich.</p>' }; },
+                j => { const v = V[(j + 2) % V.length]; return { q: `Present-Perfect-Frage: ___ you ever ${v[3]} there? (Have/Has)`, a: 'have', f: R + 'Have/Has + Subjekt + past participle.</p>' }; }
+            ];
         } else if (grade === 8) {
-            if (variant < 4) { question = `Passiv: The book is ___ (write) by her.`; answer = 'written'; formula = '<p><strong>Regel.</strong> Passive: be + past participle.</p>'; }
-            else if (variant < 7) { question = 'Setze Gerund nach enjoy: I enjoy ___ football.'; answer = 'playing'; formula = '<p><strong>Regel.</strong> Nach enjoy folgt Gerund (-ing).</p>'; }
-            else { question = 'If-clause type I: If it rains, I ___ stay home.'; answer = 'will'; formula = '<p><strong>Regel.</strong> If I: if + simple present, main clause mit will.</p>'; }
+            tpl = [
+                j => { const tv = TV[j % TV.length]; return { q: `Passiv (Present): The work is ___ (${tv[0]}).`, a: tv[1], f: R + 'Passive: be + past participle.</p>' }; },
+                j => { const v = V[(j + 3) % V.length]; return { q: `Gerund nach enjoy: I enjoy ___ (${v[0]}).`, a: v[4], f: R + 'Nach enjoy/like/avoid folgt Gerund (-ing).</p>' }; },
+                j => { const v = V[(j + 1) % V.length]; return { q: `First Conditional: If it rains, we ___ ${v[0]} later.`, a: 'will', f: R + 'If I: if + Simple Present, Hauptsatz mit will.</p>' }; },
+                j => { const v = V[(j + 5) % V.length]; return { q: `Modalverb der Pflicht: You ___ ${v[0]} now.`, a: 'must', f: R + 'must drueckt starke Pflicht aus.</p>' }; },
+                j => { const tv = TV[(j + 2) % TV.length]; return { q: `Passiv (Past): The house was ___ (${tv[0]}).`, a: tv[1], f: R + 'Passive Past: was/were + past participle.</p>' }; }
+            ];
         } else if (grade === 9) {
-            if (variant < 4) { question = 'Reported speech: He said, "I am tired." -> He said he ___ tired.'; answer = 'was'; formula = '<p><strong>Regel.</strong> Backshift: am/is -> was.</p>'; }
-            else if (variant < 7) { question = 'If-clause type II: If I had time, I ___ travel.'; answer = 'would'; formula = '<p><strong>Regel.</strong> If II: if + simple past, main clause would + infinitive.</p>'; }
-            else { question = 'Modal verb fuer Pflicht: You ___ wear a helmet.'; answer = 'must'; formula = '<p><strong>Regel.</strong> must drueckt starke Pflicht aus.</p>'; }
+            tpl = [
+                j => { const v = V[j % V.length]; return { q: `Reported speech (Backshift): "I ${v[2]} home." -> He said he ___ ${v[3]} home.`, a: 'had', f: R + 'Simple Past wird im Reported Speech zu Past Perfect (had + pp).</p>' }; },
+                j => { const v = V[(j + 2) % V.length]; return { q: `Second Conditional: If I had time, I ___ ${v[0]}.`, a: 'would', f: R + 'If II: if + Simple Past, Hauptsatz would + Infinitiv.</p>' }; },
+                j => { const v = V[(j + 4) % V.length]; return { q: `Past Perfect: After she had ___ (${v[0]}), she left.`, a: v[3], f: R + 'Past Perfect: had + past participle.</p>' }; },
+                j => { const a = A[j % A.length]; return { q: `Reported speech: He said it was ___ (Komparativ von ${a[0]}).`, a: a[1], f: R + 'Komparativ bleibt im Reported Speech erhalten.</p>' }; },
+                j => { const v = V[(j + 1) % V.length]; return { q: `Modal der sicheren Vermutung: She ___ ${v[0]} a lot (logischer Schluss).`, a: 'must', f: R + 'must drueckt sichere Vermutung aus.</p>' }; }
+            ];
         } else {
-            if (variant < 4) { question = 'If-clause type III: If I had studied, I ___ have passed.'; answer = 'would'; formula = '<p><strong>Regel.</strong> If III: if + past perfect, would have + past participle.</p>'; }
-            else if (variant < 7) { question = 'Nominalisierung: decide -> ___'; answer = 'decision'; formula = '<p><strong>Regel.</strong> Wortbildung: Verb -> Nomen, haeufig -ion/-ment/-ance.</p>'; }
-            else { question = 'Formal synonym for <code>start</code>.'; answer = 'begin'; formula = '<p><strong>Merksatz.</strong> Registerwechsel: formeller Stil nutzt praezisere Verben.</p>'; }
+            tpl = [
+                j => { const v = V[j % V.length]; return { q: `Third Conditional: If I had ___ (${v[0]}) earlier, I would have won.`, a: v[3], f: R + 'If III: if + Past Perfect, would have + past participle.</p>' }; },
+                j => { const nm = NOM[j % NOM.length]; return { q: `Nominalisierung: ${nm[0]} -> ___`, a: nm[1], f: R + 'Verb -> Nomen, haeufig -ion/-ment/-al.</p>' }; },
+                j => { const tv = TV[(j + 3) % TV.length]; return { q: `Passiv mit Modal: It must be ___ (${tv[0]}) today.`, a: tv[1], f: R + 'Modal + be + past participle.</p>' }; },
+                j => { const nm = NOM[(j + 2) % NOM.length]; return { q: `Wortbildung: Nomen zu <code>${nm[0]}</code>?`, a: nm[1], f: R + 'Typische Endungen: -ion, -ment, -ance.</p>' }; },
+                j => { const v = V[(j + 1) % V.length]; return { q: `Mixed Conditional: If I had ___ (${v[0]}) then, I would be happy now.`, a: v[3], f: R + 'Mixed Conditional: Past Perfect im if-Satz, would + Infinitiv im Hauptsatz.</p>' }; }
+            ];
         }
-        return item(`Englisch Klasse ${grade} Grammatik ${index + 1}: ${question}`, answer, formula, solutionFor(answer, sourceForLanguage('englisch', 'grammar')), 'grammar');
+        const built = tpl[index % tpl.length](Math.floor(index / tpl.length));
+        return item(`Englisch Klasse ${grade} Grammatik ${index + 1}: ${built.q}`, built.a, built.f, solutionFor(built.a, sourceForLanguage('englisch', 'grammar')), 'grammar');
     }
 
     function frenchGrammarItem(classId, index) {
         const grade = CLASS_NO[classId];
-        const variant = index % 10;
-        const erVerbs = [['parler', 'parle'], ['jouer', 'joue'], ['aimer', 'aime'], ['regarder', 'regarde'], ['travailler', 'travaille'], ['habiter', 'habite']];
-        const row = erVerbs[index % erVerbs.length];
-        let question;
-        let answer;
-        let formula;
+        // Regelmaessige -er-Verben -> alle Formen programmatisch korrekt ableitbar.
+        // [Infinitiv, je/il-Form (= Schreibung des participe passe)].
+        const ER = [['parler', 'parle'], ['jouer', 'joue'], ['aimer', 'aime'], ['regarder', 'regarde'], ['travailler', 'travaille'], ['habiter', 'habite'], ['chanter', 'chante'], ['donner', 'donne'], ['porter', 'porte'], ['chercher', 'cherche'], ['trouver', 'trouve'], ['ecouter', 'ecoute']];
+        const ADJ = [['petit', 'petite'], ['grand', 'grande'], ['vert', 'verte'], ['noir', 'noire'], ['joli', 'jolie'], ['fort', 'forte'], ['lourd', 'lourde'], ['froid', 'froide'], ['haut', 'haute'], ['lent', 'lente']];
+        const NOUN = [['ami', 'amis'], ['livre', 'livres'], ['chat', 'chats'], ['maison', 'maisons'], ['enfant', 'enfants'], ['fille', 'filles'], ['table', 'tables'], ['jardin', 'jardins']];
+        const R = '<p><strong>Regel.</strong> ';
+        const stem = er => er[1].replace(/e$/, '');
+        let tpl;
         if (grade <= 5) {
-            if (variant < 4) { question = `Setze die je-Form von <code>${row[0]}</code>: je ___`; answer = row[1]; formula = '<p><strong>Regel.</strong> Verben auf -er: je -e, tu -es, il/elle -e.</p>'; }
-            else if (variant < 7) { question = 'Unbestimmter Artikel maskulin Singular: ___ garcon.'; answer = 'un'; formula = '<p><strong>Regel.</strong> un = ein (maskulin), une = eine (feminin).</p>'; }
-            else { question = 'Bestimmter Artikel Plural: ___ amis.'; answer = 'les'; formula = '<p><strong>Regel.</strong> le/la/l\' im Singular, les im Plural.</p>'; }
+            tpl = [
+                j => { const er = ER[j % ER.length]; return { q: `Konjugiere Praesens (je) von <code>${er[0]}</code>: je ___.`, a: er[1], f: R + 'Verben auf -er: je -e, tu -es, il/elle -e.</p>' }; },
+                j => { const er = ER[(j + 2) % ER.length]; return { q: `Konjugiere Praesens (tu) von <code>${er[0]}</code>: tu ___.`, a: er[1] + 's', f: R + '-er-Verben, 2. Person Singular: -es.</p>' }; },
+                j => { const er = ER[(j + 4) % ER.length]; return { q: `Konjugiere Praesens (nous) von <code>${er[0]}</code>: nous ___.`, a: stem(er) + 'ons', f: R + '-er-Verben, 1. Person Plural: -ons.</p>' }; },
+                j => { const n = NOUN[j % NOUN.length]; return { q: `Bestimmter Artikel Plural: ___ ${n[1]}.`, a: 'les', f: R + 'le/la/l\' im Singular, les im Plural.</p>' }; },
+                j => { const er = ER[(j + 1) % ER.length]; return { q: `Verneinung: Je ___ ${er[1]} pas.`, a: 'ne', f: R + 'ne ... pas umklammert das konjugierte Verb.</p>' }; }
+            ];
         } else if (grade === 6) {
-            if (variant < 4) { question = 'Passe compose mit avoir: J\'ai ___ (parler).'; answer = 'parle'; formula = '<p><strong>Regel.</strong> Passe compose: avoir + participe passe; -er -> -e.</p>'; }
-            else if (variant < 7) { question = 'Adjektiv feminin von <code>petit</code>.'; answer = 'petite'; formula = '<p><strong>Regel.</strong> Viele feminine Adjektive erhalten -e.</p>'; }
-            else { question = 'Verneinung: Je ___ parle pas.'; answer = 'ne'; formula = '<p><strong>Regel.</strong> ne ... pas umklammert das konjugierte Verb.</p>'; }
+            tpl = [
+                j => { const er = ER[j % ER.length]; return { q: `Passe compose: J'ai ___ (${er[0]}).`, a: er[1], f: R + 'Passe compose: avoir + participe passe; -er -> -e.</p>' }; },
+                j => { const a = ADJ[j % ADJ.length]; return { q: `Adjektiv feminin von <code>${a[0]}</code>.`, a: a[1], f: R + 'Viele feminine Adjektive erhalten -e.</p>' }; },
+                j => { const er = ER[(j + 3) % ER.length]; return { q: `Verneinung: Je ne ${er[1]} ___.`, a: 'pas', f: R + 'ne ... pas umschliesst das konjugierte Verb.</p>' }; },
+                j => { const er = ER[(j + 1) % ER.length]; return { q: `Konjugiere Praesens (ils) von <code>${er[0]}</code>: ils ___.`, a: stem(er) + 'ent', f: R + '-er-Verben, 3. Person Plural: -ent (Endung stumm).</p>' }; },
+                j => { const n = NOUN[j % NOUN.length]; return { q: `Unbestimmter Artikel Plural: ___ ${n[1]}.`, a: 'des', f: R + 'des ist der unbestimmte Artikel im Plural.</p>' }; }
+            ];
         } else if (grade === 7) {
-            if (variant < 4) { question = 'Futur proche: Je ___ manger.'; answer = 'vais'; formula = '<p><strong>Regel.</strong> aller + Infinitiv bildet die nahe Zukunft.</p>'; }
-            else if (variant < 7) { question = 'Objektpronomen fuer "ihn/es" vor dem Verb.'; answer = 'le'; formula = '<p><strong>Regel.</strong> le/la/les stehen vor dem konjugierten Verb.</p>'; }
-            else { question = 'Teilungsartikel vor maskulinem Nomen: Je mange ___ pain.'; answer = 'du'; formula = '<p><strong>Regel.</strong> du/de la/de l\'/des druecken unbestimmte Menge aus.</p>'; }
+            tpl = [
+                j => { const er = ER[j % ER.length]; return { q: `Futur proche: Je ___ ${er[0]}.`, a: 'vais', f: R + 'aller + Infinitiv bildet die nahe Zukunft.</p>' }; },
+                j => { const er = ER[(j + 2) % ER.length]; return { q: `Futur proche (nous): Nous ___ ${er[0]}.`, a: 'allons', f: R + 'aller (nous allons) + Infinitiv.</p>' }; },
+                j => { return { q: `Teilungsartikel vor maskulinem Nomen: Je mange ___ pain.`, a: 'du', f: R + 'du/de la/de l\'/des druecken eine unbestimmte Menge aus.</p>' }; },
+                j => { const er = ER[(j + 1) % ER.length]; return { q: `Imperativ (tu) von <code>${er[0]}</code> (ohne -s): ___ !`, a: er[1], f: R + 'Imperativ tu der -er-Verben ohne Schluss-s.</p>' }; },
+                j => { const er = ER[(j + 3) % ER.length]; return { q: `Konjugiere Praesens (vous) von <code>${er[0]}</code>: vous ___.`, a: stem(er) + 'ez', f: R + '-er-Verben, 2. Person Plural: -ez.</p>' }; }
+            ];
         } else if (grade === 8) {
-            if (variant < 4) { question = 'Imparfait von etre, je-Form: j\'___'; answer = 'etais'; formula = '<p><strong>Regel.</strong> Imparfait-Stamm von nous-Form, Endung -ais/-ais/-ait...</p>'; }
-            else if (variant < 7) { question = 'Relativpronomen fuer Subjekt: la fille ___ parle.'; answer = 'qui'; formula = '<p><strong>Regel.</strong> qui ist Subjekt, que ist direktes Objekt.</p>'; }
-            else { question = 'Komparativ: plus grand ___ moi.'; answer = 'que'; formula = '<p><strong>Regel.</strong> Vergleich: plus/moins/aussi + Adjektiv + que.</p>'; }
+            tpl = [
+                j => { const er = ER[j % ER.length]; return { q: `Imparfait (je) von <code>${er[0]}</code>: je ___.`, a: stem(er) + 'ais', f: R + 'Imparfait: Stamm der nous-Form + -ais/-ait/-ions...</p>' }; },
+                j => { const er = ER[(j + 2) % ER.length]; return { q: `Imparfait (il) von <code>${er[0]}</code>: il ___.`, a: stem(er) + 'ait', f: R + 'Imparfait 3. Person Singular: -ait.</p>' }; },
+                j => { return { q: `Relativpronomen fuer das Subjekt: la fille ___ parle.`, a: 'qui', f: R + 'qui ist Subjekt, que ist direktes Objekt.</p>' }; },
+                j => { const a = ADJ[j % ADJ.length]; return { q: `Vergleich (mehr ... als): plus ${a[0]} ___ moi.`, a: 'que', f: R + 'plus/moins/aussi + Adjektiv + que.</p>' }; },
+                j => { const er = ER[(j + 1) % ER.length]; return { q: `Imparfait (nous) von <code>${er[0]}</code>: nous ___.`, a: stem(er) + 'ions', f: R + 'Imparfait 1. Person Plural: -ions.</p>' }; }
+            ];
         } else if (grade === 9) {
-            if (variant < 4) { question = 'Conditionnel von vouloir, je-Form: je ___'; answer = 'voudrais'; formula = '<p><strong>Regel.</strong> Conditionnel: Futur-Stamm + Imparfait-Endung.</p>'; }
-            else if (variant < 7) { question = 'Subjonctif-Ausloeser: Il faut que tu ___ (etre) prudent.'; answer = 'sois'; formula = '<p><strong>Regel.</strong> Il faut que + subjonctif.</p>'; }
-            else { question = 'Pronomen fuer "dorthin/darauf": j\'___ vais.'; answer = 'y'; formula = '<p><strong>Regel.</strong> y ersetzt Ortsangaben oder a + Sache.</p>'; }
+            tpl = [
+                j => { const er = ER[j % ER.length]; return { q: `Conditionnel (je) von <code>${er[0]}</code>: je ___.`, a: er[0] + 'ais', f: R + 'Conditionnel: Infinitiv + Imparfait-Endung (-ais).</p>' }; },
+                j => { const er = ER[(j + 2) % ER.length]; return { q: `Conditionnel (il) von <code>${er[0]}</code>: il ___.`, a: er[0] + 'ait', f: R + 'Conditionnel 3. Person Singular: Infinitiv + -ait.</p>' }; },
+                j => { return { q: `Subjonctif-Ausloeser: Il faut que tu ___ (etre) prudent.`, a: 'sois', f: R + 'Il faut que + subjonctif (etre -> sois).</p>' }; },
+                j => { return { q: `Pronomen fuer "dorthin/darauf": j'___ vais.`, a: 'y', f: R + 'y ersetzt Ortsangaben oder a + Sache.</p>' }; },
+                j => { const er = ER[(j + 1) % ER.length]; return { q: `Conditionnel (nous) von <code>${er[0]}</code>: nous ___.`, a: er[0] + 'ions', f: R + 'Conditionnel 1. Person Plural: Infinitiv + -ions.</p>' }; }
+            ];
         } else {
-            if (variant < 4) { question = 'Plus-que-parfait: J\'avais ___ (manger).'; answer = 'mange'; formula = '<p><strong>Regel.</strong> Plus-que-parfait: Imparfait von avoir/etre + participe passe.</p>'; }
-            else if (variant < 7) { question = 'Pronomen fuer "davon": j\'___ ai deux.'; answer = 'en'; formula = '<p><strong>Regel.</strong> en ersetzt de + Nomen/Mengenangaben.</p>'; }
-            else { question = 'Futur simple von aller, je-Form: j\'___'; answer = 'irai'; formula = '<p><strong>Regel.</strong> Futur simple: Stamm + ai/as/a/ons/ez/ont; aller -> ir-.</p>'; }
+            tpl = [
+                j => { const er = ER[j % ER.length]; return { q: `Plus-que-parfait: J'avais ___ (${er[0]}).`, a: er[1], f: R + 'Plus-que-parfait: Imparfait von avoir/etre + participe passe.</p>' }; },
+                j => { return { q: `Pronomen fuer "davon": j'___ ai deux.`, a: 'en', f: R + 'en ersetzt de + Nomen/Mengenangaben.</p>' }; },
+                j => { const er = ER[j % ER.length]; return { q: `Futur simple (je) von <code>${er[0]}</code>: je ___.`, a: er[0] + 'ai', f: R + 'Futur simple: Infinitiv + ai/as/a/ons/ez/ont.</p>' }; },
+                j => { const er = ER[(j + 2) % ER.length]; return { q: `Futur simple (ils) von <code>${er[0]}</code>: ils ___.`, a: er[0] + 'ont', f: R + 'Futur simple 3. Person Plural: Infinitiv + -ont.</p>' }; },
+                j => { const er = ER[(j + 1) % ER.length]; return { q: `Subjonctif (que je) von <code>${er[0]}</code>: que je ___.`, a: er[1], f: R + 'Subjonctif der -er-Verben (que je): wie Praesens je -e.</p>' }; }
+            ];
         }
-        return item(`Franzoesisch Klasse ${grade} Grammatik ${index + 1}: ${question}`, answer, formula, solutionFor(answer, sourceForLanguage('franzoesisch', 'grammar')), 'grammar');
+        const built = tpl[index % tpl.length](Math.floor(index / tpl.length));
+        return item(`Franzoesisch Klasse ${grade} Grammatik ${index + 1}: ${built.q}`, built.a, built.f, solutionFor(built.a, sourceForLanguage('franzoesisch', 'grammar')), 'grammar');
     }
 
     function latinGrammarItem(classId, index) {
         const grade = CLASS_NO[classId];
-        const variant = index % 10;
-        const nouns = [['servus', 'servi', 'servum', 'servo'], ['puella', 'puellae', 'puellam', 'puella'], ['templum', 'templi', 'templum', 'templo'], ['amicus', 'amici', 'amicum', 'amico']];
-        const noun = nouns[index % nouns.length];
-        let question;
-        let answer;
-        let formula;
+        // Explizite Kasus-Tabellen (nom,gen,acc,abl Sg.) -> jede Form ist hinterlegt,
+        // daher keine fehleranfaellige Ableitung (auch Neutra korrekt). Die
+        // a-Konjugation ist regelmaessig genug fuer programmatische Formen.
+        const NA = [
+            ['rosa', 'rosae', 'rosam', 'rosa'], ['puella', 'puellae', 'puellam', 'puella'], ['terra', 'terrae', 'terram', 'terra'],
+            ['via', 'viae', 'viam', 'via'], ['aqua', 'aquae', 'aquam', 'aqua'], ['silva', 'silvae', 'silvam', 'silva'],
+            ['servus', 'servi', 'servum', 'servo'], ['amicus', 'amici', 'amicum', 'amico'], ['dominus', 'domini', 'dominum', 'domino'],
+            ['templum', 'templi', 'templum', 'templo'], ['bellum', 'belli', 'bellum', 'bello'], ['verbum', 'verbi', 'verbum', 'verbo']
+        ];
+        const VA = [
+            ['amare', 'amo', 'amat', 'amavi', 'amatus', 'amandus'], ['laudare', 'laudo', 'laudat', 'laudavi', 'laudatus', 'laudandus'],
+            ['portare', 'porto', 'portat', 'portavi', 'portatus', 'portandus'], ['vocare', 'voco', 'vocat', 'vocavi', 'vocatus', 'vocandus'],
+            ['parare', 'paro', 'parat', 'paravi', 'paratus', 'parandus'], ['spectare', 'specto', 'spectat', 'spectavi', 'spectatus', 'spectandus'],
+            ['narrare', 'narro', 'narrat', 'narravi', 'narratus', 'narrandus'], ['curare', 'curo', 'curat', 'curavi', 'curatus', 'curandus'],
+            ['pugnare', 'pugno', 'pugnat', 'pugnavi', 'pugnatus', 'pugnandus'], ['servare', 'servo', 'servat', 'servavi', 'servatus', 'servandus'],
+            ['clamare', 'clamo', 'clamat', 'clamavi', 'clamatus', 'clamandus'], ['monstrare', 'monstro', 'monstrat', 'monstravi', 'monstratus', 'monstrandus']
+        ];
+        const R = '<p><strong>Regel.</strong> ';
+        let tpl;
         if (grade <= 5) {
-            if (variant < 4) { question = `Bestimme den Nominativ Singular zu <code>${noun[1]}</code> (Genitiv Singular ist gegeben).`; answer = noun[0]; formula = '<p><strong>Regel.</strong> Grundform im Woerterbuch: Nominativ Singular + Genitiv Singular + Genus.</p>'; }
-            else if (variant < 7) { question = `Akkusativ Singular von <code>${noun[0]}</code>?`; answer = noun[2]; formula = '<p><strong>Regel.</strong> Akkusativ Singular haeufig -m.</p>'; }
-            else { question = '1. Person Singular Praesens von <code>amare</code>.'; answer = 'amo'; formula = '<p><strong>Regel.</strong> a-Konjugation Praesens: amo, amas, amat...</p>'; }
+            tpl = [
+                j => { const n = NA[j % NA.length]; return { q: `Nominativ Singular zum Genitiv <code>${n[1]}</code>?`, a: n[0], f: R + 'Woerterbuch-Grundform: Nominativ + Genitiv Singular + Genus.</p>' }; },
+                j => { const n = NA[(j + 3) % NA.length]; return { q: `Akkusativ Singular von <code>${n[0]}</code>?`, a: n[2], f: R + 'Akkusativ Singular endet haeufig auf -m.</p>' }; },
+                j => { const v = VA[j % VA.length]; return { q: `1. Person Singular Praesens von <code>${v[0]}</code>.`, a: v[1], f: R + 'a-Konjugation Praesens: amo, amas, amat...</p>' }; },
+                j => { const n = NA[(j + 1) % NA.length]; return { q: `Genitiv Singular von <code>${n[0]}</code>?`, a: n[1], f: R + 'Der Genitiv Singular zeigt die Deklination an.</p>' }; },
+                j => { const v = VA[(j + 2) % VA.length]; return { q: `3. Person Singular Praesens von <code>${v[0]}</code>.`, a: v[2], f: R + 'a-Konjugation 3. Person Singular: -at.</p>' }; }
+            ];
         } else if (grade === 6) {
-            if (variant < 4) { question = `Ablativ Singular von <code>${noun[0]}</code>?`; answer = noun[3]; formula = '<p><strong>Regel.</strong> Ablativ drueckt haeufig Mittel, Ort oder Trennung aus.</p>'; }
-            else if (variant < 7) { question = 'Infinitiv Praesens Aktiv von <code>videre</code>.'; answer = 'videre'; formula = '<p><strong>Regel.</strong> Infinitive enden meist auf -re.</p>'; }
-            else { question = '3. Person Singular Praesens von <code>esse</code>.'; answer = 'est'; formula = '<p><strong>Regel.</strong> esse ist unregelmaessig: sum, es, est...</p>'; }
+            tpl = [
+                j => { const n = NA[j % NA.length]; return { q: `Ablativ Singular von <code>${n[0]}</code>?`, a: n[3], f: R + 'Der Ablativ drueckt Mittel, Ort oder Trennung aus.</p>' }; },
+                j => { const v = VA[j % VA.length]; return { q: `Infinitiv Praesens Aktiv: Grundform zu <code>${v[1]}</code> (1. Person Singular)?`, a: v[0], f: R + 'Infinitive der a-Konjugation enden auf -are.</p>' }; },
+                j => { return { q: `3. Person Singular Praesens von <code>esse</code>.`, a: 'est', f: R + 'esse ist unregelmaessig: sum, es, est...</p>' }; },
+                j => { const n = NA[(j + 2) % NA.length]; return { q: `Akkusativ Singular von <code>${n[0]}</code>?`, a: n[2], f: R + 'Akkusativ Singular haeufig -m.</p>' }; },
+                j => { const v = VA[(j + 1) % VA.length]; return { q: `2. Person Singular Praesens von <code>${v[0]}</code> (Endung -as).`, a: v[1].replace(/o$/, 'as'), f: R + 'a-Konjugation 2. Person Singular: -as.</p>' }; }
+            ];
         } else if (grade === 7) {
-            if (variant < 4) { question = 'Perfekt 1. Person Singular von <code>amare</code>.'; answer = 'amavi'; formula = '<p><strong>Regel.</strong> Perfekt der a-Konjugation oft Stamm + -v- + Endung.</p>'; }
-            else if (variant < 7) { question = 'Relativpronomen Nom. Sg. maskulin.'; answer = 'qui'; formula = '<p><strong>Regel.</strong> Relativpronomen: qui, quae, quod.</p>'; }
-            else { question = 'Signalwort fuer AcI: <code>videt puerum venire</code> — welche Konstruktion?'; answer = 'aci'; formula = '<p><strong>Regel.</strong> AcI = Akkusativ + Infinitiv nach Wahrnehmungs-/Sageverben.</p>'; }
+            tpl = [
+                j => { const v = VA[j % VA.length]; return { q: `Perfekt 1. Person Singular von <code>${v[0]}</code>.`, a: v[3], f: R + 'Perfekt der a-Konjugation: Stamm + -v- + Endung (-avi).</p>' }; },
+                j => { const v = VA[(j + 2) % VA.length]; return { q: `3. Person Singular Praesens von <code>${v[0]}</code>.`, a: v[2], f: R + 'a-Konjugation 3. Person Singular: -at.</p>' }; },
+                j => { return { q: `Die Konstruktion <code>videt puerum venire</code> heisst ___ (Abkuerzung).`, a: 'aci', f: R + 'AcI = Akkusativ + Infinitiv nach Verben des Sagens/Wahrnehmens.</p>' }; },
+                j => { const n = NA[j % NA.length]; return { q: `Genitiv Singular von <code>${n[0]}</code>?`, a: n[1], f: R + 'Der Genitiv zeigt Zugehoerigkeit und Deklination.</p>' }; },
+                j => { const v = VA[(j + 1) % VA.length]; return { q: `Perfekt 3. Person Singular von <code>${v[0]}</code> (Endung -it).`, a: v[3].replace(/i$/, 'it'), f: R + 'Perfekt 3. Person Singular: Perfektstamm + -it.</p>' }; }
+            ];
         } else if (grade === 8) {
-            if (variant < 4) { question = 'PPP von <code>amare</code> (mask. Nom. Sg.).'; answer = 'amatus'; formula = '<p><strong>Regel.</strong> PPP: geliebt = amatus, -a, -um.</p>'; }
-            else if (variant < 7) { question = 'Participium coniunctum wird im Deutschen meist als ___ aufgeloest.'; answer = 'nebensatz'; formula = '<p><strong>Merksatz.</strong> PC kann als Relativ-, Temporal-, Kausal- oder Konzessivsatz uebersetzt werden.</p>'; }
-            else { question = 'Ablativus absolutus besteht aus Nomen im Ablativ und einem ___ im Ablativ.'; answer = 'partizip'; formula = '<p><strong>Regel.</strong> Abl. abs. = losgeloester Ablativ mit Partizip.</p>'; }
+            tpl = [
+                j => { const v = VA[j % VA.length]; return { q: `PPP (mask. Nom. Sg.) von <code>${v[0]}</code>.`, a: v[4], f: R + 'PPP der a-Konjugation: -atus, -a, -um.</p>' }; },
+                j => { return { q: `Das Participium coniunctum loest man im Deutschen meist als ___ auf.`, a: 'nebensatz', f: R + 'PC: Relativ-, Temporal-, Kausal- oder Konzessivsatz.</p>' }; },
+                j => { return { q: `Der Ablativus absolutus besteht aus einem Nomen im Ablativ und einem ___ im Ablativ.`, a: 'partizip', f: R + 'Abl. abs. = losgeloester Ablativ mit Partizip.</p>' }; },
+                j => { const v = VA[(j + 2) % VA.length]; return { q: `Perfekt 1. Person Singular von <code>${v[0]}</code>.`, a: v[3], f: R + 'Perfektstamm + -i (1. Person Singular).</p>' }; },
+                j => { const n = NA[j % NA.length]; return { q: `Ablativ Singular von <code>${n[0]}</code> (fuer den Abl. abs.)?`, a: n[3], f: R + 'Der Ablativus absolutus braucht das Nomen im Ablativ.</p>' }; }
+            ];
         } else if (grade === 9) {
-            if (variant < 4) { question = 'Konjunktiv Imperfekt von <code>esse</code>, 3. Person Singular.'; answer = 'esset'; formula = '<p><strong>Regel.</strong> Konj. Impf.: Infinitiv + Personalendung.</p>'; }
-            else if (variant < 7) { question = 'ut-Satz mit Konjunktiv nach Verben des Befehlens ist ein ___satz.'; answer = 'finalsatz'; formula = '<p><strong>Regel.</strong> ut + Konjunktiv kann final, konsekutiv oder begehrend sein; Kontext entscheidet.</p>'; }
-            else { question = 'Gerundium Genitiv von <code>legere</code>.'; answer = 'legendi'; formula = '<p><strong>Regel.</strong> Gerundium: Genitiv -ndi.</p>'; }
+            tpl = [
+                j => { return { q: `Konjunktiv Imperfekt von <code>esse</code>, 3. Person Singular.`, a: 'esset', f: R + 'Konjunktiv Imperfekt: Infinitiv esse + Endung -t -> esset.</p>' }; },
+                j => { return { q: `Ein ut-Satz, der einen Zweck/eine Absicht ausdrueckt, heisst (ein Wort) ___.`, a: 'finalsatz', f: R + 'ut + Konjunktiv mit Zweck-Sinn = Finalsatz.</p>' }; },
+                j => { const v = VA[j % VA.length]; return { q: `Gerundium Genitiv von <code>${v[0]}</code>.`, a: v[0].replace(/are$/, 'andi'), f: R + 'Gerundium Genitiv der a-Konjugation: -andi.</p>' }; },
+                j => { const v = VA[(j + 2) % VA.length]; return { q: `PPP (mask. Nom. Sg.) von <code>${v[0]}</code>.`, a: v[4], f: R + 'PPP: -atus, -a, -um.</p>' }; },
+                j => { const v = VA[(j + 1) % VA.length]; return { q: `Perfekt 1. Person Singular von <code>${v[0]}</code>.`, a: v[3], f: R + 'Perfektstamm + -i.</p>' }; }
+            ];
         } else {
-            if (variant < 4) { question = 'Gerundivum von <code>laudare</code>, mask. Nom. Sg.'; answer = 'laudandus'; formula = '<p><strong>Regel.</strong> Gerundivum drueckt Notwendigkeit/Passivitaet aus: -ndus.</p>'; }
-            else if (variant < 7) { question = 'Nominativ Plural von <code>res publica</code>.'; answer = 'res publicae'; formula = '<p><strong>Regel.</strong> Adjektiv passt in Kasus, Numerus, Genus zum Bezugsnomen.</p>'; }
-            else { question = 'Welche Stilfigur liegt bei <code>veni, vidi, vici</code> vor (dreigliedrige Steigerung)?'; answer = 'trikolon'; formula = '<p><strong>Merksatz.</strong> Trikolon = dreigliedrige, oft rhythmische Reihung.</p>'; }
+            tpl = [
+                j => { const v = VA[j % VA.length]; return { q: `Gerundivum (mask. Nom. Sg.) von <code>${v[0]}</code>.`, a: v[5], f: R + 'Gerundivum drueckt Notwendigkeit aus: -andus, -a, -um.</p>' }; },
+                j => { const v = VA[(j + 2) % VA.length]; return { q: `Gerundium Genitiv von <code>${v[0]}</code>.`, a: v[0].replace(/are$/, 'andi'), f: R + 'Gerundium Genitiv: -andi.</p>' }; },
+                j => { return { q: `Welche Stilfigur liegt bei <code>veni, vidi, vici</code> vor (dreigliedrige Reihung)?`, a: 'trikolon', f: R + 'Trikolon = dreigliedrige, oft rhythmische Reihung.</p>' }; },
+                j => { const v = VA[(j + 1) % VA.length]; return { q: `PPP (mask. Nom. Sg.) von <code>${v[0]}</code>.`, a: v[4], f: R + 'PPP: -atus, -a, -um.</p>' }; },
+                j => { const v = VA[(j + 3) % VA.length]; return { q: `Gerundivum (mask. Nom. Sg.) von <code>${v[0]}</code>.`, a: v[5], f: R + 'Gerundivum: -andus.</p>' }; }
+            ];
         }
-        return item(`Latein Klasse ${grade} Grammatik ${index + 1}: ${question}`, answer, formula, solutionFor(answer, sourceForLanguage('latein', 'grammar')), 'grammar');
+        const built = tpl[index % tpl.length](Math.floor(index / tpl.length));
+        return item(`Latein Klasse ${grade} Grammatik ${index + 1}: ${built.q}`, built.a, built.f, solutionFor(built.a, sourceForLanguage('latein', 'grammar')), 'grammar');
     }
 
     function sourceForLanguage(language, kind) {
