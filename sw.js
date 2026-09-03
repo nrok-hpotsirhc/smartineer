@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v107-eng-plus70-vocab-grammar-hints';
+const CACHE_VERSION = 'smartineer-v108-cdn-pin-babel7';
 const APP_SHELL = [
     './',
     './index.html',
