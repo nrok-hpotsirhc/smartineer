@@ -729,6 +729,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
     const [quizIdx, setQuizIdx] = useState(0);
     const [quizAnswers, setQuizAnswers] = useState([]);
     const [quizInput, setQuizInput] = useState(null);
+    const [quizFeedback, setQuizFeedback] = useState(null);
     const [reviewMode, setReviewMode] = useState(false);
     // P-ARCH-ASSESSMENT-ENGINE: assessmentMode wird parallel zu reviewMode gefuehrt.
     // currentAssessment ist das Pruefungs-Definitions-Objekt (id/title/type/poolFilter/count/passScore/timeLimit).
@@ -744,7 +745,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
     const [quizFlags, setQuizFlags] = useState([]);
 
     const readerRef = useKaTeX([stage, tid, cid, page]);
-    const quizRef = useKaTeX([stage, quizIdx]);
+    const quizRef = useKaTeX([stage, quizIdx, !!quizFeedback]);
     const resultRef = useKaTeX([stage, quizAnswers.length]);
 
     // P-UI-READER-SCROLL-TOP: bei Seitenwechsel im Reader (auch bei Sprung via TOC /
@@ -883,7 +884,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
         const sample = picked.map(i => pool[i]);
         const refs = picked.map(i => ({ tid, cid, idx: i, qid: stableQid(pool[i]) }));
         setReviewMode(false);
-        setQuizSet(sample); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]); setQuizFlags([]);
+        setQuizSet(sample); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]); setQuizFlags([]); setQuizFeedback(null);
         setQuizInput(sample.length ? defaultInputForItem(sample[0]) : null);
         setStage('quiz');
     };
@@ -909,7 +910,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
         const items = sample.map(s => s.item);
         const refs = sample.map(s => ({ tid: s.trainingId, cid: s.chapterId, idx: s.idx, qid: s.qid }));
         setReviewMode(true);
-        setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]); setQuizFlags([]);
+        setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]); setQuizFlags([]); setQuizFeedback(null);
         setQuizInput(items.length ? defaultInputForItem(items[0]) : null);
         setStage('quiz');
     };
@@ -948,14 +949,32 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
         setCurrentAssessment(asmt);
         const dl = (asmt.timeLimit > 0) ? (Date.now() + asmt.timeLimit * 60 * 1000) : null;
         setDeadlineMs(dl);
-        setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]); setQuizFlags([]);
+        setQuizSet(items); setQuizRefs(refs); setQuizIdx(0); setQuizAnswers([]); setQuizFlags([]); setQuizFeedback(null);
         setQuizInput(items.length ? defaultInputForItem(items[0]) : null);
         setStage('quiz');
+    };
+
+    const finalizeQuiz = (answered) => {
+        const score = answered.filter(a => a.ok).length;
+        // Karteikarten aktualisieren — auch im Wiederholungs-Modus.
+        srsGradeMany(answered.map(a => ({ ref: a.ref, ok: a.ok })).filter(u => u.ref));
+        // Persistenz: regulaeres Kapitel-Quiz -> recordQuiz, Pruefung -> recordAssessment,
+        // Wiederholung -> nichts (Karten kommen aus mehreren Kapiteln, Score wuerde verfaelschen).
+        if (assessmentMode && currentAssessment) {
+            recordAssessment(tid, currentAssessment.id, score, quizSet.length, currentAssessment.passScore);
+        } else if (!reviewMode) {
+            recordQuiz(tid, cid, score, quizSet.length);
+        }
+        setQuizInput(null);
+        setQuizFeedback(null);
+        setDeadlineMs(null);
+        setStage('quizResult');
     };
 
     const submitQuizAnswer = () => {
         const item = quizSet[quizIdx];
         if (!item) return;
+        if (quizFeedback) return;
         if (!isInputComplete(item, quizInput)) return;
         const ok = gradeQuizItem(item, quizInput);
         const next = quizAnswers.concat([{
@@ -966,25 +985,33 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
             ref: quizRefs[quizIdx] || null
         }]);
         setQuizAnswers(next);
+        // P-UI-QUIZ-INSTANT-FEEDBACK (v111): Kapitel-Quiz und Wiederholung werten
+        // sofort aus. Der Pruefungsmodus bleibt bewusst ohne Per-Item-Feedback
+        // (AGENTS §18.10, Closed-Book-Simulation).
+        if (!assessmentMode) {
+            setQuizFeedback({ ok, isLast: quizIdx + 1 >= quizSet.length, answers: next });
+            return;
+        }
         if (quizIdx + 1 >= quizSet.length) {
-            const score = next.filter(a => a.ok).length;
-            // Karteikarten aktualisieren — auch im Wiederholungs-Modus.
-            srsGradeMany(next.map(a => ({ ref: a.ref, ok: a.ok })).filter(u => u.ref));
-            // Persistenz: regulaeres Kapitel-Quiz -> recordQuiz, Pruefung -> recordAssessment,
-            // Wiederholung -> nichts (Karten kommen aus mehreren Kapiteln, Score wuerde verfaelschen).
-            if (assessmentMode && currentAssessment) {
-                recordAssessment(tid, currentAssessment.id, score, quizSet.length, currentAssessment.passScore);
-            } else if (!reviewMode) {
-                recordQuiz(tid, cid, score, quizSet.length);
-            }
-            setQuizInput(null);
-            setDeadlineMs(null);
-            setStage('quizResult');
+            finalizeQuiz(next);
         } else {
             const nextItem = quizSet[quizIdx + 1];
             setQuizIdx(quizIdx + 1);
             setQuizInput(defaultInputForItem(nextItem));
         }
+    };
+
+    const advanceAfterFeedback = () => {
+        if (!quizFeedback) return;
+        const fb = quizFeedback;
+        setQuizFeedback(null);
+        if (fb.isLast) {
+            finalizeQuiz(fb.answers);
+            return;
+        }
+        const nextIdx = quizIdx + 1;
+        setQuizIdx(nextIdx);
+        setQuizInput(defaultInputForItem(quizSet[nextIdx]));
     };
 
     // P-ARCH-ASSESSMENT-ENGINE: Auto-Submit beim Ablauf der Pruefungszeit.
@@ -1451,6 +1478,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                             setAssessmentMode(false);
                             setCurrentAssessment(null);
                             setDeadlineMs(null);
+                            setQuizFeedback(null);
                             setStage('chapters');
                         }
                     }}
@@ -1458,7 +1486,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-2 mb-5 overflow-hidden">
                     <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-2 transition-all duration-500"
-                        style={{ width: `${(quizIdx / quizSet.length) * 100}%` }}></div>
+                        style={{ width: `${(quizAnswers.length / quizSet.length) * 100}%` }}></div>
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 task-fade" key={quizIdx} data-item-id={unifiedItem ? unifiedItem.id : undefined}>
                     <div className="text-base md:text-lg font-bold text-slate-900 mb-5 math-block"
@@ -1469,6 +1497,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                             role="radiogroup"
                             aria-label="Antwortoptionen"
                             onKeyDown={(e) => {
+                                if (quizFeedback) return;
                                 // P-UI-QUIZ-A11Y: Pfeil-Tasten + Home/End + 1..9 Direktwahl.
                                 const n = item.options.length;
                                 let next = null;
@@ -1490,17 +1519,26 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                             }}>
                             {item.options.map((opt, i) => {
                                 const sel = quizInput === i;
+                                // Nach dem Pruefen: korrekte Option gruen, falsch gewaehlte rot.
+                                let tone = sel
+                                    ? 'border-blue-500 bg-blue-50 text-blue-900 shadow'
+                                    : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800';
+                                if (quizFeedback) {
+                                    if (i === item.correct) tone = 'quiz-option-correct border-emerald-500 bg-emerald-50 text-emerald-900';
+                                    else if (sel) tone = 'quiz-option-wrong border-rose-500 bg-rose-50 text-rose-900';
+                                    else tone = 'border-slate-200 bg-white text-slate-500';
+                                }
                                 return (
                                     <button key={i}
                                         role="radio"
                                         aria-checked={sel}
+                                        disabled={!!quizFeedback}
                                         tabIndex={sel || (typeof quizInput !== 'number' && i === 0) ? 0 : -1}
-                                        onClick={() => setQuizInput(i)}
-                                        className={`text-left px-4 py-3 rounded-lg border transition ${sel
-                                            ? 'border-blue-500 bg-blue-50 text-blue-900 shadow'
-                                            : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800'}`}>
+                                        onClick={() => { if (!quizFeedback) setQuizInput(i); }}
+                                        className={`text-left px-4 py-3 rounded-lg border transition ${tone}`}>
                                         <span className="font-bold mr-2">{String.fromCharCode(65 + i)})</span>
                                         <span dangerouslySetInnerHTML={{ __html: opt }} />
+                                        {quizFeedback && i === item.correct && <span className="ml-2 text-xs font-bold uppercase tracking-wider">{' \u00b7 richtig'}</span>}
                                     </button>
                                 );
                             })}
@@ -1514,9 +1552,9 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                                 <div key={pos} className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white">
                                     <span className="font-bold text-slate-500 w-6 text-right">{pos + 1}.</span>
                                     <span className="flex-1 text-slate-800" dangerouslySetInnerHTML={{ __html: item.items[origIdx] }} />
-                                    <button onClick={() => moveSeq(pos, pos - 1)} disabled={pos === 0}
+                                    <button onClick={() => moveSeq(pos, pos - 1)} disabled={pos === 0 || !!quizFeedback}
                                         className="px-2 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded disabled:opacity-30" aria-label="Hoch">↑</button>
-                                    <button onClick={() => moveSeq(pos, pos + 1)} disabled={pos === quizInput.length - 1}
+                                    <button onClick={() => moveSeq(pos, pos + 1)} disabled={pos === quizInput.length - 1 || !!quizFeedback}
                                         className="px-2 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded disabled:opacity-30" aria-label="Runter">↓</button>
                                 </div>
                             ))}
@@ -1531,8 +1569,9 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                                     <span className="text-sm font-bold text-slate-700">{i + 1}. {b.label}</span>
                                     <input type="text" value={quizInput[i] || ''}
                                         onChange={(e) => setBlank(i, e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter' && canSubmit) submitQuizAnswer(); }}
-                                        className="px-3 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white text-slate-800"
+                                        onKeyDown={(e) => { if (e.key === 'Enter' && canSubmit && !quizFeedback) submitQuizAnswer(); }}
+                                        disabled={!!quizFeedback}
+                                        className="px-3 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white text-slate-800 disabled:opacity-60"
                                         autoFocus={i === 0} />
                                 </label>
                             ))}
@@ -1547,10 +1586,58 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                             if (!window.confirm(`Pruefung jetzt abgeben? ${answered} von ${total} Fragen beantwortet. Eine Korrektur ist danach nicht moeglich.`)) return;
                         }
                         submitQuizAnswer();
-                    }} disabled={!canSubmit}
-                        className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition">
+                    }} disabled={!canSubmit || !!quizFeedback}
+                        className={`w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition ${quizFeedback ? 'hidden' : ''}`}>
                         {assessmentMode && quizIdx + 1 >= quizSet.length ? 'Pruefung abgeben' : 'Antwort bestätigen'}
                     </button>
+
+                    {/* P-UI-QUIZ-INSTANT-FEEDBACK (v111): Sofort-Auswertung mit Quellenanker.
+                        Im Pruefungsmodus nicht aktiv (AGENTS §18.10). */}
+                    {quizFeedback && (
+                        <div className="slide-in" aria-live="polite">
+                            <div className={`quiz-feedback rounded-xl border-l-4 p-4 mb-4 ${quizFeedback.ok
+                                ? 'quiz-feedback-ok border-emerald-500 bg-emerald-50'
+                                : 'quiz-feedback-bad border-rose-500 bg-rose-50'}`}>
+                                <p className={`text-lg font-extrabold mb-1 ${quizFeedback.ok ? 'text-emerald-800' : 'text-rose-800'}`}>
+                                    {quizFeedback.ok ? 'Richtig' : 'Leider falsch'}
+                                </p>
+                                {!quizFeedback.ok && itype === 'mcq' && (
+                                    <p className="text-sm text-slate-800">
+                                        Richtige Antwort: <strong className="text-emerald-800">{String.fromCharCode(65 + item.correct)})</strong>
+                                        <span className="ml-1" dangerouslySetInnerHTML={{ __html: item.options[item.correct] }} />
+                                    </p>
+                                )}
+                                {!quizFeedback.ok && itype === 'sequence' && (
+                                    <div className="text-sm text-slate-800">
+                                        <p className="font-bold mb-1">Korrekte Reihenfolge:</p>
+                                        <ol className="list-decimal ml-5">
+                                            {item.correct.map((origIdx, pos) => (
+                                                <li key={pos} dangerouslySetInnerHTML={{ __html: item.items[origIdx] }} />
+                                            ))}
+                                        </ol>
+                                    </div>
+                                )}
+                                {!quizFeedback.ok && itype === 'cloze' && (
+                                    <div className="text-sm text-slate-800">
+                                        <p className="font-bold mb-1">Korrekte Loesung:</p>
+                                        <ul className="list-disc ml-5">
+                                            {item.blanks.map((b, i) => (
+                                                <li key={i}>{b.label}: <strong className="text-emerald-800">{b.accept[0]}</strong></li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {item.explanation && (
+                                    <div className="mt-3 pt-3 border-t border-slate-200 text-sm text-slate-700 math-block"
+                                        dangerouslySetInnerHTML={{ __html: applyGlossary(item.explanation, glossaryMap) }} />
+                                )}
+                            </div>
+                            <button onClick={advanceAfterFeedback} autoFocus
+                                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition">
+                                {quizFeedback.isLast ? 'Auswertung anzeigen →' : 'Nächste Frage →'}
+                            </button>
+                        </div>
+                    )}
                 </div>
                 {glossaryModal}
             </section>

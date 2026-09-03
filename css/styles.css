@@ -401,6 +401,43 @@ html.theme-dark, body.theme-dark {
 .schueler-ring-label { fill: #334155; }
 .theme-dark .schueler-ring-label { fill: #e2e8f0; }
 
+/* P-UI-QUIZ-INSTANT-FEEDBACK (v111): Sofort-Auswertung im Schueler-Quiz.
+   Tailwind `bg-emerald-50` / `bg-rose-50` rendern im Dark-Mode near-white. */
+.theme-dark .schueler-feedback-ok {
+    background-color: #052e23;
+    border-color: #10b981;
+}
+.theme-dark .schueler-feedback-ok .text-emerald-800 { color: #6ee7b7; }
+.theme-dark .schueler-feedback-bad {
+    background-color: #3f1220;
+    border-color: #f43f5e;
+}
+.theme-dark .schueler-feedback-bad .text-rose-800 { color: #fda4af; }
+.theme-dark .schueler-feedback .text-slate-700,
+.theme-dark .schueler-feedback .text-slate-800 { color: #e2e8f0; }
+.theme-dark .quiz-feedback-ok {
+    background-color: #052e23;
+    border-color: #10b981;
+}
+.theme-dark .quiz-feedback-ok .text-emerald-800 { color: #6ee7b7; }
+.theme-dark .quiz-feedback-bad {
+    background-color: #3f1220;
+    border-color: #f43f5e;
+}
+.theme-dark .quiz-feedback-bad .text-rose-800 { color: #fda4af; }
+.theme-dark .quiz-feedback .text-slate-700,
+.theme-dark .quiz-feedback .text-slate-800 { color: #e2e8f0; }
+.theme-dark .quiz-option-correct {
+    background-color: #052e23;
+    border-color: #10b981;
+    color: #6ee7b7;
+}
+.theme-dark .quiz-option-wrong {
+    background-color: #3f1220;
+    border-color: #f43f5e;
+    color: #fda4af;
+}
+
 /* P-UI-SCHUELER-BOX-CONTRAST (v82): Formel/Merksatz- und Musterloesung-Boxen
    im Schueler-Training und Quiz-Result. Im Dark-Mode greift Tailwind
    `bg-cyan-50` / `bg-emerald-50` als near-white und erzeugt einen blendend

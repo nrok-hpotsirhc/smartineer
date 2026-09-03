@@ -333,13 +333,14 @@ function Schueler({ visibleClassIds }) {
     const [idx, setIdx] = useState(0);
     const [answers, setAnswers] = useState([]);
     const [val, setVal] = useState('');
+    const [quizFeedback, setQuizFeedback] = useState(null);
     const [trainingIdx, setTrainingIdx] = useState(0);
     const [showTrainingSolution, setShowTrainingSolution] = useState(false);
     const [showTrainingFormula, setShowTrainingFormula] = useState(false);
     const [selectedSection, setSelectedSection] = useState(null);
     const schuelerProgress = useSchuelerProgress();
 
-    const drillRef = useKaTeX([stage, idx]);
+    const drillRef = useKaTeX([stage, idx, !!quizFeedback]);
     const resultRef = useKaTeX([stage, answers.length]);
     const trainingRef = useKaTeX([stage, klass, subject, trainingIdx, showTrainingSolution, showTrainingFormula, Object.keys(schuelerProgress.progress).length]);
 
@@ -727,21 +728,26 @@ function Schueler({ visibleClassIds }) {
         }
         setKlass(klassId); setSubject(subjId);
         setItems(arr); setIdx(0); setAnswers([]); setVal('');
+        setQuizFeedback(null);
         setSelectedSection(sectionId || null);
         setShowTrainingSolution(false);
         setShowTrainingFormula(false);
         setStage('quiz');
     };
 
+    // P-UI-QUIZ-INSTANT-FEEDBACK (v111): Pruefen wertet sofort aus und haelt an,
+    // statt direkt zur naechsten Aufgabe zu springen. Weiter geht es erst ueber
+    // `advanceQuiz`. Die Antwort wird bereits hier in `answers` und in den
+    // Fortschritt geschrieben, damit die Auswertung am Ende unveraendert bleibt.
     const submit = () => {
-        if (!val.trim()) return;
+        if (quizFeedback || !val.trim()) return;
         const item = items[idx];
         const correct = SCH.normalize(val) === SCH.normalize(item.a);
         const meta = splitQuestionMeta(item.q, klass, subject, selectedSection);
         const taskKey = studentTaskKey(klass, subject, item, idx);
         const wasSolved = schuelerProgress.isSolved(taskKey);
-        const next = answers.concat([{ q: item.q, body: meta.body, crumbs: meta.crumbs, expected: item.a, given: val, correct, formula: item.f, solution: item.s, fresh: correct && !wasSolved }]);
-        setAnswers(next); setVal('');
+        const entry = { q: item.q, body: meta.body, crumbs: meta.crumbs, expected: item.a, given: val, correct, formula: item.f, solution: item.s, fresh: correct && !wasSolved };
+        setAnswers(answers.concat([entry]));
         // P-UI-SCHUELER-QUIZ-PROGRESS (v95): Richtig beantwortete Quiz-Items in den
         // Schueler-Fortschritt schreiben. studentTaskKey nutzt stableQid({q,a}) —
         // damit deckt sich der Key 1:1 mit dem, was schuelerClassStats erwartet,
@@ -752,7 +758,15 @@ function Schueler({ visibleClassIds }) {
         if (correct) {
             schuelerProgress.setSolved(taskKey, true);
         }
-        if (idx + 1 >= items.length) setStage('result');
+        setQuizFeedback({ ...entry, isLast: idx + 1 >= items.length });
+    };
+
+    const advanceQuiz = () => {
+        if (!quizFeedback) return;
+        const isLast = quizFeedback.isLast;
+        setQuizFeedback(null);
+        setVal('');
+        if (isLast) setStage('result');
         else setIdx(idx + 1);
     };
 
@@ -1164,12 +1178,12 @@ function Schueler({ visibleClassIds }) {
                     <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
                         Quiz{selectedSection ? ` · ${sectionLabel(selectedSection, subject, klass)}` : ''} · Aufgabe {idx + 1} von {items.length}
                     </div>
-                    <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) setStage('subjects'); }}
+                    <button onClick={() => { if (window.confirm('Quiz abbrechen? Antworten gehen verloren.')) { setQuizFeedback(null); setStage('subjects'); } }}
                         className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-2 mb-6 overflow-hidden">
                     <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 transition-all duration-500"
-                         style={{ width: `${(idx / items.length) * 100}%` }}></div>
+                         style={{ width: `${(answers.length / items.length) * 100}%` }}></div>
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 task-fade" key={idx}>
                     {(() => { const meta = splitQuestionMeta(item.q, klass, subject, selectedSection); return (<>
@@ -1180,7 +1194,7 @@ function Schueler({ visibleClassIds }) {
                     {/* P-UI-SCHUELER-INPUTMODE: Mobile-Tastatur passend zur erwarteten Antwort.
                         Reine Zahl (mit/ohne Komma/Punkt/Minus) -> `decimal`-Ziffernblock.
                         Sonstige Antworten (z.B. `7R3` bei Division-mit-Rest, oder Englisch) -> Text. */}
-                    {(() => {
+                    {!quizFeedback && (() => {
                         const isNumeric = typeof item.a === 'string' && /^-?[\d.,\s]+$/.test(item.a);
                         return (
                             <input type="text"
@@ -1192,11 +1206,58 @@ function Schueler({ visibleClassIds }) {
                                 className="schueler-input mb-4" />
                         );
                     })()}
-                    <button onClick={submit} disabled={!val.trim()}
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
-                        Antwort prüfen
-                    </button>
-                    <p className="text-xs text-slate-500 text-center mt-3">Hinweis: Im Quiz werden Formel und Musterlösung erst in der Auswertung sichtbar.</p>
+                    {!quizFeedback && (
+                        <button onClick={submit} disabled={!val.trim()}
+                            className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
+                            Antwort prüfen
+                        </button>
+                    )}
+                    {quizFeedback && (
+                        <div className="slide-in" aria-live="polite">
+                            <div className={`schueler-feedback rounded-xl border-l-4 p-4 mb-4 ${quizFeedback.correct
+                                ? 'schueler-feedback-ok border-emerald-500 bg-emerald-50'
+                                : 'schueler-feedback-bad border-rose-500 bg-rose-50'}`}>
+                                <p className={`text-lg font-extrabold mb-2 ${quizFeedback.correct ? 'text-emerald-800' : 'text-rose-800'}`}>
+                                    {quizFeedback.correct ? 'Richtig' : 'Leider falsch'}
+                                </p>
+                                <p className="text-sm text-slate-700">
+                                    Deine Antwort: <strong className={quizFeedback.correct ? 'text-emerald-800' : 'text-rose-800'}>{quizFeedback.given}</strong>
+                                </p>
+                                {!quizFeedback.correct && (
+                                    <p className="text-base text-slate-800 mt-1">
+                                        Richtige Antwort: <strong className="text-emerald-800">{quizFeedback.expected}</strong>
+                                    </p>
+                                )}
+                                {quizFeedback.fresh && (
+                                    <p className="text-xs font-bold text-emerald-700 mt-2">Aufgabe neu freigeschaltet.</p>
+                                )}
+                            </div>
+                            {/* Bei falscher Antwort ist der Lernmoment jetzt; bei richtiger bleibt die
+                                Erklaerung optional aufklappbar, damit der Quizfluss nicht ausgebremst wird. */}
+                            {((quizFeedback.formula && quizFeedback.formula.trim()) || (quizFeedback.solution && quizFeedback.solution.trim())) && (
+                                <details className="schueler-result-details mb-4" open={!quizFeedback.correct}>
+                                    <summary className="cursor-pointer text-sm font-bold text-slate-600 hover:text-slate-900">Formel und Musterlösung</summary>
+                                    {quizFeedback.formula && quizFeedback.formula.trim() && (
+                                        <div className="schueler-formula-box mt-2 p-3 rounded-lg bg-cyan-50 border-l-4 border-cyan-400">
+                                            <div className="schueler-formula-body text-sm text-cyan-950 math-block" dangerouslySetInnerHTML={{ __html: quizFeedback.formula }} />
+                                        </div>
+                                    )}
+                                    {quizFeedback.solution && quizFeedback.solution.trim() && (
+                                        <div className="schueler-solution-box mt-2 p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                                            <div className="schueler-solution-body text-sm text-emerald-950 math-block" dangerouslySetInnerHTML={{ __html: quizFeedback.solution }} />
+                                        </div>
+                                    )}
+                                </details>
+                            )}
+                            <button onClick={advanceQuiz} autoFocus
+                                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
+                                {quizFeedback.isLast ? 'Auswertung anzeigen →' : 'Nächste Aufgabe →'}
+                            </button>
+                        </div>
+                    )}
+                    {!quizFeedback && (
+                        <p className="text-xs text-slate-500 text-center mt-3">Rechne wenn nötig im Heft und gib hier nur das Ergebnis ein.</p>
+                    )}
                 </div>
             </section>
         );
