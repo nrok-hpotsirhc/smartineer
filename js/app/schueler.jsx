@@ -16,25 +16,96 @@ const SCHUELER_CLASS_COLORS = [
     '#fb923c'  // k10 orange
 ];
 
+// P-UI-SCHUELER-PROGRESS (v109): gemeinsame Fortschritts-Basis fuer Dashboard,
+// Klassen-Stage, Faecher-Stage, Abschnitte und Training. `schuelerStatsMap`
+// berechnet einmal pro Progress-Objekt-Identitaet alle (Klasse, Fach)-Werte und
+// cached sie modulweit — sonst wuerden pro Render ~16.000 stableQid-Hashes
+// mehrfach anfallen.
+function schuelerTaskKeyOf(klassId, subjId, item, itemIdx) {
+    const qid = stableQid({ q: item && item.q, a: item && item.a });
+    return `${klassId}.${subjId}|${qid || itemIdx}`;
+}
+
+let _schuelerStatsCache = { progress: null, map: null };
+function schuelerStatsMap(SCH, progress) {
+    if (_schuelerStatsCache.progress === progress && _schuelerStatsCache.map) return _schuelerStatsCache.map;
+    const prog = progress || {};
+    const map = {};
+    if (SCH && SCH.content) {
+        const solvedPerPool = {};
+        Object.keys(prog).forEach(k => {
+            const bar = k.indexOf('|');
+            if (bar > 0) {
+                const head = k.slice(0, bar);
+                solvedPerPool[head] = (solvedPerPool[head] || 0) + 1;
+            }
+        });
+        Object.keys(SCH.content).forEach(key => {
+            const cfg = SCH.content[key];
+            if (!cfg) return;
+            const dot = key.indexOf('.');
+            const klassId = key.slice(0, dot);
+            const subjId = key.slice(dot + 1);
+            if (cfg.mode === 'pool' && Array.isArray(cfg.pool)) {
+                let done = 0;
+                cfg.pool.forEach((item, idx) => { if (prog[schuelerTaskKeyOf(klassId, subjId, item, idx)]) done++; });
+                map[key] = { mode: 'pool', done, total: cfg.pool.length, pct: cfg.pool.length ? Math.round((done / cfg.pool.length) * 100) : 0 };
+            } else if (cfg.mode === 'generated') {
+                const done = solvedPerPool[key] || 0;
+                map[key] = { mode: 'generated', done, total: 0, pct: 0 };
+            } else {
+                map[key] = { mode: cfg.mode, done: 0, total: 0, pct: 0 };
+            }
+        });
+    }
+    _schuelerStatsCache = { progress, map };
+    return map;
+}
+
+let _schuelerSectionCache = { progress: null, klass: null, map: null };
+function schuelerSectionStats(SCH, klassId, progress, sectionOf) {
+    if (_schuelerSectionCache.progress === progress && _schuelerSectionCache.klass === klassId && _schuelerSectionCache.map) {
+        return _schuelerSectionCache.map;
+    }
+    const prog = progress || {};
+    const out = {};
+    const cls = SCH && SCH.classes && SCH.classes.find(c => c.id === klassId);
+    (cls ? (cls.subjects || []) : []).forEach(sub => {
+        const cfg = SCH.content && SCH.content[`${klassId}.${sub}`];
+        if (!cfg || cfg.mode !== 'pool' || !Array.isArray(cfg.pool)) return;
+        const bySection = {};
+        cfg.pool.forEach((item, idx) => {
+            const sid = sectionOf(item, sub, klassId);
+            if (!sid) return;
+            const rec = bySection[sid] || (bySection[sid] = { total: 0, done: 0, pct: 0 });
+            rec.total++;
+            if (prog[schuelerTaskKeyOf(klassId, sub, item, idx)]) rec.done++;
+        });
+        Object.keys(bySection).forEach(sid => {
+            const rec = bySection[sid];
+            rec.pct = rec.total ? Math.round((rec.done / rec.total) * 100) : 0;
+        });
+        out[sub] = bySection;
+    });
+    _schuelerSectionCache = { progress, klass: klassId, map: out };
+    return out;
+}
+
 function schuelerClassStats(SCH, classId, progress) {
     const cls = SCH && SCH.classes && SCH.classes.find(c => c.id === classId);
     if (!cls) return { total: 0, done: 0, pct: 0, mode: 'unknown' };
+    const map = schuelerStatsMap(SCH, progress);
     let total = 0, done = 0, generatedDone = 0, hasPool = false, hasGenerated = false;
     (cls.subjects || []).forEach(sub => {
-        const cfg = SCH.content && SCH.content[`${classId}.${sub}`];
-        if (!cfg) return;
-        if (cfg.mode === 'pool' && Array.isArray(cfg.pool)) {
+        const st = map[`${classId}.${sub}`];
+        if (!st) return;
+        if (st.mode === 'pool') {
             hasPool = true;
-            cfg.pool.forEach((item, idx) => {
-                total++;
-                const qid = stableQid({ q: item && item.q, a: item && item.a });
-                const key = `${classId}.${sub}|${qid || idx}`;
-                if (progress[key]) done++;
-            });
-        } else if (cfg.mode === 'generated') {
+            total += st.total;
+            done += st.done;
+        } else if (st.mode === 'generated') {
             hasGenerated = true;
-            const prefix = `${classId}.${sub}|`;
-            Object.keys(progress || {}).forEach(k => { if (k.indexOf(prefix) === 0) generatedDone++; });
+            generatedDone += st.done;
         }
     });
     if (!hasPool && hasGenerated) {
@@ -49,6 +120,40 @@ function schuelerClassStats(SCH, classId, progress) {
         done += generatedDone;
     }
     return { total, done, pct: total ? Math.round((done / total) * 100) : 0, mode: 'pool' };
+}
+
+function schuelerClassColor(SCH, classId) {
+    const all = (SCH && SCH.classes) ? SCH.classes : [];
+    const i = all.findIndex(c => c.id === classId);
+    return SCHUELER_CLASS_COLORS[(i < 0 ? 0 : i) % SCHUELER_CLASS_COLORS.length];
+}
+
+// Schlanker Fortschrittsbalken mit optionaler Akzentfarbe.
+function SchuelerBar({ pct, color, height }) {
+    const h = height || 8;
+    return (
+        <div className="schueler-bar w-full rounded-full overflow-hidden" style={{ height: h + 'px' }}>
+            <div className="rounded-full transition-all duration-700 ease-out"
+                style={{ width: Math.max(0, Math.min(100, pct || 0)) + '%', height: h + 'px', backgroundColor: color || '#10b981' }}></div>
+        </div>
+    );
+}
+
+function SchuelerRing({ pct, color, size }) {
+    const s = size || 56;
+    const value = Math.max(0, Math.min(100, pct || 0));
+    const r = (s - 8) / 2;
+    const circumference = 2 * Math.PI * r;
+    return (
+        <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} className="schueler-ring shrink-0" role="img" aria-label={`${value} Prozent gelöst`}>
+            <circle className="schueler-ring-track" cx={s / 2} cy={s / 2} r={r} fill="none" stroke="currentColor" strokeWidth="6" />
+            <circle cx={s / 2} cy={s / 2} r={r} fill="none" stroke={color || '#10b981'} strokeWidth="6" strokeLinecap="round"
+                strokeDasharray={`${(circumference * value) / 100} ${circumference}`}
+                transform={`rotate(-90 ${s / 2} ${s / 2})`} style={{ transition: 'stroke-dasharray 700ms ease-out' }} />
+            <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central"
+                className="schueler-ring-label font-bold" style={{ fontSize: s * 0.28 + 'px' }}>{value}%</text>
+        </svg>
+    );
 }
 
 function SchuelerChart({ classRows }) {
@@ -254,10 +359,10 @@ function Schueler({ visibleClassIds }) {
         return false;
     };
     const TRAINING_GENERATED_BATCH = 20; // K1/K2: Anzahl frischer Aufgaben pro Trainings-Start
-    const studentTaskKey = (klassId, subjId, item, itemIdx) => {
-        const qid = stableQid({ q: item && item.q, a: item && item.a });
-        return `${klassId}.${subjId}|${qid || itemIdx}`;
-    };
+    const studentTaskKey = (klassId, subjId, item, itemIdx) => schuelerTaskKeyOf(klassId, subjId, item, itemIdx);
+    const statsMap = schuelerStatsMap(SCH, schuelerProgress.progress);
+    const subjectStats = (klassId, subjId) => statsMap[`${klassId}.${subjId}`] || { mode: 'stub', done: 0, total: 0, pct: 0 };
+    const classStats = (klassId) => schuelerClassStats(SCH, klassId, schuelerProgress.progress);
     // P-UI-SCHUELER-SECTIONS-ALL (v78): Lehrplan-orientierte Abschnitte fuer alle
     // Mittelstufen-Faecher. Sprachfaecher haben tagged data (`section`-Feld via
     // `kind`/Datenpflege), die anderen Faecher werden heuristisch nach NRW-KLP-
@@ -518,24 +623,34 @@ function Schueler({ visibleClassIds }) {
         // (Lehrplan-Floor, P-UI-SCHUELER-SECTION-FLOOR, v80). So entstehen keine
         // visuell duennen Sections; betroffene Items sind ueber Gesamttraining/-
         // Gesamtquiz weiterhin erreichbar.
+        const secStats = schuelerSectionStats(SCH, klassId, schuelerProgress.progress, deriveSection);
+        const perSubject = (secStats && secStats[subjId]) || {};
+        const accent = schuelerClassColor(SCH, klassId);
         const rows = sections
-            .map(section => ({ section, count: poolForSection(cfg, section.id, subjId, klassId).length }))
+            .map(section => {
+                const st = perSubject[section.id] || { total: 0, done: 0, pct: 0 };
+                return { section, count: st.total, done: st.done, pct: st.pct };
+            })
             .filter(r => r.count >= MIN_SECTION_ITEMS);
         if (!rows.length) return null;
         return (
             <div className="mt-4 border-t border-slate-200 pt-4">
                 <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Abschnitte</div>
                 <div className="space-y-2">
-                    {rows.map(({ section, count }) => (
+                    {rows.map(({ section, count, done, pct }) => (
                         <details key={section.id} className="schueler-section rounded-lg border border-slate-200 bg-slate-50">
                             <summary className="cursor-pointer px-3 py-2 text-sm font-bold text-slate-800">
                                 <span className="inline-flex w-full items-center justify-between gap-3">
                                     <span>{section.label}</span>
-                                    <span className="schueler-section-count text-xs font-bold px-2 py-1 rounded-full bg-white border border-slate-200 text-slate-600">{count} Aufgaben</span>
+                                    <span className="flex items-center gap-2">
+                                        {pct >= 100 && <span className="schueler-section-count text-xs font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">fertig</span>}
+                                        <span className="schueler-section-count text-xs font-bold px-2 py-1 rounded-full bg-white border border-slate-200 text-slate-600">{done} / {count}</span>
+                                    </span>
                                 </span>
+                                <span className="mt-2 block"><SchuelerBar pct={pct} color={accent} height={5} /></span>
                             </summary>
                             <div className="px-3 pb-3">
-                                <p className="text-xs text-slate-600 mb-3">{section.desc}</p>
+                                <p className="text-xs text-slate-600 mb-3">{section.desc} · <strong>{pct}%</strong> gelöst.</p>
                                 <div className="flex flex-wrap gap-2">
                                     {trainingReady && (
                                         <button onClick={() => startTraining(klassId, subjId, 0, section.id)}
@@ -543,6 +658,10 @@ function Schueler({ visibleClassIds }) {
                                             Training
                                         </button>
                                     )}
+                                    <button onClick={() => startTraining(klassId, subjId, 0, section.id, true)}
+                                        className="bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50 text-xs font-bold py-1.5 px-3 rounded-lg transition">
+                                        Nur offene
+                                    </button>
                                     <button onClick={() => startQuiz(klassId, subjId, section.id)}
                                         className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">
                                         Quiz
@@ -556,7 +675,7 @@ function Schueler({ visibleClassIds }) {
         );
     };
 
-    const startTraining = (klassId, subjId, startAt, sectionId) => {
+    const startTraining = (klassId, subjId, startAt, sectionId, openOnly) => {
         const key = `${klassId}.${subjId}`;
         const cfg = SCH.content[key];
         if (!hasSchuelerTraining(klassId, cfg)) return;
@@ -574,6 +693,13 @@ function Schueler({ visibleClassIds }) {
             }
         } else {
             pool = poolForSection(cfg, sectionId, subjId, klassId);
+            // P-UI-SCHUELER-PROGRESS (v109): "Nur offene" filtert bereits geloeste
+            // Aufgaben heraus. Sind alle geloest, faellt die Auswahl auf den
+            // vollen Pool zurueck (Wiederholung bleibt moeglich).
+            if (openOnly) {
+                const open = pool.filter((it, i) => !schuelerProgress.isSolved(studentTaskKey(klassId, subjId, it, i)));
+                if (open.length) pool = open;
+            }
         }
         if (!pool.length) return;
         setKlass(klassId); setSubject(subjId);
@@ -612,7 +738,9 @@ function Schueler({ visibleClassIds }) {
         const item = items[idx];
         const correct = SCH.normalize(val) === SCH.normalize(item.a);
         const meta = splitQuestionMeta(item.q, klass, subject, selectedSection);
-        const next = answers.concat([{ q: item.q, body: meta.body, crumbs: meta.crumbs, expected: item.a, given: val, correct, formula: item.f, solution: item.s }]);
+        const taskKey = studentTaskKey(klass, subject, item, idx);
+        const wasSolved = schuelerProgress.isSolved(taskKey);
+        const next = answers.concat([{ q: item.q, body: meta.body, crumbs: meta.crumbs, expected: item.a, given: val, correct, formula: item.f, solution: item.s, fresh: correct && !wasSolved }]);
         setAnswers(next); setVal('');
         // P-UI-SCHUELER-QUIZ-PROGRESS (v95): Richtig beantwortete Quiz-Items in den
         // Schueler-Fortschritt schreiben. studentTaskKey nutzt stableQid({q,a}) —
@@ -622,7 +750,7 @@ function Schueler({ visibleClassIds }) {
         // generierte Faecher (K1/K2): generierte Items haben pro {q,a} eine
         // eigene qid und tragen damit zur K1/K2-"gemeistert"-Zaehlung bei.
         if (correct) {
-            schuelerProgress.setSolved(studentTaskKey(klass, subject, item, idx), true);
+            schuelerProgress.setSolved(taskKey, true);
         }
         if (idx + 1 >= items.length) setStage('result');
         else setIdx(idx + 1);
@@ -693,6 +821,13 @@ function Schueler({ visibleClassIds }) {
 
     // ---------- Stage: Klassen-Auswahl ----------
     if (stage === 'classes') {
+        const overview = visibleClasses.map(c => ({ c, st: classStats(c.id) }));
+        const grand = overview.reduce((acc, o) => {
+            if (o.st.mode === 'pool') { acc.total += o.st.total; acc.done += o.st.done; }
+            else acc.generated += o.st.done;
+            return acc;
+        }, { total: 0, done: 0, generated: 0 });
+        const grandPct = grand.total ? Math.round((grand.done / grand.total) * 100) : 0;
         return (
             <section className="view-fade">
                 <div className="text-center max-w-3xl mx-auto mb-8">
@@ -701,22 +836,49 @@ function Schueler({ visibleClassIds }) {
                     <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schüler-Bereich</h1>
                     <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–10; ab Klasse 5 kommen Deutsch, Naturwissenschaften, Geschichte sowie Englisch, Französisch und Latein dazu. Alle Mittelstufenfächer bieten getrenntes Training mit Formeln/Merksätzen, Musterlösungen und ein 10-Fragen-Quiz.</p>
                 </div>
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6 flex flex-wrap items-center gap-5">
+                    <SchuelerRing pct={grandPct} color="#0ea5e9" size={64} />
+                    <div className="flex-1 min-w-[220px]">
+                        <h2 className="font-bold text-slate-800 mb-1">Dein Gesamtfortschritt</h2>
+                        <p className="text-sm text-slate-600 mb-2">
+                            {grand.done} von {grand.total} Aufgaben gelöst
+                            {grand.generated > 0 && <> · {grand.generated} generierte Aufgaben gemeistert</>}
+                        </p>
+                        <SchuelerBar pct={grandPct} color="#0ea5e9" />
+                    </div>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {visibleClasses.map((c, i) => {
+                    {overview.map(({ c, st }, i) => {
                         const ready = c.subjects.some(s => {
                             const cfg = SCH.content[`${c.id}.${s}`];
                             return cfg && cfg.mode !== 'stub';
                         });
+                        const color = schuelerClassColor(SCH, c.id);
+                        const isGenerated = st.mode === 'generated';
                         return (
                             <button key={c.id}
                                 onClick={() => { setKlass(c.id); setStage('subjects'); }}
                                 style={{ animationDelay: `${i * 50}ms` }}
                                 className="card-fade group bg-white rounded-2xl border border-slate-200 p-5 text-left hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 transition-all">
-                                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Klassenstufe</div>
-                                <div className="text-2xl font-extrabold text-slate-800 mb-2">{c.label}</div>
-                                <div className={`text-xs font-bold px-2 py-1 rounded-full inline-block ${ready ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                                    {ready ? 'verfügbar' : 'in Vorbereitung'}
+                                <div className="flex items-start justify-between gap-2 mb-1">
+                                    <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Klassenstufe</div>
+                                    {ready && !isGenerated && (
+                                        <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white shrink-0" style={{ backgroundColor: color }}>{st.pct}%</span>
+                                    )}
                                 </div>
+                                <div className="text-2xl font-extrabold text-slate-800 mb-2">{c.label}</div>
+                                {ready ? (
+                                    <>
+                                        <SchuelerBar pct={isGenerated ? 0 : st.pct} color={color} height={6} />
+                                        <p className="text-xs text-slate-500 mt-2">
+                                            {isGenerated
+                                                ? <>{st.done} Aufgaben gemeistert</>
+                                                : <>{st.done} / {st.total} gelöst</>}
+                                        </p>
+                                    </>
+                                ) : (
+                                    <div className="text-xs font-bold px-2 py-1 rounded-full inline-block bg-slate-100 text-slate-500">in Vorbereitung</div>
+                                )}
                             </button>
                         );
                     })}
@@ -733,6 +895,8 @@ function Schueler({ visibleClassIds }) {
         // Anzeige neben dem Reset-Button und fuer den Klassen-Gesamtwert.
         const classSolvedCount = Object.keys(schuelerProgress.progress || {})
             .filter(k => k.indexOf(`${klass}.`) === 0).length;
+        const classAgg = classStats(klass);
+        const classColor = schuelerClassColor(SCH, klass);
         const handleResetClass = () => {
             if (!classSolvedCount) return;
             if (window.confirm(`Fortschritt für ${klassObj.label} wirklich zurücksetzen? (${classSolvedCount} gelöste Aufgaben)`)) {
@@ -755,12 +919,27 @@ function Schueler({ visibleClassIds }) {
                             className="px-4 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition">← Klassenübersicht</button>
                     </div>
                 </div>
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6 flex flex-wrap items-center gap-5">
+                    <SchuelerRing pct={classAgg.mode === 'pool' ? classAgg.pct : 0} color={classColor} size={64} />
+                    <div className="flex-1 min-w-[220px]">
+                        <h2 className="font-bold text-slate-800 mb-1">Fortschritt {klassObj.label}</h2>
+                        <p className="text-sm text-slate-600 mb-2">
+                            {classAgg.mode === 'pool'
+                                ? <>{classAgg.done} von {classAgg.total} Aufgaben gelöst · {klassObj.subjects.length} Fächer</>
+                                : <>{classAgg.done} generierte Aufgaben gemeistert · {klassObj.subjects.length} Fächer</>}
+                        </p>
+                        <SchuelerBar pct={classAgg.mode === 'pool' ? classAgg.pct : 0} color={classColor} />
+                    </div>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {klassObj.subjects.map(s => {
                         const cfg = SCH.content[`${klass}.${s}`];
                         const ready = cfg && cfg.mode !== 'stub';
                         const trainingReady = hasSchuelerTraining(klass, cfg);
                         const poolCount = cfg && Array.isArray(cfg.pool) ? cfg.pool.length : null;
+                        const st = subjectStats(klass, s);
+                        const isPool = st.mode === 'pool';
+                        const openCount = isPool ? Math.max(0, st.total - st.done) : 0;
                         const subjSolvedCount = Object.keys(schuelerProgress.progress || {})
                             .filter(k => k.indexOf(`${klass}.${s}|`) === 0).length;
                         const handleResetSubject = (e) => {
@@ -776,14 +955,29 @@ function Schueler({ visibleClassIds }) {
                                     : 'opacity-60 cursor-not-allowed'}`}>
                                 <div className="flex items-start justify-between gap-2 mb-2">
                                     <h3 className="text-xl font-bold text-slate-800">{SCH.subjects[s].label}</h3>
-                                    {ready && subjSolvedCount > 0 && (
-                                        <button onClick={handleResetSubject}
-                                            className="text-xs px-2 py-1 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold transition shrink-0"
-                                            title={`Setzt ${subjSolvedCount} gelöste Aufgaben zurück`}>
-                                            Reset ({subjSolvedCount})
-                                        </button>
-                                    )}
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {ready && isPool && (
+                                            <span className="text-xs font-bold px-2 py-1 rounded-full text-white" style={{ backgroundColor: classColor }}>{st.pct}%</span>
+                                        )}
+                                        {ready && subjSolvedCount > 0 && (
+                                            <button onClick={handleResetSubject}
+                                                className="text-xs px-2 py-1 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold transition"
+                                                title={`Setzt ${subjSolvedCount} gelöste Aufgaben zurück`}>
+                                                Reset ({subjSolvedCount})
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
+                                {ready && (
+                                    <div className="mb-3">
+                                        <SchuelerBar pct={isPool ? st.pct : 0} color={classColor} height={6} />
+                                        <p className="text-xs text-slate-500 mt-1.5">
+                                            {isPool
+                                                ? <>{st.done} / {st.total} gelöst · {openCount} offen</>
+                                                : <>{st.done} generierte Aufgaben gemeistert</>}
+                                        </p>
+                                    </div>
+                                )}
                                 <p className="text-sm text-slate-600 mb-3">{ready && cfg.note ? cfg.note : 'In Vorbereitung. Bald verfügbar.'}</p>
                                 {ready ? (
                                     <>
@@ -792,6 +986,13 @@ function Schueler({ visibleClassIds }) {
                                                 <button onClick={() => startTraining(klass, s)}
                                                     className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
                                                     Training öffnen
+                                                </button>
+                                            )}
+                                            {trainingReady && isPool && openCount > 0 && (
+                                                <button onClick={() => startTraining(klass, s, 0, null, true)}
+                                                    className="bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50 text-sm font-bold py-2 px-4 rounded-lg transition"
+                                                    title={`${openCount} noch nicht gelöste Aufgaben`}>
+                                                    Nur offene ({openCount})
                                                 </button>
                                             )}
                                             <button onClick={() => startQuiz(klass, s)}
@@ -829,6 +1030,14 @@ function Schueler({ visibleClassIds }) {
             setShowTrainingSolution(false);
             setShowTrainingFormula(false);
         };
+        const gotoNextOpen = () => {
+            for (let step = 1; step <= items.length; step++) {
+                const cand = (trainingIdx + step) % items.length;
+                if (!schuelerProgress.isSolved(studentTaskKey(klass, subject, items[cand], cand))) { goTo(cand); return; }
+            }
+        };
+        const subjSt = subjectStats(klass, subject);
+        const accent = schuelerClassColor(SCH, klass);
         return (
             <section className="view-fade max-w-5xl mx-auto" ref={trainingRef}>
                 <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
@@ -849,12 +1058,29 @@ function Schueler({ visibleClassIds }) {
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-5">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                         <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">Aufgabe {trainingIdx + 1} von {items.length}</div>
-                        <div className="text-sm font-bold text-emerald-700">{solvedCount} gelöst · {pct}%</div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm font-bold text-emerald-700">{solvedCount} gelöst · {pct}%</span>
+                            {solvedCount < items.length && (
+                                <button onClick={gotoNextOpen}
+                                    className="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 hover:bg-emerald-100 transition">
+                                    Nächste offene
+                                </button>
+                            )}
+                        </div>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                         <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 transition-all duration-500"
                              style={{ width: `${pct}%` }}></div>
                     </div>
+                    {subjSt.mode === 'pool' && (
+                        <div className="mt-4 pt-3 border-t border-slate-100">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Fach gesamt</span>
+                                <span className="text-xs font-bold text-slate-700">{subjSt.done} / {subjSt.total} · {subjSt.pct}%</span>
+                            </div>
+                            <SchuelerBar pct={subjSt.pct} color={accent} height={5} />
+                        </div>
+                    )}
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 task-fade" key={`${klass}-${subject}-${trainingIdx}`}>
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -980,7 +1206,10 @@ function Schueler({ visibleClassIds }) {
     if (stage === 'result') {
         const correct = answers.filter(a => a.correct).length;
         const wrong = answers.length - correct;
+        const fresh = answers.filter(a => a.fresh).length;
         const klassObj = SCH.classes.find(c => c.id === klass);
+        const subjSt = subjectStats(klass, subject);
+        const accent = schuelerClassColor(SCH, klass);
         return (
             <section className="view-fade max-w-3xl mx-auto" ref={resultRef}>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
@@ -1000,7 +1229,22 @@ function Schueler({ visibleClassIds }) {
                             <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">Quote</div>
                         </div>
                     </div>
+                    {fresh > 0 && (
+                        <p className="inline-block text-sm font-bold px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800">
+                            {fresh} {fresh === 1 ? 'Aufgabe' : 'Aufgaben'} neu freigeschaltet
+                        </p>
+                    )}
                 </div>
+                {subjSt.mode === 'pool' && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6 flex flex-wrap items-center gap-5">
+                        <SchuelerRing pct={subjSt.pct} color={accent} size={56} />
+                        <div className="flex-1 min-w-[200px]">
+                            <h3 className="font-bold text-slate-800 mb-1">Fachfortschritt {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}</h3>
+                            <p className="text-sm text-slate-600 mb-2">{subjSt.done} von {subjSt.total} Aufgaben gelöst · {Math.max(0, subjSt.total - subjSt.done)} offen</p>
+                            <SchuelerBar pct={subjSt.pct} color={accent} />
+                        </div>
+                    </div>
+                )}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
                     <h3 className="font-bold text-slate-800 mb-4">Aufgaben im Überblick</h3>
                     <ol className="flex flex-col gap-3">

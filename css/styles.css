@@ -393,6 +393,14 @@ html.theme-dark, body.theme-dark {
 }
 .theme-dark .schueler-crumb-sep { color: #64748b; }
 
+/* P-UI-SCHUELER-PROGRESS (v109): Fortschrittsbalken und -ringe im Schueler-Bereich. */
+.schueler-bar { background-color: #e2e8f0; }
+.theme-dark .schueler-bar { background-color: #334155; }
+.schueler-ring-track { color: #e2e8f0; }
+.theme-dark .schueler-ring-track { color: #334155; }
+.schueler-ring-label { fill: #334155; }
+.theme-dark .schueler-ring-label { fill: #e2e8f0; }
+
 /* P-UI-SCHUELER-BOX-CONTRAST (v82): Formel/Merksatz- und Musterloesung-Boxen
    im Schueler-Training und Quiz-Result. Im Dark-Mode greift Tailwind
    `bg-cyan-50` / `bg-emerald-50` als near-white und erzeugt einen blendend
