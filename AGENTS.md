@@ -411,7 +411,7 @@ Eine PR/Änderung gilt als fertig, wenn:
 Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Track:
 
 - Eigener Top-Level-Nav-Tab "Schüler" (links neben dem Theme-Toggle).
-- Eigene Datendatei `js/data/schueler.js` mit globalem `window.SCHUELER`; seit v73 zusaetzlich `js/data/schueler_200_topups.js` als append-only Erweiterung fuer 200er-Pools und Sprachen; seit v109 zusaetzlich `js/data/schueler_topups_v109.js` mit kuratierten Zusatzaufgaben fuer Klasse 5-10 (Ladereihenfolge: `schueler.js` -> `schueler_200_topups.js` -> `schueler_topups_v109.js`).
+- Eigene Datendatei `js/data/schueler.js` mit globalem `window.SCHUELER`; seit v73 zusaetzlich `js/data/schueler_200_topups.js` als append-only Erweiterung fuer 200er-Pools und Sprachen; seit v109 zusaetzlich `js/data/schueler_topups_v109.js` mit kuratierten Zusatzaufgaben fuer Klasse 5-10; seit v110 zusaetzlich `js/data/schueler_sprachen_v110.js` mit Grammatikaufgaben fuer Englisch/Franzoesisch/Latein (Ladereihenfolge: `schueler.js` -> `schueler_200_topups.js` -> `schueler_topups_v109.js` -> `schueler_sprachen_v110.js`).
 - Eigener Komponenten-Block `Schueler` in `app.jsx` (Stages: `classes` -> `subjects` -> `training` oder `quiz` -> `result`).
 - **Eigener** Storage-Namespace (Prefix `smartineer_schueler_*`, aktuell `smartineer_schueler_progress_v1`); der Ingenieurs-Storage-Key (`wissen_reloaded_progress_v1`) und der Schulungen-State (`smartineer_schulungen_v2`) werden **nicht** angefasst.
 - KaTeX wird im Training, Quiz und Ergebnis mitgerendert (nur falls eine Aufgabe `$...$` enthält); die generierten Klasse-1/2-Aufgaben sind reiner Text.
@@ -490,6 +490,18 @@ Der Schüler-Bereich (`view === 'schueler'`) ist **getrennt** vom Ingenieurs-Tra
 - **Sprach-Aufgabe Klasse 5–10 hinzufügen**: append-only in `js/data/schueler_200_topups.js`. Zahlen-/Vokabelitems muessen `kind: 'vocab'` und `section: 'numbers'` bzw. `section: 'vocab'` tragen, Grammatikitems `kind: 'grammar'` und `section: 'grammar'`. Validator fordert mindestens 100 Zahlen-, 100 Vokabel- und 200 Grammatikitems pro (Klasse, Sprache). `normalize()` toleriert seit v73 Akzente, Apostrophe, Satzzeichen, Leerraum und Gross-/Kleinschreibung; seit v75 zusaetzlich deutsche Umlaute via `ae/oe/ue/ss`.
 - **Antwortformat-Konventionen** dokumentieren: Sachaufgaben — Antworten ohne Einheit; Division-mit-Rest — Format `qRr` (z.B. `7R3`), Vergleich case-insensitiv über `normalize()`.
 - **Dezimal-Normalisierung (P-DATA-SCHUELER-NORMALIZE-DECIMAL, seit v109):** `normalize()` schuetzt den Dezimaltrenner **zwischen zwei Ziffern** und vereinheitlicht ihn auf `.`; alle uebrigen Satzzeichen (`! ? ; : . -` sowie Apostrophe) fallen weiterhin weg. Vorher entfernte die Kette erst alle Punkte und wandelte danach Kommas in Punkte um — `0.5` wurde zu `05`, die Eingabe `0,5` aber zu `0.5`, wodurch **keine** Dezimalantwort matchen konnte. Antworten duerfen deshalb Komma **oder** Punkt tragen; beide Schreibweisen des Lernenden werden akzeptiert. **Nicht** toleriert werden Tausenderpunkte (`1.000` bleibt ungleich `1000`) — Aufgaben mit grossen Zahlen daher ohne Tausendertrennung stellen oder in einer kleineren Einheit (z.B. Cent) fragen.
+
+### 17.4.1 Antwort-Qualitaet (P-DATA-SCHUELER-ANSWER-AUDIT, seit v110)
+
+`tools/validate.js` prueft jedes Pool-Item zusaetzlich auf drei Fehlerklassen, die eine Aufgabe unloesbar oder wertlos machen. Alle drei sind **blockierende Fehler**:
+
+1. **Antwort normalisiert zu einem leeren String.** Beispiel: `a: '?'` — `normalize()` entfernt alle Satzzeichen, danach ist die Antwort leer und **jede** Satzzeichen-Eingabe gilt als richtig. Frage stattdessen nach dem **Namen** des Zeichens (`a: 'fragezeichen'`).
+2. **Gleicher Frage-Stem mit unterschiedlicher Antwort.** Eine der beiden Aufgaben wird zwangslaeufig als falsch gewertet. Frage eindeutig formulieren (Beispiel v110: franzoesisch `ou` = oder vs. `où` = wo — der Accent grave ist Teil der Vokabel und muss in den Daten stehen).
+3. **Format-/Beispielhinweis enthaelt die Loesung.** Verboten: `Schreibe im Format 2a+4b` bei Antwort `2a+4b`. Erlaubt: ein **neutrales** Beispiel derselben Form (`Beispielform: 5a+7b`) oder ein generischer Platzhalter (`Format a/b`).
+
+Exakte Dubletten (gleicher Stem **und** gleiche Antwort) sind nur eine Warnung; sie werden beim Laden von `dedupeAllPools()` in `js/data/schueler_topups_v109.js` still entfernt. Das ist gefahrlos, weil die Item-Identitaet an `stableQid({q,a})` haengt und nicht am Index.
+
+**Bewusst nicht als Fehler gewertet:** Aufgaben, deren Antwort als eine von mehreren Alternativen im Fragetext steht (`... ausdehnen oder zusammenziehen?`, `(Apfel, Banane, Karotte)`). Das ist im Grundschulbereich gewollte Lesehilfe und in der Mittelstufe eine bewusste Entscheidungsfrage. Ratewahrscheinlichkeit 1/2 bis 1/3 — sparsam einsetzen. Das Hilfsskript `tools/audit_schueler_answers.js` listet diese Faelle zur manuellen Sichtung auf.
 
 ### 17.5 Anti-Pattern
 

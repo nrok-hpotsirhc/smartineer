@@ -34,7 +34,7 @@ Eine schlanke, modulare **React-SPA + Progressive Web App** (PWA), mit der ein e
 - **PWA**: voll installierbar auf Desktop / Android / iOS, **offline-fähig** durch Service-Worker-Caching
 - **Optionen-Menü** mit Kategorie-Toggle, Import/Export, Reset und Install-Prompt; lokaler Konto-Login ueber `js/auth-credentials.js` (gitignored)
 - **Schulungen-Bereich** fuer Cert-Prep und Master-ET-Vorbereitungen; das Frontend-Only Schulungen-Gate ist aktiv (Login ueber Optionen)
-- **Schüler-Bereich**: Mathematik Klasse 1–10, Deutsch und Sachunterricht Klasse 1–4 sowie Englisch ab Klasse 3; K1/K2-Mathematik erzeugt >50 Aufgabenvarianten, alle K1–K4-Poolfächer enthalten 100+ Fragen. Mathe 5–10, Deutsch, Physik, Chemie, Biologie und Geschichte bieten je **216–294 Aufgaben** (seit v109 um 679 kuratierte Aufgaben erweitert). Englisch/Französisch/Latein haben je Klasse 100 Zahlen-, 100 Vokabel- und 200 Grammatik-Abfragen mit einklappbarer Abschnittstrennung und eigenen Training-/Quiz-Starts. Alle Mittelstufenfächer nutzen getrenntes Training mit Formel/Merksatz (default eingeklappt, per Klick auf "Tipp anzeigen" einblendbar), Musterlösung und eigener geloest-Markierung sowie ein 10-Fragen-Quiz.
+- **Schüler-Bereich**: Mathematik Klasse 1–10, Deutsch und Sachunterricht Klasse 1–4 sowie Englisch ab Klasse 3; K1/K2-Mathematik erzeugt >50 Aufgabenvarianten, alle K1–K4-Poolfächer enthalten 100+ Fragen. Mathe 5–10, Deutsch, Physik, Chemie, Biologie und Geschichte bieten je **216–294 Aufgaben** (seit v109 um 679 kuratierte Aufgaben erweitert). Englisch/Französisch/Latein haben je Klasse 100 Zahlen-, 100 Vokabel- und **220 Grammatik**-Abfragen mit einklappbarer Abschnittstrennung und eigenen Training-/Quiz-Starts. Insgesamt rund **17.700 Schüler-Aufgaben**. Alle Mittelstufenfächer nutzen getrenntes Training mit Formel/Merksatz (default eingeklappt, per Klick auf "Tipp anzeigen" einblendbar), Musterlösung und eigener geloest-Markierung sowie ein 10-Fragen-Quiz.
 - **Fortschrittsanzeige im Schüler-Bereich** (seit v109): Ring und Balken für den Gesamtfortschritt, Prozentwerte je Klasse, je Fach und je Lehrplan-Abschnitt, ein `Nur offene`-Start für noch nicht gelöste Aufgaben, ein `Nächste offene`-Sprung im Training sowie Fachfortschritt und `neu freigeschaltet`-Badge in der Quiz-Auswertung.
 - **Cheatsheets** je Kategorie mit zwei Reitern:
   1. **Formeln** (kompakte Übersicht)
@@ -166,6 +166,7 @@ smartineer/
         ├── schueler.js         # Schüler-Basisbereich
         ├── schueler_200_topups.js # Schüler-Top-ups + Sprachen 5-10
         ├── schueler_topups_v109.js # Kuratierte Zusatzaufgaben Klasse 5-10
+        ├── schueler_sprachen_v110.js # Grammatik Englisch/Franz./Latein 5-10
         ├── schulung_master_et_cybersec.js
         ├── schulung_master_et_automation.js
         └── ...

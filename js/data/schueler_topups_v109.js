@@ -77,6 +77,27 @@
         return String(question || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
     }
 
+    // P-DATA-SCHUELER-ANSWER-AUDIT (v110): Exakte Dubletten (gleicher Frage-Stem
+    // UND gleiche Antwort) aus allen Pools entfernen. Sie stammen aus mehrfach
+    // ueberlappenden Top-up-Generatoren und wuerden im Zufalls-Sampling doppelt
+    // gezogen. Identitaet haengt an stableQid({q,a}) — das Entfernen einer
+    // Dublette verschiebt keine anderen Items und laesst den Lernstand intakt.
+    // Widersprueche (gleicher Stem, andere Antwort) werden bewusst NICHT still
+    // entfernt; die faengt tools/validate.js als Fehler ab.
+    function dedupeAllPools() {
+        Object.keys(SCH.content).forEach(function (key) {
+            const cfg = SCH.content[key];
+            if (!cfg || cfg.mode !== 'pool' || !Array.isArray(cfg.pool)) return;
+            const seen = new Set();
+            cfg.pool = cfg.pool.filter(function (it) {
+                const k = dedupKey(it && it.q) + '\u0000' + SCH.normalize(String(it && it.a != null ? it.a : ''));
+                if (seen.has(k)) return false;
+                seen.add(k);
+                return true;
+            });
+        });
+    }
+
     function flush() {
         Object.keys(PENDING).forEach(function (key) {
             const cfg = SCH.content[key];
@@ -182,7 +203,7 @@
     add('k5.mathe', M.teiler, [
         ['Bestimme den groessten gemeinsamen Teiler von 24 und 36.', '12', 'Gemeinsame Teiler sind 1, 2, 3, 4, 6 und 12.'],
         ['Bestimme das kleinste gemeinsame Vielfache von 6 und 8.', '24', 'Vielfache von 8: 8, 16, 24 — 24 ist auch durch 6 teilbar.'],
-        ['Zerlege 84 in Primfaktoren. Schreibe im Format 2*2*3*7.', '2*2*3*7', '84 ist 2 mal 42, 42 ist 2 mal 21, 21 ist 3 mal 7.']
+        ['Zerlege 84 in Primfaktoren. Schreibe die Faktoren aufsteigend mit * verbunden (Beispielform: 2*3*5).', '2*2*3*7', '84 ist 2 mal 42, 42 ist 2 mal 21, 21 ist 3 mal 7.']
     ]);
 
     add('k5.deutsch', M.wortart, [
@@ -496,8 +517,8 @@
     add('k7.mathe', M.gleichung, [
         ['Loese die Gleichung 3x + 7 = 25.', '6', '18 geteilt durch 3.'],
         ['Loese die Gleichung 5x - 12 = 3x + 8.', '10', '2x = 20.'],
-        ['Fasse zusammen: 4a + 3b - 2a + b. Schreibe im Format 2a+4b.', '2a+4b', 'Nur gleichartige Glieder zusammenfassen.'],
-        ['Multipliziere aus: 3(x + 4). Schreibe im Format 3x+12.', '3x+12', 'Jeden Summanden mit 3 multiplizieren.'],
+        ['Fasse zusammen: 4a + 3b - 2a + b. Schreibe ohne Leerzeichen, Variablen alphabetisch (Beispielform: 5a+7b).', '2a+4b', 'Nur gleichartige Glieder zusammenfassen.'],
+        ['Multipliziere aus: 3(x + 4). Schreibe ohne Leerzeichen (Beispielform: 5x+20).', '3x+12', 'Jeden Summanden mit 3 multiplizieren.'],
         ['Wie heisst die Zahl vor der Variablen im Term 7x?', 'koeffizient', 'x ist die Variable, 7 der Koeffizient.'],
         ['Berechne (-4) &middot; (-6).', '24', 'Minus mal Minus ergibt Plus.'],
         ['Berechne (-18) : 3.', '-6', 'Ungleiche Vorzeichen ergeben ein negatives Ergebnis.'],
@@ -555,10 +576,10 @@
     add('k7.physik', M.mechanik, [
         ['Wie gross ist die Gewichtskraft von 1 kg auf der Erde in Newton? Runde auf zwei Nachkommastellen.', '9,81', 'Ortsfaktor g ist rund 9,81 N/kg.'],
         ['Berechne die Gewichtskraft von 5 kg mit g = 9,81 N/kg in Newton.', '49,05', '5 mal 9,81.'],
-        ['Wie lautet die Formel fuer die Dichte? Schreibe im Format m/V.', 'm/v', 'Masse geteilt durch Volumen.'],
+        ['Wie lautet die Formel fuer die Dichte? Nutze Formelzeichen und / fuer den Bruchstrich (Beispielform: a/b).', 'm/v', 'Masse geteilt durch Volumen.'],
         ['Ein Koerper hat 200 g und 250 Kubikzentimeter. Wie gross ist die Dichte in g pro Kubikzentimeter?', '0,8', '200 geteilt durch 250.'],
         ['Welche Dichte hat Wasser in Kilogramm pro Kubikmeter?', '1000', 'Das entspricht 1 g pro Kubikzentimeter.'],
-        ['Wie lautet die Formel fuer den Druck? Schreibe im Format F/A.', 'f/a', 'Kraft geteilt durch Flaeche.'],
+        ['Wie lautet die Formel fuer den Druck? Nutze Formelzeichen und / fuer den Bruchstrich (Beispielform: a/b).', 'f/a', 'Kraft geteilt durch Flaeche.'],
         ['Wie heisst die Einheit des Drucks?', 'pascal', 'Ein Pascal ist ein Newton pro Quadratmeter.'],
         ['Eine Kraft von 200 N wirkt auf 0,5 Quadratmeter. Wie gross ist der Druck in Pascal?', '400', '200 geteilt durch 0,5.'],
         ['Wie heisst das Gesetz Kraft mal Kraftarm gleich Last mal Lastarm?', 'hebelgesetz', 'Es beschreibt das Drehmomentgleichgewicht.'],
@@ -568,7 +589,7 @@
         ['Wie nennt man die Kraft, die einer Bewegung entgegenwirkt?', 'reibung', 'Sie wandelt Bewegungsenergie in Waerme um.'],
         ['Welche Reibung ist groesser: Haftreibung oder Gleitreibung?', 'haftreibung', 'Deshalb ist das Losfahren schwerer als das Weiterschieben.'],
         ['Wer formulierte das Gesetz zum Auftrieb in Fluessigkeiten?', 'archimedes', 'Der Auftrieb entspricht der Gewichtskraft der verdraengten Fluessigkeit.'],
-        ['Wie lautet die Formel fuer mechanische Arbeit? Schreibe im Format F*s.', 'f*s', 'Kraft mal Weg in Kraftrichtung.'],
+        ['Wie lautet die Formel fuer mechanische Arbeit? Nutze Formelzeichen und * als Malzeichen (Beispielform: a*b).', 'f*s', 'Kraft mal Weg in Kraftrichtung.'],
         ['Wie heisst die Einheit der Arbeit?', 'joule', 'Ein Joule ist ein Newtonmeter.'],
         ['Berechne die Arbeit, wenn 50 N ueber 4 m wirken, in Joule.', '200', '50 mal 4.'],
         ['Wie heisst die Einheit der Leistung?', 'watt', 'Ein Watt ist ein Joule pro Sekunde.'],
@@ -654,9 +675,9 @@
     add('k8.mathe', M.gleichung, [
         ['Im Gleichungssystem 2x + y = 10 und y = 4: Wie gross ist x?', '3', 'Einsetzungsverfahren: 2x = 6.'],
         ['Loese das System x + y = 10 und x - y = 2. Wie gross ist x?', '6', 'Additionsverfahren: 2x = 12.'],
-        ['Multipliziere aus: (x + 3)(x + 5). Schreibe im Format x^2+8x+15.', 'x^2+8x+15', 'Jedes Glied mit jedem multiplizieren.'],
-        ['Wende die erste binomische Formel auf (a + b)^2 an. Schreibe im Format a^2+2ab+b^2.', 'a^2+2ab+b^2', 'Merke: erstes Quadrat, doppeltes Produkt, zweites Quadrat.'],
-        ['Faktorisiere x^2 - 9. Schreibe im Format (x+3)(x-3).', '(x+3)(x-3)', 'Dritte binomische Formel.']
+        ['Multipliziere aus: (x + 3)(x + 5). Schreibe ohne Leerzeichen, absteigend nach Potenz (Beispielform: x^2+9x+20).', 'x^2+8x+15', 'Jedes Glied mit jedem multiplizieren.'],
+        ['Wende die erste binomische Formel auf (a + b)^2 an. Schreibe ohne Leerzeichen (Beispielform: p^2+2pq+q^2).', 'a^2+2ab+b^2', 'Merke: erstes Quadrat, doppeltes Produkt, zweites Quadrat.'],
+        ['Faktorisiere x^2 - 9. Schreibe als Produkt zweier Klammern ohne Leerzeichen (Beispielform: (x+5)(x-5)).', '(x+3)(x-3)', 'Dritte binomische Formel.']
     ]);
     add('k8.mathe', M.pythagoras, [
         ['Berechne die Hypotenuse bei a = 3 cm und b = 4 cm in Zentimetern.', '5', 'Wurzel aus 9 plus 16.'],
@@ -666,8 +687,8 @@
         ['Berechne die Wurzel aus 144.', '12', '12 mal 12 ergibt 144.']
     ]);
     add('k8.mathe', M.potenz, [
-        ['Fasse 2^3 &middot; 2^4 als eine Potenz zusammen. Schreibe im Format 2^7.', '2^7', 'Exponenten addieren.'],
-        ['Fasse x^6 : x^2 als eine Potenz zusammen. Schreibe im Format x^4.', 'x^4', 'Exponenten subtrahieren.'],
+        ['Fasse 2^3 &middot; 2^4 als eine Potenz zusammen. Schreibe Basis^Exponent ohne Leerzeichen (Beispielform: 5^9).', '2^7', 'Exponenten addieren.'],
+        ['Fasse x^6 : x^2 als eine Potenz zusammen. Schreibe Basis^Exponent ohne Leerzeichen (Beispielform: y^9).', 'x^4', 'Exponenten subtrahieren.'],
         ['Berechne 3 hoch 0.', '1', 'Jede Potenz mit Exponent 0 ergibt 1.']
     ]);
     add('k8.mathe', M.kreis, [
@@ -716,14 +737,14 @@
         ['Wie heisst die Einheit der elektrischen Stromstaerke?', 'ampere', 'Formelzeichen I.'],
         ['Wie heisst die Einheit der elektrischen Spannung?', 'volt', 'Formelzeichen U.'],
         ['Wie heisst die Einheit des elektrischen Widerstands?', 'ohm', 'Formelzeichen R.'],
-        ['Wie lautet das ohmsche Gesetz? Schreibe im Format U=R*I.', 'u=r*i', 'Umgestellt: R = U/I.'],
+        ['Wie lautet das ohmsche Gesetz, nach der Spannung aufgeloest? Nutze Formelzeichen und * als Malzeichen (Beispielform: a=b*c).', 'u=r*i', 'Umgestellt: R = U/I.'],
         ['Berechne den Widerstand bei U = 12 V und I = 2 A in Ohm.', '6', '12 geteilt durch 2.'],
         ['Berechne die Stromstaerke bei U = 230 V und R = 46 Ohm in Ampere.', '5', '230 geteilt durch 46.'],
         ['Wie gross ist der Gesamtwiderstand von 10 Ohm und 20 Ohm in Reihe in Ohm?', '30', 'In Reihe addieren sich die Widerstaende.'],
         ['Wie gross ist der Gesamtwiderstand zweier 10-Ohm-Widerstaende parallel in Ohm?', '5', 'Bei gleichen Widerstaenden halbiert sich der Wert.'],
         ['Wie verhaelt sich die Stromstaerke in einer Reihenschaltung: ueberall gleich oder verschieden?', 'gleich', 'Die Spannungen teilen sich auf.'],
         ['Wie verhaelt sich die Spannung in einer Parallelschaltung: gleich oder verschieden?', 'gleich', 'Die Stroeme teilen sich auf.'],
-        ['Wie lautet die Formel der elektrischen Leistung? Schreibe im Format P=U*I.', 'p=u*i', 'Einheit Watt.'],
+        ['Wie lautet die Formel der elektrischen Leistung? Nutze Formelzeichen und * als Malzeichen (Beispielform: a=b*c).', 'p=u*i', 'Einheit Watt.'],
         ['Berechne die Leistung bei 230 V und 0,5 A in Watt.', '115', '230 mal 0,5.'],
         ['Wie viele Joule entsprechen einer Kilowattstunde?', '3600000', '1000 W mal 3600 s.'],
         ['Welche Netzspannung hat das deutsche Haushaltsnetz in Volt?', '230', 'Bei 50 Hertz Wechselspannung.'],
@@ -821,7 +842,7 @@
         ['Berechne sin(30 Grad).', '0,5', 'Merkwert im halben gleichseitigen Dreieck.'],
         ['Berechne cos(60 Grad).', '0,5', 'cos(60) entspricht sin(30).'],
         ['Berechne tan(45 Grad).', '1', 'Gegen- und Ankathete sind gleich lang.'],
-        ['Welcher Quotient ergibt den Sinus? Schreibe im Format Gegenkathete/Hypotenuse.', 'gegenkathete/hypotenuse', 'Der Kosinus nutzt Ankathete durch Hypotenuse.'],
+        ['Welcher Seitenquotient im rechtwinkligen Dreieck ergibt den Sinus? Nenne Zaehler und Nenner mit / verbunden (Beispielform: Hoehe/Breite).', 'gegenkathete/hypotenuse', 'Der Kosinus nutzt Ankathete durch Hypotenuse.'],
         ['In einem rechtwinkligen Dreieck ist die Gegenkathete 6 und die Hypotenuse 10. Wie gross ist der Sinus?', '0,6', '6 geteilt durch 10.']
     ]);
     add('k9.mathe', M.stochastik, [
@@ -864,14 +885,14 @@
     ], 'medien');
 
     add('k9.physik', M.energie, [
-        ['Wie lautet die Formel der kinetischen Energie? Schreibe im Format 0.5*m*v^2.', '0.5*m*v^2', 'Die Geschwindigkeit geht quadratisch ein.'],
+        ['Wie lautet die Formel der kinetischen Energie? Nutze * als Malzeichen und ^ fuer die Potenz (Beispielform: 2*a*b^3).', '0.5*m*v^2', 'Die Geschwindigkeit geht quadratisch ein.'],
         ['Berechne die Hoehenenergie von 2 kg in 10 m Hoehe mit g = 9,81 N/kg in Joule.', '196,2', '2 mal 9,81 mal 10.'],
         ['Wie heisst der Satz, nach dem Energie in einem abgeschlossenen System konstant bleibt?', 'energieerhaltungssatz', 'Energie wird nur umgewandelt.'],
         ['Welchen Wirkungsgrad in Prozent haette eine ideale Maschine?', '100', 'Real gibt es immer Reibungsverluste.'],
         ['Von 800 J zugefuehrter Energie sind 200 J nutzbar. Wie gross ist der Wirkungsgrad in Prozent?', '25', '200 geteilt durch 800 mal 100.'],
         ['Wie gross ist der Luftdruck auf Meereshoehe ungefaehr in Hektopascal?', '1013', 'Das entspricht 1013 hPa Normaldruck.'],
         ['Wie nennt man den Druck in einer Fluessigkeit durch ihr Eigengewicht?', 'schweredruck', 'Er waechst linear mit der Tiefe.'],
-        ['Wie lautet die Formel des Schweredrucks? Schreibe im Format rho*g*h.', 'rho*g*h', 'Dichte mal Ortsfaktor mal Hoehe.'],
+        ['Wie lautet die Formel des Schweredrucks? Nutze * als Malzeichen (Beispielform: a*b*c).', 'rho*g*h', 'Dichte mal Ortsfaktor mal Hoehe.'],
         ['Nach wem ist das Prinzip der gleichmaessigen Druckausbreitung in Fluessigkeiten benannt?', 'pascal', 'Grundlage der hydraulischen Presse.']
     ]);
     add('k9.physik', M.kern, [
@@ -1026,14 +1047,14 @@
     add('k10.physik', M.optik, [
         ['Wie nennt man das Ausloesen von Elektronen aus einer Metalloberflaeche durch Licht?', 'fotoeffekt', 'Er belegt den Teilchencharakter des Lichts.'],
         ['Wer erklaerte 1905 den Fotoeffekt mit Lichtquanten?', 'einstein', 'Dafuer erhielt er 1921 den Nobelpreis.'],
-        ['Wie berechnet man die Energie eines Photons? Schreibe im Format h*f.', 'h*f', 'Plancksches Wirkungsquantum mal Frequenz.'],
+        ['Wie berechnet man die Energie eines Photons? Nutze Formelzeichen und * als Malzeichen (Beispielform: a*b).', 'h*f', 'Plancksches Wirkungsquantum mal Frequenz.'],
         ['Wie nennt man das Doppelverhalten des Lichts als Welle und als Teilchen?', 'welle-teilchen-dualismus', 'Er gilt auch fuer Materie.'],
         ['Wie nennt man die Ueberlagerung zweier Wellen?', 'interferenz', 'Sie kann verstaerkend oder ausloeschend sein.'],
         ['Wie nennt man die Ausbreitung von Wellen in den geometrischen Schattenraum hinter einem Spalt?', 'beugung', 'Sie ist ein Wellenphaenomen.'],
         ['Wie gross ist die Lichtgeschwindigkeit im Vakuum gerundet in Metern pro Sekunde?', '300000000', 'Exakt 299 792 458 m/s.']
     ]);
     add('k10.physik', M.kern, [
-        ['Wie lautet die Formel der Masse-Energie-Aequivalenz? Schreibe im Format E=m*c^2.', 'e=m*c^2', 'Grundlage des Massendefekts.'],
+        ['Wie lautet die Formel der Masse-Energie-Aequivalenz? Nutze * als Malzeichen und ^ fuer die Potenz (Beispielform: a=b*c^3).', 'e=m*c^2', 'Grundlage des Massendefekts.'],
         ['Wie nennt man Protonen und Neutronen gemeinsam?', 'nukleon', 'Ihre Summe ist die Massenzahl.'],
         ['Wie nennt man Atome mit gleicher Protonenzahl, aber unterschiedlicher Neutronenzahl?', 'isotope', 'Sie sind chemisch nahezu gleich.'],
         ['Wie viele Neutronen enthaelt der Kern von Kohlenstoff-14?', '8', '14 minus 6 Protonen.'],
@@ -1111,4 +1132,5 @@
     ]);
 
     flush();
+    dedupeAllPools();
 })();

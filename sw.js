@@ -6,7 +6,7 @@
  *   - Cross-origin (CDN): Stale-while-revalidate.
  *   - Navigation-Fallback: index.html (offline-fähig).
  */
-const CACHE_VERSION = 'smartineer-v109-schueler-progress';
+const CACHE_VERSION = 'smartineer-v110-schueler-audit-sprachen';
 const APP_SHELL = [
     './',
     './index.html',
@@ -41,6 +41,7 @@ const APP_SHELL = [
     './js/data/schueler.js',
     './js/data/schueler_200_topups.js',
     './js/data/schueler_topups_v109.js',
+    './js/data/schueler_sprachen_v110.js',
     './js/data/schulung_securityx.js',
     './js/data/schulung_starter.js',
     './js/data/schulung_allgemeinmedizin.js',

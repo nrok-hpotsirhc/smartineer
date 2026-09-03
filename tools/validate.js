@@ -361,6 +361,40 @@ function validateQuizItem(file, where, qi, qIdx, seenQ) {
     }
 }
 
+// P-DATA-SCHUELER-ANSWER-AUDIT (v110): Fehlerklassen, die eine Aufgabe unloesbar
+// oder wertlos machen und die vorher unbemerkt blieben (AGENTS §17.4):
+//   1. Antwort normalisiert zu "" -> jede Eingabe aus derselben Zeichenklasse gilt
+//      als richtig (z.B. Antwort "?" — normalize entfernt alle Satzzeichen).
+//   2. Zwei Items mit identischem Frage-Stem, aber unterschiedlicher Antwort
+//      -> eine der beiden Antworten wird zwangslaeufig als falsch gewertet.
+//   3. Format-/Beispielhinweis in der Frage enthaelt woertlich die Loesung.
+function validatePoolAnswers(file, where, pool, normalize) {
+    if (typeof normalize !== 'function') return;
+    const stemOf = (q) => String(q || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+    const byStem = new Map();
+    pool.forEach((it, i) => {
+        if (!it || typeof it.q !== 'string' || typeof it.a !== 'string') return;
+        const answer = normalize(it.a);
+        if (!answer) {
+            err(file, `${where}.pool[${i}]`, `Antwort ${JSON.stringify(it.a)} normalisiert zu einem leeren String — jede aehnliche Eingabe gilt als richtig. Frage nach dem Namen des Zeichens statt nach dem Zeichen.`);
+        }
+        const stem = stemOf(it.q);
+        const prev = byStem.get(stem);
+        if (prev && prev.answer !== answer) {
+            err(file, `${where}.pool[${prev.index}] / [${i}]`, `Gleicher Frage-Stem mit widerspruechlichen Antworten (${JSON.stringify(prev.raw)} vs ${JSON.stringify(it.a)}). Frage eindeutig formulieren.`);
+        } else if (prev) {
+            warn(file, `${where}.pool[${i}]`, 'Exakte Dublette (gleicher Stem und gleiche Antwort).');
+        } else {
+            byStem.set(stem, { answer, raw: it.a, index: i });
+        }
+        // Beispiel-/Formathinweis darf die Loesung nicht verraten.
+        const hint = /(?:beispielform|format)\s*:?\s*([^)."]+)/i.exec(it.q);
+        if (hint && answer && normalize(hint[1]) === answer) {
+            err(file, `${where}.pool[${i}]`, `Der Formathinweis "${hint[1].trim()}" enthaelt woertlich die Loesung. Neutrales Beispiel verwenden.`);
+        }
+    });
+}
+
 function validateSchueler(win) {
     const s = win.SCHUELER;
     const file = 'js/data/schueler.js';
@@ -435,6 +469,7 @@ function validateSchueler(win) {
                         err(file, `${where}.pool[${i}]`, 'Mittelstufen-Item benoetigt {f:string, s:string} (leer = kein Tipp).');
                     }
                 });
+                validatePoolAnswers(file, where, c.pool, s.normalize);
             }
         }
     });

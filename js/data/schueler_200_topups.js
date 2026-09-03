@@ -508,7 +508,7 @@
         ['schwarz', 'black', 'noir', 'niger'], ['gluecklich', 'happy', 'heureux', 'beatus'], ['traurig', 'sad', 'triste', 'tristis'], ['stark', 'strong', 'fort', 'fortis'],
         ['links', 'left', 'gauche', 'sinister'], ['rechts', 'right', 'droite', 'dexter'], ['oben', 'above', 'en haut', 'supra'], ['unten', 'below', 'en bas', 'infra'],
         ['warum', 'why', 'pourquoi', 'cur'], ['weil', 'because', 'parce que', 'quia'], ['aber', 'but', 'mais', 'sed'], ['und', 'and', 'et', 'et'],
-        ['oder', 'or', 'ou', 'aut'], ['wenn', 'if', 'si', 'si'], ['wo', 'where', 'ou', 'ubi'], ['wer', 'who', 'qui', 'quis'],
+        ['oder', 'or', 'ou', 'aut'], ['wenn', 'if', 'si', 'si'], ['wo', 'where', 'où', 'ubi'], ['wer', 'who', 'qui', 'quis'],
         ['was', 'what', 'quoi', 'quid'], ['viele', 'many', 'beaucoup de', 'multi'], ['wenige', 'few', 'peu de', 'pauci'], ['alles', 'everything', 'tout', 'omnia'],
         ['nichts', 'nothing', 'rien', 'nihil'], ['Koerper', 'body', 'corps', 'corpus'], ['Kopf', 'head', 'tete', 'caput'], ['Hand', 'hand', 'main', 'manus'],
         ['Fuss', 'foot', 'pied', 'pes'], ['Auge', 'eye', 'oeil', 'oculus'], ['Ohr', 'ear', 'oreille', 'auris'], ['Herz', 'heart', 'coeur', 'cor'],
