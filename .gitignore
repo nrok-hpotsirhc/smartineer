@@ -56,3 +56,20 @@ coverage/
 # die produktive Datei muss lokal aus der Vorlage kopiert und mit eigenen Werten
 # gepflegt werden, damit Default-Passwoerter nicht im Repo landen.
 js/auth-credentials.js
+
+# AI-Coding-Tool-Konfiguration / Skill-Caches (lokal je Tool/Entwickler,
+# nicht Teil der dokumentierten Repo-Struktur, siehe AGENTS.md §3).
+.agent/
+.claude/
+.codebuddy/
+.codex/
+.continue/
+.cursor/
+.gemini/
+.kiro/
+.opencode/
+.qoder/
+.roo/
+.trae/
+.windsurf/
+.github/prompts/
