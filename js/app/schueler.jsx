@@ -345,6 +345,13 @@ function Schueler({ visibleClassIds }) {
     const resultRef = useKaTeX([stage, answers.length]);
     const trainingRef = useKaTeX([stage, klass, subject, trainingIdx, showTrainingSolution, showTrainingFormula, Object.keys(schuelerProgress.progress).length]);
     useScrollReveal([stage, klass, subject]);
+    // P-UI-FX: Konfetti als Belohnung bei starkem Quiz-Ergebnis (>= 80 % korrekt).
+    const scoreRef = useRef(null);
+    useEffect(() => {
+        if (stage !== 'result' || !scoreRef.current || !answers.length) return;
+        const ratio = answers.filter(a => a.correct).length / answers.length;
+        if (ratio >= 0.8) burstConfetti(scoreRef.current, 26);
+    }, [stage, answers]);
 
     if (!SCH) {
         return <section className="view-fade p-8 text-red-700">Schüler-Daten nicht geladen. Prüfe <code>js/data/schueler.js</code> in <code>index.html</code>.</section>;
@@ -1217,8 +1224,8 @@ function Schueler({ visibleClassIds }) {
                     {quizFeedback && (
                         <div className="slide-in" aria-live="polite">
                             <div className={`schueler-feedback rounded-xl border-l-4 p-4 mb-4 ${quizFeedback.correct
-                                ? 'schueler-feedback-ok border-emerald-500 bg-emerald-50'
-                                : 'schueler-feedback-bad border-rose-500 bg-rose-50'}`}>
+                                ? 'schueler-feedback-ok border-emerald-500 bg-emerald-50 fx-state-ok'
+                                : 'schueler-feedback-bad border-rose-500 bg-rose-50 fx-state-bad'}`}>
                                 <p className={`text-lg font-extrabold mb-2 ${quizFeedback.correct ? 'text-emerald-800' : 'text-rose-800'}`}>
                                     {quizFeedback.correct ? 'Richtig' : 'Leider falsch'}
                                 </p>
@@ -1275,7 +1282,7 @@ function Schueler({ visibleClassIds }) {
         const accent = schuelerClassColor(SCH, klass);
         return (
             <section className="view-fade max-w-3xl mx-auto" ref={resultRef}>
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
+                <div ref={scoreRef} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
                     <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Auswertung</h2>
                     <p className="text-slate-600 mb-6">{klassObj ? klassObj.label : ''} · {SCH.subjects[subject] ? SCH.subjects[subject].label : ''}{selectedSection ? ` · ${sectionLabel(selectedSection, subject, klass)}` : ''}</p>
                     <div className="flex justify-center gap-8 mb-4">

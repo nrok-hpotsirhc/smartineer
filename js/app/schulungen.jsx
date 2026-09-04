@@ -799,6 +799,13 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
         return m;
     }, [training]);
     useScrollReveal([stage, training && training.id]);
+    // P-UI-FX: Konfetti als Belohnung bei starkem Ergebnis (>= 80 % korrekt).
+    const scoreRef = useRef(null);
+    useEffect(() => {
+        if (stage !== 'quizResult' || !scoreRef.current || !quizAnswers.length) return;
+        const ratio = quizAnswers.filter(a => a.ok).length / quizAnswers.length;
+        if (ratio >= 0.8) burstConfetti(scoreRef.current, 26);
+    }, [stage, quizAnswers]);
     const onGlossaryClick = useCallback((e) => {
         const btn = e.target && e.target.closest && e.target.closest('.glossary-link');
         if (!btn) return;
@@ -1597,8 +1604,8 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                     {quizFeedback && (
                         <div className="slide-in" aria-live="polite">
                             <div className={`quiz-feedback rounded-xl border-l-4 p-4 mb-4 ${quizFeedback.ok
-                                ? 'quiz-feedback-ok border-emerald-500 bg-emerald-50'
-                                : 'quiz-feedback-bad border-rose-500 bg-rose-50'}`}>
+                                ? 'quiz-feedback-ok border-emerald-500 bg-emerald-50 fx-state-ok'
+                                : 'quiz-feedback-bad border-rose-500 bg-rose-50 fx-state-bad'}`}>
                                 <p className={`text-lg font-extrabold mb-1 ${quizFeedback.ok ? 'text-emerald-800' : 'text-rose-800'}`}>
                                     {quizFeedback.ok ? 'Richtig' : 'Leider falsch'}
                                 </p>
@@ -1654,7 +1661,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
         const asmtPassed = asmtPassScore != null ? asmtPct >= asmtPassScore : null;
         return (
             <section className="view-fade max-w-3xl mx-auto" ref={resultRef}>
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
+                <div ref={scoreRef} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6 text-center">
                     <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">
                         {assessmentMode ? 'Pruefungs-Auswertung' : reviewMode ? 'Wiederholung — Auswertung' : 'Quiz-Auswertung'}
                     </h2>

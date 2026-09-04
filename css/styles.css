@@ -14,7 +14,7 @@
 html, body {
     background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
     color: var(--c-text);
-    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -295,12 +295,8 @@ img, svg { max-width: 100%; height: auto; }
     50% { box-shadow: 0 0 0 8px rgba(var(--glow-blue), 0); }
 }
 
-/* ---------- Fokus-Ringe (Accessibility, siehe UI/UX-Skill §Accessibility) ---------- */
-a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-    outline: 2px solid rgb(var(--glow-blue));
-    outline-offset: 2px;
-    border-radius: 4px;
-}
+/* Fokus-Ringe fuer Tastaturnavigation sind bereits weiter unten definiert
+   (`button:focus-visible` mit doppeltem box-shadow-Ring) — hier bewusst nichts. */
 
 /* ---------- Konfetti-lite Burst (100%-Abschluss-Badge) ---------- */
 .badge-complete { position: relative; }
@@ -345,27 +341,34 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
    starten durch Hover, Klick, Scroll oder ein Achievement.
    ============================================================ */
 
-/* ---------- Cursor-Spotlight + 3D-Tilt (Karten) ---------- */
-.fx-spotlight {
-    position: relative;
-    transform-style: preserve-3d;
-    transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
-    transition: transform 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out;
-}
-.fx-spotlight::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--glow-blue), 0.16), transparent 65%);
-    opacity: 0;
-    transition: opacity 220ms ease;
-    pointer-events: none;
-    z-index: 0;
-}
-.fx-spotlight:hover::before { opacity: 1; }
-.theme-dark .fx-spotlight::before {
-    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(96, 165, 250, 0.22), transparent 65%);
+/* ---------- Cursor-Spotlight + 3D-Tilt (Karten) ----------
+   Nur auf Geraeten mit echtem Hover (Maus/Trackpad). Auf Touch wuerde der
+   Effekt beim Antippen haengenbleiben (UI/UX-Skill: `@media (hover: hover)`). */
+.fx-spotlight { position: relative; }
+/* Press-Feedback (taktil) — gilt auch auf Touch, daher ausserhalb des Hover-Queries. */
+.fx-ripple, .fx-spotlight { transition: scale 90ms ease-out; }
+.fx-ripple:active, .fx-spotlight:active { scale: 0.985; }
+@media (hover: hover) and (pointer: fine) {
+    .fx-spotlight {
+        transform-style: preserve-3d;
+        transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+        transition: transform 200ms ease-out, scale 90ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out;
+    }
+    .fx-spotlight::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--glow-blue), 0.16), transparent 65%);
+        opacity: 0;
+        transition: opacity 220ms ease;
+        pointer-events: none;
+        z-index: 0;
+    }
+    .fx-spotlight:hover::before { opacity: 1; }
+    .theme-dark .fx-spotlight::before {
+        background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(96, 165, 250, 0.22), transparent 65%);
+    }
 }
 /* Inhalte ueber dem Spotlight-Layer halten. */
 .fx-spotlight > * { position: relative; z-index: 1; }
@@ -398,7 +401,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 .fx-revealed { opacity: 1; translate: 0 0; }
 /* Karten heben beim Hover an — ebenfalls ueber `translate`, damit der Tilt bleibt. */
-.fx-revealed.fx-spotlight:hover { translate: 0 -6px; }
+@media (hover: hover) and (pointer: fine) {
+    .fx-revealed.fx-spotlight:hover { translate: 0 -6px; }
+}
 
 /* ---------- Animierter Farbverlauf-Rahmen (nur bei Hover/Fokus) ---------- */
 .fx-border-glow { position: relative; }
@@ -429,6 +434,25 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 @keyframes borderSpin {
     to { --angle: 360deg; }
+}
+
+/* ---------- Success-/Error-State-Feedback (Micro-interactions-Checkliste) ----------
+   Feedback-Farben laut Skill: Green #22C55E, Red #EF4444, Amber #F59E0B. */
+.fx-state-ok { animation: stateOk 520ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.fx-state-bad { animation: stateBad 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+@keyframes stateOk {
+    0% { opacity: 0; scale: 0.96; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+    60% { opacity: 1; scale: 1.01; box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+    100% { opacity: 1; scale: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+/* Kurzer horizontaler Ruckler statt Blinken — signalisiert "falsch" ohne Farbe allein
+   (UI/UX-Skill: "Color is not the only indicator"). */
+@keyframes stateBad {
+    0%, 100% { translate: 0 0; }
+    20% { translate: -6px 0; }
+    45% { translate: 5px 0; }
+    70% { translate: -3px 0; }
+    88% { translate: 2px 0; }
 }
 
 /* ---------- Konfetti-Burst (Achievement) ---------- */
