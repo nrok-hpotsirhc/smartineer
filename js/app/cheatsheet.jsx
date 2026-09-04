@@ -27,20 +27,20 @@ function Cheatsheet({ data, order }) {
         <section className="view-fade" ref={ref}>
             <div className="text-center max-w-3xl mx-auto mb-8">
                 <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
-                     className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
-                <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Cheatsheets &amp; Isolierte Musterlösungen</h1>
+                     className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow float-y" />
+                <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 via-blue-700 to-slate-900 bg-clip-text text-transparent animated-gradient-text">Cheatsheets &amp; Isolierte Musterlösungen</h1>
                 <p className="text-slate-600">Zwei strikt getrennte Bereiche: <strong>1)</strong> kompakte Formelsammlung und <strong>2)</strong> isolierter Lösungskatalog mit Rechenweg und Kommentaren.</p>
             </div>
             <div className="flex flex-wrap justify-center gap-3 mb-6">
                 <button onClick={() => setTab('formulas')}
-                    className={`font-bold py-2.5 px-6 rounded-xl shadow transition ${tab === 'formulas'
-                        ? 'bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-lg'
+                    className={`font-bold py-2.5 px-6 rounded-xl shadow transition-all cursor-pointer hover:scale-105 ${tab === 'formulas'
+                        ? 'btn-glow bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-lg'
                         : 'bg-white text-slate-800 border border-slate-300 hover:bg-slate-50'}`}>
                     1) Formelsammlung
                 </button>
                 <button onClick={() => setTab('solutions')}
-                    className={`font-bold py-2.5 px-6 rounded-xl shadow transition ${tab === 'solutions'
-                        ? 'bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-lg'
+                    className={`font-bold py-2.5 px-6 rounded-xl shadow transition-all cursor-pointer hover:scale-105 ${tab === 'solutions'
+                        ? 'btn-glow bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-lg'
                         : 'bg-white text-slate-800 border border-slate-300 hover:bg-slate-50'}`}>
                     2) Isolierte Lösungen
                 </button>
@@ -54,7 +54,7 @@ function Cheatsheet({ data, order }) {
                     {order.map(k => {
                         const cat = data[k]; if (!cat) return null;
                         return (
-                            <details key={k} onToggle={onDetailsToggle} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            <details key={k} onToggle={onDetailsToggle} className="bg-white rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-blue-200 transition-all duration-300 overflow-hidden">
                                 <summary className="cursor-pointer select-none px-6 py-4 font-bold text-slate-800 hover:bg-slate-50 flex items-center justify-between">
                                     <span>{cat.name}</span>
                                     <span className="text-xs text-slate-500 font-normal">Formelsammlung</span>
@@ -74,7 +74,7 @@ function Cheatsheet({ data, order }) {
                         const cat = data[k]; if (!cat) return null;
                         const totalTasks = cat.levels.reduce((s, t) => s + t.length, 0);
                         return (
-                            <details key={k} onToggle={onDetailsToggle} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            <details key={k} onToggle={onDetailsToggle} className="bg-white rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-emerald-200 transition-all duration-300 overflow-hidden">
                                 <summary className="cursor-pointer select-none px-6 py-4 font-bold text-slate-800 hover:bg-slate-50 flex items-center justify-between">
                                     <span>{cat.name} — Isolierte Musterlösungen</span>
                                     <span className="text-xs text-slate-500 font-normal">{totalTasks} Aufgaben</span>

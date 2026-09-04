@@ -145,6 +145,7 @@ function Nav({ view, setView, theme, onToggleTheme, activeProfile, onOpenProfile
 function Radar({ data, order, isSolved }) {
     const canvasRef = useRef(null);
     const chartRef = useRef(null);
+    const [chartReady, setChartReady] = useState(false);
 
     useEffect(() => {
         if (!canvasRef.current || !window.Chart) return;
@@ -196,6 +197,7 @@ function Radar({ data, order, isSolved }) {
                 plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } } }
             }
         });
+        setChartReady(true);
         return () => { /* keep chart instance across renders */ };
     }, [data, order, isSolved]);
 
@@ -203,7 +205,8 @@ function Radar({ data, order, isSolved }) {
 
     return (
         <div className="chart-container">
-            <canvas ref={canvasRef}></canvas>
+            {!chartReady && <div className="chart-skeleton" aria-hidden="true"></div>}
+            <canvas ref={canvasRef} className={`transition-opacity duration-300 ${chartReady ? 'opacity-100' : 'opacity-0'}`}></canvas>
         </div>
     );
 }
@@ -218,7 +221,7 @@ function CategoryCard({ cat, stats, onOpen, idx }) {
             <div className={`absolute -right-8 -top-8 w-28 h-28 rounded-full bg-gradient-to-br ${ringColor} opacity-10 group-hover:opacity-25 group-hover:scale-110 transition-all duration-500`}></div>
             <div className="flex justify-between items-start mb-2 relative">
                 <h3 className="font-bold text-slate-800 text-lg">{cat.name}</h3>
-                <span className={`text-xs font-bold px-2 py-1 rounded-full ${stats.pct === 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>{stats.pct}%</span>
+                <span className={`text-xs font-bold px-2 py-1 rounded-full ${stats.pct === 100 ? 'badge-complete bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>{stats.pct}%</span>
             </div>
             <p className="text-sm text-slate-500 mb-4 line-clamp-2 relative">{cat.desc}</p>
             <div className="bar-shimmer w-full bg-slate-100 rounded-full h-2 mb-2 overflow-hidden relative">

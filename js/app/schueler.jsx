@@ -132,7 +132,7 @@ function schuelerClassColor(SCH, classId) {
 function SchuelerBar({ pct, color, height }) {
     const h = height || 8;
     return (
-        <div className="schueler-bar w-full rounded-full overflow-hidden" style={{ height: h + 'px' }}>
+        <div className="schueler-bar bar-shimmer w-full rounded-full overflow-hidden" style={{ height: h + 'px' }}>
             <div className="rounded-full transition-all duration-700 ease-out"
                 style={{ width: Math.max(0, Math.min(100, pct || 0)) + '%', height: h + 'px', backgroundColor: color || '#10b981' }}></div>
         </div>
@@ -229,8 +229,8 @@ function SchuelerDashboard({ activeProfile, visibleClassIds, onOpenSchueler, onG
         <section className="view-fade">
             <div className="text-center max-w-3xl mx-auto mb-8">
                 <img src="icons/smartineer-logo.png" alt="" width="80" height="80"
-                     className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-3 drop-shadow-md" />
-                <h1 className="text-3xl md:text-4xl font-extrabold mb-2 bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent">Dein Schüler-Cockpit.</h1>
+                     className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-3 drop-shadow-md float-y" />
+                <h1 className="text-3xl md:text-4xl font-extrabold mb-2 bg-gradient-to-r from-emerald-700 via-teal-500 to-emerald-700 bg-clip-text text-transparent animated-gradient-text">Dein Schüler-Cockpit.</h1>
                 <p className="text-sm md:text-base text-slate-600">Fortschritt pro Klasse, lokal auf diesem Gerät gespeichert.</p>
                 {activeProfile && (
                     <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 shadow-sm text-xs text-slate-600">
@@ -250,12 +250,12 @@ function SchuelerDashboard({ activeProfile, visibleClassIds, onOpenSchueler, onG
                         <p className="text-sm text-slate-600 mb-3">{rows.length} sichtbare Klassen · {totals.done} / {totals.total} Aufgaben gelöst ({totals.pct}%).</p>
                         <div className="flex flex-wrap gap-2">
                             <button onClick={onOpenSchueler}
-                                className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-2 px-5 rounded-xl shadow-md hover:shadow-lg transition-all">
+                                className="btn-glow bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-2 px-5 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer">
                                 Schülerbereich öffnen →
                             </button>
                             {onGoToOptionen && (
                                 <button onClick={onGoToOptionen}
-                                    className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-5 rounded-xl transition-all">
+                                    className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-5 rounded-xl transition-all cursor-pointer">
                                     Klassen verwalten
                                 </button>
                             )}
@@ -273,13 +273,13 @@ function SchuelerDashboard({ activeProfile, visibleClassIds, onOpenSchueler, onG
                 {rows.map((r, i) => (
                     <button key={r.id} onClick={onOpenSchueler}
                         style={{ animationDelay: `${i * 50}ms` }}
-                        className="card-fade group relative overflow-hidden bg-white text-left rounded-2xl border border-slate-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-5">
-                        <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full opacity-15 group-hover:opacity-30 transition-opacity"
+                        className="card-fade group relative overflow-hidden bg-white text-left rounded-2xl border border-slate-200 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-5 cursor-pointer">
+                        <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full opacity-15 group-hover:opacity-30 group-hover:scale-110 transition-all duration-500"
                             style={{ backgroundColor: r.color }}></div>
                         <div className="flex justify-between items-start mb-2 relative">
                             <h3 className="font-bold text-slate-800 text-lg">{r.label}</h3>
                             {r.mode === 'pool' ? (
-                                <span className="text-xs font-bold px-2 py-1 rounded-full text-white"
+                                <span className={`text-xs font-bold px-2 py-1 rounded-full text-white ${r.pct === 100 ? 'badge-complete' : ''}`}
                                     style={{ backgroundColor: r.color }}>{r.pct}%</span>
                             ) : (
                                 <span className="text-xs font-bold px-2 py-1 rounded-full bg-slate-200 text-slate-700">offen</span>
@@ -300,10 +300,10 @@ function SchuelerDashboard({ activeProfile, visibleClassIds, onOpenSchueler, onG
 
             {(onExport || onImport || onReset || onInstall) && (
                 <div className="mt-8 flex flex-wrap gap-2 justify-center">
-                    {onExport && <button onClick={onExport} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-lg text-sm transition">Fortschritt exportieren</button>}
-                    {onImport && <button onClick={onImport} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-lg text-sm transition">Fortschritt importieren</button>}
-                    {onReset && <button onClick={onReset} className="bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 font-bold py-2 px-4 rounded-lg text-sm transition">Fortschritt zurücksetzen</button>}
-                    {onInstall && <button onClick={onInstall} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition">Als App installieren</button>}
+                    {onExport && <button onClick={onExport} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-lg text-sm transition cursor-pointer">Fortschritt exportieren</button>}
+                    {onImport && <button onClick={onImport} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-lg text-sm transition cursor-pointer">Fortschritt importieren</button>}
+                    {onReset && <button onClick={onReset} className="bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 font-bold py-2 px-4 rounded-lg text-sm transition cursor-pointer">Fortschritt zurücksetzen</button>}
+                    {onInstall && <button onClick={onInstall} className="btn-glow bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition hover:scale-105 cursor-pointer">Als App installieren</button>}
                 </div>
             )}
         </section>
@@ -846,8 +846,8 @@ function Schueler({ visibleClassIds }) {
             <section className="view-fade">
                 <div className="text-center max-w-3xl mx-auto mb-8">
                     <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
-                         className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
-                    <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schüler-Bereich</h1>
+                         className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow float-y" />
+                    <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 via-blue-700 to-slate-900 bg-clip-text text-transparent animated-gradient-text">Schüler-Bereich</h1>
                     <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–10; ab Klasse 5 kommen Deutsch, Naturwissenschaften, Geschichte sowie Englisch, Französisch und Latein dazu. Alle Mittelstufenfächer bieten getrenntes Training mit Formeln/Merksätzen, Musterlösungen und ein 10-Fragen-Quiz.</p>
                 </div>
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6 flex flex-wrap items-center gap-5">
@@ -873,7 +873,7 @@ function Schueler({ visibleClassIds }) {
                             <button key={c.id}
                                 onClick={() => { setKlass(c.id); setStage('subjects'); }}
                                 style={{ animationDelay: `${i * 50}ms` }}
-                                className="card-fade group bg-white rounded-2xl border border-slate-200 p-5 text-left hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 transition-all">
+                                className="card-fade group bg-white rounded-2xl border border-slate-200 p-5 text-left hover:border-blue-300 hover:shadow-xl hover:-translate-y-1.5 transition-all cursor-pointer">
                                 <div className="flex items-start justify-between gap-2 mb-1">
                                     <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Klassenstufe</div>
                                     {ready && !isGenerated && (
@@ -998,19 +998,19 @@ function Schueler({ visibleClassIds }) {
                                         <div className="flex flex-wrap gap-2 items-center">
                                             {trainingReady && (
                                                 <button onClick={() => startTraining(klass, s)}
-                                                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
+                                                    className="btn-glow bg-emerald-600 hover:bg-emerald-700 hover:scale-105 text-white text-sm font-bold py-2 px-4 rounded-lg transition-all cursor-pointer">
                                                     Training öffnen
                                                 </button>
                                             )}
                                             {trainingReady && isPool && openCount > 0 && (
                                                 <button onClick={() => startTraining(klass, s, 0, null, true)}
-                                                    className="bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50 text-sm font-bold py-2 px-4 rounded-lg transition"
+                                                    className="bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50 text-sm font-bold py-2 px-4 rounded-lg transition cursor-pointer"
                                                     title={`${openCount} noch nicht gelöste Aufgaben`}>
                                                     Nur offene ({openCount})
                                                 </button>
                                             )}
                                             <button onClick={() => startQuiz(klass, s)}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
+                                                className="btn-glow bg-blue-600 hover:bg-blue-700 hover:scale-105 text-white text-sm font-bold py-2 px-4 rounded-lg transition-all cursor-pointer">
                                                 10-Fragen-Quiz
                                             </button>
                                             {poolCount != null && <span className="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600">{poolCount} Aufgaben</span>}
@@ -1208,7 +1208,7 @@ function Schueler({ visibleClassIds }) {
                     })()}
                     {!quizFeedback && (
                         <button onClick={submit} disabled={!val.trim()}
-                            className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
+                            className="btn-glow w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 hover:scale-[1.02] transition-all cursor-pointer disabled:cursor-not-allowed">
                             Antwort prüfen
                         </button>
                     )}
@@ -1250,7 +1250,7 @@ function Schueler({ visibleClassIds }) {
                                 </details>
                             )}
                             <button onClick={advanceQuiz} autoFocus
-                                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
+                                className="btn-glow w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 hover:scale-[1.02] transition-all cursor-pointer">
                                 {quizFeedback.isLast ? 'Auswertung anzeigen →' : 'Nächste Aufgabe →'}
                             </button>
                         </div>
@@ -1335,21 +1335,21 @@ function Schueler({ visibleClassIds }) {
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center">
                     <button onClick={() => startQuiz(klass, subject, selectedSection)}
-                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition">
+                        className="btn-glow bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 hover:scale-105 transition-all cursor-pointer">
                         Neues Quiz (10 Aufgaben)
                     </button>
                     {hasSchuelerTraining(klass, SCH.content[`${klass}.${subject}`]) && (
                         <button onClick={() => startTraining(klass, subject, 0, selectedSection)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition">
+                            className="bg-emerald-600 hover:bg-emerald-700 hover:scale-105 text-white font-bold py-3 px-6 rounded-xl transition-all cursor-pointer">
                             Training öffnen
                         </button>
                     )}
                     <button onClick={() => setStage('subjects')}
-                        className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">
+                        className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition cursor-pointer">
                         Anderes Fach
                     </button>
                     <button onClick={() => setStage('classes')}
-                        className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition">
+                        className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition cursor-pointer">
                         Andere Klasse
                     </button>
                 </div>

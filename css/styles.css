@@ -294,6 +294,41 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     border-radius: 4px;
 }
 
+/* ---------- Konfetti-lite Burst (100%-Abschluss-Badge) ---------- */
+.badge-complete { position: relative; }
+.badge-complete::before, .badge-complete::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgba(var(--glow-emerald), 0.55), transparent 70%);
+    animation: completeBurst 900ms ease-out both;
+    pointer-events: none;
+}
+.badge-complete::after { animation-delay: 120ms; opacity: 0.6; }
+@keyframes completeBurst {
+    0% { transform: scale(0.3); opacity: 0.9; }
+    100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* ---------- Skeleton (Chart-Ladezustand) ---------- */
+.chart-skeleton {
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+    background-size: 400% 100%;
+    animation: skeletonShimmer 1.4s ease-in-out infinite;
+}
+.theme-dark .chart-skeleton {
+    background: linear-gradient(90deg, #1e293b 25%, #273449 37%, #1e293b 63%);
+    background-size: 400% 100%;
+}
+@keyframes skeletonShimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+
 /* ---------- Cheatsheet details ---------- */
 details > summary { list-style: none; cursor: pointer; }
 details > summary::-webkit-details-marker { display: none; }

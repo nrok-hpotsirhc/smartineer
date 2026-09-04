@@ -1062,8 +1062,8 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
             <section className="view-fade">
                 <div className="text-center max-w-3xl mx-auto mb-8">
                     <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
-                         className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
-                    <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schulungen — Zertifikats-Vorbereitung</h1>
+                         className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow float-y" />
+                    <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 via-blue-700 to-slate-900 bg-clip-text text-transparent animated-gradient-text">Schulungen — Zertifikats-Vorbereitung</h1>
                     <p className="text-slate-600">Buchartig aufgebaute, kapitelweise Lernpfade. Fortschritt und letzte Seite werden lokal gespeichert. Am Ende jedes Kapitels wartet ein Quiz mit zufällig gezogenen Fragen.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1072,7 +1072,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                         return (
                             <button key={t.id} onClick={() => openTraining(t.id)}
                                 style={{ animationDelay: `${i * 70}ms` }}
-                                className="card-fade text-left bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 transition-all p-6">
+                                className="card-fade text-left bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-6 cursor-pointer">
                                 <div className="flex items-start justify-between gap-2 mb-3">
                                     <div>
                                         <div className="text-xs font-bold uppercase tracking-wider text-slate-500">{t.code}</div>
@@ -1091,7 +1091,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                                         <div className="flex justify-between text-xs text-slate-500 mb-1">
                                             <span>Gelesen</span><span>{tp.readPct}%</span>
                                         </div>
-                                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden bar-shimmer">
                                             <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-1.5 transition-all" style={{ width: `${tp.readPct}%` }}></div>
                                         </div>
                                     </div>
@@ -1099,7 +1099,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                                         <div className="flex justify-between text-xs text-slate-500 mb-1">
                                             <span>Quiz-Schnitt (Best)</span><span>{tp.quizPct}%</span>
                                         </div>
-                                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden bar-shimmer">
                                             <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-1.5 transition-all" style={{ width: `${tp.quizPct}%` }}></div>
                                         </div>
                                     </div>
@@ -1201,7 +1201,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                         const cp = chapterProgress(ch, cs);
                         const hasResume = cs && typeof cs.lastPage === 'number';
                         return (
-                            <div key={ch.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition">
+                            <div key={ch.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md hover:border-blue-200 transition-all duration-300">
                                 <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
                                     <div className="flex-1 min-w-[260px]">
                                         <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Kapitel {i + 1}</div>
@@ -1213,7 +1213,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                                         <span className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-bold">{ch.quiz.length} Quiz-Fragen</span>
                                     </div>
                                 </div>
-                                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden my-3">
+                                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden my-3 bar-shimmer">
                                     <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-1.5 transition-all" style={{ width: `${cp.pagePct}%` }}></div>
                                 </div>
                                 <div className="flex flex-wrap gap-2 items-center justify-between">
@@ -1224,12 +1224,12 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                                     <div className="flex gap-2 flex-wrap">
                                         {hasResume && cp.lastPage > 0 && (
                                             <button onClick={() => openChapter(ch.id)}
-                                                className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold py-2 px-4 rounded-lg shadow text-sm hover:shadow-lg transition">
+                                                className="btn-glow bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold py-2 px-4 rounded-lg shadow text-sm hover:shadow-lg hover:scale-105 transition-all cursor-pointer">
                                                 Weiterlesen ({cp.lastPage + 1}/{cp.totalPages})
                                             </button>
                                         )}
                                         <button onClick={() => openChapter(ch.id, 0)}
-                                            className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-lg text-sm transition">
+                                            className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-lg text-sm transition cursor-pointer">
                                             {hasResume ? 'Von vorn' : 'Lesen starten'}
                                         </button>
                                     </div>
@@ -1342,11 +1342,11 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                             className="px-3 py-1.5 text-sm bg-white border border-slate-300 hover:bg-slate-100 rounded transition disabled:opacity-40 disabled:cursor-not-allowed">← Zurück</button>
                         {!isLast && (
                             <button onClick={() => goPage(page + 1)}
-                                className="px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded shadow hover:shadow-lg transition">Weiter →</button>
+                                className="btn-glow px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded shadow hover:shadow-lg hover:scale-105 transition-all cursor-pointer">Weiter →</button>
                         )}
                         {isLast && (
                             <button onClick={startQuiz}
-                                className="px-3 py-1.5 text-sm bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded shadow hover:shadow-lg transition">
+                                className="btn-glow px-3 py-1.5 text-sm bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded shadow hover:shadow-lg hover:scale-105 transition-all cursor-pointer">
                                 Quiz starten ({Math.min(10, chapter.quiz.length)} von {chapter.quiz.length})
                             </button>
                         )}
@@ -1484,7 +1484,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                     }}
                         className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded transition">Abbrechen</button>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 mb-5 overflow-hidden">
+                <div className="w-full bg-slate-100 rounded-full h-2 mb-5 overflow-hidden bar-shimmer">
                     <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-2 transition-all duration-500"
                         style={{ width: `${(quizAnswers.length / quizSet.length) * 100}%` }}></div>
                 </div>
@@ -1587,7 +1587,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                         }
                         submitQuizAnswer();
                     }} disabled={!canSubmit || !!quizFeedback}
-                        className={`w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition ${quizFeedback ? 'hidden' : ''}`}>
+                        className={`btn-glow w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 hover:scale-[1.02] transition-all cursor-pointer ${quizFeedback ? 'hidden' : ''}`}>
                         {assessmentMode && quizIdx + 1 >= quizSet.length ? 'Pruefung abgeben' : 'Antwort bestätigen'}
                     </button>
 
@@ -1633,7 +1633,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                                 )}
                             </div>
                             <button onClick={advanceAfterFeedback} autoFocus
-                                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition">
+                                className="btn-glow w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 hover:scale-[1.02] transition-all cursor-pointer">
                                 {quizFeedback.isLast ? 'Auswertung anzeigen →' : 'Nächste Frage →'}
                             </button>
                         </div>
