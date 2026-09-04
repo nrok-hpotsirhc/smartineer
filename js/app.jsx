@@ -1,3 +1,15 @@
+// P-UI-REFRESH: dezenter, animierter Farbverlauf-Hintergrund hinter der gesamten App.
+// Rein dekorativ (aria-hidden), respektiert prefers-reduced-motion via CSS (styles.css).
+function AuroraBackground() {
+    return (
+        <div className="aurora-bg" aria-hidden="true">
+            <span className="aurora-blob aurora-blob-a"></span>
+            <span className="aurora-blob aurora-blob-b"></span>
+            <span className="aurora-blob aurora-blob-c"></span>
+        </div>
+    );
+}
+
 function App() {
     const data = window.APP_DATA || {};
     const allOrder = (window.APP_ORDER && window.APP_ORDER.length) ? window.APP_ORDER : Object.keys(data);
@@ -268,6 +280,7 @@ function App() {
 
     return (
         <>
+            <AuroraBackground />
             <Nav view={view} setView={setView} theme={theme} onToggleTheme={toggleTheme}
                 activeProfile={activeProfile}
                 onOpenProfileSwitcher={() => setProfileSwitcherOpen(true)} />

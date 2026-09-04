@@ -32,6 +32,31 @@ const NAV_ICONS = {
     )
 };
 
+// P-UI-REFRESH: zaehlt eine Zahl beim Mount/Wertwechsel animiert hoch (rAF, respektiert reduced-motion).
+function useCountUp(target, duration = 700) {
+    const [value, setValue] = useState(target);
+    const prevRef = useRef(target);
+    useEffect(() => {
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) { setValue(target); prevRef.current = target; return; }
+        const from = prevRef.current;
+        const to = target;
+        if (from === to) return;
+        const start = performance.now();
+        let raf;
+        const step = (now) => {
+            const t = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - t, 3);
+            setValue(Math.round(from + (to - from) * eased));
+            if (t < 1) raf = requestAnimationFrame(step);
+            else prevRef.current = to;
+        };
+        raf = requestAnimationFrame(step);
+        return () => raf && cancelAnimationFrame(raf);
+    }, [target, duration]);
+    return value;
+}
+
 function Nav({ view, setView, theme, onToggleTheme, activeProfile, onOpenProfileSwitcher }) {
     // P-UI-RESTRUCTURE (v85): Top-Level-Navigation auf vier Bereiche reduziert.
     // Cheatsheets und Schulungen ziehen als Sub-Tabs in den Ingenieurbereich um.
@@ -52,8 +77,8 @@ function Nav({ view, setView, theme, onToggleTheme, activeProfile, onOpenProfile
                 aria-label={it.aria}
                 aria-current={active ? 'page' : undefined}
                 className={`nav-btn inline-flex items-center justify-center gap-2 whitespace-nowrap px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${active
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30 nav-btn-active'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700/60'}`}>
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30 nav-btn-active scale-[1.03]'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-700/60 hover:scale-[1.03]'}`}>
                 <span className="md:hidden flex" aria-hidden="true">{NAV_ICONS[it.id]}</span>
                 <span className="hidden md:inline">{it.label}</span>
             </button>
@@ -63,10 +88,10 @@ function Nav({ view, setView, theme, onToggleTheme, activeProfile, onOpenProfile
         <nav className="nav-glass sticky top-0 z-40 backdrop-blur-md bg-slate-900/90 text-white shadow-lg border-b border-slate-700/50 w-full">
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                 <div className="flex justify-between gap-2 h-16 items-center min-w-0">
-                    <a href="./" className="flex items-center gap-2 min-w-0 flex-shrink" aria-label="Smartineer Home">
+                    <a href="./" className="group flex items-center gap-2 min-w-0 flex-shrink" aria-label="Smartineer Home">
                         <img src="icons/smartineer-logo.png" alt="" width="36" height="36"
-                             className="w-9 h-9 flex-shrink-0" />
-                        <span className="hidden sm:inline text-base sm:text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent truncate">Smartineer</span>
+                             className="w-9 h-9 flex-shrink-0 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110" />
+                        <span className="hidden sm:inline text-base sm:text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent truncate animated-gradient-text">Smartineer</span>
                     </a>
                     <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                         {learnItems.map(renderItem)}
@@ -189,14 +214,14 @@ function CategoryCard({ cat, stats, onOpen, idx }) {
     return (
         <button onClick={onOpen}
             style={{ animationDelay: `${idx * 60}ms` }}
-            className="card-fade group relative overflow-hidden bg-white text-left rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-5">
-            <div className={`absolute -right-8 -top-8 w-28 h-28 rounded-full bg-gradient-to-br ${ringColor} opacity-10 group-hover:opacity-20 transition-opacity`}></div>
+            className="card-fade group relative overflow-hidden bg-white text-left rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1.5 transition-all duration-300 p-5 cursor-pointer">
+            <div className={`absolute -right-8 -top-8 w-28 h-28 rounded-full bg-gradient-to-br ${ringColor} opacity-10 group-hover:opacity-25 group-hover:scale-110 transition-all duration-500`}></div>
             <div className="flex justify-between items-start mb-2 relative">
                 <h3 className="font-bold text-slate-800 text-lg">{cat.name}</h3>
                 <span className={`text-xs font-bold px-2 py-1 rounded-full ${stats.pct === 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>{stats.pct}%</span>
             </div>
             <p className="text-sm text-slate-500 mb-4 line-clamp-2 relative">{cat.desc}</p>
-            <div className="w-full bg-slate-100 rounded-full h-2 mb-2 overflow-hidden relative">
+            <div className="bar-shimmer w-full bg-slate-100 rounded-full h-2 mb-2 overflow-hidden relative">
                 <div className={`bg-gradient-to-r ${ringColor} h-2 rounded-full transition-all duration-700 ease-out`} style={{ width: `${stats.pct}%` }}></div>
             </div>
             <p className="text-xs text-slate-500 relative">{stats.done} / {stats.total} gelöst</p>
@@ -211,12 +236,21 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
         const pct = total ? Math.round((done / total) * 100) : 0;
         return { total, done, pct };
     }, [data, order, isSolved]);
+    // P-UI-REFRESH: Gesamt-Statistik zaehlt beim ersten Render bzw. bei Aenderung animiert hoch.
+    const totalsDone = useCountUp(totals.done);
+    const totalsTotal = useCountUp(totals.total);
+    const totalsPct = useCountUp(totals.pct);
 
     // P-LP-SRS-OPEN: Heute-faellig-Zaehler ueber Training und Schulungen.
     const dueStats = useMemo(() => srsState
         ? srsCrossTrackDue(data, order, srsState)
         : { dueTraining: 0, dueSchulungen: 0, freshTraining: 0 },
     [data, order, srsState]);
+    // P-UI-REFRESH: Hooks werden unbedingt aufgerufen (Rules of Hooks) — der Wert wird
+    // nur im bedingt gerenderten SRS-Panel weiter unten verwendet.
+    const dueTotalCount = useCountUp(dueStats.dueTraining + dueStats.dueSchulungen);
+    const dueTrainingCount = useCountUp(dueStats.dueTraining);
+    const dueSchulungenCount = useCountUp(dueStats.dueSchulungen);
     // P-LP-DAILY-MIX: deterministischer Tagesmix (5 Items, cross-Kategorie).
     const dailyMix = useMemo(() => srsState
         ? srsDailyMixTraining(data, order, srsState, 5)
@@ -227,8 +261,8 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
         <section className="view-fade">
             <div className="text-center max-w-3xl mx-auto mb-10">
                 <img src="icons/smartineer-logo.png" alt="" width="96" height="96"
-                     className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 drop-shadow-lg" />
-                <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-slate-900 via-blue-800 to-cyan-700 bg-clip-text text-transparent">Smartineer — dein Lern-Cockpit.</h1>
+                     className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 drop-shadow-lg float-y" />
+                <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-slate-900 via-blue-800 to-cyan-700 bg-clip-text text-transparent animated-gradient-text">Smartineer — dein Lern-Cockpit.</h1>
                 <p className="text-base md:text-lg text-slate-600">Reaktiviere Ingenieurs-Wissen über drei Schwierigkeitsstufen oder wechsle in den Schüler-Bereich für Mathematik der Klassen 1–10. Fortschritt wird lokal gespeichert.</p>
             </div>
 
@@ -238,37 +272,37 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
                     <p className="text-slate-600 mb-6">Blau = Ziel, Orange = aktueller Fortschritt (Anteil als gelöst markierter Aufgaben pro Kategorie).</p>
                     <div className="flex flex-wrap gap-3">
                         <button onClick={() => onOpenCategory(order[0], 'training')}
-                            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-105 transition-all">
+                            className="btn-glow bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-105 transition-all cursor-pointer">
                             Training starten →
                         </button>
                         {onReset && (
                             <button onClick={onReset}
-                                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all">
+                                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all cursor-pointer">
                                 Fortschritt zurücksetzen
                             </button>
                         )}
                         {onExport && (
                             <button onClick={onExport}
-                                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all"
+                                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all cursor-pointer"
                                 title="Lernfortschritt als JSON-Datei sichern und auf andere Geräte übertragen">
                                 Fortschritt exportieren
                             </button>
                         )}
                         {onImport && (
                             <button onClick={onImport}
-                                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all"
+                                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-3 px-6 rounded-xl transition-all cursor-pointer"
                                 title="Fortschritt aus zuvor exportierter JSON-Datei einspielen">
                                 Fortschritt importieren
                             </button>
                         )}
                         {onInstall && (
                             <button onClick={onInstall}
-                                className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 transition-all">
+                                className="btn-glow bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/30 hover:scale-105 transition-all cursor-pointer">
                                 Als App installieren
                             </button>
                         )}
                     </div>
-                    <p className="text-sm text-slate-500 mt-4">Gesamt: <strong>{totals.done} / {totals.total}</strong> Aufgaben gelöst ({totals.pct}%).</p>
+                    <p className="text-sm text-slate-500 mt-4">Gesamt: <strong className="text-slate-800">{totalsDone} / {totalsTotal}</strong> Aufgaben gelöst ({totalsPct}%).</p>
                 </div>
                 <div className="w-full md:w-1/2 flex justify-center">
                     <Radar data={data} order={order} isSolved={isSolved} />
@@ -291,7 +325,7 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
                         )}
                     </div>
                     <button onClick={() => onResumeSchulung(resumeCandidate.tid, resumeCandidate.cid)}
-                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition-all flex-shrink-0">
+                        className="btn-glow bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 hover:scale-105 transition-all flex-shrink-0 cursor-pointer">
                         Weiterlesen →
                     </button>
                 </div>
@@ -312,16 +346,16 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
                             <h2 className="text-xl font-bold text-slate-800 mb-2">Heute zur Wiederholung</h2>
                             <p className="text-slate-600 text-sm mb-4">Spaced-Repetition-Karteikarten faellig auf Basis deines Lernverlaufs (SM-2 lite). Karten entstehen, sobald du eine Aufgabe oder ein Quiz-Item bewertest.</p>
                             <div className="grid grid-cols-3 gap-2 text-center">
-                                <div className="bg-white rounded-lg border border-slate-200 p-3">
-                                    <div className="text-2xl font-bold text-emerald-600">{dueStats.dueTraining + dueStats.dueSchulungen}</div>
+                                <div className={`bg-white rounded-lg border border-slate-200 p-3 ${(dueStats.dueTraining + dueStats.dueSchulungen) > 0 ? 'pulse-soft' : ''}`}>
+                                    <div className="text-2xl font-bold text-emerald-600">{dueTotalCount}</div>
                                     <div className="text-[11px] uppercase tracking-wide text-slate-500">heute faellig</div>
                                 </div>
                                 <div className="bg-white rounded-lg border border-slate-200 p-3">
-                                    <div className="text-2xl font-bold text-blue-600">{dueStats.dueTraining}</div>
+                                    <div className="text-2xl font-bold text-blue-600">{dueTrainingCount}</div>
                                     <div className="text-[11px] uppercase tracking-wide text-slate-500">Training</div>
                                 </div>
                                 <div className="bg-white rounded-lg border border-slate-200 p-3">
-                                    <div className="text-2xl font-bold text-violet-600">{dueStats.dueSchulungen}</div>
+                                    <div className="text-2xl font-bold text-violet-600">{dueSchulungenCount}</div>
                                     <div className="text-[11px] uppercase tracking-wide text-slate-500">Schulungen</div>
                                 </div>
                             </div>
@@ -349,7 +383,7 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
                                                     <div className="text-sm text-slate-700 truncate leading-snug">{short || '(Aufgabe)'}</div>
                                                 </div>
                                                 <button onClick={() => onOpenTrainingAt && onOpenTrainingAt(entry.catId, entry.level, entry.idx)}
-                                                    className="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition flex-shrink-0">
+                                                    className="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 hover:scale-105 transition-all flex-shrink-0 cursor-pointer">
                                                     Oeffnen
                                                 </button>
                                             </li>
@@ -528,9 +562,9 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
                     Musterlösung
                 </button>
                 <button onClick={() => onMark(!solved)}
-                    className={`font-medium py-2 px-4 rounded-lg transition text-white ${solved
-                        ? 'bg-slate-500 hover:bg-slate-600'
-                        : 'bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/30'}`}>
+                    className={`font-medium py-2 px-4 rounded-lg transition text-white cursor-pointer ${solved
+                        ? 'bg-slate-500 hover:bg-slate-600 pop-in'
+                        : 'btn-glow bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/30 hover:scale-105'}`}>
                     {solved ? 'Gelöst (rückgängig)' : 'Als gelöst markieren'}
                 </button>
             </div>
