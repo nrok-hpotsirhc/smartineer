@@ -798,6 +798,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
         list.forEach(e => { if (e && e.id) m[e.id] = e; });
         return m;
     }, [training]);
+    useScrollReveal([stage, training && training.id]);
     const onGlossaryClick = useCallback((e) => {
         const btn = e.target && e.target.closest && e.target.closest('.glossary-link');
         if (!btn) return;
@@ -1062,8 +1063,8 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
             <section className="view-fade">
                 <div className="text-center max-w-3xl mx-auto mb-8">
                     <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
-                         className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow float-y" />
-                    <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 via-blue-700 to-slate-900 bg-clip-text text-transparent animated-gradient-text">Schulungen — Zertifikats-Vorbereitung</h1>
+                         className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
+                    <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schulungen — Zertifikats-Vorbereitung</h1>
                     <p className="text-slate-600">Buchartig aufgebaute, kapitelweise Lernpfade. Fortschritt und letzte Seite werden lokal gespeichert. Am Ende jedes Kapitels wartet ein Quiz mit zufällig gezogenen Fragen.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1072,7 +1073,7 @@ function Schulungen({ auth, onGoToOptionen, srsState, srsGradeMany, getInitialOp
                         return (
                             <button key={t.id} onClick={() => openTraining(t.id)}
                                 style={{ animationDelay: `${i * 70}ms` }}
-                                className="card-fade text-left bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-6 cursor-pointer">
+                                className="fx-reveal fx-spotlight fx-border-glow fx-ripple fx-ripple-dark group text-left bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 p-6 cursor-pointer">
                                 <div className="flex items-start justify-between gap-2 mb-3">
                                     <div>
                                         <div className="text-xs font-bold uppercase tracking-wider text-slate-500">{t.code}</div>

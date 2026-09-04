@@ -217,7 +217,7 @@ function CategoryCard({ cat, stats, onOpen, idx }) {
     return (
         <button onClick={onOpen}
             style={{ animationDelay: `${idx * 60}ms` }}
-            className="card-fade group relative overflow-hidden bg-white text-left rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1.5 transition-all duration-300 p-5 cursor-pointer">
+            className="fx-reveal fx-spotlight fx-border-glow fx-ripple fx-ripple-dark group relative overflow-hidden bg-white text-left rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 p-5 cursor-pointer">
             <div className={`absolute -right-8 -top-8 w-28 h-28 rounded-full bg-gradient-to-br ${ringColor} opacity-10 group-hover:opacity-25 group-hover:scale-110 transition-all duration-500`}></div>
             <div className="flex justify-between items-start mb-2 relative">
                 <h3 className="font-bold text-slate-800 text-lg">{cat.name}</h3>
@@ -259,6 +259,8 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
         ? srsDailyMixTraining(data, order, srsState, 5)
         : [], [data, order, srsState]);
     const dailyMixRef = useKaTeX([dailyMix.length, dailyMix.map(e => e.catId + e.level + e.idx).join(',')]);
+    // P-UI-FX: Sektionen unterhalb des Folds gestaffelt einblenden.
+    useScrollReveal([order.length, dailyMix.length, !!resumeCandidate]);
 
     return (
         <section className="view-fade">
@@ -275,7 +277,7 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
                     <p className="text-slate-600 mb-6">Blau = Ziel, Orange = aktueller Fortschritt (Anteil als gelöst markierter Aufgaben pro Kategorie).</p>
                     <div className="flex flex-wrap gap-3">
                         <button onClick={() => onOpenCategory(order[0], 'training')}
-                            className="btn-glow bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-105 transition-all cursor-pointer">
+                            className="fx-ripple btn-glow bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-105 transition-all cursor-pointer">
                             Training starten →
                         </button>
                         {onReset && (
@@ -315,7 +317,7 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
             {/* P-UI-DASHBOARD-RESUME: Wiedereinstiegs-Hero. Wird nur gerendert, wenn
                 eine Schulung kuerzlich bearbeitet wurde (lastPage > 0 oder ein Quiz-Lauf vorliegt). */}
             {resumeCandidate && onResumeSchulung && (
-                <div className="dashboard-resume-panel bg-gradient-to-br from-blue-50 via-white to-cyan-50/40 rounded-2xl border border-blue-200 shadow-sm p-6 md:p-7 mb-10 flex flex-col md:flex-row items-start md:items-center gap-5">
+                <div className="fx-reveal dashboard-resume-panel bg-gradient-to-br from-blue-50 via-white to-cyan-50/40 rounded-2xl border border-blue-200 shadow-sm p-6 md:p-7 mb-10 flex flex-col md:flex-row items-start md:items-center gap-5">
                     <div className="flex-1 min-w-0">
                         <div className="text-[11px] uppercase tracking-wider text-blue-700 font-bold mb-1">Weiterlernen</div>
                         <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 truncate">{resumeCandidate.trainingName}</h2>
@@ -343,7 +345,7 @@ function Dashboard({ data, order, isSolved, srsState, onOpenCategory, onOpenTrai
             </div>
 
             {srsState && (dueStats.dueTraining + dueStats.dueSchulungen > 0 || dailyMix.length > 0) && (
-                <div className="bg-gradient-to-br from-white via-white to-emerald-50/40 rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mt-10">
+                <div className="fx-reveal bg-gradient-to-br from-white via-white to-emerald-50/40 rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mt-10">
                     <div className="flex flex-col md:flex-row gap-6">
                         <div className="md:w-1/3">
                             <h2 className="text-xl font-bold text-slate-800 mb-2">Heute zur Wiederholung</h2>
@@ -564,8 +566,8 @@ function TaskView({ task, catId, lvl, idx, total, isSolved, onPrev, onNext, onMa
                     className="bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 px-4 rounded-lg transition">
                     Musterlösung
                 </button>
-                <button onClick={() => onMark(!solved)}
-                    className={`font-medium py-2 px-4 rounded-lg transition text-white cursor-pointer ${solved
+                <button onClick={(e) => { if (!solved) burstConfetti(e.currentTarget); onMark(!solved); }}
+                    className={`fx-ripple font-medium py-2 px-4 rounded-lg transition text-white cursor-pointer ${solved
                         ? 'bg-slate-500 hover:bg-slate-600 pop-in'
                         : 'btn-glow bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/30 hover:scale-105'}`}>
                     {solved ? 'Gelöst (rückgängig)' : 'Als gelöst markieren'}

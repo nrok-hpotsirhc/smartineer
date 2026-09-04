@@ -27,8 +27,8 @@ function Cheatsheet({ data, order }) {
         <section className="view-fade" ref={ref}>
             <div className="text-center max-w-3xl mx-auto mb-8">
                 <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
-                     className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow float-y" />
-                <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 via-blue-700 to-slate-900 bg-clip-text text-transparent animated-gradient-text">Cheatsheets &amp; Isolierte Musterlösungen</h1>
+                     className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
+                <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Cheatsheets &amp; Isolierte Musterlösungen</h1>
                 <p className="text-slate-600">Zwei strikt getrennte Bereiche: <strong>1)</strong> kompakte Formelsammlung und <strong>2)</strong> isolierter Lösungskatalog mit Rechenweg und Kommentaren.</p>
             </div>
             <div className="flex flex-wrap justify-center gap-3 mb-6">

@@ -224,6 +224,7 @@ function SchuelerDashboard({ activeProfile, visibleClassIds, onOpenSchueler, onG
         return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
     }, [rows]);
     const chartRows = rows.filter(r => r.mode === 'pool');
+    useScrollReveal([rows.length]);
 
     return (
         <section className="view-fade">
@@ -273,7 +274,7 @@ function SchuelerDashboard({ activeProfile, visibleClassIds, onOpenSchueler, onG
                 {rows.map((r, i) => (
                     <button key={r.id} onClick={onOpenSchueler}
                         style={{ animationDelay: `${i * 50}ms` }}
-                        className="card-fade group relative overflow-hidden bg-white text-left rounded-2xl border border-slate-200 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-5 cursor-pointer">
+                        className="fx-reveal fx-spotlight fx-border-glow fx-ripple fx-ripple-dark group relative overflow-hidden bg-white text-left rounded-2xl border border-slate-200 hover:shadow-xl transition-all duration-300 p-5 cursor-pointer">
                         <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full opacity-15 group-hover:opacity-30 group-hover:scale-110 transition-all duration-500"
                             style={{ backgroundColor: r.color }}></div>
                         <div className="flex justify-between items-start mb-2 relative">
@@ -343,6 +344,7 @@ function Schueler({ visibleClassIds }) {
     const drillRef = useKaTeX([stage, idx, !!quizFeedback]);
     const resultRef = useKaTeX([stage, answers.length]);
     const trainingRef = useKaTeX([stage, klass, subject, trainingIdx, showTrainingSolution, showTrainingFormula, Object.keys(schuelerProgress.progress).length]);
+    useScrollReveal([stage, klass, subject]);
 
     if (!SCH) {
         return <section className="view-fade p-8 text-red-700">Schüler-Daten nicht geladen. Prüfe <code>js/data/schueler.js</code> in <code>index.html</code>.</section>;
@@ -846,8 +848,8 @@ function Schueler({ visibleClassIds }) {
             <section className="view-fade">
                 <div className="text-center max-w-3xl mx-auto mb-8">
                     <img src="icons/smartineer-logo.png" alt="" width="72" height="72"
-                         className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow float-y" />
-                    <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 via-blue-700 to-slate-900 bg-clip-text text-transparent animated-gradient-text">Schüler-Bereich</h1>
+                         className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 drop-shadow" />
+                    <h1 className="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Schüler-Bereich</h1>
                     <p className="text-slate-600">Wähle eine Klassenstufe. Mathematik ist verfügbar für Klasse 1–10; ab Klasse 5 kommen Deutsch, Naturwissenschaften, Geschichte sowie Englisch, Französisch und Latein dazu. Alle Mittelstufenfächer bieten getrenntes Training mit Formeln/Merksätzen, Musterlösungen und ein 10-Fragen-Quiz.</p>
                 </div>
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6 flex flex-wrap items-center gap-5">
@@ -873,7 +875,7 @@ function Schueler({ visibleClassIds }) {
                             <button key={c.id}
                                 onClick={() => { setKlass(c.id); setStage('subjects'); }}
                                 style={{ animationDelay: `${i * 50}ms` }}
-                                className="card-fade group bg-white rounded-2xl border border-slate-200 p-5 text-left hover:border-blue-300 hover:shadow-xl hover:-translate-y-1.5 transition-all cursor-pointer">
+                                className="fx-reveal fx-spotlight fx-border-glow fx-ripple fx-ripple-dark group bg-white rounded-2xl border border-slate-200 p-5 text-left hover:border-blue-300 hover:shadow-xl transition-all duration-300 cursor-pointer">
                                 <div className="flex items-start justify-between gap-2 mb-1">
                                     <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Klassenstufe</div>
                                     {ready && !isGenerated && (

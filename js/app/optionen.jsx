@@ -20,7 +20,7 @@ function Optionen({ data, allOrder, vis, visClasses, allClassIds, classLabels, a
     return (
         <section className="view-fade max-w-4xl mx-auto">
             <div className="text-center mb-6">
-                <h1 className="text-3xl md:text-4xl font-extrabold mb-2 bg-gradient-to-r from-slate-900 via-blue-700 to-slate-900 bg-clip-text text-transparent animated-gradient-text">Einstellungen</h1>
+                <h1 className="text-3xl md:text-4xl font-extrabold mb-2 bg-gradient-to-r from-slate-900 to-blue-700 bg-clip-text text-transparent">Einstellungen</h1>
                 <p className="text-slate-600 text-sm">Konto, Bereich, sichtbare Kategorien / Klassen, Daten-Sync, App-Installation.</p>
             </div>
             <div className="flex flex-wrap gap-2 mb-5 border-b border-slate-200">

@@ -11,6 +11,8 @@ function AuroraBackground() {
 }
 
 function App() {
+    // P-UI-FX: je ein delegierter Listener fuer Ripple und Spotlight/Tilt in der gesamten App.
+    useEffect(() => { installRippleDelegate(); installSpotlightDelegate(); }, []);
     const data = window.APP_DATA || {};
     const allOrder = (window.APP_ORDER && window.APP_ORDER.length) ? window.APP_ORDER : Object.keys(data);
     // P-ARCH-PROFILES (v84): aktives Profil muss vor jedem Lernschritt gesetzt sein.

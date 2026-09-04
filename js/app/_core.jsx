@@ -617,6 +617,118 @@ function useKaTeX(deps) {
     return ref;
 }
 
+/* ============================================================
+   P-UI-FX: Interaktions-Effekte (Spotlight/Tilt, Ripple, Scroll-Reveal, Konfetti).
+   Rein DOM/CSS-basiert, keine zusaetzliche Bibliothek (AGENTS §1/§14b).
+   Alle Effekte sind No-ops bei `prefers-reduced-motion: reduce`.
+   ============================================================ */
+
+function fxReduceMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+// Cursor-folgender Lichtkegel + leichter 3D-Tilt fuer alle `.fx-spotlight`-Elemente.
+// Delegiert am Document, damit Karten in `.map()` keinen Hook je Element brauchen.
+let fxSpotlightInstalled = false;
+function installSpotlightDelegate(maxTiltDeg = 5) {
+    if (fxSpotlightInstalled) return;
+    fxSpotlightInstalled = true;
+    let frame = null;
+    let active = null;
+    document.addEventListener('pointermove', (e) => {
+        if (fxReduceMotion()) return;
+        const el = e.target && e.target.closest && e.target.closest('.fx-spotlight');
+        if (el !== active && active) {
+            active.style.setProperty('--tilt-x', '0deg');
+            active.style.setProperty('--tilt-y', '0deg');
+        }
+        active = el;
+        if (!el || frame) return;
+        frame = requestAnimationFrame(() => {
+            frame = null;
+            if (!active) return;
+            const r = active.getBoundingClientRect();
+            const px = (e.clientX - r.left) / r.width;
+            const py = (e.clientY - r.top) / r.height;
+            active.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
+            active.style.setProperty('--my', (py * 100).toFixed(1) + '%');
+            active.style.setProperty('--tilt-x', ((0.5 - py) * 2 * maxTiltDeg).toFixed(2) + 'deg');
+            active.style.setProperty('--tilt-y', ((px - 0.5) * 2 * maxTiltDeg).toFixed(2) + 'deg');
+        });
+    }, { passive: true });
+}
+
+// Blendet Elemente mit Klasse `.fx-reveal` beim Scrollen gestaffelt ein.
+// Ein einziger IntersectionObserver pro Mount statt Listener je Element.
+function useScrollReveal(deps) {
+    useEffect(() => {
+        if (fxReduceMotion()) {
+            document.querySelectorAll('.fx-reveal').forEach(el => el.classList.add('fx-revealed'));
+            return;
+        }
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (!entry.isIntersecting) return;
+                entry.target.style.transitionDelay = (Math.min(i, 6) * 70) + 'ms';
+                entry.target.classList.add('fx-revealed');
+                io.unobserve(entry.target);
+            });
+        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+        document.querySelectorAll('.fx-reveal:not(.fx-revealed)').forEach(el => io.observe(el));
+        return () => io.disconnect();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, deps);
+}
+
+// Material-artiger Klick-Ripple auf allen Buttons mit `.fx-ripple`.
+// Ein einziger delegierter Listener am Document — kein Handler je Button.
+let fxRippleInstalled = false;
+function installRippleDelegate() {
+    if (fxRippleInstalled) return;
+    fxRippleInstalled = true;
+    document.addEventListener('pointerdown', (e) => {
+        if (fxReduceMotion()) return;
+        const host = e.target && e.target.closest && e.target.closest('.fx-ripple');
+        if (!host) return;
+        const r = host.getBoundingClientRect();
+        const span = document.createElement('span');
+        span.className = 'fx-ripple-wave';
+        const size = Math.max(r.width, r.height) * 2;
+        span.style.width = span.style.height = size + 'px';
+        span.style.left = (e.clientX - r.left - size / 2) + 'px';
+        span.style.top = (e.clientY - r.top - size / 2) + 'px';
+        host.appendChild(span);
+        setTimeout(() => span.remove(), 650);
+    }, { passive: true });
+}
+
+// Kurzer Partikel-Burst als Belohnung (z.B. Aufgabe geloest, Quiz bestanden).
+// Partikel sind absolut positionierte Spans, die sich nach 900 ms selbst entfernen.
+const FX_CONFETTI_COLORS = ['#10b981', '#0ea5e9', '#f59e0b', '#8b5cf6', '#f43f5e'];
+function burstConfetti(anchorEl, count = 18) {
+    if (!anchorEl || fxReduceMotion()) return;
+    const r = anchorEl.getBoundingClientRect();
+    const layer = document.createElement('div');
+    layer.className = 'fx-confetti-layer';
+    layer.style.left = (r.left + r.width / 2) + 'px';
+    layer.style.top = (r.top + r.height / 2) + 'px';
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('span');
+        p.className = 'fx-confetti-piece';
+        const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+        const dist = 60 + Math.random() * 70;
+        p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        p.style.setProperty('--dy', (Math.sin(angle) * dist - 30) + 'px');
+        p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+        p.style.backgroundColor = FX_CONFETTI_COLORS[i % FX_CONFETTI_COLORS.length];
+        p.style.animationDelay = (Math.random() * 90) + 'ms';
+        layer.appendChild(p);
+    }
+    document.body.appendChild(layer);
+    setTimeout(() => layer.remove(), 1200);
+}
+
+
 // Auth: liest window.SMARTINEER_AUTH (aus js/auth-credentials.js); persistiert
 // Login-Session in localStorage. KEIN echter Schutz, nur UX-Gate.
 function useAuth() {
