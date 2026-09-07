@@ -60,7 +60,11 @@ js/auth-credentials.js
 # AI-Coding-Tool-Konfiguration / Skill-Caches (lokal je Tool/Entwickler,
 # nicht Teil der dokumentierten Repo-Struktur, siehe AGENTS.md §3).
 .agent/
-.claude/
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/smartineer-question-authoring/
+!.claude/skills/smartineer-question-authoring/**
 .codebuddy/
 .codex/
 .continue/
