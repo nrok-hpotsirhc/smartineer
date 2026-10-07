@@ -1,3 +1,10 @@
+/* Erweiterung: je 100 Aufgaben pro Level; vorhandene Aufgaben unveraendert.
+ * Neue Aufgaben und Loesungen: eigenstaendig erstellt, keine uebernommenen Pruefungsaufgaben.
+ * Thematische Orientierung (kein spezifischer Studiengang-Lehrplan):
+ * https://confluence.h2.de/spaces/MHBIWIDING/pages/202539103/Ingenieurmathematik
+ * https://www.tu-braunschweig.de/ipde/personal/langemann/ingmaskripte
+ * Die vorhandenen vertiefenden Aufgaben bleiben bewusst erhalten.
+ */
 /* Höhere Mathematik */
 (function () {
     window.APP_DATA = window.APP_DATA || {};
@@ -304,6 +311,277 @@
                     q: 'Leite $f(x)=x\\ln x$ ab (Produktregel).',
                     h: 'Produktregel $(uv)\' = u\'v + uv\'$ mit $u=x$, $v=\\ln x$.',
                     s: '$u\' = 1$, $v\' = 1/x$. $f\'(x)=1\\cdot\\ln x+x\\cdot\\tfrac1x=\\ln x+1$.<br>$$\\boxed{f\'(x)=\\ln x+1}$$ <em>Quelle:</em> Forster, Analysis 1, 12. Aufl. (2016), §15.'
+                },
+                // Ergaenzung: eigenstaendig erstellte Aufgaben zum Ingenieur-Grundstudium.
+                {
+                    q: "Bestimme den Definitionsbereich von $f(x)=\\sqrt{x-2}/(x-5)$.",
+                    h: "Radikand nicht negativ, Nenner nicht null.",
+                    s: "$x-2\\ge0$ und $x\\ne5$. Daher $D=[2,5)\\cup(5,\\infty)$."
+                },
+                {
+                    q: "Bestimme die Umkehrfunktion von $f(x)=3x-7$.",
+                    h: "Löse $y=3x-7$ nach $x$ auf.",
+                    s: "$y+7=3x$, also $f^{-1}(y)=(y+7)/3$; beide Definitionsbereiche sind $\\mathbb R$."
+                },
+                {
+                    q: "Löse $|2x-3|=5$.",
+                    h: "Unterscheide die beiden Vorzeichen.",
+                    s: "$2x-3=5$ oder $2x-3=-5$. Damit $x=4$ oder $x=-1$."
+                },
+                {
+                    q: "Löse $x^2-4<0$ über $\\mathbb R$.",
+                    h: "Faktorisiere oder vergleiche $x^2$ mit 4.",
+                    s: "$x^2<4$ entspricht $|x|<2$. Lösungsmenge: $(-2,2)$."
+                },
+                {
+                    q: "Berechne $\\log_{10}(1000)+\\log_2(8)$.",
+                    h: "Schreibe die Argumente als Potenzen ihrer Basis.",
+                    s: "$1000=10^3$ und $8=2^3$. Ergebnis: $3+3=6$."
+                },
+                {
+                    q: "Löse $e^{2x}=7$.",
+                    h: "Wende den natürlichen Logarithmus an.",
+                    s: "$2x=\\ln 7$, also $x=\\tfrac 12\\ln 7$."
+                },
+                {
+                    q: "Bestimme die Periode von $f(t)=\\sin(5t+\\pi/3)$.",
+                    h: "Die Phase ändert sich pro Periode um $2\\pi$.",
+                    s: "$5T=2\\pi$, also $T=2\\pi/5$. Die Phasenverschiebung ändert die Periode nicht."
+                },
+                {
+                    q: "Wandle $150^\\circ$ in Bogenmaß und $3\\pi/4$ in Grad um.",
+                    h: "$180^\\circ$ entsprechen $\\pi$.",
+                    s: "$150^\\circ=5\\pi/6$; $3\\pi/4=135^\\circ$."
+                },
+                {
+                    q: "Bestimme $\\operatorname{Re}(z)$, $\\operatorname{Im}(z)$ und $\\bar z$ für $z=-3-2j$.",
+                    h: "Konjugieren kehrt das Vorzeichen des Imaginärteils um.",
+                    s: "$\\operatorname{Re}(z)=-3$, $\\operatorname{Im}(z)=-2$, $\\bar z=-3+2j$."
+                },
+                {
+                    q: "Berechne $j^{2026}$.",
+                    h: "Die Potenzen von $j$ wiederholen sich alle vier Schritte.",
+                    s: "$2026=4\\cdot506+2$, daher $j^{2026}=j^2=-1$."
+                },
+                {
+                    q: "Berechne $(2-3j)+(4+5j)$ und $(2-3j)-(4+5j)$.",
+                    h: "Real- und Imaginärteile getrennt behandeln.",
+                    s: "Summe: $6+2j$. Differenz: $-2-8j$."
+                },
+                {
+                    q: "Berechne $|2e^{j\\pi/6}|$ und seinen Hauptargumentwert.",
+                    h: "Polarform $re^{j\\varphi}$ direkt ablesen.",
+                    s: "Betrag $2$, Hauptargument $\\pi/6$."
+                },
+                {
+                    q: "Bestimme den Abstand zwischen $P=(1,2,3)$ und $Q=(4,6,3)$.",
+                    h: "Bilde $Q-P$ und dessen Länge.",
+                    s: "$Q-P=(3,4,0)$, Abstand $\\sqrt{9+16}=5$."
+                },
+                {
+                    q: "Sind $\\vec a=(2,-1,0)$ und $\\vec b=(1,2,3)$ orthogonal?",
+                    h: "Prüfe das Skalarprodukt.",
+                    s: "$\\vec a\\cdot\\vec b=2-2+0=0$. Die beiden von null verschiedenen Vektoren sind orthogonal."
+                },
+                {
+                    q: "Gib eine Parametergleichung der Geraden durch $P=(1,0,2)$ und $Q=(3,1,0)$ an.",
+                    h: "Richtungsvektor ist $Q-P$.",
+                    s: "$\\vec r(t)=(1,0,2)+t(2,1,-2)$, $t\\in\\mathbb R$."
+                },
+                {
+                    q: "Gib die Ebene durch $P=(1,2,3)$ mit Normalenvektor $(1,-1,2)$ an.",
+                    h: "Nutze $\\vec n\\cdot(\\vec x-\\vec P)=0$.",
+                    s: "$(x-1)-(y-2)+2(z-3)=0$, also $x-y+2z=5$."
+                },
+                {
+                    q: "Berechne $2A-B$ für $A=\\begin{pmatrix}1&0\\\\2&-1\\end{pmatrix}$, $B=\\begin{pmatrix}3&1\\\\0&2\\end{pmatrix}$.",
+                    h: "Rechne komponentenweise.",
+                    s: "$2A=\\begin{pmatrix}2&0\\\\4&-2\\end{pmatrix}$, daher $2A-B=\\begin{pmatrix}-1&-1\\\\4&-4\\end{pmatrix}$."
+                },
+                {
+                    q: "Welche Dimension hat $AB$ bei $A\\in\\mathbb R^{2\\times3}$ und $B\\in\\mathbb R^{3\\times4}$?",
+                    h: "Innere Dimensionen müssen übereinstimmen.",
+                    s: "Das Produkt ist definiert und liegt in $\\mathbb R^{2\\times4}$. $BA$ ist nicht definiert, da $4\\ne2$."
+                },
+                {
+                    q: "Ist $A=\\begin{pmatrix}1&2\\\\2&4\\end{pmatrix}$ invertierbar?",
+                    h: "Berechne die Determinante.",
+                    s: "$\\det A=4-4=0$. Daher ist $A$ singulär und nicht invertierbar."
+                },
+                {
+                    q: "Berechne die Determinante von $\\operatorname{diag}(2,-3,4)$.",
+                    h: "Bei einer Diagonalmatrix multipliziert man die Diagonaleinträge.",
+                    s: "$\\det A=2\\cdot(-3)\\cdot4=-24$."
+                },
+                {
+                    q: "Löse $3x+2y=12$, $x+2y=8$.",
+                    h: "Subtrahiere die zweite Gleichung von der ersten.",
+                    s: "$2x=4$, also $x=2$. Dann $2+2y=8$, also $y=3$."
+                },
+                {
+                    q: "Bestimme den Rang von $\\begin{pmatrix}1&0&2\\\\0&1&3\\end{pmatrix}$.",
+                    h: "Die ersten beiden Spalten bilden eine Einheitsmatrix.",
+                    s: "Die zwei Zeilen sind unabhängig; mehr als zwei sind nicht möglich. Rang $=2$."
+                },
+                {
+                    q: "Berechne $\\lim_{n\\to\\infty}(3n+1)/(2n-5)$.",
+                    h: "Teile Zähler und Nenner durch $n$.",
+                    s: "$(3+1/n)/(2-5/n)\\to3/2$."
+                },
+                {
+                    q: "Berechne $\\lim_{n\\to\\infty}(-1/3)^n$.",
+                    h: "Eine geometrische Folge mit Betrag der Basis kleiner 1 geht gegen null.",
+                    s: "$|(-1/3)^n|=3^{-n}\\to0$. Grenzwert $0$."
+                },
+                {
+                    q: "Bestimme $c$, damit $f(x)=x+1$ für $x<2$ und $f(x)=c$ für $x\\ge2$ bei 2 stetig ist.",
+                    h: "Linker Grenzwert muss Funktionswert und rechtem Grenzwert entsprechen.",
+                    s: "Links ist der Grenzwert $3$, rechts und am Punkt $c$. Daher $c=3$."
+                },
+                {
+                    q: "Berechne $\\lim_{x\\to2}(x^2-4)/(x-2)$.",
+                    h: "Faktorisiere den Zähler und kürze für $x\\ne2$.",
+                    s: "$(x^2-4)/(x-2)=x+2$. Grenzwert $4$."
+                },
+                {
+                    q: "Leite $f(x)=\\sqrt{x}$ für $x>0$ ab.",
+                    h: "Schreibe $\\sqrt x=x^{1/2}$.",
+                    s: "Potenzregel: $f'(x)=\\tfrac 12x^{-1/2}=1/(2\\sqrt x)$."
+                },
+                {
+                    q: "Leite $f(x)=\\ln(3x)$ für $x>0$ ab.",
+                    h: "Kettenregel oder Logarithmengesetz.",
+                    s: "$f'(x)=3/(3x)=1/x$."
+                },
+                {
+                    q: "Leite $f(x)=\\cos(2x)$ ab.",
+                    h: "Äußere Ableitung und innere Ableitung multiplizieren.",
+                    s: "$f'(x)=-\\sin(2x)\\cdot2=-2\\sin(2x)$."
+                },
+                {
+                    q: "Bestimme die Tangente an $f(x)=x^2$ bei $x_0=2$.",
+                    h: "$y=f(x_0)+f'(x_0)(x-x_0)$.",
+                    s: "$f(2)=4$, $f'(2)=4$. Tangente: $y=4+4(x-2)=4x-4$."
+                },
+                {
+                    q: "Bestimme das Minimum von $f(x)=x^2-4x+7$.",
+                    h: "Quadratische Ergänzung oder $f'=0$.",
+                    s: "$f(x)=(x-2)^2+3$. Globales Minimum $3$ bei $x=2$."
+                },
+                {
+                    q: "Bestimme die Monotonieintervalle von $f(x)=x^2$.",
+                    h: "Untersuche das Vorzeichen von $f'=2x$.",
+                    s: "Für $x<0$ ist $f'<0$, für $x>0$ ist $f'>0$. Streng fallend auf $(-\\infty,0]$, streng steigend auf $[0,\\infty)$."
+                },
+                {
+                    q: "Bestimme die Wendestelle von $f(x)=x^3-3x$.",
+                    h: "$f''=0$ mit Vorzeichenwechsel prüfen.",
+                    s: "$f''=6x$ wechselt bei $0$ von negativ zu positiv. Wendepunkt $(0,0)$."
+                },
+                {
+                    q: "Berechne $\\int(4x^3-2x)\\,dx$.",
+                    h: "Integriere jeden Summanden mit der Potenzregel.",
+                    s: "$\\int4x^3dx=x^4$, $\\int-2x\\,dx=-x^2$. Ergebnis $x^4-x^2+C$."
+                },
+                {
+                    q: "Berechne $\\int e^{3x}\\,dx$.",
+                    h: "Die innere Ableitung 3 muss kompensiert werden.",
+                    s: "$\\int e^{3x}dx=\\tfrac 13e^{3x}+C$; Ableiten liefert $e^{3x}$."
+                },
+                {
+                    q: "Berechne $\\int\\sin(2x)\\,dx$.",
+                    h: "Eine Stammfunktion ist ein skalierter Kosinus.",
+                    s: "$\\int\\sin(2x)dx=-\\tfrac 12\\cos(2x)+C$."
+                },
+                {
+                    q: "Berechne $\\int_0^1(2x+3)\\,dx$.",
+                    h: "Verwende $F(x)=x^2+3x$.",
+                    s: "$F(1)-F(0)=1+3=4$."
+                },
+                {
+                    q: "Berechne $\\int_{-1}^1x^3\\,dx$ mithilfe der Symmetrie.",
+                    h: "Ungerade Funktion auf symmetrischem Intervall.",
+                    s: "$(-x)^3=-x^3$. Die Beiträge heben sich auf; Integral $0$."
+                },
+                {
+                    q: "Berechne die Fläche unter $f(x)=2x$ auf $[0,2]$.",
+                    h: "Die Funktion ist nicht negativ, daher entspricht das Integral der Fläche.",
+                    s: "$A=\\int_0^22x\\,dx=[x^2]_0^2=4$."
+                },
+                {
+                    q: "Ein Körper bewegt sich mit $v(t)=3t^2$ für $0\\le t\\le2$. Bestimme den zurückgelegten Weg.",
+                    h: "Integriere die nichtnegative Geschwindigkeit.",
+                    s: "$s=\\int_0^23t^2dt=[t^3]_0^2=8$ Längeneinheiten."
+                },
+                {
+                    q: "Berechne $\\sum_{k=1}^4k^2$.",
+                    h: "Schreibe die vier Summanden aus.",
+                    s: "$1+4+9+16=30$."
+                },
+                {
+                    q: "Berechne $\\sum_{k=0}^4 2^k$.",
+                    h: "Endliche geometrische Summe.",
+                    s: "$1+2+4+8+16=31$, alternativ $(2^5-1)/(2-1)=31$."
+                },
+                {
+                    q: "Bestimme die ersten vier Taylor-Koeffizienten von $1/(1-x)$ um 0.",
+                    h: "Nutze die geometrische Reihe für $|x|<1$.",
+                    s: "$1/(1-x)=1+x+x^2+x^3+\\cdots$. Die Koeffizienten von $x^0$ bis $x^3$ sind alle 1."
+                },
+                {
+                    q: "Berechne $\\binom{6}{2}$.",
+                    h: "$\\binom nk=n!/[k!(n-k)!]$.",
+                    s: "$\\binom62=6\\cdot5/2=15$."
+                },
+                {
+                    q: "Bestimme $A\\cap B$ und $A\\cup B$ für $A=\\{1,2,3\\}$, $B=\\{3,4\\}$.",
+                    h: "Schnitt enthält gemeinsame Elemente, Vereinigung alle Elemente ohne Wiederholung.",
+                    s: "$A\\cap B=\\{3\\}$, $A\\cup B=\\{1,2,3,4\\}$."
+                },
+                {
+                    q: "Negiere die Aussage: Für alle $x\\in\\mathbb R$ gilt $x^2>0$.",
+                    h: "Die Negation von für alle ist es gibt; negiere auch die Ungleichung.",
+                    s: "Es gibt $x\\in\\mathbb R$ mit $x^2\\le0$. Ein Gegenbeispiel zur ursprünglichen Aussage ist $x=0$."
+                },
+                {
+                    q: "Löse $x^3-4x=0$ über $\\mathbb R$.",
+                    h: "Klammere $x$ aus und faktorisiere weiter.",
+                    s: "$x(x^2-4)=x(x-2)(x+2)=0$. Lösungen $-2,0,2$."
+                },
+                {
+                    q: "Bestimme Nullstellen und Polstelle von $f(x)=(x-1)/(x+2)$.",
+                    h: "Nullstellen aus dem Zähler, Polstellen aus dem Nenner ohne Kürzung.",
+                    s: "Nullstelle $x=1$. Einfache Polstelle $x=-2$, da der Zähler dort $-3\\ne0$ ist."
+                },
+                {
+                    q: "Ist $f(x)=x^4+2x^2$ gerade oder ungerade?",
+                    h: "Vergleiche $f(-x)$ mit $f(x)$ und $-f(x)$.",
+                    s: "$f(-x)=x^4+2x^2=f(x)$. Die Funktion ist gerade."
+                },
+                {
+                    q: "Bestimme die lineare Näherung von $\\sqrt{1+x}$ um $x=0$.",
+                    h: "$f(0)+f'(0)x$.",
+                    s: "$f(0)=1$, $f'(0)=1/2$. Für kleine $x$: $\\sqrt{1+x}\\approx1+x/2$."
+                },
+                {
+                    q: "Ein Widerstand erfüllt $R(T)=100[1+0{,}004(T-20)]$. Berechne $R(50)$ und $R'(T)$.",
+                    h: "Setze $T=50$ ein; die Funktion ist linear.",
+                    s: "$R(50)=100(1+0{,}12)=112$. Ableitung $R'(T)=0{,}4$ pro Temperatureinheit."
+                },
+                {
+                    q: "Bestimme die Amplitude von $3\\sin t+4\\cos t$.",
+                    h: "Schreibe als $A\\sin(t+\\varphi)$ mit $A\\cos\\varphi=3$, $A\\sin\\varphi=4$.",
+                    s: "$A=\\sqrt{3^2+4^2}=5$. Beispielsweise $\\varphi=\\arctan(4/3)$."
+                },
+                {
+                    q: "Bestimme die Steigung der Sekante von $f(x)=x^2$ zwischen $x=1$ und $x=3$.",
+                    h: "Differenzenquotient $[f(3)-f(1)]/(3-1)$.",
+                    s: "$(9-1)/2=4$."
+                },
+                {
+                    q: "Bestimme die horizontale Asymptote von $f(x)=(2x^2+1)/(x^2+3)$.",
+                    h: "Vergleiche die führenden Koeffizienten.",
+                    s: "Division durch $x^2$ ergibt Grenzwert $2$ für $x\\to\\pm\\infty$. Horizontale Asymptote $y=2$."
                 }
             ],
             // ----------------- LEVEL 2 -----------------
@@ -535,6 +813,277 @@
                     q: 'Bestimme einen Eigenvektor zum Eigenwert $\\lambda=5$ von $A=\\begin{pmatrix}4&1\\\\2&3\\end{pmatrix}$.',
                     h: 'Löse $(A-5I)\\vec v=0$.',
                     s: '$A-5I=\\begin{pmatrix}-1&1\\\\2&-2\\end{pmatrix}$. Aus $-v_1+v_2=0$ folgt $v_2=v_1$.<br>$$\\boxed{\\vec v=\\begin{pmatrix}1\\\\1\\end{pmatrix}}$$ Probe: $A\\vec v=(5,5)^T=5\\vec v$. <em>Quelle:</em> Fischer, Lineare Algebra, 18. Aufl. (2014), §4.3.'
+                },
+                // Ergaenzung: eigenstaendig erstellte Aufgaben zum Ingenieur-Grundstudium.
+                {
+                    q: "Untersuche $f(x)=xe^{-x}$ auf Extremstellen.",
+                    h: "Setze $f'=0$ und prüfe den Vorzeichenwechsel.",
+                    s: "$f'=e^{-x}(1-x)$; einzige kritische Stelle $x=1$. Links positiv, rechts negativ: globales Maximum $f(1)=1/e$."
+                },
+                {
+                    q: "Berechne $\\lim_{x\\to0}(1-\\cos x)/x^2$.",
+                    h: "Nutze Taylorentwicklung oder zweimal de l'Hospital.",
+                    s: "$1-\\cos x=x^2/2+O(x^4)$. Grenzwert $1/2$."
+                },
+                {
+                    q: "Berechne $\\lim_{x\\to0}\\ln(1+2x)/\\sin(3x)$.",
+                    h: "Beide Terme sind null; differenziere Zähler und Nenner.",
+                    s: "Quotient der Ableitungen $[2/(1+2x)]/[3\\cos(3x)]\\to2/3$."
+                },
+                {
+                    q: "Berechne $\\int\\ln x\\,dx$ für $x>0$.",
+                    h: "Partielle Integration mit $u=\\ln x$, $v'=1$.",
+                    s: "$\\int\\ln x\\,dx=x\\ln x-\\int1\\,dx=x\\ln x-x+C$."
+                },
+                {
+                    q: "Berechne $\\int_0^1x/(1+x^2)\\,dx$.",
+                    h: "Substitution $u=1+x^2$.",
+                    s: "$du=2x\\,dx$, Grenzen $1,2$. Integral $\\tfrac 12\\int_1^2du/u=\\tfrac 12\\ln 2$."
+                },
+                {
+                    q: "Berechne $\\int\\sin^2x\\,dx$.",
+                    h: "Nutze $\\sin^2x=(1-\\cos 2x)/2$.",
+                    s: "Integral $x/2-\\sin(2x)/4+C$."
+                },
+                {
+                    q: "Berechne $\\int dx/(x^2+4)$.",
+                    h: "Skaliere die Standardstammfunktion des Arkustangens.",
+                    s: "$\\int dx/(x^2+4)=\\tfrac 12\\arctan(x/2)+C$."
+                },
+                {
+                    q: "Berechne $\\int_0^\\infty e^{-3x}\\,dx$.",
+                    h: "Ersetze die obere Grenze durch $R$ und bilde den Grenzwert.",
+                    s: "$[-e^{-3x}/3]_0^R=(1-e^{-3R})/3\\to1/3$."
+                },
+                {
+                    q: "Für welche reellen $p$ konvergiert $\\int_1^\\infty x^{-p}\\,dx$?",
+                    h: "Unterscheide $p=1$ und $p\\ne1$.",
+                    s: "Für $p\\ne1$ lautet die Stammfunktion $x^{1-p}/(1-p)$. Endlicher Grenzwert genau für $p>1$, dann Wert $1/(p-1)$. Für $p=1$ divergiert $\\ln R$."
+                },
+                {
+                    q: "Berechne die Fläche zwischen $y=x$ und $y=x^2$ auf $[0,1]$.",
+                    h: "Obere minus untere Funktion integrieren.",
+                    s: "$x\\ge x^2$ auf dem Intervall. $A=\\int_0^1(x-x^2)dx=1/2-1/3=1/6$."
+                },
+                {
+                    q: "Berechne das Volumen des Rotationskörpers von $y=x$ auf $[0,2]$ um die $x$-Achse.",
+                    h: "Scheibenmethode $V=\\pi\\int y^2dx$.",
+                    s: "$V=\\pi\\int_0^2x^2dx=8\\pi/3$."
+                },
+                {
+                    q: "Bestimme den Schwerpunkt einer homogenen Fläche unter $y=x$ auf $[0,1]$.",
+                    h: "$\\bar x=\\int xf(x)dx/A$, $\\bar y=\\int f(x)^2dx/(2A)$.",
+                    s: "$A=1/2$, erstes Moment $1/3$, zweites $1/6$. Schwerpunkt $(2/3,1/3)$."
+                },
+                {
+                    q: "Bestimme den Konvergenzradius von $\\sum_{n=1}^\\infty x^n/n$ und prüfe die Randpunkte.",
+                    h: "Quotientenkriterium, dann $x=\\pm1$ getrennt.",
+                    s: "$R=1$. Bei $1$ harmonische Reihe: divergent. Bei $-1$ alternierende harmonische Reihe: konvergent. Konvergenzintervall $[-1,1)$."
+                },
+                {
+                    q: "Bestimme die Summe $\\sum_{n=1}^\\infty n/2^n$.",
+                    h: "Differenziere die geometrische Reihe innerhalb $|q|<1$.",
+                    s: "$\\sum_{n=1}^\\infty nq^n=q/(1-q)^2$. Bei $q=1/2$ ergibt sich $2$."
+                },
+                {
+                    q: "Bestimme $T_2(x)$ von $\\sqrt{1+x}$ um 0.",
+                    h: "Berechne $f(0)$, $f'(0)$, $f''(0)$.",
+                    s: "Werte $1$, $1/2$, $-1/4$. Daher $T_2=1+x/2-x^2/8$."
+                },
+                {
+                    q: "Schätze den Fehler von $e^{0{,}1}\\approx1+0{,}1+0{,}1^2/2$ mit dem Lagrange-Restglied ab.",
+                    h: "$|R_2|\\le e^{0{,}1}(0{,}1)^3/6$.",
+                    s: "Auf $[0,0{,}1]$ ist die dritte Ableitung höchstens $e^{0{,}1}$. Fehler höchstens $e^{0{,}1}/6000\\approx0{,}0001842$."
+                },
+                {
+                    q: "Bestimme die partiellen Ableitungen erster und zweiter Ordnung von $f(x,y)=x^2e^y$.",
+                    h: "Beim Ableiten nach einer Variablen die andere konstant halten.",
+                    s: "$f_x=2xe^y$, $f_y=x^2e^y$, $f_{xx}=2e^y$, $f_{xy}=f_{yx}=2xe^y$, $f_{yy}=x^2e^y$."
+                },
+                {
+                    q: "Bestimme die Tangentialebene an $z=x^2+y^2$ bei $(1,2,5)$.",
+                    h: "Linearisierung mit den partiellen Ableitungen.",
+                    s: "$f_x=2$, $f_y=4$ am Punkt. $z=5+2(x-1)+4(y-2)=2x+4y-5$."
+                },
+                {
+                    q: "Berechne das totale Differential von $f(x,y)=xy^2$ bei $(2,3)$.",
+                    h: "$df=f_xdx+f_ydy$.",
+                    s: "$f_x=y^2=9$, $f_y=2xy=12$. Daher $df=9dx+12dy$."
+                },
+                {
+                    q: "Für $f(x,y)=x^2+y^2$ sind $x=3$, $y=4$, $|dx|\\le0{,}01$, $|dy|\\le0{,}02$. Schätze den absoluten Fehler linear ab.",
+                    h: "Nutze $|df|\\le|f_x||dx|+|f_y||dy|$.",
+                    s: "$|df|\\le6\\cdot0{,}01+8\\cdot0{,}02=0{,}22$. Dies ist eine lineare Näherung, keine exakte Schranke des endlichen Fehlers."
+                },
+                {
+                    q: "Berechne die Jacobi-Matrix von $F(x,y)=(x^2-y,xy)$.",
+                    h: "Jede Zeile enthält den Gradienten einer Komponente.",
+                    s: "$DF=\\begin{pmatrix}2x&-1\\\\y&x\\end{pmatrix}$."
+                },
+                {
+                    q: "Berechne $\\iint_{[0,1]\\times[0,2]}(x+y)\\,dA$.",
+                    h: "Integriere zuerst nach $y$, dann nach $x$.",
+                    s: "Inneres Integral $2x+2$. Danach $\\int_0^1(2x+2)dx=3$."
+                },
+                {
+                    q: "Berechne $\\int_0^1\\int_0^x y\\,dy\\,dx$.",
+                    h: "Der Bereich ist das Dreieck $0\\le y\\le x\\le1$.",
+                    s: "Inneres Integral $x^2/2$. Äußeres Integral $1/6$."
+                },
+                {
+                    q: "Berechne $\\iint_{x^2+y^2\\le4}1\\,dA$ in Polarkoordinaten.",
+                    h: "Jacobi-Faktor $r$ nicht vergessen.",
+                    s: "$\\int_0^{2\\pi}\\int_0^2r\\,dr\\,d\\varphi=2\\pi\\cdot2=4\\pi$."
+                },
+                {
+                    q: "Berechne $\\iiint_{[0,1]^3}xyz\\,dV$.",
+                    h: "Auf dem Quader separiert das Produkt.",
+                    s: "$(\\int_0^1x\\,dx)(\\int_0^1y\\,dy)(\\int_0^1z\\,dz)=(1/2)^3=1/8$."
+                },
+                {
+                    q: "Bestimme den Abstand des Punkts $(1,2,3)$ zur Ebene $x+2y+2z=0$.",
+                    h: "Abstand $|\\vec n\\cdot\\vec P-d|/|\\vec n|$.",
+                    s: "Zähler $|1+4+6|=11$, Nenner $\\sqrt{1+4+4}=3$. Abstand $11/3$."
+                },
+                {
+                    q: "Bestimme den Schnitt der Geraden $(x,y,z)=(1,0,0)+t(1,2,1)$ mit $x+y+z=5$.",
+                    h: "Setze die Geradenkoordinaten in die Ebene ein.",
+                    s: "$1+t+2t+t=5$, also $t=1$. Schnittpunkt $(2,2,1)$."
+                },
+                {
+                    q: "Sind $(1,0,1)$, $(0,1,1)$, $(1,1,0)$ eine Basis von $\\mathbb R^3$?",
+                    h: "Bilde die Matrix mit diesen Spalten.",
+                    s: "Determinante von $\\begin{pmatrix}1&0&1\\\\0&1&1\\\\1&1&0\\end{pmatrix}$ ist $-2\\ne0$. Daher bilden sie eine Basis."
+                },
+                {
+                    q: "Bestimme die Koordinaten von $(3,1)$ bezüglich der Basis $b_1=(1,1)$, $b_2=(1,-1)$.",
+                    h: "Löse $\\alpha b_1+\\beta b_2=(3,1)$.",
+                    s: "$\\alpha+\\beta=3$, $\\alpha-\\beta=1$. Koordinaten $(2,1)$."
+                },
+                {
+                    q: "Löse das LGS $x+y=2$, $2x+2y=4$ und beschreibe die Lösungsmenge.",
+                    h: "Die zweite Gleichung ist ein Vielfaches der ersten.",
+                    s: "Eine freie Variable: $y=t$, $x=2-t$. Lösungsmenge $\\{(2-t,t):t\\in\\mathbb R\\}$."
+                },
+                {
+                    q: "Untersuche $x+y=2$, $2x+2y=5$ auf Lösbarkeit.",
+                    h: "Vergleiche die zweite Gleichung mit dem Doppelten der ersten.",
+                    s: "Aus der ersten folgt $2x+2y=4$, im Widerspruch zu 5. Keine Lösung."
+                },
+                {
+                    q: "Für welche $a$ ist $A=\\begin{pmatrix}a&1\\\\1&a\\end{pmatrix}$ invertierbar?",
+                    h: "Prüfe $\\det A\\ne0$.",
+                    s: "$\\det A=a^2-1$. Invertierbar genau für $a\\ne\\pm1$."
+                },
+                {
+                    q: "Bestimme die Eigenwerte von $\\begin{pmatrix}3&2\\\\2&3\\end{pmatrix}$ und je einen Eigenvektor.",
+                    h: "Charakteristisches Polynom und Kern berechnen.",
+                    s: "$(3-\\lambda)^2-4=0$. Eigenwert 5 mit $(1,1)^T$, Eigenwert 1 mit $(1,-1)^T$."
+                },
+                {
+                    q: "Bestimme den Kern von $A=\\begin{pmatrix}1&1&0\\\\0&1&1\\end{pmatrix}$.",
+                    h: "Löse $A\\vec x=0$.",
+                    s: "$x_1=-x_2$, $x_3=-x_2$. Kern $\\operatorname{span}\\{(-1,1,-1)^T\\}$."
+                },
+                {
+                    q: "Berechne die orthogonale Projektion von $(2,1)$ auf die Gerade mit Richtung $(1,1)$.",
+                    h: "$\\operatorname{proj}_b a=(a\\cdot b)b/(b\\cdot b)$.",
+                    s: "Faktor $3/2$. Projektion $(3/2,3/2)$, orthogonaler Rest $(1/2,-1/2)$."
+                },
+                {
+                    q: "Löse $y'=-3y$, $y(0)=2$.",
+                    h: "Exponentieller Ansatz oder Variablentrennung.",
+                    s: "$y=Ce^{-3t}$. Anfangswert liefert $C=2$, also $y(t)=2e^{-3t}$."
+                },
+                {
+                    q: "Löse $y'=2t/y$, $y(0)=1$ auf der positiven Lösungsbranche.",
+                    h: "Multipliziere mit $y$ und integriere.",
+                    s: "$y\\,dy=2t\\,dt$, also $y^2/2=t^2+C$. $C=1/2$, daher $y=\\sqrt{1+2t^2}$."
+                },
+                {
+                    q: "Löse $y'+y=t$, $y(0)=0$.",
+                    h: "Partikulärer Ansatz $at+b$ und homogene Lösung.",
+                    s: "$a=1$, $b=-1$. $y=t-1+Ce^{-t}$; Anfangswert $C=1$. Ergebnis $t-1+e^{-t}$."
+                },
+                {
+                    q: "Löse $y''+9y=0$, $y(0)=2$, $y'(0)=3$.",
+                    h: "Verwende Sinus und Kosinus mit Kreisfrequenz 3.",
+                    s: "$y=C_1\\cos 3t+C_2\\sin 3t$. $C_1=2$, $3C_2=3$. Daher $y=2\\cos 3t+\\sin 3t$."
+                },
+                {
+                    q: "Ein RC-Modell erfüllt $2u'+u=10$, $u(0)=0$. Bestimme $u(t)$ und die Zeitkonstante.",
+                    h: "Stationärwert plus exponentieller Übergang.",
+                    s: "$u(t)=10(1-e^{-t/2})$. Zeitkonstante $\\tau=2$ Zeiteinheiten; $u(2)=10(1-e^{-1})$."
+                },
+                {
+                    q: "Bestimme die Halbwertszeit für $N'=-0{,}2N$, $N(0)=N_0>0$.",
+                    h: "Setze $N(T)=N_0/2$.",
+                    s: "$e^{-0{,}2T}=1/2$. Daher $T=\\ln 2/0{,}2=5\\ln 2\\approx3{,}466$."
+                },
+                {
+                    q: "Berechne $\\mathcal L\\{\\cos(3t)\\}$ für $t\\ge0$.",
+                    h: "Standardkorrespondenz $\\cos\\omega t$.",
+                    s: "$F(s)=s/(s^2+9)$ für $\\operatorname{Re}s>0$."
+                },
+                {
+                    q: "Bestimme $\\mathcal L^{-1}\\{1/[s(s+2)]\\}$ kausal.",
+                    h: "Partialbrüche $A/s+B/(s+2)$.",
+                    s: "$A=1/2$, $B=-1/2$. $f(t)=\\tfrac 12(1-e^{-2t})$ für $t\\ge0$, sonst 0."
+                },
+                {
+                    q: "Berechne $\\mathcal L\\{te^{-2t}\\}$.",
+                    h: "Dämpfungssatz auf $\\mathcal L\\{t\\}=1/s^2$ anwenden.",
+                    s: "$F(s)=1/(s+2)^2$ für $\\operatorname{Re}s>-2$."
+                },
+                {
+                    q: "Berechne die Fourier-Koeffizienten von $f(x)=2+3\\cos x-\\sin 2x$ in der reellen $2\\pi$-periodischen Form.",
+                    h: "Konvention $a_0/2+\\sum(a_n\\cos nx+b_n\\sin nx)$.",
+                    s: "$a_0=4$, $a_1=3$, $b_2=-1$. Alle übrigen Koeffizienten sind 0."
+                },
+                {
+                    q: "Führe einen expliziten Euler-Schritt für $y'=-2y$, $y(0)=1$, $h=0{,}1$ aus.",
+                    h: "$y_1=y_0+hf(0,y_0)$.",
+                    s: "$y_1=1+0{,}1(-2)=0{,}8$. Exakt bei $t=0{,}1$: $e^{-0{,}2}\\approx0{,}81873$."
+                },
+                {
+                    q: "Führe einen Newton-Schritt für $f(x)=x^3-2$ mit $x_0=1$ aus.",
+                    h: "$x_1=x_0-f(x_0)/f'(x_0)$.",
+                    s: "$f(1)=-1$, $f'(1)=3$. $x_1=1+1/3=4/3$."
+                },
+                {
+                    q: "Approximiere $\\int_0^1x^2dx$ mit der einfachen Trapezregel und berechne den absoluten Fehler.",
+                    h: "$T=(b-a)[f(a)+f(b)]/2$.",
+                    s: "$T=1/2$, exakt $1/3$. Absoluter Fehler $1/6$."
+                },
+                {
+                    q: "Interpoliere $(0,1)$ und $(2,5)$ linear und bestimme den Wert bei $x=1{,}5$.",
+                    h: "Geradensteigung und Achsenabschnitt bestimmen.",
+                    s: "Steigung $(5-1)/2=2$, also $p(x)=1+2x$. $p(1{,}5)=4$."
+                },
+                {
+                    q: "Bestimme das quadratische Interpolationspolynom durch $(0,1)$, $(1,2)$, $(2,5)$.",
+                    h: "Ansatz $ax^2+bx+c$ und drei Gleichungen.",
+                    s: "$c=1$, $a+b=1$, $4a+2b=4$. Daher $a=1$, $b=0$ und $p(x)=x^2+1$."
+                },
+                {
+                    q: "Berechne die Konditionszahl in der 2-Norm von $A=\\operatorname{diag}(1,10)$.",
+                    h: "Für positive Diagonaleinträge ist sie größter geteilt durch kleinsten Eintrag.",
+                    s: "$\\|A\\|_2=10$, $\\|A^{-1}\\|_2=1$. Daher $\\kappa_2(A)=10$."
+                },
+                {
+                    q: "Ein idealer Würfel wird zweimal unabhängig geworfen. Bestimme die Wahrscheinlichkeit für Summe 7.",
+                    h: "Zähle günstige geordnete Paare unter 36 gleich wahrscheinlichen Paaren.",
+                    s: "Günstig sind $(1,6),(2,5),(3,4),(4,3),(5,2),(6,1)$. Wahrscheinlichkeit $6/36=1/6$."
+                },
+                {
+                    q: "Für $X\\sim\\operatorname{Bin}(10,0{,}2)$ bestimme Erwartungswert und Varianz.",
+                    h: "$E[X]=np$, $\\operatorname{Var}(X)=np(1-p)$.",
+                    s: "Erwartungswert $2$, Varianz $1{,}6$."
+                },
+                {
+                    q: "Berechne Mittelwert und empirische Varianz mit Nenner $n$ für die Daten $1,2,3,4$.",
+                    h: "Quadrierte Abweichungen vom Mittelwert mitteln.",
+                    s: "$\\bar x=2{,}5$. Quadratsumme $2{,}25+0{,}25+0{,}25+2{,}25=5$. Varianz mit Nenner 4: $1{,}25$."
                 }
             ],
             // ----------------- LEVEL 3 -----------------
@@ -776,6 +1325,267 @@
                     q: 'Berechne $\\Gamma(5)$ und $\\Gamma(\\tfrac12)$ (Gamma-Funktion).',
                     h: '$\\Gamma(n)=(n-1)!$ für $n\\in\\mathbb N$; $\\Gamma(\\tfrac12)=\\sqrt\\pi$ folgt aus dem Gauss-Integral.',
                     s: '$\\Gamma(5)=4!=24$.<br>$\\Gamma(\\tfrac12)=\\int_0^\\infty t^{-1/2}e^{-t}dt$; Substitution $t=u^2$ liefert $2\\int_0^\\infty e^{-u^2}du=\\sqrt\\pi$.<br>$$\\boxed{\\Gamma(5)=24,\\ \\Gamma(\\tfrac12)=\\sqrt\\pi}$$ <em>Quelle:</em> Bronstein/Semendjajew, 12. Aufl. (2024), §8.2.5.'
+                },
+                // Ergaenzung: eigenstaendig erstellte Aufgaben zum Ingenieur-Grundstudium.
+                {
+                    q: "Bestimme alle dritten Wurzeln von $8j$ in Polarform.",
+                    h: "Betrag und Argument durch drei teilen, drei Argumentzweige berücksichtigen.",
+                    s: "$8j=8e^{j(\\pi/2+2k\\pi)}$. Wurzeln $z_k=2e^{j(\\pi/6+2k\\pi/3)}$, $k=0,1,2$. Argumente $\\pi/6$, $5\\pi/6$, $3\\pi/2$."
+                },
+                {
+                    q: "Bestimme Betrag und Phase von $H(j\\omega)=1/(1+j\\omega)$ bei $\\omega=2$.",
+                    h: "Betrag des Nenners und dessen Argument bestimmen.",
+                    s: "$|H|=1/\\sqrt 5$. Phase $-\\arctan(2)\\approx-63{,}435^\\circ$. Außerdem $H=(1-2j)/5$."
+                },
+                {
+                    q: "Bestimme die reellen $a$, für die $A=\\begin{pmatrix}a&1\\\\1&a\\end{pmatrix}$ positiv definit ist.",
+                    h: "Eigenwerte müssen beide positiv sein.",
+                    s: "Eigenwerte $a+1$ und $a-1$. Beide positiv genau für $a>1$."
+                },
+                {
+                    q: "Löse $x+y+z=1$, $x+ay+z=2$, $x+y+az=3$ abhängig vom reellen Parameter $a$.",
+                    h: "Subtrahiere die erste Gleichung von den anderen.",
+                    s: "$(a-1)y=1$, $(a-1)z=2$. Für $a\\ne1$: $y=1/(a-1)$, $z=2/(a-1)$, $x=1-3/(a-1)$. Für $a=1$ entsteht $0=1$: keine Lösung."
+                },
+                {
+                    q: "Bestimme die Cholesky-Zerlegung von $A=\\begin{pmatrix}4&2\\\\2&3\\end{pmatrix}$.",
+                    h: "Ansatz $A=LL^T$ mit positiver Diagonale von $L$.",
+                    s: "$l_{11}=2$, $l_{21}=1$, $l_{22}=\\sqrt 2$. Daher $L=\\begin{pmatrix}2&0\\\\1&\\sqrt 2\\end{pmatrix}$; Multiplikation ergibt $A$."
+                },
+                {
+                    q: "Bestimme eine reduzierte QR-Zerlegung von $A=\\begin{pmatrix}1&1\\\\1&0\\\\0&1\\end{pmatrix}$.",
+                    h: "Gram-Schmidt auf die Spalten anwenden.",
+                    s: "$q_1=(1,1,0)^T/\\sqrt 2$, $q_2=(1,-1,2)^T/\\sqrt 6$. $R=\\begin{pmatrix}\\sqrt 2&1/\\sqrt 2\\\\0&\\sqrt{3/2}\\end{pmatrix}$. Mit $Q=(q_1,q_2)$ gilt $Q^TQ=I_2$ und $QR=A$."
+                },
+                {
+                    q: "Passe die Gerade $y=a+bx$ im kleinsten-Quadrate-Sinn an $(0,1),(1,2),(2,2)$ an.",
+                    h: "Stelle die zwei Normalengleichungen auf.",
+                    s: "$3a+3b=5$, $3a+5b=6$. Daraus $b=1/2$, $a=7/6$. Gerade $y=7/6+x/2$."
+                },
+                {
+                    q: "Berechne $e^{At}$ für $A=\\begin{pmatrix}0&-2\\\\2&0\\end{pmatrix}$.",
+                    h: "$A^2=-4I$; gerade und ungerade Potenzen der Exponentialreihe trennen.",
+                    s: "$e^{At}=I\\cos 2t+(A/2)\\sin 2t=\\begin{pmatrix}\\cos 2t&-\\sin 2t\\\\\\sin 2t&\\cos 2t\\end{pmatrix}$."
+                },
+                {
+                    q: "Löse $x'=-x+y$, $y'=-2y$ mit $x(0)=0$, $y(0)=1$.",
+                    h: "Zuerst $y$ lösen, dann in die erste Gleichung einsetzen.",
+                    s: "$y=e^{-2t}$. $(e^tx)'=e^{-t}$, daher $e^tx=1-e^{-t}$. $x=e^{-t}-e^{-2t}$."
+                },
+                {
+                    q: "Untersuche die asymptotische Stabilität von $\\dot x=Ax$ für $A=\\begin{pmatrix}0&1\\\\-2&-3\\end{pmatrix}$.",
+                    h: "Realteile aller Eigenwerte prüfen.",
+                    s: "Charakteristisches Polynom $\\lambda^2+3\\lambda+2=(\\lambda+1)(\\lambda+2)$. Beide Eigenwerte negativ; der Ursprung ist asymptotisch stabil."
+                },
+                {
+                    q: "Bestimme die stationären Punkte und deren Typ für $f(x,y)=x^2+2xy+3y^2-4x$.",
+                    h: "Gradient null setzen und Hesse-Matrix prüfen.",
+                    s: "$2x+2y=4$, $2x+6y=0$. Punkt $(3,-1)$. Hesse $\\begin{pmatrix}2&2\\\\2&6\\end{pmatrix}$ ist positiv definit (führende Minoren 2 und 8). Eindeutiges globales Minimum mit Wert $-6$."
+                },
+                {
+                    q: "Bestimme Maximum und Minimum von $f(x,y)=xy$ auf $x^2+y^2=1$.",
+                    h: "Lagrange-Multiplikatoren oder $|xy|\\le(x^2+y^2)/2$.",
+                    s: "Maximum $1/2$ bei $(1/\\sqrt 2,1/\\sqrt 2)$ und $(-1/\\sqrt 2,-1/\\sqrt 2)$. Minimum $-1/2$ bei den beiden Punkten mit entgegengesetzten Vorzeichen."
+                },
+                {
+                    q: "Bestimme das Taylorpolynom 2. Ordnung von $f(x,y)=e^{x+y}$ um $(0,0)$.",
+                    h: "Entwickle $e^u$ mit $u=x+y$.",
+                    s: "$T_2=1+x+y+\\tfrac 12(x+y)^2=1+x+y+x^2/2+xy+y^2/2$."
+                },
+                {
+                    q: "Bestimme $dy/dx$ implizit aus $x^2+xy+y^2=3$ bei $(1,1)$.",
+                    h: "Differenziere nach $x$ mit $y=y(x)$.",
+                    s: "$2x+y+xy'+2yy'=0$. $y'=-(2x+y)/(x+2y)$. Bei $(1,1)$ ist $y'=-1$; der Nenner ist dort nicht null."
+                },
+                {
+                    q: "Für $z=f(x,y)=x^2y$, $x=r\\cos\\theta$, $y=r\\sin\\theta$: bestimme $z_r$ und $z_\\theta$.",
+                    h: "Setze die Koordinaten ein oder nutze die mehrdimensionale Kettenregel.",
+                    s: "$z=r^3\\cos^2\\theta\\sin\\theta$. $z_r=3r^2\\cos^2\\theta\\sin\\theta$, $z_\\theta=r^3(\\cos^3\\theta-2\\cos\\theta\\sin^2\\theta)$."
+                },
+                {
+                    q: "Berechne $\\iint_D(x^2+y^2)\\,dA$ über den Kreisring $1\\le x^2+y^2\\le4$.",
+                    h: "Polarkoordinaten mit $1\\le r\\le2$ und Jacobi-Faktor $r$.",
+                    s: "$\\int_0^{2\\pi}\\int_1^2r^3dr\\,d\\varphi=2\\pi(16-1)/4=15\\pi/2$."
+                },
+                {
+                    q: "Berechne $\\iint_D(x+y)\\,dA$ für $D=\\{x\\ge0,y\\ge0,x+y\\le1\\}$.",
+                    h: "Grenzen $0\\le x\\le1$, $0\\le y\\le1-x$.",
+                    s: "Inneres Integral $x(1-x)+(1-x)^2/2=(1-x^2)/2$. Integration über $x$ ergibt $1/3$."
+                },
+                {
+                    q: "Vertausche die Integrationsreihenfolge von $\\int_0^1\\int_x^1e^{y^2}\\,dy\\,dx$ und berechne das Integral.",
+                    h: "Beschreibe den Bereich als $0\\le x\\le y\\le1$.",
+                    s: "$\\int_0^1\\int_0^ye^{y^2}dx\\,dy=\\int_0^1ye^{y^2}dy=(e-1)/2$."
+                },
+                {
+                    q: "Berechne das Volumen der Kugel $x^2+y^2+z^2\\le R^2$, $R>0$, in Kugelkoordinaten.",
+                    h: "Volumenelement $r^2\\sin\\theta\\,dr\\,d\\theta\\,d\\varphi$.",
+                    s: "$\\int_0^Rr^2dr\\int_0^\\pi\\sin\\theta d\\theta\\int_0^{2\\pi}d\\varphi=(R^3/3)\\cdot2\\cdot2\\pi=4\\pi R^3/3$."
+                },
+                {
+                    q: "Berechne $\\iiint_{x^2+y^2\\le1,\\,0\\le z\\le2}(x^2+y^2)\\,dV$.",
+                    h: "Zylinderkoordinaten; Integrand $r^2$, Jacobi-Faktor $r$.",
+                    s: "$\\int_0^2dz\\int_0^{2\\pi}d\\varphi\\int_0^1r^3dr=2\\cdot2\\pi\\cdot1/4=\\pi$."
+                },
+                {
+                    q: "Berechne das Linienintegral von $F=(y,x)$ entlang $r(t)=(t,t^2)$, $0\\le t\\le1$.",
+                    h: "$\\int F(r(t))\\cdot r'(t)dt$.",
+                    s: "$F(r)=(t^2,t)$, $r'=(1,2t)$. Integral $\\int_0^13t^2dt=1$. Auch Potential $xy$ liefert $1-0$."
+                },
+                {
+                    q: "Berechne den Fluss von $F=(x,y,z)$ durch die nach außen orientierte Einheitskugeloberfläche.",
+                    h: "Gaußsatz mit $\\operatorname{div}F=3$.",
+                    s: "Fluss $\\iiint_B3\\,dV=3\\cdot4\\pi/3=4\\pi$."
+                },
+                {
+                    q: "Berechne $\\oint_C(-y\\,dx+x\\,dy)$ für den positiv orientierten Rand des Rechtecks $[0,2]\\times[0,1]$.",
+                    h: "Satz von Green.",
+                    s: "$\\partial_xQ-\\partial_yP=1-(-1)=2$. Fläche $2$. Integral $4$."
+                },
+                {
+                    q: "Prüfe, ob $F=(y,0)$ auf $\\mathbb R^2$ ein Gradientenfeld ist.",
+                    h: "Vergleiche $\\partial_yF_x$ und $\\partial_xF_y$.",
+                    s: "$\\partial_yF_x=1$, $\\partial_xF_y=0$. Kein Potential auf $\\mathbb R^2$."
+                },
+                {
+                    q: "Bestimme die Länge der Helix $r(t)=(\\cos t,\\sin t,t)$ für $0\\le t\\le2\\pi$.",
+                    h: "Integriere $|r'(t)|$.",
+                    s: "$r'=(-\\sin t,\\cos t,1)$, Betrag $\\sqrt 2$. Länge $2\\pi\\sqrt 2$."
+                },
+                {
+                    q: "Löse $y''+2y'+y=0$, $y(0)=1$, $y'(0)=0$.",
+                    h: "Doppelte charakteristische Wurzel $-1$.",
+                    s: "$y=(C_1+C_2t)e^{-t}$. $C_1=1$, $C_2-C_1=0$. Daher $y=(1+t)e^{-t}$."
+                },
+                {
+                    q: "Löse $y''+y=\\sin t$, $y(0)=y'(0)=0$.",
+                    h: "Resonanz: partikulärer Ansatz mit Faktor $t$.",
+                    s: "$y_p=-t\\cos t/2$. Allgemein $y=C_1\\cos t+C_2\\sin t-t\\cos t/2$. Anfangswerte $C_1=0$, $C_2=1/2$. Ergebnis $(\\sin t-t\\cos t)/2$."
+                },
+                {
+                    q: "Löse $y'+2y=\\cos t$, $y(0)=0$.",
+                    h: "Partikulärer Ansatz $a\\cos t+b\\sin t$.",
+                    s: "Koeffizienten: $b+2a=1$, $-a+2b=0$. $a=2/5$, $b=1/5$. $y=(2\\cos t+\\sin t-2e^{-2t})/5$."
+                },
+                {
+                    q: "Löse $y'=y(1-y)$, $y(0)=1/4$.",
+                    h: "Variablentrennung und Partialbrüche.",
+                    s: "$\\ln[y/(1-y)]=t+C$ auf $0<y<1$. Anfangswert liefert $y(t)=1/(1+3e^{-t})$; für $t\\to\\infty$ geht $y$ gegen 1."
+                },
+                {
+                    q: "Löse die exakte DGL $(2xy+1)dx+(x^2+2y)dy=0$ implizit.",
+                    h: "Prüfe $M_y=N_x$ und integriere $M$ nach $x$.",
+                    s: "$M_y=N_x=2x$. Potential $\\Phi=x^2y+x+g(y)$; aus $\\Phi_y=x^2+2y$ folgt $g=y^2$. Lösung $x^2y+x+y^2=C$."
+                },
+                {
+                    q: "Löse $xy'+2y=x^2$ für $x>0$.",
+                    h: "Teile durch $x$ und nutze den integrierenden Faktor $x^2$.",
+                    s: "$(x^2y)'=x^3$. Daher $x^2y=x^4/4+C$, also $y=x^2/4+C/x^2$."
+                },
+                {
+                    q: "Löse $y''+y=0$, $y(0)=0$, $y(\\pi/2)=1$ als Randwertproblem.",
+                    h: "Bestimme die Konstanten aus den beiden Randwerten.",
+                    s: "$y=A\\cos x+B\\sin x$. $A=0$, $B=1$. Eindeutige Lösung $y=\\sin x$."
+                },
+                {
+                    q: "Löse $y'+y=1$ mit $y(0)=0$ mittels Laplace-Transformation.",
+                    h: "$\\mathcal L\\{y'\\}=sY-y(0)$.",
+                    s: "$(s+1)Y=1/s$. $Y=1/[s(s+1)]=1/s-1/(s+1)$. Für $t\\ge0$: $y=1-e^{-t}$."
+                },
+                {
+                    q: "Bestimme die kausale inverse Laplace-Transformierte von $1/[s(s+1)^2]$.",
+                    h: "Partialbrüche mit einfachem und doppeltem Pol.",
+                    s: "$1/[s(s+1)^2]=1/s-1/(s+1)-1/(s+1)^2$. Für $t\\ge0$: $f=1-e^{-t}-te^{-t}$; sonst 0."
+                },
+                {
+                    q: "Berechne die Faltung von $f(t)=e^{-t}$ und $g(t)=e^{-2t}$, beide kausal.",
+                    h: "$\\int_0^te^{-\\tau}e^{-2(t-\\tau)}d\\tau$.",
+                    s: "Für $t\\ge0$: $e^{-2t}\\int_0^te^\\tau d\\tau=e^{-t}-e^{-2t}$. Für $t<0$ ist die Faltung 0."
+                },
+                {
+                    q: "Bestimme die kausale inverse Laplace-Transformierte von $e^{-3s}/s^2$.",
+                    h: "Zeitverschiebung der Rampe.",
+                    s: "Ohne Verschiebung gehört $1/s^2$ zu $t$. Ergebnis $f(t)=(t-3)\\sigma(t-3)$."
+                },
+                {
+                    q: "Bestimme die reelle Fourier-Reihe der $2\\pi$-periodischen Funktion $f(x)=x$ für $-\\pi<x<\\pi$.",
+                    h: "Ungerade Funktion; nur Sinuskoeffizienten.",
+                    s: "$b_n=(2/\\pi)\\int_0^\\pi x\\sin(nx)dx=2(-1)^{n+1}/n$. Daher $f(x)=2\\sum_{n=1}^\\infty(-1)^{n+1}\\sin(nx)/n$ im offenen Intervall. An Sprungstellen konvergiert die Reihe gegen 0."
+                },
+                {
+                    q: "Bestimme die reelle Fourier-Reihe der $2\\pi$-periodischen Funktion $f(x)=|x|$ auf $[-\\pi,\\pi]$.",
+                    h: "Gerade Funktion; integriere $x\\cos(nx)$ auf $[0,\\pi]$.",
+                    s: "$a_0=\\pi$, $a_n=2[(-1)^n-1]/(\\pi n^2)$, $b_n=0$. Daher $f(x)=\\pi/2-(4/\\pi)\\sum_{k=0}^\\infty\\cos((2k+1)x)/(2k+1)^2$."
+                },
+                {
+                    q: "Berechne den Effektivwert (quadratischen Mittelwert) von $f(t)=3\\cos t+4\\sin 2t$ über $[0,2\\pi]$.",
+                    h: "Orthogonalität: gemischter Term hat Mittelwert 0, Quadrate je $1/2$.",
+                    s: "Mittelwert von $f^2$ ist $(9+16)/2=25/2$. Effektivwert $\\sqrt{25/2}=5/\\sqrt 2$."
+                },
+                {
+                    q: "Bestimme die Fourier-Transformierte von $f(t)=e^{-a|t|}$, $a>0$, mit $\\hat f(\\omega)=\\int_{\\mathbb R}f(t)e^{-j\\omega t}dt$.",
+                    h: "Teile das Integral bei 0 oder nutze die Geradheit.",
+                    s: "Summe $1/(a+j\\omega)+1/(a-j\\omega)=2a/(a^2+\\omega^2)$."
+                },
+                {
+                    q: "Führe zwei Bisektionsschritte für $f(x)=x^2-2$ auf $[1,2]$ aus.",
+                    h: "Wähle nach jedem Mittelpunkt das Teilintervall mit Vorzeichenwechsel.",
+                    s: "$m_1=1{,}5$, $f(m_1)>0$: neues Intervall $[1,1{,}5]$. $m_2=1{,}25$, $f(m_2)<0$: neues Intervall $[1{,}25,1{,}5]$."
+                },
+                {
+                    q: "Eine stetige Funktion hat einen Vorzeichenwechsel auf $[0,1]$. Wie viele Bisektionsschritte genügen, damit der Mittelpunkt des resultierenden Intervalls einen Fehler höchstens $10^{-3}$ hat?",
+                    h: "Nach $n$ Halbierungen ist die halbe Intervallbreite $2^{-(n+1)}$.",
+                    s: "$2^{-(n+1)}\\le10^{-3}$. $n=9$ genügt, da $1/1024<10^{-3}$; $n=8$ genügt nicht."
+                },
+                {
+                    q: "Führe einen Newton-Schritt für $F(x,y)=(x^2+y^2-1,x-y)$ ab $(1,0)$ aus.",
+                    h: "Löse $DF(x_0)\\Delta=-F(x_0)$ und addiere $\\Delta$.",
+                    s: "$F(1,0)=(0,1)$, $DF=\\begin{pmatrix}2&0\\\\1&-1\\end{pmatrix}$. $2\\Delta x=0$, $\\Delta x-\\Delta y=-1$. $\\Delta=(0,1)$, neuer Punkt $(1,1)$."
+                },
+                {
+                    q: "Führe einen Heun-Schritt für $y'=y$, $y(0)=1$, $h=0{,}1$ aus.",
+                    h: "Euler-Prädiktor, danach Mittelwert der beiden Steigungen.",
+                    s: "Prädiktor $\\tilde y=1{,}1$. Korrektor $y_1=1+0{,}1(1+1{,}1)/2=1{,}105$."
+                },
+                {
+                    q: "Für welche positiven Schrittweiten ist expliziter Euler für $y'=-5y$ asymptotisch stabil?",
+                    h: "Verstärkungsfaktor $1-5h$ muss Betrag kleiner 1 haben.",
+                    s: "$|1-5h|<1$ entspricht $-1<1-5h<1$. Daher $0<h<2/5$."
+                },
+                {
+                    q: "Führe einen impliziten Euler-Schritt für $y'=-10y$, $y(0)=1$, $h=0{,}2$ aus.",
+                    h: "$y_1=y_0-10hy_1$ nach $y_1$ auflösen.",
+                    s: "$(1+2)y_1=1$, also $y_1=1/3$. Der explizite Euler-Schritt wäre $-1$."
+                },
+                {
+                    q: "Approximiere $\\int_0^1x^2dx$ mit der zusammengesetzten Trapezregel bei $n=2$ Teilintervallen.",
+                    h: "$h=1/2$, Knoten $0,1/2,1$.",
+                    s: "$T=h[f(0)/2+f(1/2)+f(1)/2]=(1/2)(0+1/4+1/2)=3/8$. Absoluter Fehler $3/8-1/3=1/24$."
+                },
+                {
+                    q: "Leite die zentrale Differenzenformel für $f'(x)$ her und nenne die Fehlerordnung für hinreichend glattes $f$.",
+                    h: "Taylorentwicklungen bei $x+h$ und $x-h$ subtrahieren.",
+                    s: "$[f(x+h)-f(x-h)]/(2h)=f'(x)+h^2f'''(x)/6+O(h^4)$ für hinreichend glattes $f$. Die Ableitungsnäherung hat Fehlerordnung $O(h^2)$."
+                },
+                {
+                    q: "Für $X\\sim\\operatorname{Bin}(5,0{,}1)$ berechne $P(X\\ge1)$.",
+                    h: "Gegenereignis: kein Erfolg.",
+                    s: "$P(X\\ge1)=1-P(X=0)=1-0{,}9^5=0{,}40951$."
+                },
+                {
+                    q: "Für $X\\sim\\operatorname{Exp}(2)$ berechne $P(X>1)$, Erwartungswert und Varianz.",
+                    h: "Überlebensfunktion $e^{-\\lambda t}$, Momente $1/\\lambda$ und $1/\\lambda^2$.",
+                    s: "$P(X>1)=e^{-2}\\approx0{,}13534$, $E[X]=1/2$, $\\operatorname{Var}(X)=1/4$."
+                },
+                {
+                    q: "Unabhängige Größen $X,Y$ haben Varianzen 4 und 9. Bestimme die Varianz von $Z=2X-Y$.",
+                    h: "Bei Unabhängigkeit entfällt die Kovarianz.",
+                    s: "$\\operatorname{Var}(Z)=2^2\\operatorname{Var}(X)+(-1)^2\\operatorname{Var}(Y)=16+9=25$."
+                },
+                {
+                    q: "Unabhängige Messfehler $X_i$ haben Erwartungswert 0 und Standardabweichung 2. Welche Standardabweichung hat ihr Mittelwert aus 16 Messungen?",
+                    h: "Varianz des Mittelwerts ist $\\sigma^2/n$.",
+                    s: "$\\operatorname{Var}(\\bar X)=4/16=1/4$, Standardabweichung $1/2$. Unabhängigkeit und gleiche Varianz sind vorausgesetzt."
                 }
             ]
         ]
